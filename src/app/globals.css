@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0e0b1f;
+  --background-elevated: #171331;
+  --background-card: #1d1840;
+  --foreground: #f3efe8;
+  --foreground-muted: #b9b3d6;
+  --accent-gold: #d4af6a;
+  --accent-gold-soft: #e8cf9c;
+  --border-subtle: rgba(212, 175, 106, 0.18);
+
+  --wuxing-wood: #4caf6e;
+  --wuxing-fire: #e2604f;
+  --wuxing-earth: #d3a04a;
+  --wuxing-metal: #cfc9b8;
+  --wuxing-water: #5b86d6;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-elevated: var(--background-elevated);
+  --color-background-card: var(--background-card);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-foreground-muted: var(--foreground-muted);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-gold-soft: var(--accent-gold-soft);
+  --color-border-subtle: var(--border-subtle);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-wuxing-wood: var(--wuxing-wood);
+  --color-wuxing-fire: var(--wuxing-fire);
+  --color-wuxing-earth: var(--wuxing-earth);
+  --color-wuxing-metal: var(--wuxing-metal);
+  --color-wuxing-water: var(--wuxing-water);
+
+  --font-sans: var(--font-sans-kr);
+  --font-serif: var(--font-serif-kr);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans-kr), Arial, Helvetica, sans-serif;
+}
+
+/* 별빛 텍스처: 은은한 방사형 그라디언트 반복으로 고급스러운 밤하늘 느낌 연출 */
+.bg-starfield {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(212, 175, 106, 0.10) 0, transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(91, 134, 214, 0.12) 0, transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(212, 175, 106, 0.08) 0, transparent 50%);
 }

@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 유료 상세 사주 리포트 1건에 대응하는 주문. paymentId는 PortOne 결제 건 ID와 동일하며
+// 결제창을 여는 시점에 우리 쪽에서 미리 발급해 중복 결제 검증의 기준으로 사용한다.
+model Order {
+  id          String    @id @default(cuid())
+  paymentId   String    @unique
+  status      OrderStatus @default(PENDING)
+  amount      Int
+  productType String    @default("premium_report")
+  // 리포트 생성에 필요한 최소한의 생년월일시/성별 정보(JSON). 그 외 개인정보는 저장하지 않는다.
+  birthInputJson String
+  // 결제 완료 후 생성한 AI 해석 결과 캐시(JSON). 재조회 시 AI를 다시 호출하지 않기 위함.
+  aiResultJson   String?
+  createdAt   DateTime  @default(now())
+  paidAt      DateTime?
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+}

@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files - 실제 값이 든 파일은 전부 제외하되, 값이 비어 있는 템플릿(.env.example)은 커밋해서
+# 다른 환경에서 어떤 환경변수가 필요한지 알 수 있게 한다.
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +41,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Prisma가 생성하는 클라이언트 코드(스키마로부터 매번 재생성 가능하므로 커밋 불필요)
+/src/generated/prisma
+
+# sqlite local dev db (더 이상 사용하지 않지만 혹시 남아있을 경우 대비)
+/prisma/*.db
+/prisma/*.db-journal
+
+# Vercel CLI가 Neon 연동 시 자동으로 내려받은 에이전트 스킬 문서(앱 소스 아님)
+/.agents/
+/.claude/skills/
+skills-lock.json

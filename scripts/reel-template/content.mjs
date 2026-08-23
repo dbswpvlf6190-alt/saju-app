@@ -1,0 +1,156 @@
+// 사주랩 릴스 템플릿 시스템 — 콘텐츠 데이터
+// 새 릴스를 추가하려면 이 배열에 항목을 추가하고 build.mjs를 다시 실행하면 됩니다.
+// 각 항목은 R25에서 검증된 5장면 구조(HOOK → INFO → CURIOSITY → 실제 앱 화면 → CTA)를 따릅니다.
+
+export const CTA_HEADLINE = "내 사주는 어떨까?";
+export const CTA_BUTTON = "프로필 링크에서 무료 확인 🔮";
+
+export const REELS = [
+  {
+    order: 1,
+    id: "R01",
+    category: "jaemul",
+    categoryLabel: "재물운",
+    title: "돈이 안 모이는 이유",
+    hook: ["월급 들어오자마자", "텅장 되는 사람들,", "이유가 있어요"],
+    info: {
+      pre: "사주에서 '식신'이나 '상관'이 강하면",
+      emphasis: "소비에서 즐거움",
+      post: "을 느끼는 성향이 있대요",
+      sub: ["'편재'가 강하면 버는 감각은 좋은데", "굴리는 방식이 다르다는 해석도 있어요"],
+    },
+    curiosity: ["그럼 내 사주엔", "어떤 기운이 많을까?"],
+    screenshotCaption: "재물운도 이렇게 한눈에 확인돼요",
+  },
+  {
+    order: 5,
+    id: "R02",
+    category: "jaemul",
+    categoryLabel: "재물운",
+    title: "편재가 많은 사람 특징",
+    hook: ["이 세 가지 다 해당되면,", "당신은 편재형일지도"],
+    info: {
+      pre: "편재가 많은 사람은",
+      emphasis: "부수입 · 아이디어 · 큰 씀씀이",
+      post: "가 특징이라고 봐요",
+      sub: ["돈 버는 감각이 좋은 편이라는", "해석이 있어요"],
+    },
+    curiosity: ["근데 편재가 많다고", "다 부자가 되는 건 아니에요"],
+    screenshotCaption: "내 사주에 편재가 있는지도 바로 나와요",
+  },
+  {
+    order: 9,
+    id: "R03",
+    category: "jaemul",
+    categoryLabel: "재물운",
+    title: "부자 사주는 따로 있다?",
+    hook: ["부자 사주 있냐고 물어보면,", "저는 항상 이렇게 답해요"],
+    info: {
+      pre: "재물운이 좋다는 건",
+      emphasis: "돈을 대하는 감각과 타이밍",
+      post: "이 남다르다는 뜻에 가까워요",
+      sub: ["결국 그 기운을 쓰는 건", "본인 몫이에요"],
+    },
+    curiosity: ["그럼 재물운 좋은 사주는", "실제로 뭐가 다를까?"],
+    screenshotCaption: "내 재물 기운, 무료로 바로 확인",
+  },
+  {
+    order: 2,
+    id: "R07",
+    category: "yeonae",
+    categoryLabel: "연애운",
+    title: "썸 탈 때 눈치 없는 사주",
+    hook: ["썸 타는데 계속 헛다리 짚는 사람,", "이유가 사주에 있을 수도"],
+    info: {
+      pre: "'관성'이 약하면",
+      emphasis: "상대 신호를 캐치",
+      post: "하는 게 서툰 편이래요",
+      sub: ["관성이 강하면 관계의 흐름을", "잘 읽는 편이라고 해요"],
+    },
+    curiosity: ["나는 관성이", "강할까 약할까?"],
+    screenshotCaption: "내 연애 성향 힌트도 여기서 확인",
+  },
+  {
+    order: 6,
+    id: "R08",
+    category: "yeonae",
+    categoryLabel: "연애운",
+    title: "표현 서툰 사람 vs 직진형",
+    hook: ["좋아하는데 티도 못 내는 사람,", "사주에 이유가 있대요"],
+    info: {
+      pre: "태어난 날의 천간(일간)에 따라",
+      emphasis: "감정 표현 방식",
+      post: "이 달라진다고 봐요",
+      sub: ["직진형도 있고", "은근형도 있어요"],
+    },
+    curiosity: ["나는 직진형일까,", "은근형일까?"],
+    screenshotCaption: "내 일간, 무료 결과에서 바로 확인",
+  },
+  {
+    order: 3,
+    id: "R13",
+    category: "jigeop",
+    categoryLabel: "직업운",
+    title: "조직생활 잘 맞는 사주",
+    hook: ["회사 체질 아니라는 말,", "사주로도 설명돼요"],
+    info: {
+      pre: "'관성'이 잘 자리잡고 있으면",
+      emphasis: "규칙과 위계 안에서",
+      post: "능력을 발휘하는 편이래요",
+      sub: ["관성이 약하면 자율적인 환경에서", "더 빛나는 경향이 있어요"],
+    },
+    curiosity: ["나는 조직형일까,", "자율형일까?"],
+    screenshotCaption: "내 성향 힌트, 무료로 확인 가능해요",
+  },
+  {
+    order: 7,
+    id: "R14",
+    category: "jigeop",
+    categoryLabel: "직업운",
+    title: "프리랜서 체질 특징",
+    hook: ["혼자 일하는 게 편한 사람들,", "사주에 이유가 있어요"],
+    info: {
+      pre: "식신·상관이 강하면 자기표현 욕구가 크고,",
+      emphasis: "관성이 약해 자유를 선호",
+      post: "하는 편이래요",
+      sub: ["편재 기운으로 여러 일을", "동시에 벌이는 것도 특징이에요"],
+    },
+    curiosity: ["나는 몇 가지나", "해당될까?"],
+    screenshotCaption: "내 사주 기운 구성, 무료로 확인",
+  },
+  {
+    order: 4,
+    id: "R19",
+    category: "saengnyeon",
+    categoryLabel: "생년월일 운세",
+    title: "생시 몰라도 되는 이유",
+    hook: ["태어난 시간 모른다고", "사주 못 본다는 거,", "사실 아니에요"],
+    info: {
+      pre: "생시를 모르면 8글자 중",
+      emphasis: "2글자(시주)만 빠질 뿐",
+      post: "이에요",
+      sub: ["나머지 6글자만으로도", "성격·오행 균형을 볼 수 있어요"],
+    },
+    curiosity: ["그럼 나도 생시 몰라도", "확인 가능하다는 거네?"],
+    screenshotCaption: "생시 몰라도 이렇게 결과가 나와요",
+  },
+  {
+    order: 8,
+    id: "R20",
+    category: "saengnyeon",
+    categoryLabel: "생년월일 운세",
+    title: "음력 양력 헷갈리는 이유",
+    hook: ["내 진짜 생일이 음력인지 양력인지", "헷갈리는 분들 많죠"],
+    info: {
+      pre: "사주는 태양의 절기를 기준으로 계산돼서",
+      emphasis: "음력이든 양력이든",
+      post: "앱이 알아서 변환해줘요",
+      sub: ["'입춘'을 새해 기준으로 삼는 것도", "사주만의 특징이에요"],
+    },
+    curiosity: ["그럼 나는 어떤 걸로", "입력해야 할까?"],
+    screenshotCaption: "양력·음력 아무거나 골라 입력하면 끝",
+  },
+];
+
+// 업로드 순서(order)대로 정렬해 파일명에 사용
+export const REELS_IN_UPLOAD_ORDER = [...REELS].sort((a, b) => a.order - b.order);

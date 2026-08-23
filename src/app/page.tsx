@@ -1,4 +1,5 @@
 import { SajuFlow } from "@/components/saju/SajuFlow";
+import { SiteFooter } from "@/components/saju/SiteFooter";
 
 export default function Home() {
   return (
@@ -21,6 +22,8 @@ export default function Home() {
       <div className="mt-10 w-full max-w-md">
         <SajuFlow />
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

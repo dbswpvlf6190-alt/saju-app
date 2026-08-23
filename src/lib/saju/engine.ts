@@ -16,21 +16,66 @@ const ZI_HOUR_MODE_TO_SECT: Record<ZiHourMode, number> = {
 
 export class SajuInputError extends Error {}
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
+ * 이 함수로 들어오는 input은 사실 API 경계(JSON.parse 결과를 SajuInput으로 캐스팅한 값)에서
+ * 온 것이라 타입스크립트 타입만으로는 아무것도 보장되지 않는다(런타임에는 그냥 unknown이다).
+ * year가 없거나 문자열이면 `undefined < 1900`/`"abc" < 1900`처럼 비교가 항상 false가 되어
+ * 검증을 조용히 통과해버리고, 이후 lunar-typescript 내부에서 처리되지 않은 예외로 500이
+ * 나는 사고가 실제로 있었다. 그래서 모든 필드를 값 존재 여부 + 타입까지 명시적으로 검사한다.
+ */
 function validateInput(input: SajuInput): void {
+  if (input.calendarType !== "solar" && input.calendarType !== "lunar") {
+    throw new SajuInputError("달력 기준(양력/음력)을 정확히 선택해 주세요.");
+  }
+  if (input.gender !== "male" && input.gender !== "female") {
+    throw new SajuInputError("성별을 정확히 선택해 주세요.");
+  }
+  if (!isFiniteNumber(input.year) || !Number.isInteger(input.year)) {
+    throw new SajuInputError("연도를 정확히 입력해 주세요.");
+  }
   if (input.year < 1900 || input.year > 2100) {
     throw new SajuInputError("연도는 1900년부터 2100년 사이만 지원합니다.");
+  }
+  if (!isFiniteNumber(input.month) || !Number.isInteger(input.month)) {
+    throw new SajuInputError("월을 정확히 입력해 주세요.");
   }
   if (input.month < 1 || input.month > 12) {
     throw new SajuInputError("월은 1~12 사이여야 합니다.");
   }
+  if (!isFiniteNumber(input.day) || !Number.isInteger(input.day)) {
+    throw new SajuInputError("일을 정확히 입력해 주세요.");
+  }
   if (input.day < 1) {
     throw new SajuInputError("일은 1 이상이어야 합니다.");
   }
-  if (input.hour !== undefined && (input.hour < 0 || input.hour > 23)) {
-    throw new SajuInputError("시는 0~23 사이여야 합니다.");
+  if (input.hour !== undefined) {
+    if (!isFiniteNumber(input.hour) || !Number.isInteger(input.hour) || input.hour < 0 || input.hour > 23) {
+      throw new SajuInputError("시는 0~23 사이여야 합니다.");
+    }
   }
-  if (input.minute !== undefined && (input.minute < 0 || input.minute > 59)) {
-    throw new SajuInputError("분은 0~59 사이여야 합니다.");
+  if (input.minute !== undefined) {
+    if (
+      !isFiniteNumber(input.minute) ||
+      !Number.isInteger(input.minute) ||
+      input.minute < 0 ||
+      input.minute > 59
+    ) {
+      throw new SajuInputError("분은 0~59 사이여야 합니다.");
+    }
+  }
+  if (input.isLeapMonth !== undefined && typeof input.isLeapMonth !== "boolean") {
+    throw new SajuInputError("윤달 여부 값이 올바르지 않습니다.");
+  }
+  if (
+    input.ziHourMode !== undefined &&
+    input.ziHourMode !== "late-zi" &&
+    input.ziHourMode !== "night-zi-split"
+  ) {
+    throw new SajuInputError("자시 처리 방식 값이 올바르지 않습니다.");
   }
   if (input.calendarType === "solar" && input.isLeapMonth) {
     throw new SajuInputError("양력 입력에는 윤달 여부를 지정할 수 없습니다.");

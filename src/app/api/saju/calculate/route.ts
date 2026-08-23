@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
     if (e instanceof SajuInputError) {
       return NextResponse.json({ error: e.message }, { status: 400 });
     }
-    throw e;
+    // 여기까지 오면 우리가 예상 못한 버그다. 원인은 서버 로그로만 남기고,
+    // 클라이언트에는 Next.js 기본 에러 페이지 대신 일관된 JSON 에러를 준다.
+    console.error("사주 계산 중 예상하지 못한 오류:", e);
+    return NextResponse.json({ error: "계산 중 오류가 발생했습니다." }, { status: 500 });
   }
 }

@@ -22,41 +22,48 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
 
   const { paymentId } = await params;
 
-  const order = await prisma.order.findUnique({ where: { paymentId } });
-  if (!order) {
-    return NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 });
-  }
-
-  // 이미 처리된 주문이면 중복 결제 검증/처리 없이 현재 상태를 그대로 반환한다(멱등 처리).
-  if (order.status !== "PENDING") {
-    return NextResponse.json({ status: order.status });
-  }
-
-  let payment;
+  // 결제 확인은 실제 돈이 걸린 경로라, 예상 못한 예외로 원인 불명의 500 페이지가 나가는 대신
+  // 항상 일관된 JSON 에러로 응답하고 원인은 서버 로그에 남긴다.
   try {
-    payment = await fetchPortOnePayment(paymentId);
-  } catch (e) {
-    if (e instanceof PortOneVerificationError) {
-      return NextResponse.json({ error: e.message }, { status: 502 });
+    const order = await prisma.order.findUnique({ where: { paymentId } });
+    if (!order) {
+      return NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 });
     }
-    throw e;
+
+    // 이미 처리된 주문이면 중복 결제 검증/처리 없이 현재 상태를 그대로 반환한다(멱등 처리).
+    if (order.status !== "PENDING") {
+      return NextResponse.json({ status: order.status });
+    }
+
+    let payment;
+    try {
+      payment = await fetchPortOnePayment(paymentId);
+    } catch (e) {
+      if (e instanceof PortOneVerificationError) {
+        return NextResponse.json({ error: e.message }, { status: 502 });
+      }
+      throw e;
+    }
+
+    const isAmountValid = payment.amount.total === order.amount;
+    const isPaid = payment.status === "PAID";
+
+    if (!isPaid || !isAmountValid) {
+      await prisma.order.update({ where: { paymentId }, data: { status: "FAILED" } });
+      return NextResponse.json(
+        { error: isAmountValid ? "결제가 완료되지 않았습니다." : "결제 금액이 일치하지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    const updated = await prisma.order.update({
+      where: { paymentId },
+      data: { status: "PAID", paidAt: new Date() },
+    });
+
+    return NextResponse.json({ status: updated.status });
+  } catch (e) {
+    console.error(`결제 완료 처리 중 예상하지 못한 오류 (paymentId=${paymentId}):`, e);
+    return NextResponse.json({ error: "결제 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });
   }
-
-  const isAmountValid = payment.amount.total === order.amount;
-  const isPaid = payment.status === "PAID";
-
-  if (!isPaid || !isAmountValid) {
-    await prisma.order.update({ where: { paymentId }, data: { status: "FAILED" } });
-    return NextResponse.json(
-      { error: isAmountValid ? "결제가 완료되지 않았습니다." : "결제 금액이 일치하지 않습니다." },
-      { status: 400 },
-    );
-  }
-
-  const updated = await prisma.order.update({
-    where: { paymentId },
-    data: { status: "PAID", paidAt: new Date() },
-  });
-
-  return NextResponse.json({ status: updated.status });
 }

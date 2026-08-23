@@ -226,6 +226,54 @@ describe("calculateSaju - 입력 검증", () => {
       }),
     ).toThrow(SajuInputError);
   });
+
+  // API 경계로 들어오는 값은 TypeScript 타입이 실제로 보장해주지 않는 unknown이나 마찬가지다.
+  // year가 없거나 문자열이면 `undefined < 1900`처럼 비교가 항상 false가 되어 검증을 그냥
+  // 통과해버리고, 이후 lunar-typescript 내부에서 처리되지 않은 예외로 500이 나던 실제 버그가 있었다.
+  it("year가 없으면(undefined) SajuInputError를 던진다 (500 방지 회귀 테스트)", () => {
+    const malformed = { calendarType: "solar", month: 1, day: 1, gender: "male" };
+    expect(() => calculateSaju(malformed as unknown as Parameters<typeof calculateSaju>[0])).toThrow(
+      SajuInputError,
+    );
+  });
+
+  it("year가 숫자가 아닌 문자열이면 SajuInputError를 던진다", () => {
+    const malformed = { calendarType: "solar", year: "abc", month: 1, day: 1, gender: "male" };
+    expect(() => calculateSaju(malformed as unknown as Parameters<typeof calculateSaju>[0])).toThrow(
+      SajuInputError,
+    );
+  });
+
+  it("calendarType이 없거나 알 수 없는 값이면 SajuInputError를 던진다(음력으로 잘못 취급되는 것 방지)", () => {
+    const noCalendarType = { year: 2000, month: 1, day: 1, gender: "male" };
+    expect(() =>
+      calculateSaju(noCalendarType as unknown as Parameters<typeof calculateSaju>[0]),
+    ).toThrow(SajuInputError);
+
+    const bogusCalendarType = { calendarType: "martian", year: 2000, month: 1, day: 1, gender: "male" };
+    expect(() =>
+      calculateSaju(bogusCalendarType as unknown as Parameters<typeof calculateSaju>[0]),
+    ).toThrow(SajuInputError);
+  });
+
+  it("gender가 없거나 알 수 없는 값이면 SajuInputError를 던진다", () => {
+    const noGender = { calendarType: "solar", year: 2000, month: 1, day: 1 };
+    expect(() => calculateSaju(noGender as unknown as Parameters<typeof calculateSaju>[0])).toThrow(
+      SajuInputError,
+    );
+
+    const bogusGender = { calendarType: "solar", year: 2000, month: 1, day: 1, gender: "robot" };
+    expect(() => calculateSaju(bogusGender as unknown as Parameters<typeof calculateSaju>[0])).toThrow(
+      SajuInputError,
+    );
+  });
+
+  it("hour가 정수가 아니면(소수/문자열) SajuInputError를 던진다", () => {
+    const fractional = { calendarType: "solar", year: 2000, month: 1, day: 1, hour: 12.5, gender: "male" };
+    expect(() => calculateSaju(fractional as unknown as Parameters<typeof calculateSaju>[0])).toThrow(
+      SajuInputError,
+    );
+  });
 });
 
 describe("calculateSaju - 결과 데이터 구조", () => {

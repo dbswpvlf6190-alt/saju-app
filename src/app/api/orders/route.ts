@@ -42,23 +42,29 @@ export async function POST(req: NextRequest) {
     if (e instanceof SajuInputError) {
       return NextResponse.json({ error: e.message }, { status: 400 });
     }
-    throw e;
+    console.error("주문 생성 전 사주 검증 중 예상하지 못한 오류:", e);
+    return NextResponse.json({ error: "요청을 처리하지 못했습니다." }, { status: 500 });
   }
 
   // 일부 PG(예: KG이니시스 INIStdPay)는 주문번호(oid) 길이를 최대 40자로 제한하므로
   // 접두사 없이 UUID(36자) 그대로 사용한다.
   const paymentId = randomUUID();
-  const order = await prisma.order.create({
-    data: {
-      paymentId,
-      amount: PREMIUM_REPORT_PRICE_KRW,
-      birthInputJson: JSON.stringify(body.birthInput),
-    },
-  });
+  try {
+    const order = await prisma.order.create({
+      data: {
+        paymentId,
+        amount: PREMIUM_REPORT_PRICE_KRW,
+        birthInputJson: JSON.stringify(body.birthInput),
+      },
+    });
 
-  return NextResponse.json({
-    paymentId: order.paymentId,
-    amount: order.amount,
-    orderName: PREMIUM_REPORT_NAME,
-  });
+    return NextResponse.json({
+      paymentId: order.paymentId,
+      amount: order.amount,
+      orderName: PREMIUM_REPORT_NAME,
+    });
+  } catch (e) {
+    console.error("주문 생성 DB 오류:", e);
+    return NextResponse.json({ error: "주문 생성에 실패했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });
+  }
 }

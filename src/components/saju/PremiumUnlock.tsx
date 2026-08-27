@@ -1,16 +1,29 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import type { PremiumSection, SajuResult } from "@/lib/saju";
 // ResultView.tsx와 같은 이유로 배럴 대신 서브모듈에서 직접 가져온다.
 import { resultToInput } from "@/lib/saju/types";
 import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import {
+  PREMIUM_CTA_LABEL,
+  PREMIUM_DELIVERY_NOTE,
+  PREMIUM_TRUST_ITEMS,
+  PREMIUM_VALUE_CHECKLIST,
+  PREMIUM_VALUE_HEADLINE,
+  PREMIUM_VALUE_SUBHEAD,
+} from "@/lib/payment/ctaCopy";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
 const PENDING_KEY = "saju:pendingPurchase";
+
+// 이 세 항목은 ResultView.tsx의 "무료 재물운/연애운/직업운" 구간에서 이미 같은 teaser
+// 문장을 열어서 보여준 뒤라, 잠금 카드에서 또 반복하면 어색해서 여기서는 생략한다.
+const ALREADY_SHOWN_FREE_KEYS = new Set(["wealth", "love", "career"]);
 
 export function PremiumUnlock({
   result,
@@ -35,6 +48,15 @@ export function PremiumUnlock({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState(name);
   const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+
+  useEffect(() => {
+    // 결제 복귀(resumePaymentId)로 바로 처리 상태에 들어가는 경우가 아니라면, 잠금
+    // 화면(미리보기)이 실제로 노출된 시점을 한 번 기록한다.
+    if (!resumePaymentId) {
+      trackEvent("premium_preview_view", {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchReport = useCallback(async (paymentId: string) => {
     const reportRes = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
@@ -221,7 +243,7 @@ export function PremiumUnlock({
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세 (유료)</h3>
+      <h3 className="px-1 text-sm font-medium text-foreground-muted">🔒 상세 분석 미리보기</h3>
       {premiumSections.map((section) => (
         <div
           key={section.key}
@@ -231,13 +253,29 @@ export function PremiumUnlock({
             <h4 className="font-medium text-foreground">{section.title}</h4>
             <span className="text-xs text-accent-gold-soft">🔒 잠금</span>
           </div>
-          <p className="mt-2 text-sm text-foreground-muted">{section.teaser}</p>
+          {!ALREADY_SHOWN_FREE_KEYS.has(section.key) && (
+            <p className="mt-2 text-sm text-foreground-muted">{section.teaser}</p>
+          )}
           <p className="mt-3 select-none text-sm leading-relaxed text-foreground-muted/40 blur-[3px]">
             상세 분석 내용은 결제 후 대운·세운 흐름과 함께 자세히 확인할 수 있어요. 상세 분석 내용은
             결제 후 대운·세운 흐름과 함께 자세히 확인할 수 있어요.
           </p>
         </div>
       ))}
+
+      <div className="flex flex-col gap-1.5 rounded-2xl border border-accent-gold/40 bg-accent-gold/10 p-4 text-center">
+        <h4 className="font-serif text-lg text-accent-gold-soft">{PREMIUM_VALUE_HEADLINE}</h4>
+        <p className="text-sm text-foreground-muted">{PREMIUM_VALUE_SUBHEAD}</p>
+        <ul className="mt-2 flex flex-col gap-1 text-left text-sm text-foreground">
+          {PREMIUM_VALUE_CHECKLIST.map((item) => (
+            <li key={item}>✓ {item}</li>
+          ))}
+        </ul>
+        <p className="mt-3 text-2xl font-semibold text-accent-gold-soft">
+          {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원
+        </p>
+        <p className="text-xs text-foreground-muted">{PREMIUM_DELIVERY_NOTE}</p>
+      </div>
 
       <div className="flex flex-col gap-2">
         <span className="px-1 text-sm text-foreground-muted">결제 수단</span>
@@ -313,16 +351,21 @@ export function PremiumUnlock({
       <button
         type="button"
         onClick={() => {
-          trackEvent("premium_click", { productType: "premium_report" });
+          trackEvent("premium_cta_click", { productType: "premium_report" });
           void handlePurchase();
         }}
         disabled={status === "processing"}
-        className="mt-1 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-1 min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {status === "processing"
-          ? "처리 중..."
-          : `상세 분석 보기 · ${PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원`}
+        {status === "processing" ? "처리 중..." : PREMIUM_CTA_LABEL}
       </button>
+
+      <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">
+        <p>{PREMIUM_TRUST_ITEMS.map((item) => `✓ ${item}`).join("  ·  ")}</p>
+        <Link href="/refund" className="underline underline-offset-4 hover:text-accent-gold-soft">
+          환불정책 확인하기
+        </Link>
+      </div>
     </div>
   );
 }

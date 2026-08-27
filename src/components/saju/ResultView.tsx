@@ -15,6 +15,15 @@ import { ShareButton } from "./ShareButton";
 import { DailyFortuneCard } from "./DailyFortuneCard";
 import { trackEvent } from "@/lib/analytics/track";
 
+// 무료로 공개하는 3개 카테고리 + 노출 순서. relationship/yearly는 유료 상세 분석에서만
+// 제공한다(기존 상품 구성 그대로 유지 — 여기서 새 카테고리를 만들지 않는다).
+const FREE_PREVIEW_ORDER = ["wealth", "love", "career"] as const;
+const FREE_PREVIEW_EMOJI: Record<(typeof FREE_PREVIEW_ORDER)[number], string> = {
+  wealth: "💰",
+  love: "❤️",
+  career: "💼",
+};
+
 export function ResultView({
   name,
   result,
@@ -31,12 +40,17 @@ export function ResultView({
   const premiumSections = getPremiumSections(result);
   const daily = getDailyFortuneDetail(result);
 
+  const freePreviewSections = FREE_PREVIEW_ORDER.map(
+    (key) => premiumSections.find((s) => s.key === key)!,
+  );
+
   useEffect(() => {
     trackEvent("free_result_view", { productType: "premium_report" });
   }, []);
 
   return (
     <div className="flex w-full max-w-md flex-col gap-8 pb-16">
+      {/* ① 나의 사주 핵심 결과 */}
       <div className="flex flex-col items-center gap-2 text-center">
         <span className="text-sm text-foreground-muted">
           {name ? `${name}님의 사주` : "나의 사주"}
@@ -53,16 +67,51 @@ export function ResultView({
         <PillarCard label="시주" pillar={result.timePillar} />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-        <h3 className="text-sm font-medium text-foreground-muted">오행 분포</h3>
-        <WuxingBar percent={result.wuxingPercent} />
-      </div>
-
+      {/* ② 기본 성향 */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
         <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
         <p className="leading-relaxed text-foreground">{free.personality}</p>
       </div>
 
+      {/* ③ 오행 분석 */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
+        <h3 className="text-sm font-medium text-foreground-muted">오행 분포</h3>
+        <WuxingBar percent={result.wuxingPercent} />
+      </div>
+
+      {/* ④⑤⑥ 무료 재물운·연애운·직업운 — 방향만 짧게, 상세는 유료에서 */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
+        <h3 className="text-sm font-medium text-foreground-muted">무료 운세 요약</h3>
+        {freePreviewSections.map((section) => (
+          <div key={section.key}>
+            <span className="text-sm font-medium text-foreground">
+              {FREE_PREVIEW_EMOJI[section.key as (typeof FREE_PREVIEW_ORDER)[number]]} {section.title}
+            </span>
+            <p className="text-sm leading-relaxed text-foreground-muted">{section.teaser}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ⑦ 전환 유도 문구 (개인화) */}
+      <div className="flex flex-col items-center gap-1 px-2 text-center">
+        <p className="text-sm text-foreground-muted">
+          지금까지는 <strong className="text-foreground">{free.dominantWuxing}</strong> 기운을 기준으로 한
+          기본 방향이었어요.
+        </p>
+        <p className="text-sm font-medium text-foreground">더 자세한 분석이 궁금하다면?</p>
+      </div>
+
+      {/* ⑧~⑩ 상세 분석 미리보기 + 포함 내용 + 가격 (PremiumUnlock 내부) */}
+      <PremiumUnlock
+        result={result}
+        name={name}
+        premiumSections={premiumSections}
+        resumePaymentId={resumePaymentId}
+        onUnlockedChange={setIsPaid}
+      />
+
+      {/* 여기서부터는 핵심 전환 목표(상세 분석 구매) 뒤에 오는 부가 기능들 — 유료 CTA보다
+          눈에 띄지 않게 아래로 내려서 배치한다. */}
       <DailyFortuneCard daily={daily} />
 
       <Link
@@ -73,14 +122,6 @@ export function ResultView({
       </Link>
 
       {!isPaid && <AdSlot />}
-
-      <PremiumUnlock
-        result={result}
-        name={name}
-        premiumSections={premiumSections}
-        resumePaymentId={resumePaymentId}
-        onUnlockedChange={setIsPaid}
-      />
 
       <div className="flex flex-col gap-2">
         <ShareButton

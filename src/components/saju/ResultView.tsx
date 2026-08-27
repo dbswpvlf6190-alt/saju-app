@@ -9,7 +9,6 @@ import { getDailyFortune } from "@/lib/saju/dailyFortune";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { PremiumUnlock } from "./PremiumUnlock";
-import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
 
 export function ResultView({
@@ -23,7 +22,7 @@ export function ResultView({
   onRestart: () => void;
   resumePaymentId: string | null;
 }) {
-  const [isPaid, setIsPaid] = useState(false);
+  const [, setIsPaid] = useState(false);
   const free = generateFreeContent(result);
   const premiumSections = getPremiumSections(result);
   const daily = getDailyFortune(result);
@@ -61,7 +60,7 @@ export function ResultView({
         <p className="leading-relaxed text-foreground">{daily.text}</p>
       </div>
 
-      {!isPaid && <AdSlot />}
+      {/* 애드핏 승인 전까지는 AdSlot을 렌더링하지 않는다 (승인되면 다시 추가) */}
 
       <PremiumUnlock
         result={result}

@@ -1,49 +1,52 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { PremiumSection, SajuResult } from "@/lib/saju";
-// ResultView.tsx와 같은 이유로 배럴 대신 서브모듈에서 직접 가져온다.
-import { resultToInput } from "@/lib/saju/types";
-import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import type { CompatibilitySection } from "@/lib/saju/compatibility";
+import type { SajuInput } from "@/lib/saju/types";
+import { COMPATIBILITY_REPORT_PRICE_KRW } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
-const PENDING_KEY = "saju:pendingPurchase";
+const PENDING_KEY = "saju:pendingCompatibilityPurchase";
 
-export function PremiumUnlock({
-  result,
-  name,
-  premiumSections,
+/** PremiumUnlock.tsx와 동일한 결제 플로우(주문 생성 → PortOne 결제창 → 서버 검증 → 결과 조회)를
+ * 궁합 상품에 맞춰 그대로 재사용한다. 결제 관련 API(/api/orders, /complete)는 완전히 동일하게
+ * 공유하고, productType만 다르게 보낸다 — 새로운 결제 시스템을 따로 만들지 않는다. */
+export function CompatibilityUnlock({
+  selfInput,
+  partnerInput,
+  selfName,
+  partnerName,
+  sections,
   resumePaymentId,
   onUnlockedChange,
 }: {
-  result: SajuResult;
-  name: string;
-  premiumSections: PremiumSection[];
+  selfInput: SajuInput;
+  partnerInput: SajuInput;
+  selfName: string;
+  partnerName: string;
+  sections: CompatibilitySection[];
   resumePaymentId: string | null;
-  /** 결제로 잠금이 풀리면 true로 호출된다 — 상위에서 이 세션 동안 광고를 숨기는 데 사용한다. */
   onUnlockedChange?: (unlocked: boolean) => void;
 }) {
   const [status, setStatus] = useState<Status>("locked");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [sections, setSections] = useState<Record<string, string> | null>(null);
+  const [sectionTexts, setSectionTexts] = useState<Record<string, string> | null>(null);
   const [missingSections, setMissingSections] = useState<string[]>([]);
   const [activePaymentId, setActivePaymentId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [fullName, setFullName] = useState(name);
+  const [fullName, setFullName] = useState(selfName);
   const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
 
   const fetchReport = useCallback(async (paymentId: string) => {
     const reportRes = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
     const reportData = await reportRes.json();
 
-    // 일부 항목만 실패한 경우에도 성공한 항목은 그대로 보여주고, 실패한 항목만
-    // 다시 시도할 수 있게 한다 — 전부 다시 기다리게 하지 않기 위함이다.
     if (reportData.sections && Object.keys(reportData.sections).length > 0) {
-      setSections(reportData.sections);
+      setSectionTexts(reportData.sections);
       setMissingSections(reportData.missingSections ?? []);
       setActivePaymentId(paymentId);
       setStatus("unlocked");
@@ -74,13 +77,13 @@ export function PremiumUnlock({
         if (!completeRes.ok) {
           throw new Error(completeData.error ?? "결제 확인에 실패했습니다.");
         }
-        trackEvent("payment_success", { productType: "premium_report" });
+        trackEvent("payment_success", { productType: "compatibility_report" });
 
         await fetchReport(paymentId);
       } catch (e) {
         setStatus("error");
         setErrorMessage(e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.");
-        trackEvent("payment_fail", { productType: "premium_report" });
+        trackEvent("payment_fail", { productType: "compatibility_report" });
       }
     },
     [fetchReport],
@@ -99,8 +102,6 @@ export function PremiumUnlock({
   }
 
   useEffect(() => {
-    // resumePaymentId는 리디렉션 복귀 시 URL에서 읽어온 외부 상태이며, 이를 감지해
-    // 결제 완료 처리를 1회 트리거하는 것이므로 effect에서의 비동기 setState 호출이 맞다.
     if (resumePaymentId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       void finalizeOrder(resumePaymentId);
@@ -109,7 +110,7 @@ export function PremiumUnlock({
   }, [resumePaymentId]);
 
   async function handlePurchase() {
-    trackEvent("checkout_start", { productType: "premium_report" });
+    trackEvent("checkout_start", { productType: "compatibility_report" });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
     if (!storeId || !channelKey) {
@@ -137,15 +138,12 @@ export function PremiumUnlock({
     setErrorMessage(null);
 
     try {
-      sessionStorage.setItem(
-        PENDING_KEY,
-        JSON.stringify({ name, birthInput: resultToInput(result) }),
-      );
+      sessionStorage.setItem(PENDING_KEY, JSON.stringify({ selfInput, partnerInput, selfName, partnerName }));
 
       const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ birthInput: resultToInput(result) }),
+        body: JSON.stringify({ productType: "compatibility_report", selfInput, partnerInput }),
       });
       const order = await orderRes.json();
       if (!orderRes.ok) {
@@ -177,12 +175,12 @@ export function PremiumUnlock({
     }
   }
 
-  if (sections) {
+  if (sectionTexts) {
     return (
       <div className="flex flex-col gap-3">
-        <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세</h3>
-        {premiumSections.map((section) => {
-          const text = sections[section.key];
+        <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 궁합 분석</h3>
+        {sections.map((section) => {
+          const text = sectionTexts[section.key];
           const isMissing = missingSections.includes(section.key);
           return (
             <div key={section.key} className="rounded-2xl border border-border-subtle bg-background-card/70 p-4">
@@ -221,8 +219,8 @@ export function PremiumUnlock({
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세 (유료)</h3>
-      {premiumSections.map((section) => (
+      <h3 className="px-1 text-sm font-medium text-foreground-muted">❤️ 우리 궁합 상세 분석</h3>
+      {sections.map((section) => (
         <div
           key={section.key}
           className="relative overflow-hidden rounded-2xl border border-border-subtle bg-background-card/70 p-4"
@@ -233,8 +231,8 @@ export function PremiumUnlock({
           </div>
           <p className="mt-2 text-sm text-foreground-muted">{section.teaser}</p>
           <p className="mt-3 select-none text-sm leading-relaxed text-foreground-muted/40 blur-[3px]">
-            상세 분석 내용은 결제 후 대운·세운 흐름과 함께 자세히 확인할 수 있어요. 상세 분석 내용은
-            결제 후 대운·세운 흐름과 함께 자세히 확인할 수 있어요.
+            상세 분석 내용은 결제 후 구체적인 관계 흐름과 함께 자세히 확인할 수 있어요. 상세 분석 내용은
+            결제 후 구체적인 관계 흐름과 함께 자세히 확인할 수 있어요.
           </p>
         </div>
       ))}
@@ -263,11 +261,11 @@ export function PremiumUnlock({
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="purchase-name" className="px-1 text-sm text-foreground-muted">
+        <label htmlFor="compat-purchase-name" className="px-1 text-sm text-foreground-muted">
           결제자 이름
         </label>
         <input
-          id="purchase-name"
+          id="compat-purchase-name"
           type="text"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
@@ -277,11 +275,11 @@ export function PremiumUnlock({
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="purchase-email" className="px-1 text-sm text-foreground-muted">
+        <label htmlFor="compat-purchase-email" className="px-1 text-sm text-foreground-muted">
           결제 확인 메일을 받을 이메일
         </label>
         <input
-          id="purchase-email"
+          id="compat-purchase-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -291,11 +289,11 @@ export function PremiumUnlock({
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="purchase-phone" className="px-1 text-sm text-foreground-muted">
+        <label htmlFor="compat-purchase-phone" className="px-1 text-sm text-foreground-muted">
           휴대폰 번호
         </label>
         <input
-          id="purchase-phone"
+          id="compat-purchase-phone"
           type="tel"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
@@ -313,7 +311,7 @@ export function PremiumUnlock({
       <button
         type="button"
         onClick={() => {
-          trackEvent("premium_click", { productType: "premium_report" });
+          trackEvent("compatibility_premium_click", {});
           void handlePurchase();
         }}
         disabled={status === "processing"}
@@ -321,7 +319,7 @@ export function PremiumUnlock({
       >
         {status === "processing"
           ? "처리 중..."
-          : `상세 분석 보기 · ${PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원`}
+          : `${COMPATIBILITY_REPORT_PRICE_KRW.toLocaleString()}원으로 자세히 확인하기`}
       </button>
     </div>
   );

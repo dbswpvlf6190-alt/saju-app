@@ -2,11 +2,33 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { calculateSaju, SajuInputError, type SajuInput } from "@/lib/saju";
 import { prisma } from "@/lib/db/prisma";
-import { PREMIUM_REPORT_NAME, PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import { PRODUCT_CATALOG, isProductType, type ProductType } from "@/lib/payment/config";
 import { rateLimit } from "@/lib/security/rateLimit";
 
 interface CreateOrderBody {
+  productType?: ProductType;
   birthInput?: SajuInput;
+  selfInput?: SajuInput;
+  partnerInput?: SajuInput;
+}
+
+// 주문에 저장할 생년월일 데이터의 모양은 상품 타입에 따라 다르다(단일 사주 vs 본인+상대방).
+// 가격/상품명은 절대 body에서 받지 않고 PRODUCT_CATALOG(서버)에서만 결정한다 —
+// 클라이언트가 금액을 조작해도 카탈로그에 없는 금액으로는 주문 자체가 생성되지 않는다.
+type BirthInputPayload = SajuInput | { self: SajuInput; partner: SajuInput };
+
+function validateAndBuildPayload(body: CreateOrderBody, productType: ProductType): BirthInputPayload {
+  if (productType === "premium_report") {
+    if (!body.birthInput) throw new SajuInputError("생년월일 정보가 필요합니다.");
+    calculateSaju(body.birthInput);
+    return body.birthInput;
+  }
+  if (!body.selfInput || !body.partnerInput) {
+    throw new SajuInputError("본인과 상대방의 생년월일 정보가 모두 필요합니다.");
+  }
+  calculateSaju(body.selfInput);
+  calculateSaju(body.partnerInput);
+  return { self: body.selfInput, partner: body.partnerInput };
 }
 
 // 결제창을 열기 전에 먼저 PENDING 상태의 주문을 만들어 paymentId를 발급한다.
@@ -31,13 +53,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
   }
 
-  if (!body.birthInput) {
-    return NextResponse.json({ error: "생년월일 정보가 필요합니다." }, { status: 400 });
-  }
+  const productType: ProductType = isProductType(body.productType) ? body.productType : "premium_report";
+  const product = PRODUCT_CATALOG[productType];
 
+  let payload: BirthInputPayload;
   try {
     // 입력값이 유효한 사주 데이터인지 미리 검증(결제만 되고 리포트를 못 만드는 상황 방지)
-    calculateSaju(body.birthInput);
+    payload = validateAndBuildPayload(body, productType);
   } catch (e) {
     if (e instanceof SajuInputError) {
       return NextResponse.json({ error: e.message }, { status: 400 });
@@ -53,15 +75,16 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.create({
       data: {
         paymentId,
-        amount: PREMIUM_REPORT_PRICE_KRW,
-        birthInputJson: JSON.stringify(body.birthInput),
+        amount: product.amount,
+        productType,
+        birthInputJson: JSON.stringify(payload),
       },
     });
 
     return NextResponse.json({
       paymentId: order.paymentId,
       amount: order.amount,
-      orderName: PREMIUM_REPORT_NAME,
+      orderName: product.name,
     });
   } catch (e) {
     console.error("주문 생성 DB 오류:", e);

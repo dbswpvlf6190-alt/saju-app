@@ -19,20 +19,20 @@ const notoSerifKR = Noto_Serif_KR({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://saju-app-three-dusky.vercel.app";
-const TITLE = "사주풀이 | 오늘의 나를 읽다";
-const DESCRIPTION = "생년월일시로 알아보는 나의 사주팔자와 운세 분석. 무료로 성격·오행 균형을 확인하세요.";
+const TITLE = "사주랩 | 나의 사주와 궁합 알아보기";
+const DESCRIPTION = "생년월일시로 알아보는 나의 사주팔자, 궁합, 오늘의 운세. 무료로 성격·오행 균형을 확인하세요.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
-  keywords: ["사주", "사주팔자", "운세", "오행", "무료사주", "사주풀이"],
+  keywords: ["사주", "사주팔자", "궁합", "운세", "오행", "무료사주", "사주랩"],
   alternates: { canonical: "/" },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
     url: SITE_URL,
-    siteName: "사주풀이",
+    siteName: "사주랩",
     locale: "ko_KR",
     type: "website",
   },

@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { SajuResult } from "@/lib/saju";
 // 배럴(@/lib/saju)을 거치면 번들러가 engine.ts(lunar-typescript, 수백 KB)까지 딸려오는 걸
 // 완전히 트리쉐이킹하지 못해서, 클라이언트 컴포넌트에서는 실제로 쓰는 서브모듈을 직접 가져온다.
 import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
-import { getDailyFortune } from "@/lib/saju/dailyFortune";
+import { getDailyFortuneDetail } from "@/lib/saju/dailyFortune";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { PremiumUnlock } from "./PremiumUnlock";
 import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
+import { DailyFortuneCard } from "./DailyFortuneCard";
+import { trackEvent } from "@/lib/analytics/track";
 
 export function ResultView({
   name,
@@ -26,7 +29,11 @@ export function ResultView({
   const [isPaid, setIsPaid] = useState(false);
   const free = generateFreeContent(result);
   const premiumSections = getPremiumSections(result);
-  const daily = getDailyFortune(result);
+  const daily = getDailyFortuneDetail(result);
+
+  useEffect(() => {
+    trackEvent("free_result_view", { productType: "premium_report" });
+  }, []);
 
   return (
     <div className="flex w-full max-w-md flex-col gap-8 pb-16">
@@ -56,10 +63,14 @@ export function ResultView({
         <p className="leading-relaxed text-foreground">{free.personality}</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-2xl border border-accent-gold/30 bg-accent-gold/10 p-4">
-        <h3 className="text-sm font-medium text-accent-gold-soft">오늘의 운세 · {daily.dateLabel}</h3>
-        <p className="leading-relaxed text-foreground">{daily.text}</p>
-      </div>
+      <DailyFortuneCard daily={daily} />
+
+      <Link
+        href="/compatibility"
+        className="rounded-2xl border border-dashed border-border-subtle px-4 py-3 text-center text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
+      >
+        ❤️ 우리 궁합도 확인해보기
+      </Link>
 
       {!isPaid && <AdSlot />}
 
@@ -72,7 +83,10 @@ export function ResultView({
       />
 
       <div className="flex flex-col gap-2">
-        <ShareButton dayMasterLabel={free.dayMasterLabel} dayMasterMetaphor={free.dayMasterMetaphor} />
+        <ShareButton
+          title="사주랩"
+          text={`나의 사주는 ${free.dayMasterLabel}, "${free.dayMasterMetaphor}"래요. 무료로 내 사주도 확인해보세요 🔮`}
+        />
         <button
           type="button"
           onClick={onRestart}

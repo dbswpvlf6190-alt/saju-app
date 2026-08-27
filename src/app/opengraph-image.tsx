@@ -19,7 +19,7 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ fontSize: 22, letterSpacing: 8, color: "#e8cf9c", marginBottom: 24 }}>
-          SAJU READING
+          SAJU LAB
         </div>
         <div style={{ display: "flex", fontSize: 72, fontWeight: 700, color: "#d4af6a" }}>
           생년월일시로 읽는 나의 사주팔자

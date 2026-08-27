@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
 
-export const metadata: Metadata = { title: "이용약관 | 사주풀이" };
+export const metadata: Metadata = { title: "이용약관 | 사주랩" };
 
 export default function TermsPage() {
   return (
@@ -11,7 +11,7 @@ export default function TermsPage() {
       <section>
         <h2>제1조 (목적)</h2>
         <p>
-          이 약관은 대국민스토어(이하 &ldquo;회사&rdquo;)가 운영하는 &ldquo;사주풀이&rdquo;
+          이 약관은 대국민스토어(이하 &ldquo;회사&rdquo;)가 운영하는 &ldquo;사주랩&rdquo;
           서비스(이하 &ldquo;서비스&rdquo;)를 이용함에 있어 회사와 이용자의 권리·의무 및
           책임사항, 서비스 이용 조건과 절차 등을 정함을 목적으로 합니다.
         </p>
@@ -21,8 +21,9 @@ export default function TermsPage() {
         <h2>제2조 (서비스의 내용)</h2>
         <p>
           서비스는 이용자가 입력한 생년월일·생시·성별을 바탕으로 사주팔자를 계산하고, 무료
-          결과(오행 분포, 기본 성격 분석)와 유료 상세 리포트(연애운·재물운·직업운·인간관계운·올해의
-          흐름에 대한 AI 기반 해석)를 제공합니다.
+          결과(오행 분포, 기본 성격 분석, 오늘의 운세)와 유료 상세 리포트(연애운·재물운·직업운·인간관계운·올해의
+          흐름에 대한 AI 기반 해석)를 제공합니다. 또한 이용자 본인과 상대방의 생년월일을 함께
+          입력하면 궁합 결과(무료 요약 및 유료 상세 분석)를 확인할 수 있는 궁합 서비스도 제공합니다.
         </p>
         <p>
           서비스가 제공하는 사주 해석은 전통 명리학 이론과 AI 언어모델을 활용한 참고용
@@ -56,6 +57,11 @@ export default function TermsPage() {
         <p>
           이용자는 서비스 이용 시 타인의 개인정보를 무단으로 입력하거나, 서비스를 부정한
           목적으로 이용하거나, 서비스의 정상적인 운영을 방해하는 행위를 해서는 안 됩니다.
+        </p>
+        <p>
+          유료 상품 구매 후 후기를 작성하는 경우, 욕설·비방, 타인의 개인정보(전화번호·이메일
+          등) 노출, 광고성 문구 등을 포함해서는 안 되며, 회사는 이러한 후기를 사전 고지 없이
+          비공개 처리할 수 있습니다.
         </p>
       </section>
 

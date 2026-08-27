@@ -1,12 +1,18 @@
 import Link from "next/link";
-import { PREMIUM_REPORT_NAME, PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import {
+  COMPATIBILITY_REPORT_NAME,
+  COMPATIBILITY_REPORT_PRICE_KRW,
+  PREMIUM_REPORT_NAME,
+  PREMIUM_REPORT_PRICE_KRW,
+} from "@/lib/payment/config";
 
 export function SiteFooter() {
   return (
     <footer className="mt-16 flex w-full max-w-md flex-col items-center gap-4 border-t border-border-subtle pt-8 text-center text-xs text-foreground-muted">
       <p>
-        판매 상품: {PREMIUM_REPORT_NAME} · {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원 (결제 즉시
-        제공되는 디지털 콘텐츠)
+        판매 상품: {PREMIUM_REPORT_NAME} · {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원 /{" "}
+        {COMPATIBILITY_REPORT_NAME} · {COMPATIBILITY_REPORT_PRICE_KRW.toLocaleString()}원
+        (결제 즉시 제공되는 디지털 콘텐츠)
       </p>
       <nav className="flex gap-4">
         <Link href="/terms" className="underline underline-offset-4">

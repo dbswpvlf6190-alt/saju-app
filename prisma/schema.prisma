@@ -33,3 +33,26 @@ enum OrderStatus {
   FAILED
   CANCELED
 }
+
+// 결제 완료(PAID) 주문에 한해 남길 수 있는 후기. paymentId로 실제 구매를 증명하며,
+// 후기 작성자의 신원(이름/연락처 등)은 별도로 저장하지 않는다.
+model Review {
+  id          String   @id @default(cuid())
+  paymentId   String   @unique
+  productType String
+  rating      Int
+  content     String
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+// 전환 퍼널 분석용 이벤트 로그. 생년월일·생시·성별 등 사주 입력값은 절대 담지 않는다(meta는
+// productType/section 개수 같은 비민감 구조 정보만 담는 JSON 문자열).
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  name      String
+  metaJson  String?
+  createdAt DateTime @default(now())
+
+  @@index([name, createdAt])
+}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
 
-export const metadata: Metadata = { title: "환불정책 | 사주풀이" };
+export const metadata: Metadata = { title: "환불정책 | 사주랩" };
 
 export default function RefundPage() {
   return (
@@ -11,8 +11,8 @@ export default function RefundPage() {
       <section>
         <h2>1. 상품의 특성</h2>
         <p>
-          사주풀이의 유료 상세 리포트는 결제 즉시 이용자에게 개인화된 디지털 콘텐츠(AI 해석
-          텍스트)가 제공되는 <strong>1회성 디지털 콘텐츠</strong>입니다.
+          사주랩의 유료 상세 리포트(사주 상세 분석, 궁합 상세 분석)는 결제 즉시 이용자에게
+          개인화된 디지털 콘텐츠(AI 해석 텍스트)가 제공되는 <strong>1회성 디지털 콘텐츠</strong>입니다.
         </p>
       </section>
 

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { AdminReviewToggle } from "@/components/admin/AdminReviewToggle";
 
 // 매출/주문 데이터는 요청마다 최신 상태여야 하므로 빌드 시점 정적 캐싱을 막는다.
 export const dynamic = "force-dynamic";
@@ -11,10 +12,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default async function AdminPage() {
-  const [orders, paidAgg, statusCounts] = await Promise.all([
+  const [orders, paidAgg, statusCounts, reviews] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amount: true }, _count: true }),
     prisma.order.groupBy({ by: ["status"], _count: true }),
+    prisma.review.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
   ]);
 
   const totalRevenue = paidAgg._sum.amount ?? 0;
@@ -61,6 +63,43 @@ export default async function AdminPage() {
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-foreground-muted">
                   아직 주문이 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className="font-serif text-xl text-accent-gold-soft">후기 관리</h2>
+      <div className="overflow-x-auto rounded-2xl border border-border-subtle">
+        <table className="w-full min-w-[640px] text-left text-sm">
+          <thead className="bg-background-elevated text-foreground-muted">
+            <tr>
+              <th className="px-4 py-3">별점</th>
+              <th className="px-4 py-3">내용</th>
+              <th className="px-4 py-3">상품</th>
+              <th className="px-4 py-3">상태</th>
+              <th className="px-4 py-3">작성일</th>
+              <th className="px-4 py-3">관리</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reviews.map((review) => (
+              <tr key={review.id} className="border-t border-border-subtle">
+                <td className="px-4 py-3">{"★".repeat(review.rating)}</td>
+                <td className="max-w-xs truncate px-4 py-3">{review.content}</td>
+                <td className="px-4 py-3 text-foreground-muted">{review.productType}</td>
+                <td className="px-4 py-3 text-foreground-muted">{review.visible ? "노출" : "숨김"}</td>
+                <td className="px-4 py-3 text-foreground-muted">{review.createdAt.toLocaleString("ko-KR")}</td>
+                <td className="px-4 py-3">
+                  <AdminReviewToggle id={review.id} visible={review.visible} />
+                </td>
+              </tr>
+            ))}
+            {reviews.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center text-foreground-muted">
+                  아직 후기가 없습니다.
                 </td>
               </tr>
             )}

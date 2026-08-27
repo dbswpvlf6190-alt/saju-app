@@ -257,9 +257,9 @@ export function PremiumUnlock({
             <p className="mt-2 text-sm text-foreground-muted">{section.teaser}</p>
           )}
           <p className="mt-3 select-none text-sm leading-relaxed text-foreground-muted/40 blur-[3px]">
-            상세 분석 내용은 결제 후 대운·세운 흐름과 함께 자세히 확인할 수 있어요. 상세 분석 내용은
-            결제 후 대운·세운 흐름과 함께 자세히 확인할 수 있어요.
+            {section.previewSnippet}... 실제 리포트에서는 이 부분을 사주 데이터를 근거로 구체적으로 짚어드리고, 어떻게 하면 좋을지도 함께 안내해요.
           </p>
+          <p className="mt-2 text-xs font-medium text-accent-gold-soft">🔒 전체 {section.title} 분석에서 계속 확인</p>
         </div>
       ))}
 

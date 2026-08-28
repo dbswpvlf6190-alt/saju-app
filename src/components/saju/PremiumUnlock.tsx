@@ -5,6 +5,9 @@ import Link from "next/link";
 import type { PremiumSection, SajuResult } from "@/lib/saju";
 // ResultView.tsx와 같은 이유로 배럴 대신 서브모듈에서 직접 가져온다.
 import { resultToInput } from "@/lib/saju/types";
+import { generateFreeContent } from "@/lib/saju/content";
+import { PillarCard } from "./PillarCard";
+import { WuxingBar } from "./WuxingBar";
 import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
 import {
   PREMIUM_CTA_LABEL,
@@ -207,9 +210,29 @@ export function PremiumUnlock({
   }
 
   if (sections) {
+    const free = generateFreeContent(result);
     return (
       <div className="flex flex-col gap-3">
         <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세</h3>
+
+        {/* 사주 기본 정보(일간·오행비율·4기둥)를 여기서 결정론적으로 한 번만 보여준다.
+            아래 5개 섹션은 각자 이 정보를 처음부터 다시 설명하지 않도록 프롬프트를 바꿔뒀다
+            (interpretSaju.ts) — 5번 반복되던 도입부를 없애서 실제 분석 밀도를 높이기 위함이다. */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
+          <h4 className="text-sm font-medium text-foreground-muted">📜 나의 사주 기본 정보</h4>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <span className="font-serif text-xl text-accent-gold-soft">{free.dayMasterLabel}</span>
+            <span className="text-sm text-foreground-muted">{free.dayMasterMetaphor}</span>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            <PillarCard label="년주" pillar={result.yearPillar} />
+            <PillarCard label="월주" pillar={result.monthPillar} />
+            <PillarCard label="일주" pillar={result.dayPillar} />
+            <PillarCard label="시주" pillar={result.timePillar} />
+          </div>
+          <WuxingBar percent={result.wuxingPercent} />
+        </div>
+
         {premiumSections.map((section) => {
           const text = sections[section.key];
           const isMissing = missingSections.includes(section.key);

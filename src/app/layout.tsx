@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 // Noto Sans/Serif KR은 한글이 폰트의 기본 문자셋이라 "subsets"는 라틴/기타 보충 범위만
@@ -55,7 +56,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="ko"
       className={`${notoSansKR.variable} ${notoSerifKR.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" strategy="afterInteractive" />
+      </body>
     </html>
   );
 }

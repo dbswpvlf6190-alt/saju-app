@@ -13,11 +13,14 @@ import { PremiumUnlock } from "./PremiumUnlock";
 import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
 import { DailyFortuneCard } from "./DailyFortuneCard";
+import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
 
 // 무료로 공개하는 3개 카테고리 + 노출 순서. relationship/yearly는 유료 상세 분석에서만
 // 제공한다(기존 상품 구성 그대로 유지 — 여기서 새 카테고리를 만들지 않는다).
-const FREE_PREVIEW_ORDER = ["wealth", "love", "career"] as const;
+// PremiumUnlock의 잠긴 미리보기 목록(연애·재물·직업·인간관계·올해의 흐름 순)과 앞 3개
+// 순서를 맞춰서, 방금 본 무료 요약이 바로 아래 유료 미리보기로 자연스럽게 이어지게 한다.
+const FREE_PREVIEW_ORDER = ["love", "wealth", "career"] as const;
 const FREE_PREVIEW_EMOJI: Record<(typeof FREE_PREVIEW_ORDER)[number], string> = {
   wealth: "💰",
   love: "❤️",
@@ -29,11 +32,13 @@ export function ResultView({
   result,
   onRestart,
   resumePaymentId,
+  reviews,
 }: {
   name: string;
   result: SajuResult;
   onRestart: () => void;
   resumePaymentId: string | null;
+  reviews: ReviewItem[];
 }) {
   const [isPaid, setIsPaid] = useState(false);
   const free = generateFreeContent(result);
@@ -110,6 +115,13 @@ export function ResultView({
         onUnlockedChange={setIsPaid}
       />
 
+      {/* 실제 이용 후기 — 4,900원 가치·CTA를 막 확인한 시점 바로 다음에 사회적 증거를
+          붙여서, 페이지 맨 아래(구매 판단이 끝난 뒤)에 있던 것보다 설득에 도움이 되게 한다. */}
+      <div className="flex flex-col gap-3">
+        <h3 className="px-1 text-sm font-medium text-foreground-muted">이용 후기</h3>
+        <ReviewList reviews={reviews} />
+      </div>
+
       {/* 여기서부터는 핵심 전환 목표(상세 분석 구매) 뒤에 오는 부가 기능들 — 유료 CTA보다
           눈에 띄지 않게 아래로 내려서 배치한다. */}
       <DailyFortuneCard daily={daily} />
@@ -120,8 +132,6 @@ export function ResultView({
       >
         ❤️ 우리 궁합도 확인해보기
       </Link>
-
-      {!isPaid && <AdSlot />}
 
       <div className="flex flex-col gap-2">
         <ShareButton
@@ -138,6 +148,10 @@ export function ResultView({
           다시 입력하기
         </button>
       </div>
+
+      {/* 광고는 구매·공유·궁합 탐색 등 서비스 자체의 전환 동선을 다 지나간 뒤,
+          정말 마지막에만 노출한다 — 동선 중간에 끼어 이탈을 유도하지 않도록. */}
+      {!isPaid && <AdSlot />}
     </div>
   );
 }

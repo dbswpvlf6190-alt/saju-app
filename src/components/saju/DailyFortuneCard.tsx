@@ -21,7 +21,18 @@ export function DailyFortuneCard({ daily }: { daily: DailyFortuneDetail }) {
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-accent-gold/30 bg-accent-gold/10 p-4">
-      <h3 className="text-sm font-medium text-accent-gold-soft">오늘의 운세 · {daily.dateLabel}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-medium text-accent-gold-soft">🌙 오늘의 간단 운세 · {daily.dateLabel}</h3>
+        <span className="shrink-0 rounded-full bg-background-elevated/60 px-2 py-0.5 text-[10px] text-foreground-muted">
+          일일 운세
+        </span>
+      </div>
+      {/* 위 유료 상세 분석과 카테고리 이름이 겹쳐서 "이미 다 봤다"고 오해하지 않도록,
+          이건 오늘 하루짜리 가벼운 운세라는 걸 읽기 전에 먼저 밝혀둔다. */}
+      <p className="text-xs text-foreground-muted">
+        이건 오늘 하루만 가볍게 보는 운세예요. 사주 전체를 심층 분석한 리포트는 위 상세 분석에서 확인하실 수
+        있어요.
+      </p>
 
       <div className="flex flex-col gap-2">
         {rows.map((row) => (

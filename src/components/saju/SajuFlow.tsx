@@ -6,6 +6,7 @@ import { BirthInfoForm, type BirthInfoFormValues } from "./BirthInfoForm";
 import { ResultView } from "./ResultView";
 import { loadLastBirthInfo, saveLastBirthInfo, type SavedBirthInfo } from "@/lib/revisit/localBirthInfo";
 import { trackEvent } from "@/lib/analytics/track";
+import type { ReviewItem } from "./ReviewList";
 
 const PENDING_KEY = "saju:pendingPurchase";
 
@@ -27,7 +28,7 @@ async function calculateSajuRemote(birthInput: SajuInput): Promise<SajuResult> {
   return data.result as SajuResult;
 }
 
-export function SajuFlow() {
+export function SajuFlow({ reviews }: { reviews: ReviewItem[] }) {
   const [result, setResult] = useState<SajuResult | null>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -149,6 +150,7 @@ export function SajuFlow() {
             result={result}
             onRestart={handleRestart}
             resumePaymentId={resumePaymentId}
+            reviews={reviews}
           />
         </div>
       )}

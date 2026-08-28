@@ -1,4 +1,4 @@
-interface Review {
+export interface ReviewItem {
   id: string;
   rating: number;
   content: string;
@@ -11,7 +11,7 @@ const PRODUCT_LABEL: Record<string, string> = {
   compatibility_report: "궁합 상세 분석",
 };
 
-export function ReviewList({ reviews }: { reviews: Review[] }) {
+export function ReviewList({ reviews }: { reviews: ReviewItem[] }) {
   if (reviews.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border-subtle p-6 text-center text-sm text-foreground-muted">

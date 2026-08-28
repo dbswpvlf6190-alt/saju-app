@@ -9,8 +9,12 @@ import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
 import {
   PREMIUM_CTA_LABEL,
   PREMIUM_DELIVERY_NOTE,
+  PREMIUM_DETAILS_STEP_INTRO,
+  PREMIUM_PREVIEW_VALUE_LINE,
+  PREMIUM_SECTION_INTRO,
   PREMIUM_TRUST_ITEMS,
   PREMIUM_VALUE_CHECKLIST,
+  PREMIUM_VALUE_DETAIL,
   PREMIUM_VALUE_HEADLINE,
   PREMIUM_VALUE_SUBHEAD,
 } from "@/lib/payment/ctaCopy";
@@ -20,10 +24,6 @@ import { ReviewForm } from "./ReviewForm";
 type Status = "locked" | "processing" | "unlocked" | "error";
 
 const PENDING_KEY = "saju:pendingPurchase";
-
-// 이 세 항목은 ResultView.tsx의 "무료 재물운/연애운/직업운" 구간에서 이미 같은 teaser
-// 문장을 열어서 보여준 뒤라, 잠금 카드에서 또 반복하면 어색해서 여기서는 생략한다.
-const ALREADY_SHOWN_FREE_KEYS = new Set(["wealth", "love", "career"]);
 
 export function PremiumUnlock({
   result,
@@ -48,6 +48,13 @@ export function PremiumUnlock({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState(name);
   const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  // 상품 가치 + CTA를 먼저 보여주고, 클릭해서 구매 의사를 밝힌 뒤에야 이름·이메일·휴대폰
+  // 입력폼을 보여주기 위한 2단계 흐름. 결제 실패로 되돌아와도 입력폼은 유지해야 하므로
+  // 여기서 "details"로 넘어간 뒤에는 "intro"로 되돌리지 않는다. 모바일 결제창 리디렉션
+  // 복귀(resumePaymentId)인 경우는 이미 정보를 다 입력하고 왔던 것이라 처음부터 details로 둔다.
+  const [formStep, setFormStep] = useState<"intro" | "details">(() =>
+    resumePaymentId ? "details" : "intro",
+  );
 
   useEffect(() => {
     // 결제 복귀(resumePaymentId)로 바로 처리 상태에 들어가는 경우가 아니라면, 잠금
@@ -244,24 +251,27 @@ export function PremiumUnlock({
   return (
     <div className="flex flex-col gap-3">
       <h3 className="px-1 text-sm font-medium text-foreground-muted">🔒 상세 분석 미리보기</h3>
-      {premiumSections.map((section) => (
-        <div
-          key={section.key}
-          className="relative overflow-hidden rounded-2xl border border-border-subtle bg-background-card/70 p-4"
-        >
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium text-foreground">{section.title}</h4>
-            <span className="text-xs text-accent-gold-soft">🔒 잠금</span>
+      <p className="px-1 text-xs text-foreground-muted">{PREMIUM_SECTION_INTRO}</p>
+      {/* 제목만 나열하면 실제로 뭘 얼마나 받는지 와닿지 않는다는 지적에 따라, 카드 목록
+          위에 구체적인 항목·분량을 먼저 보여준다(과장 없이 실제 생성 규격 그대로). */}
+      <p className="px-1 text-xs font-medium text-accent-gold-soft">{PREMIUM_PREVIEW_VALUE_LINE}</p>
+
+      {/* 카드 하나당 제목 + 블러 처리된 한 줄 미리보기만 보여주는 압축 리스트.
+          예전엔 카드마다 티저 문단 + 블러 문단 + "계속 확인" 문구가 반복돼 5개를 다 보려면
+          스크롤이 상당히 길었다 — 같은 안내 문구를 위 한 줄로 합치고 카드 자체를 줄였다. */}
+      <div className="flex flex-col divide-y divide-border-subtle overflow-hidden rounded-2xl border border-border-subtle bg-background-card/70">
+        {premiumSections.map((section) => (
+          <div key={section.key} className="flex items-center gap-3 px-4 py-3">
+            <div className="min-w-0 flex-1">
+              <span className="text-sm font-medium text-foreground">{section.title}</span>
+              <p className="mt-0.5 truncate select-none text-xs leading-relaxed text-foreground-muted/40 blur-[2.5px]">
+                {section.previewSnippet}
+              </p>
+            </div>
+            <span className="shrink-0 text-xs font-medium text-accent-gold-soft">🔒</span>
           </div>
-          {!ALREADY_SHOWN_FREE_KEYS.has(section.key) && (
-            <p className="mt-2 text-sm text-foreground-muted">{section.teaser}</p>
-          )}
-          <p className="mt-3 select-none text-sm leading-relaxed text-foreground-muted/40 blur-[3px]">
-            {section.previewSnippet}... 실제 리포트에서는 이 부분을 사주 데이터를 근거로 구체적으로 짚어드리고, 어떻게 하면 좋을지도 함께 안내해요.
-          </p>
-          <p className="mt-2 text-xs font-medium text-accent-gold-soft">🔒 전체 {section.title} 분석에서 계속 확인</p>
-        </div>
-      ))}
+        ))}
+      </div>
 
       <div className="flex flex-col gap-1.5 rounded-2xl border border-accent-gold/40 bg-accent-gold/10 p-4 text-center">
         <h4 className="font-serif text-lg text-accent-gold-soft">{PREMIUM_VALUE_HEADLINE}</h4>
@@ -271,101 +281,136 @@ export function PremiumUnlock({
             <li key={item}>✓ {item}</li>
           ))}
         </ul>
+        <p className="text-xs text-foreground-muted">{PREMIUM_VALUE_DETAIL}</p>
         <p className="mt-3 text-2xl font-semibold text-accent-gold-soft">
           {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원
         </p>
         <p className="text-xs text-foreground-muted">{PREMIUM_DELIVERY_NOTE}</p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="px-1 text-sm text-foreground-muted">결제 수단</span>
-        <div className="grid grid-cols-2 gap-2">
-          {([
-            ["CARD", "카드"],
-            ["EASY_PAY", "카카오페이"],
-          ] as const).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setPayMethod(value)}
-              className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
-                payMethod === value
-                  ? "border-accent-gold bg-accent-gold/15 text-accent-gold-soft"
-                  : "border-border-subtle text-foreground-muted"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      {formStep === "intro" ? (
+        // 1단계: 가치 제안 + CTA만 먼저 보여준다. 구매 의사를 밝히기 전에는
+        // 이름·이메일·휴대폰 입력란을 아예 노출하지 않는다.
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("premium_cta_click", { productType: "premium_report" });
+              setFormStep("details");
+            }}
+            className="min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
+          >
+            {PREMIUM_CTA_LABEL}
+          </button>
+          <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">
+            <p>{PREMIUM_TRUST_ITEMS.map((item) => `✓ ${item}`).join("  ·  ")}</p>
+            <Link href="/refund" className="underline underline-offset-4 hover:text-accent-gold-soft">
+              환불정책 확인하기
+            </Link>
+          </div>
         </div>
-      </div>
+      ) : (
+        // 2단계: CTA를 눌러 구매 의사를 밝힌 뒤에만 결제 정보 입력란이 나타난다.
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-sm text-foreground-muted">{PREMIUM_DETAILS_STEP_INTRO}</span>
+            <button
+              type="button"
+              onClick={() => setFormStep("intro")}
+              disabled={status === "processing"}
+              className="shrink-0 text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft disabled:opacity-50"
+            >
+              ‹ 이전
+            </button>
+          </div>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="purchase-name" className="px-1 text-sm text-foreground-muted">
-          결제자 이름
-        </label>
-        <input
-          id="purchase-name"
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          placeholder="홍길동"
-          className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
-        />
-      </div>
+          <div className="flex flex-col gap-2">
+            <span className="px-1 text-sm text-foreground-muted">결제 수단</span>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                ["CARD", "카드"],
+                ["EASY_PAY", "카카오페이"],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setPayMethod(value)}
+                  className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
+                    payMethod === value
+                      ? "border-accent-gold bg-accent-gold/15 text-accent-gold-soft"
+                      : "border-border-subtle text-foreground-muted"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="purchase-email" className="px-1 text-sm text-foreground-muted">
-          결제 확인 메일을 받을 이메일
-        </label>
-        <input
-          id="purchase-email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
-        />
-      </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="purchase-name" className="px-1 text-sm text-foreground-muted">
+              결제자 이름
+            </label>
+            <input
+              id="purchase-name"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="홍길동"
+              className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
+            />
+          </div>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="purchase-phone" className="px-1 text-sm text-foreground-muted">
-          휴대폰 번호
-        </label>
-        <input
-          id="purchase-phone"
-          type="tel"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          placeholder="01012345678"
-          className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
-        />
-      </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="purchase-email" className="px-1 text-sm text-foreground-muted">
+              결제 확인 메일을 받을 이메일
+            </label>
+            <input
+              id="purchase-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
+            />
+          </div>
 
-      {errorMessage && (
-        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
-          {errorMessage}
-        </p>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="purchase-phone" className="px-1 text-sm text-foreground-muted">
+              휴대폰 번호
+            </label>
+            <input
+              id="purchase-phone"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="01012345678"
+              className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
+            />
+          </div>
+
+          {errorMessage && (
+            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+              {errorMessage}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={() => void handlePurchase()}
+            disabled={status === "processing"}
+            className="mt-1 min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {status === "processing" ? "처리 중..." : PREMIUM_CTA_LABEL}
+          </button>
+
+          <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">
+            <Link href="/refund" className="underline underline-offset-4 hover:text-accent-gold-soft">
+              환불정책 확인하기
+            </Link>
+          </div>
+        </div>
       )}
-
-      <button
-        type="button"
-        onClick={() => {
-          trackEvent("premium_cta_click", { productType: "premium_report" });
-          void handlePurchase();
-        }}
-        disabled={status === "processing"}
-        className="mt-1 min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
-      >
-        {status === "processing" ? "처리 중..." : PREMIUM_CTA_LABEL}
-      </button>
-
-      <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">
-        <p>{PREMIUM_TRUST_ITEMS.map((item) => `✓ ${item}`).join("  ·  ")}</p>
-        <Link href="/refund" className="underline underline-offset-4 hover:text-accent-gold-soft">
-          환불정책 확인하기
-        </Link>
-      </div>
     </div>
   );
 }

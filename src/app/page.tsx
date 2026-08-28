@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { SajuFlow } from "@/components/saju/SajuFlow";
 import { SiteFooter } from "@/components/saju/SiteFooter";
-import { ReviewList } from "@/components/saju/ReviewList";
 import { prisma } from "@/lib/db/prisma";
 
 // 후기 목록이 새로 등록돼도 반영되도록 60초 주기로 재생성한다(완전 동적으로 매번 DB를
@@ -57,13 +56,10 @@ export default async function Home() {
       </main>
 
       <div id="saju-form" className="mt-10 w-full max-w-md scroll-mt-10">
-        <SajuFlow />
+        {/* 후기는 결과 화면 안에서 4,900원 상세 분석 가치·CTA 바로 다음(구매 판단 시점)에
+            노출한다 — SajuFlow → ResultView로 그대로 내려보내고 페이지 레벨에서는 더 렌더링하지 않는다. */}
+        <SajuFlow reviews={reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }))} />
       </div>
-
-      <section className="mt-4 flex w-full max-w-md flex-col gap-3">
-        <h2 className="px-1 text-sm font-medium text-foreground-muted">이용 후기</h2>
-        <ReviewList reviews={reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }))} />
-      </section>
 
       <SiteFooter />
     </div>

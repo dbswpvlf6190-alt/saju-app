@@ -69,6 +69,8 @@ export function CompatibilityResultView({
         <ShareButton
           title="사주랩 궁합 결과"
           text={`우리 궁합은 ${free.overallScore}점, "${free.headline}"래요. 무료로 우리 궁합도 확인해보세요 🔮`}
+          ctaLabel="우리 궁합도 확인하기"
+          card={{ variant: "compat", score: free.overallScore, sub: free.headline }}
         />
         <button
           type="button"

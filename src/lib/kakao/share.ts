@@ -41,10 +41,15 @@ export function shareToKakao({
   title,
   description,
   url,
+  imageUrl,
+  buttonLabel = "무료로 확인하기",
 }: {
   title: string;
   description: string;
   url: string;
+  /** 결과별 맞춤 카드 이미지 URL. 안 넘기면 사이트 기본 OG 이미지를 쓴다. */
+  imageUrl?: string;
+  buttonLabel?: string;
 }): boolean {
   const kakao = getKakaoSdk();
   if (!kakao) return false;
@@ -54,10 +59,10 @@ export function shareToKakao({
     content: {
       title,
       description,
-      imageUrl: `${new URL(url).origin}/opengraph-image`,
+      imageUrl: imageUrl ?? `${new URL(url).origin}/opengraph-image`,
       link: { mobileWebUrl: url, webUrl: url },
     },
-    buttons: [{ title: "무료로 확인하기", link: { mobileWebUrl: url, webUrl: url } }],
+    buttons: [{ title: buttonLabel, link: { mobileWebUrl: url, webUrl: url } }],
   });
   return true;
 }

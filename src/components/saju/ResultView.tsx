@@ -127,6 +127,8 @@ export function ResultView({
         <ShareButton
           title="사주랩"
           text={`나의 사주는 ${free.dayMasterLabel}, "${free.dayMasterMetaphor}"래요. 무료로 내 사주도 확인해보세요 🔮`}
+          ctaLabel="무료로 내 사주 확인하기"
+          card={{ variant: "saju", label: free.dayMasterLabel, sub: free.dayMasterMetaphor }}
         />
         <button
           type="button"

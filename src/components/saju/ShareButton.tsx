@@ -10,19 +10,27 @@ import { shareToKakao } from "@/lib/kakao/share";
 export function ShareButton({ title, text }: { title: string; text: string }) {
   const [copied, setCopied] = useState(false);
 
+  // 공유 링크에 방법별 ref를 붙여서, 랜딩 페이지에서 어떤 공유 경로로 새 방문자가
+  // 들어왔는지 구분할 수 있게 한다(공유 기능이 실제 유입을 만드는지 확인하는 용도).
+  function buildShareUrl(method: "kakao" | "native" | "copy") {
+    if (typeof window === "undefined") return "";
+    const url = new URL(window.location.origin);
+    url.searchParams.set("ref", `share_${method}`);
+    return url.toString();
+  }
+
   async function handleShare() {
     trackEvent("share_click", {});
-    const shareUrl = typeof window !== "undefined" ? window.location.origin : "";
 
     // 카카오톡이 국내 공유 채널 중 압도적으로 많이 쓰여서 우선 시도한다.
     // SDK 로드 실패(광고차단 등)나 초기화 실패 시에만 기존 방식으로 폴백한다.
-    if (shareToKakao({ title, description: text, url: shareUrl })) {
+    if (shareToKakao({ title, description: text, url: buildShareUrl("kakao") })) {
       return;
     }
 
     if (navigator.share) {
       try {
-        await navigator.share({ title, text, url: shareUrl });
+        await navigator.share({ title, text, url: buildShareUrl("native") });
       } catch {
         // 사용자가 공유를 취소한 경우 등은 별도 처리 없이 조용히 무시한다.
       }
@@ -30,7 +38,7 @@ export function ShareButton({ title, text }: { title: string; text: string }) {
     }
 
     try {
-      await navigator.clipboard.writeText(`${text} ${shareUrl}`);
+      await navigator.clipboard.writeText(`${text} ${buildShareUrl("copy")}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {

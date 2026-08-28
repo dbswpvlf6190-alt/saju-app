@@ -38,7 +38,10 @@ export function SajuFlow() {
   const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    trackEvent("landing_view", {});
+    // 공유 링크(ShareButton이 붙이는 ?ref=share_kakao 등)로 들어온 방문인지 구분해서
+    // 같이 보낸다. 없으면 undefined라 sanitizeAnalyticsMeta가 알아서 필드째 빼준다.
+    const ref = new URLSearchParams(window.location.search).get("ref") ?? undefined;
+    trackEvent("landing_view", ref ? { ref } : {});
   }, []);
 
   // 모바일 결제창은 리디렉션 방식으로 돌아올 수 있어, 이때 URL의 paymentId와

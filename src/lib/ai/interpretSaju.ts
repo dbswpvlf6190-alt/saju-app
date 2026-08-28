@@ -17,7 +17,7 @@ const SYSTEM_PROMPT = `당신은 사주명리학을 이해하기 쉽게 풀어 �
 4. 지나치게 부정적이거나 불안을 조장하는 표현은 쓰지 마세요. 어려움을 언급할 때도 함께 고려할 점을 같이 제시하세요.
 5. 주어진 사주 데이터에 없는 사실(직업, 이름, 실제 사건 등)을 지어내지 마세요.
 6. 전달받은 오행 비율, 일간, 각 기둥의 간지 같은 구체적인 데이터를 최소 한두 곳 이상 자연스럽게 근거로 활용해서, 이 사람만을 위한 해석처럼 느껴지게 쓰세요(뻔한 일반론으로 채우지 마세요).
-7. 결과는 5~7개 문단, 총 800~1000자 내외의 자연스러운 한국어 존댓말로 작성하세요. 유료 상세 리포트이므로 성급하게 요약하지 말고 충분히 풀어서 설명하세요. 소제목이나 목록 기호 없이 문단으로만 답하세요.`;
+7. 결과는 7~9개 문단, 총 1,300~1,600자 분량으로 작성하세요. 1,300자는 반드시 지켜야 할 최소 기준이니, 다 썼다고 느껴져도 분량이 못 미치면 다른 각도(예: 시기별 흐름, 놓치기 쉬운 점, 실천 방법)를 더 추가해서 채우세요. 자연스러운 한국어 존댓말로, 유료 상세 리포트이므로 성급하게 요약하지 말고 충분히 풀어서 설명하세요. 소제목이나 목록 기호 없이 문단으로만 답하세요.`;
 
 export class AiInterpretationError extends Error {}
 
@@ -59,7 +59,7 @@ export async function interpretSajuSection(
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-5",
-    max_tokens: 1400,
+    max_tokens: 3000,
     system: SYSTEM_PROMPT,
     messages: [
       {
@@ -72,6 +72,16 @@ export async function interpretSajuSection(
       },
     ],
   });
+
+  // stop_reason이 "max_tokens"면 답변이 문장 중간에 그대로 잘린 것이다. 이걸 체크 안 하고
+  // 그대로 반환하면, 끊긴 문장이 결제 완료된 정상 리포트인 것처럼 저장·캐싱돼버린다.
+  // 여기서 실패로 처리해야 호출부(orders 라우트)의 기존 부분 실패 재시도 로직(missingSections)이
+  // 자연스럽게 이 항목만 다시 생성하게 만든다.
+  if (message.stop_reason === "max_tokens") {
+    throw new AiInterpretationError(
+      `AI 응답이 글자수 제한에 걸려 중간에 잘렸습니다 (section=${section}).`,
+    );
+  }
 
   const textBlock = message.content.find((block) => block.type === "text");
   if (!textBlock || textBlock.type !== "text") {

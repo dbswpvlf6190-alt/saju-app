@@ -63,7 +63,7 @@ export async function interpretCompatibilitySection(
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-5",
-    max_tokens: 1200,
+    max_tokens: 1600,
     system: SYSTEM_PROMPT,
     messages: [
       {
@@ -72,6 +72,14 @@ export async function interpretCompatibilitySection(
       },
     ],
   });
+
+  // interpretSaju.ts와 동일한 이유로, 글자수 제한에 걸려 문장이 잘린 응답을 성공으로
+  // 취급하지 않는다 — 실패 처리해서 호출부의 부분 재시도 로직이 다시 생성하게 한다.
+  if (message.stop_reason === "max_tokens") {
+    throw new AiInterpretationError(
+      `AI 응답이 글자수 제한에 걸려 중간에 잘렸습니다 (section=${section}).`,
+    );
+  }
 
   const textBlock = message.content.find((block) => block.type === "text");
   if (!textBlock || textBlock.type !== "text") {

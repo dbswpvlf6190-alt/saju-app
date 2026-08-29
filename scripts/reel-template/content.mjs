@@ -7,12 +7,28 @@ export const CTA_BUTTON = "프로필 링크에서 무료 확인 🔮";
 
 export const REELS = [
   {
+    order: 0,
+    id: "R25",
+    category: "sangsik",
+    categoryLabel: "사주상식",
+    title: "사주팔자란 정확히 무엇인가",
+    hook: ["사주가 미신이라고", "생각했다면,", "이거 보고", "다시 생각해보세요"],
+    info: {
+      pre: "사주는 태어난 연월일시를",
+      emphasis: "여덟 글자로 환산",
+      post: "해서 보는 분석이에요",
+      sub: ["그 여덟 글자의 조합과 균형을", "보고 성향과 흐름을 해석해요"],
+    },
+    curiosity: ["원리를 알고 나면", "훨씬 재밌게 볼 수 있어요"],
+    screenshotCaption: "내 여덟 글자, 이렇게 바로 나와요",
+  },
+  {
     order: 1,
     id: "R01",
     category: "jaemul",
     categoryLabel: "재물운",
     title: "돈이 안 모이는 이유",
-    hook: ["월급 들어오자마자", "텅장 되는 사람들,", "이유가 있어요"],
+    hook: ["월급 들어오고 3일 만에", "텅장이면,", "의지 문제", "아닐 수도 있어요"],
     info: {
       pre: "사주에서 '식신'이나 '상관'이 강하면",
       emphasis: "소비에서 즐거움",
@@ -28,7 +44,7 @@ export const REELS = [
     category: "jaemul",
     categoryLabel: "재물운",
     title: "편재가 많은 사람 특징",
-    hook: ["이 세 가지 다 해당되면,", "당신은 편재형일지도"],
+    hook: ["부수입 아이디어만", "3년째 떠올리고", "실행은 안 하는", "사람 여기요"],
     info: {
       pre: "편재가 많은 사람은",
       emphasis: "부수입 · 아이디어 · 큰 씀씀이",
@@ -44,7 +60,7 @@ export const REELS = [
     category: "jaemul",
     categoryLabel: "재물운",
     title: "부자 사주는 따로 있다?",
-    hook: ["부자 사주 있냐고 물어보면,", "저는 항상 이렇게 답해요"],
+    hook: ["부자 사주 있냐는", "질문에, 저는 항상", "이렇게 답해요"],
     info: {
       pre: "재물운이 좋다는 건",
       emphasis: "돈을 대하는 감각과 타이밍",
@@ -60,7 +76,7 @@ export const REELS = [
     category: "yeonae",
     categoryLabel: "연애운",
     title: "썸 탈 때 눈치 없는 사주",
-    hook: ["썸 타는데 계속 헛다리 짚는 사람,", "이유가 사주에 있을 수도"],
+    hook: ["썸 탈 때마다", "타이밍 놓치는 사람,", "사실 이유가 있어요"],
     info: {
       pre: "'관성'이 약하면",
       emphasis: "상대 신호를 캐치",
@@ -76,7 +92,7 @@ export const REELS = [
     category: "yeonae",
     categoryLabel: "연애운",
     title: "표현 서툰 사람 vs 직진형",
-    hook: ["좋아하는데 티도 못 내는 사람,", "사주에 이유가 있대요"],
+    hook: ["좋아하면서", "표현 못 하는 사람,", "사주에 다 써 있어요"],
     info: {
       pre: "태어난 날의 천간(일간)에 따라",
       emphasis: "감정 표현 방식",
@@ -92,7 +108,7 @@ export const REELS = [
     category: "jigeop",
     categoryLabel: "직업운",
     title: "조직생활 잘 맞는 사주",
-    hook: ["회사 체질 아니라는 말,", "사주로도 설명돼요"],
+    hook: ["회사 체질 아니라는", "말,", "근거 없는", "핑계가 아니었어요"],
     info: {
       pre: "'관성'이 잘 자리잡고 있으면",
       emphasis: "규칙과 위계 안에서",
@@ -108,7 +124,7 @@ export const REELS = [
     category: "jigeop",
     categoryLabel: "직업운",
     title: "프리랜서 체질 특징",
-    hook: ["혼자 일하는 게 편한 사람들,", "사주에 이유가 있어요"],
+    hook: ["혼자 일하는 게", "편한 사람,", "사주에 이유가", "따로 있어요"],
     info: {
       pre: "식신·상관이 강하면 자기표현 욕구가 크고,",
       emphasis: "관성이 약해 자유를 선호",
@@ -124,7 +140,7 @@ export const REELS = [
     category: "saengnyeon",
     categoryLabel: "생년월일 운세",
     title: "생시 몰라도 되는 이유",
-    hook: ["태어난 시간 모른다고", "사주 못 본다는 거,", "사실 아니에요"],
+    hook: ["생시 몰라서", "사주 못 본다는 말,", "반은 틀렸어요"],
     info: {
       pre: "생시를 모르면 8글자 중",
       emphasis: "2글자(시주)만 빠질 뿐",
@@ -140,7 +156,7 @@ export const REELS = [
     category: "saengnyeon",
     categoryLabel: "생년월일 운세",
     title: "음력 양력 헷갈리는 이유",
-    hook: ["내 진짜 생일이 음력인지 양력인지", "헷갈리는 분들 많죠"],
+    hook: ["음력이든 양력이든,", "사실", "하나도 안 중요해요"],
     info: {
       pre: "사주는 태양의 절기를 기준으로 계산돼서",
       emphasis: "음력이든 양력이든",

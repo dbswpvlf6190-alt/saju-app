@@ -8,6 +8,7 @@ import { resultToInput } from "@/lib/saju/types";
 import { generateFreeContent } from "@/lib/saju/content";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
+import { ShareButton } from "./ShareButton";
 import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
 import {
   PREMIUM_CTA_LABEL,
@@ -265,6 +266,18 @@ export function PremiumUnlock({
             </button>
           </>
         )}
+
+        {/* 구매 후 공유. 결제까지 마친 시점이라 서비스에 대한 신뢰가 가장 높은 순간이고,
+            공유 카드에는 무료 결과와 동일한 요약값(일간 별명·비유)만 담아 유료 리포트
+            본문은 절대 노출하지 않는다. */}
+        <ShareButton
+          title="사주랩"
+          text="나의 사주 심층 분석, 생각보다 자세해서 놀랐어요. 무료로 내 사주도 먼저 확인해보세요 🔮"
+          shareLabel="💬 이 정도로 자세할 줄 몰랐어요 — 친구한테도 알려주기"
+          ctaLabel="무료로 내 사주 확인하기"
+          card={{ variant: "saju", label: free.dayMasterLabel, sub: free.dayMasterMetaphor }}
+          source="premium_unlocked"
+        />
 
         {activePaymentId && <ReviewForm paymentId={activePaymentId} />}
       </div>

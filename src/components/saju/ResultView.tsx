@@ -136,9 +136,11 @@ export function ResultView({
       <div className="flex flex-col gap-2">
         <ShareButton
           title="사주랩"
-          text={`나의 사주는 ${free.dayMasterLabel}, "${free.dayMasterMetaphor}"래요. 무료로 내 사주도 확인해보세요 🔮`}
+          text={`나의 사주는 ${free.dayMasterLabel}래요. 근데 이게 무슨 뜻인지 알아? 🔮 (30초, 무료로 확인)`}
+          shareLabel="💬 내 사주, 친구는 뭐라고 나올까?"
           ctaLabel="무료로 내 사주 확인하기"
           card={{ variant: "saju", label: free.dayMasterLabel, sub: free.dayMasterMetaphor }}
+          source="free_result"
         />
         <button
           type="button"

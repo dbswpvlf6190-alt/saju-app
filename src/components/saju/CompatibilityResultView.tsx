@@ -68,9 +68,11 @@ export function CompatibilityResultView({
       <div className="flex flex-col gap-2">
         <ShareButton
           title="사주랩 궁합 결과"
-          text={`우리 궁합은 ${free.overallScore}점, "${free.headline}"래요. 무료로 우리 궁합도 확인해보세요 🔮`}
+          text={`우리 궁합 ${free.overallScore}점 나왔는데, 이 점수가 왜 나왔는지 궁금하지 않아? 🔮`}
+          shareLabel="💬 이 결과 그 사람한테 보내기"
           ctaLabel="우리 궁합도 확인하기"
-          card={{ variant: "compat", score: free.overallScore, sub: free.headline }}
+          card={{ variant: "compat", score: free.overallScore, sub: "이 점수가 나온 진짜 이유는 따로 있어요" }}
+          source="compat_free"
         />
         <button
           type="button"

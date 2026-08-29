@@ -17,13 +17,21 @@ export function ShareButton({
   title,
   text,
   ctaLabel = "무료로 확인하기",
+  shareLabel = "💬 카카오톡으로 공유하기",
   card,
+  source,
 }: {
   title: string;
   text: string;
   /** 카카오 공유 카드의 버튼 문구. 사주/궁합 맥락에 맞게 호출부에서 지정한다. */
   ctaLabel?: string;
+  /** 화면에 보이는 공유 버튼 자체의 문구. 위치(무료 결과/궁합/구매 후)마다 다른 동기부여
+   * 카피를 쓰기 위해 호출부에서 지정한다 — 예: "친구는 뭐라고 나올까?", "그 사람한테 보내기". */
+  shareLabel?: string;
   card?: ShareCard;
+  /** share_click 이벤트에 같이 기록할 위치 식별자(예: "free_result"/"compat_free"/"premium_unlocked").
+   * 어느 화면의 공유 버튼이 실제 유입을 만드는지 구분하기 위한 용도. */
+  source?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -49,7 +57,7 @@ export function ShareButton({
   }
 
   async function handleShare() {
-    trackEvent("share_click", {});
+    trackEvent("share_click", source ? { source } : {});
 
     // 카카오톡이 국내 공유 채널 중 압도적으로 많이 쓰여서 우선 시도한다.
     // SDK 로드 실패(광고차단 등)나 초기화 실패 시에만 기존 방식으로 폴백한다.
@@ -89,7 +97,7 @@ export function ShareButton({
       onClick={handleShare}
       className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
     >
-      {copied ? "링크를 복사했어요" : "💬 카카오톡으로 공유하기"}
+      {copied ? "링크를 복사했어요" : shareLabel}
     </button>
   );
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { fetchPortOnePayment, PortOneVerificationError } from "@/lib/payment/verify";
 import { rateLimit } from "@/lib/security/rateLimit";
+import { sendPaymentKakaoNotification } from "@/lib/kakao/notify";
 
 /**
  * 클라이언트가 PortOne 결제창에서 성공 응답을 받은 뒤 호출한다.
@@ -60,6 +61,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
       where: { paymentId },
       data: { status: "PAID", paidAt: new Date() },
     });
+
+    // 카카오톡 알림은 결제 완료 자체와 무관한 부가 기능이므로, 실패해도 응답에는 영향을 주지 않는다.
+    try {
+      await sendPaymentKakaoNotification(updated);
+    } catch (e) {
+      console.error(`카카오 결제 알림 전송 실패 (paymentId=${paymentId}):`, e);
+    }
 
     return NextResponse.json({ status: updated.status });
   } catch (e) {

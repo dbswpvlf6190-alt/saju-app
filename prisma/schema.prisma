@@ -46,6 +46,16 @@ model Review {
   createdAt   DateTime @default(now())
 }
 
+// 결제 발생 시 카카오톡 "나에게 보내기"로 알림을 보내기 위한 OAuth 토큰. 서버리스 환경(Vercel)은
+// 로컬 파일에 상태를 남길 수 없어, 갱신될 때마다 이 단일 행을 갱신하는 방식으로 토큰을 유지한다.
+model KakaoToken {
+  id           String   @id @default("default")
+  accessToken  String
+  refreshToken String
+  obtainedAt   DateTime @default(now())
+  expiresIn    Int
+}
+
 // 전환 퍼널 분석용 이벤트 로그. 생년월일·생시·성별 등 사주 입력값은 절대 담지 않는다(meta는
 // productType/section 개수 같은 비민감 구조 정보만 담는 JSON 문자열).
 model AnalyticsEvent {

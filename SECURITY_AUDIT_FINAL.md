@@ -9,7 +9,7 @@
 | 🟠 High → **패치 완료** | GET `/api/orders/[paymentId]` — paymentId만으로 제3자가 유료 리포트 열람 가능 | ✅ 지난 세션에서 이미 수정·테스트·배포 완료 |
 | 🟠 High → **패치 완료** | 궁합 상대방(제3자) 원본 생년월일 장기 보관 | ✅ 지난 세션에서 90일 자동 파기로 수정·테스트·배포 완료 |
 | 🟡 Medium → **패치 완료** | POST `/api/orders/[paymentId]/complete`에 접근 통제 없음 (상태 정보 노출 + 불필요한 재검증 유발 가능) | ✅ 수정·테스트·배포 완료 (아래 참고) |
-| 🟡 Medium | 보안 헤더 전무 (`X-Frame-Options`/CSP/`Referrer-Policy` 등) — 클릭재킹 방어 없음 | 미수정 |
+| 🟡 Medium → **패치 완료** | 보안 헤더 전무 (`X-Frame-Options`/CSP/`Referrer-Policy` 등) — 클릭재킹 방어 없음 | ✅ 수정·테스트·배포 완료 |
 | 🟢 Low | 후기 등록 API가 paymentId 소유 여부를 쿠키로 재확인하지 않음(IDOR 유사 패턴) | 미수정 |
 | 🟢 Low | Rate limit이 서버 메모리 기반이라 다중 인스턴스·재배포 시 무력화 | 미수정(기존 주석에 이미 명시된 한계) |
 | 🟢 Low | Admin 세션 로그아웃 버튼 부재(8시간 자동 만료로 완화됨) | 미수정 |
@@ -82,6 +82,8 @@
 - 브라우저 자체 기본값(`Referrer-Policy: strict-origin-when-cross-origin`)이 어느 정도 완화해주지만, 명시적으로 설정하는 게 안전합니다.
 
 **수정 방법(제안)**: `next.config.ts`에 `headers()` 함수를 추가해 최소한 `X-Frame-Options: DENY`(또는 CSP `frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`을 전역 적용합니다.
+
+**(추가 업데이트, 같은 날 수정됨)** 위 3개 헤더를 `next.config.ts:headers()`로 전체 라우트(`/(.*)`)에 적용했습니다. PortOne 결제창은 SDK가 PortOne 자체 도메인에서 여는 UI라 우리 응답 헤더와 무관하고, Kakao 공유 SDK는 `<script>` 태그 로드일 뿐이라 `X-Frame-Options`의 영향을 받지 않습니다 — 실제로 로컬에서 홈페이지 로드 후 `window.Kakao`가 정상 로드됨을 확인했고, 프로덕션 배포 후 실제 응답 헤더(`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`)가 정확히 내려오는 것도 확인했습니다. CSP는 Kakao/PortOne/폰트 등 여러 외부 도메인을 정교하게 허용목록화해야 하는 더 큰 변경이라 이번 "최소한의 클릭재킹 방어" 범위에서는 제외했습니다.
 
 ## 9. 입력값 검증 — 양호
 - 사주 계산 입력(연/월/일/시/분/윤달/자시 처리 등)에 대해 서버 단에서 촘촘한 범위 검증이 이미 있습니다(`src/lib/saju/engine.ts:32-103`, 연도 1900~2100, 월 1~12, 일 실제 존재 여부, 시 0~23, 분 0~59 등 전부 확인).

@@ -141,6 +141,21 @@ export const COMPATIBILITY_SECTION_KEYS: CompatibilitySectionKey[] = [
   "overall",
 ];
 
+/** Order.aiResultJson에 저장되는 궁합 리포트 캐시 형태. scores를 sections와 함께 캐시해둬야,
+ * 생성이 끝난 뒤에는 재열람 시 원본 생년월일(birthInputJson)을 다시 읽지 않아도 된다 —
+ * 이게 있어야 상대방 원본 생년월일을 보관기간 이후 안전하게 파기할 수 있다. */
+export interface CompatibilityReportCache {
+  sections: Partial<Record<CompatibilitySectionKey, string>>;
+  scores: CompatibilityScores;
+}
+
+export function isCompatibilityReportComplete(
+  cache: CompatibilityReportCache | null,
+): cache is CompatibilityReportCache {
+  if (!cache) return false;
+  return COMPATIBILITY_SECTION_KEYS.every((key) => typeof cache.sections[key] === "string" && cache.sections[key]);
+}
+
 export function getCompatibilitySections(free: FreeCompatibility): CompatibilitySection[] {
   return COMPATIBILITY_SECTION_KEYS.map((key) => ({
     key,

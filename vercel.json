@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/internal/purge-partner-data",
+      "schedule": "0 18 * * *"
+    }
+  ]
+}

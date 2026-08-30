@@ -4,6 +4,7 @@ import { calculateCompatibilityScores, type CompatibilitySectionKey } from "@/li
 import { prisma } from "@/lib/db/prisma";
 import { AiInterpretationError, interpretSajuSection } from "@/lib/ai/interpretSaju";
 import { interpretCompatibilitySection } from "@/lib/ai/interpretCompatibility";
+import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 
 const PREMIUM_SECTION_KEYS: PremiumSectionKey[] = ["love", "wealth", "career", "relationship", "yearly"];
 const COMPATIBILITY_SECTION_KEYS: CompatibilitySectionKey[] = [
@@ -26,13 +27,20 @@ const COMPATIBILITY_SECTION_KEYS: CompatibilitySectionKey[] = [
  * 다음 조회 때는 실패했던 항목만 다시 시도한다. premium_report/compatibility_report 둘 다
  * 이 로직을 공유하고, 항목별 AI 호출 함수만 상품 타입에 따라 다르게 쓴다.
  */
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ paymentId: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ paymentId: string }> }) {
   const { paymentId } = await params;
 
   try {
     const order = await prisma.order.findUnique({ where: { paymentId } });
     if (!order) {
       return NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    // paymentId는 URL·브라우저 히스토리로 노출될 수 있어, 이것만으로는 리포트를 열람할 수
+    // 없게 한다. 주문을 생성한 바로 그 브라우저에만 심어둔 서명 쿠키를 확인한다.
+    const accessToken = req.cookies.get(orderAccessCookieName(paymentId))?.value;
+    if (!(await verifyOrderAccessToken(paymentId, accessToken))) {
+      return NextResponse.json({ error: "이 리포트에 접근할 권한이 없습니다." }, { status: 403 });
     }
 
     if (order.status !== "PAID") {

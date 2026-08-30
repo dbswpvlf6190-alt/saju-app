@@ -4,6 +4,7 @@ import { calculateSaju, SajuInputError, type SajuInput } from "@/lib/saju";
 import { prisma } from "@/lib/db/prisma";
 import { PRODUCT_CATALOG, isProductType, type ProductType } from "@/lib/payment/config";
 import { rateLimit } from "@/lib/security/rateLimit";
+import { orderAccessCookieName, signOrderAccessToken } from "@/lib/payment/orderAccess";
 
 interface CreateOrderBody {
   productType?: ProductType;
@@ -81,11 +82,23 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       paymentId: order.paymentId,
       amount: order.amount,
       orderName: product.name,
     });
+
+    // 이 주문을 실제로 생성한 브라우저만 나중에 리포트를 조회할 수 있도록, paymentId와
+    // 묶인 서명 토큰을 httpOnly 쿠키로 심어둔다(GET /api/orders/[paymentId]에서 검증).
+    response.cookies.set(orderAccessCookieName(order.paymentId), await signOrderAccessToken(order.paymentId), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+
+    return response;
   } catch (e) {
     console.error("주문 생성 DB 오류:", e);
     return NextResponse.json({ error: "주문 생성에 실패했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });

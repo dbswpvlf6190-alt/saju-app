@@ -19,7 +19,7 @@ const SYSTEM_PROMPT = `당신은 사주명리학 기반 궁합을 이해하기 �
 4. 사주는 자기이해와 재미를 위한 콘텐츠라는 성격을 유지하고, 의학적·법률적·금융적 사실처럼 단정하지 마세요.
 5. 주어진 데이터에 없는 사실(직업, 실제 이름, 실제 사건 등)을 지어내지 마세요.
 6. 전달받은 두 사람의 오행 비율, 일간, 궁합 점수 같은 구체적인 데이터를 최소 한두 곳 이상 자연스럽게 근거로 활용해서, 이 두 사람만을 위한 해석처럼 느껴지게 쓰세요(뻔한 일반론으로 채우지 마세요).
-7. 결과는 4~6개 문단, 총 650~800자 내외의 자연스러운 한국어 존댓말로 작성하세요. 유료 상세 리포트이므로 성급하게 요약하지 말고 충분히 풀어서 설명하세요. 소제목이나 목록 기호 없이 문단으로만 답하세요.`;
+7. 결과는 4~6개 문단, 총 700~900자 내외의 자연스러운 한국어 존댓말로 작성하세요. 유료 상세 리포트이므로 성급하게 요약하지 말고 충분히 풀어서 설명하되, 이 범위를 크게 넘기지 않도록 핵심만 담아 간결하게 압축해서 작성하세요. 소제목이나 목록 기호 없이 문단으로만 답하세요.`;
 
 export class AiInterpretationError extends Error {}
 
@@ -63,7 +63,7 @@ export async function interpretCompatibilitySection(
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-5",
-    max_tokens: 1600,
+    max_tokens: 2600,
     system: SYSTEM_PROMPT,
     messages: [
       {

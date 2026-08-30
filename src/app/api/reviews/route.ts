@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { validateReview } from "@/lib/review/validate";
 import { rateLimit } from "@/lib/security/rateLimit";
+import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 
 /** 공개 후기 목록. visible=true인 것만, 최신순으로 최대 50건. */
 export async function GET() {
@@ -57,6 +58,14 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.findUnique({ where: { paymentId: body.paymentId } });
     if (!order || order.status !== "PAID") {
       return NextResponse.json({ error: "결제 완료된 주문에서만 후기를 남길 수 있습니다." }, { status: 403 });
+    }
+
+    // paymentId만 알면 다른 사람의 실제 주문에 허위 후기를 남기거나 진짜 구매자의 후기
+    // 작성 기회를 가로챌 수 있었다(SECURITY_AUDIT_FINAL.md 2-1번). 그 주문을 생성한
+    // 브라우저에만 있는 서명 쿠키를 확인해서, 실제 구매자 본인만 후기를 남기게 한다.
+    const accessToken = req.cookies.get(orderAccessCookieName(body.paymentId))?.value;
+    if (!(await verifyOrderAccessToken(body.paymentId, accessToken))) {
+      return NextResponse.json({ error: "이 주문에 대한 접근 권한이 없습니다." }, { status: 403 });
     }
 
     const existing = await prisma.review.findUnique({ where: { paymentId: body.paymentId } });

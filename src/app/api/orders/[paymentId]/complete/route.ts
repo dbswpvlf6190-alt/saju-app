@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { fetchPortOnePayment, PortOneVerificationError } from "@/lib/payment/verify";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { sendPaymentKakaoNotification } from "@/lib/kakao/notify";
+import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 
 /**
  * 클라이언트가 PortOne 결제창에서 성공 응답을 받은 뒤 호출한다.
@@ -29,6 +30,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
     const order = await prisma.order.findUnique({ where: { paymentId } });
     if (!order) {
       return NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    // paymentId는 URL·브라우저 히스토리로 노출될 수 있어, 이것만으로는 상태 조회나 결제
+    // 재검증을 트리거할 수 없게 한다. 주문을 생성한 바로 그 브라우저에만 심어둔 서명
+    // 쿠키를 확인한다(GET /api/orders/[paymentId]와 동일한 패턴, SECURITY_AUDIT_FINAL.md 1-2번).
+    const accessToken = req.cookies.get(orderAccessCookieName(paymentId))?.value;
+    if (!(await verifyOrderAccessToken(paymentId, accessToken))) {
+      return NextResponse.json({ error: "이 주문에 접근할 권한이 없습니다." }, { status: 403 });
     }
 
     // 이미 처리된 주문이면 중복 결제 검증/처리 없이 현재 상태를 그대로 반환한다(멱등 처리).

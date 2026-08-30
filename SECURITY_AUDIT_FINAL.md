@@ -8,7 +8,7 @@
 |---|---|---|
 | 🟠 High → **패치 완료** | GET `/api/orders/[paymentId]` — paymentId만으로 제3자가 유료 리포트 열람 가능 | ✅ 지난 세션에서 이미 수정·테스트·배포 완료 |
 | 🟠 High → **패치 완료** | 궁합 상대방(제3자) 원본 생년월일 장기 보관 | ✅ 지난 세션에서 90일 자동 파기로 수정·테스트·배포 완료 |
-| 🟡 Medium | POST `/api/orders/[paymentId]/complete`에 접근 통제 없음 (상태 정보 노출 + 불필요한 재검증 유발 가능) | 미수정 (이번 보고 대상) |
+| 🟡 Medium → **패치 완료** | POST `/api/orders/[paymentId]/complete`에 접근 통제 없음 (상태 정보 노출 + 불필요한 재검증 유발 가능) | ✅ 수정·테스트·배포 완료 (아래 참고) |
 | 🟡 Medium | 보안 헤더 전무 (`X-Frame-Options`/CSP/`Referrer-Policy` 등) — 클릭재킹 방어 없음 | 미수정 |
 | 🟢 Low | 후기 등록 API가 paymentId 소유 여부를 쿠키로 재확인하지 않음(IDOR 유사 패턴) | 미수정 |
 | 🟢 Low | Rate limit이 서버 메모리 기반이라 다중 인스턴스·재배포 시 무력화 | 미수정(기존 주석에 이미 명시된 한계) |
@@ -23,8 +23,10 @@
 ### 1-1. GET `/api/orders/[paymentId]` — 🟠 High, **이미 패치됨**
 직전 세션에서 발견·수정·배포·테스트 완료된 항목입니다. paymentId(UUID) 하나만 알면 인증 없이 누구나 유료 리포트(사주/궁합 해석 전문)를 조회할 수 있었습니다. 지금은 주문 생성 시 발급되는 브라우저 전용 서명 쿠키(`saju_order_{paymentId}`, httpOnly)로 보호됩니다(`src/lib/payment/orderAccess.ts`, `src/app/api/orders/[paymentId]/route.ts:41-44`). 쿠키 없이 조회 시 403, 존재하지 않는 주문은 404. 실제 프로덕션 DB의 기존 PAID 주문으로 재검증까지 완료했습니다.
 
-### 1-2. POST `/api/orders/[paymentId]/complete` — 🟡 Medium, **미수정**
-이 엔드포인트는 여전히 접근 통제가 없습니다(`src/app/api/orders/[paymentId]/complete/route.ts:12-37`). paymentId만 알면 누구나:
+### 1-2. POST `/api/orders/[paymentId]/complete` — 🟡 Medium, **✅ 패치 완료**
+**(추가 업데이트, 같은 날 수정됨)** GET 라우트와 동일한 `saju_order_{paymentId}` 쿠키 검증을 이 라우트에도 추가했습니다(`complete/route.ts:35-41`). 기존 PortOne 검증·금액 대조·멱등 처리 로직은 전혀 건드리지 않았고, 쿠키 확인은 그 앞에 게이트로만 추가됐습니다. 실제 API로 테스트 완료: 쿠키 없음/위조 쿠키 → 403, 정상 쿠키(미결제 주문) → 기존과 동일하게 PortOne 검증까지 정상 도달(502 "결제 없음"), 실제 기존 PAID 주문에 쿠키 없이 조회 → 403(수정 전엔 상태가 노출되던 지점), 올바른 쿠키로는 기존과 동일하게 `{"status":"PAID"}` 반환. 아래는 수정 전 발견 당시의 원문입니다.
+
+이 엔드포인트는 수정 전까지 접근 통제가 없었습니다(`src/app/api/orders/[paymentId]/complete/route.ts:12-37`). paymentId만 알면 누구나:
 - 그 주문의 결제 상태(PENDING/PAID/FAILED/CANCELED)를 알아낼 수 있습니다(정보 노출).
 - 아직 PENDING인 주문이면 PortOne 실제 결제 조회 API를 다시 호출시킬 수 있습니다.
 

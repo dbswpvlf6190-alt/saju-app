@@ -166,6 +166,22 @@ export const REELS = [
     curiosity: ["그럼 나는 어떤 걸로", "입력해야 할까?"],
     screenshotCaption: "양력·음력 아무거나 골라 입력하면 끝",
   },
+  {
+    order: 10,
+    id: "R26",
+    category: "ingan",
+    categoryLabel: "인간관계",
+    title: "힘들 때 나타나는 귀인",
+    hook: ["힘들 때마다", "누군가 나타나서", "도와준다면,", "사주에 이유가 있어요"],
+    info: {
+      pre: "사주에 '천을귀인'이 있으면",
+      emphasis: "위기 때 도와주는 사람",
+      post: "이 나타나는 흐름으로 봐요",
+      sub: ["대운이 바뀌는 시기에도", "새로운 인연을 만나기 쉬워요"],
+    },
+    curiosity: ["내 사주엔", "귀인이 있을까?"],
+    screenshotCaption: "내 귀인운 힌트도 여기서 확인",
+  },
 ];
 
 // 업로드 순서(order)대로 정렬해 파일명에 사용

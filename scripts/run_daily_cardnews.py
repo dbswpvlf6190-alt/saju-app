@@ -49,6 +49,9 @@ def mark_posted(day, entry, media_id):
 
 
 def main():
+    # 주의(2026-09-03 실제로 겪음): Windows 작업 스케줄러 트리거에 반복(Repetition/재시도)을 걸면
+    # 실행될 때마다 다음 미게시 항목을 계속 찾아 올려서 한 창(예: 4시간) 안에 여러 건이 연달아
+    # 게시돼버림(하루에 3건 나간 사고 있었음) — 절대 반복 트리거 걸지 말 것. run_daily.py 참고.
     git_sync.git_pull(BASE_DIR)
     entries = load_manifest()
     next_entry = next((e for e in entries if not is_posted(e["day"])), None)

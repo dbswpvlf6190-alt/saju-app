@@ -53,6 +53,11 @@ def mark_posted(day, entry, media_id):
 def main():
     # 하루 실행당 딱 1건만 게시한다. 노트북/데스크톱 둘 다 이 스크립트를 돌릴 수 있으므로,
     # 먼저 최신 게시 기록을 받아오고 처리할 항목에 락을 걸어 중복 게시를 막는다.
+    # 주의(2026-09-03 실제로 겪음): 이 스크립트는 "실행될 때마다 다음 미게시 항목 1개"를 올리므로,
+    # Windows 작업 스케줄러 트리거에 반복(Repetition/재시도)을 걸면 한 번의 실행 창(예: 4시간) 안에서
+    # 30분마다 계속 다음 항목을 찾아 여러 건이 연달아 게시돼버림(하루에 3건 이상 나간 사고 있었음).
+    # shorts_auto의 run_queue.py는 매번 새 콘텐츠를 사람이 준비해야 해서 반복을 걸어도 안전하지만,
+    # 여기는 manifest에 미리 만들어둔 항목이 쌓여있어서 절대 반복 트리거를 걸면 안 됨.
     git_sync.git_pull(BASE_DIR)
     entries = load_manifest()
     next_entry = next((e for e in entries if not is_posted(e["day"])), None)

@@ -39,9 +39,10 @@ function pct(numerator: number, denominator: number): string {
 }
 
 export default async function AdminPage() {
-  // Vercel Cron(vercel.json)이 매시간 재검증하지만, Hobby 플랜은 실제로는 하루 1회로
-  // 제한될 수 있다. 그 안전망과 별개로, 관리자가 대시보드를 열 때마다도 정체된 PENDING
-  // 주문을 즉시 재검증해서 화면에 최신 상태가 보이게 한다.
+  // Vercel Cron(vercel.json)이 하루 1회 재검증한다(Hobby 플랜은 cron이 하루 1회 이상이면
+  // 배포 자체가 거부된다 — 2026-09-04에 실제로 이 스케줄이 시간당으로 되어 있어서 배포가
+  // 통째로 실패했던 적이 있다). 그 안전망과 별개로, 관리자가 대시보드를 열 때마다도 정체된
+  // PENDING 주문을 즉시 재검증해서 화면에 최신 상태가 보이게 한다.
   await reconcileStalePendingOrders();
 
   const [orders, paidAgg, statusCounts, reviews, funnel] = await Promise.all([

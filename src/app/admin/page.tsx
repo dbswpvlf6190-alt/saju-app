@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminReviewToggle } from "@/components/admin/AdminReviewToggle";
+import { reconcileStalePendingOrders } from "@/lib/payment/reconcile";
 
 // 매출/주문 데이터는 요청마다 최신 상태여야 하므로 빌드 시점 정적 캐싱을 막는다.
 export const dynamic = "force-dynamic";
@@ -12,6 +13,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default async function AdminPage() {
+  // Vercel Cron(vercel.json)이 매시간 재검증하지만, Hobby 플랜은 실제로는 하루 1회로
+  // 제한될 수 있다. 그 안전망과 별개로, 관리자가 대시보드를 열 때마다도 정체된 PENDING
+  // 주문을 즉시 재검증해서 화면에 최신 상태가 보이게 한다.
+  await reconcileStalePendingOrders();
+
   const [orders, paidAgg, statusCounts, reviews] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amount: true }, _count: true }),

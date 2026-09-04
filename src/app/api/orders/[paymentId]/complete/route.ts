@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { fetchPortOnePayment, PortOneVerificationError } from "@/lib/payment/verify";
+import { finalizeOrderFromPortOnePayment } from "@/lib/payment/settle";
 import { rateLimit } from "@/lib/security/rateLimit";
-import { sendPaymentKakaoNotification } from "@/lib/kakao/notify";
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 
 /**
@@ -55,30 +55,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
       throw e;
     }
 
-    const isAmountValid = payment.amount.total === order.amount;
-    const isPaid = payment.status === "PAID";
-
-    if (!isPaid || !isAmountValid) {
-      await prisma.order.update({ where: { paymentId }, data: { status: "FAILED" } });
+    // reconcile 배치(뒤늦은 재검증)와 PAID/FAILED 판정 기준이 갈라지지 않도록 공용 함수를 쓴다.
+    const result = await finalizeOrderFromPortOnePayment(order, payment);
+    if (result.status === "FAILED") {
       return NextResponse.json(
-        { error: isAmountValid ? "결제가 완료되지 않았습니다." : "결제 금액이 일치하지 않습니다." },
+        { error: result.amountValid ? "결제가 완료되지 않았습니다." : "결제 금액이 일치하지 않습니다." },
         { status: 400 },
       );
     }
 
-    const updated = await prisma.order.update({
-      where: { paymentId },
-      data: { status: "PAID", paidAt: new Date() },
-    });
-
-    // 카카오톡 알림은 결제 완료 자체와 무관한 부가 기능이므로, 실패해도 응답에는 영향을 주지 않는다.
-    try {
-      await sendPaymentKakaoNotification(updated);
-    } catch (e) {
-      console.error(`카카오 결제 알림 전송 실패 (paymentId=${paymentId}):`, e);
-    }
-
-    return NextResponse.json({ status: updated.status });
+    return NextResponse.json({ status: result.status });
   } catch (e) {
     console.error(`결제 완료 처리 중 예상하지 못한 오류 (paymentId=${paymentId}):`, e);
     return NextResponse.json({ error: "결제 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });

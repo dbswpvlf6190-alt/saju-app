@@ -4,6 +4,8 @@
 
 export const CTA_HEADLINE = "내 사주는 어떨까?";
 export const CTA_BUTTON = "프로필 링크에서 무료 확인 🔮";
+// 화면 문구(CTA_BUTTON)엔 이모지가 있어서 나레이션에 그대로 쓰면 어색하게 읽힘 — 음성 전용 문구를 따로 둔다.
+export const CTA_NARRATION = "내 사주는 어떨까요? 프로필 링크에서 무료로 확인해보세요.";
 
 export const REELS = [
   {
@@ -181,6 +183,102 @@ export const REELS = [
     },
     curiosity: ["내 사주엔", "귀인이 있을까?"],
     screenshotCaption: "내 귀인운 힌트도 여기서 확인",
+  },
+  {
+    order: 11,
+    id: "R27",
+    category: "sangsik",
+    categoryLabel: "사주상식",
+    title: "삼재, 진짜 의미는 이거예요",
+    hook: ["내 띠가", "삼재띠라는 말,", "정확히 무슨 뜻인지", "아세요?"],
+    info: {
+      pre: "삼재는 12년 중",
+      emphasis: "3년 동안 돌아오는",
+      post: "기운의 흐름을 말해요",
+      sub: ["무조건 나쁜 것도 아니고", "그 3년만 유독 조심하라는 뜻도 아니에요"],
+    },
+    curiosity: ["그럼 삼재엔", "정말 아무것도 못 할까?"],
+    screenshotCaption: "내 사주 기운 흐름도 무료로 확인 가능해요",
+  },
+  {
+    order: 12,
+    id: "R28",
+    category: "jaemul",
+    categoryLabel: "재물운",
+    title: "월급 관리, 사주로 스타일이 갈린대요",
+    hook: ["월급 관리 잘하는 사람과", "못하는 사람,", "사주로 갈린다는", "말이 있어요"],
+    info: {
+      pre: "'정재'가 강하면",
+      emphasis: "꾸준하고 계획적인",
+      post: "소비 습관을 가진 편이래요",
+      sub: ["'편재'가 강하면 버는 감각은 좋은데", "관리는 즉흥적인 편이라고 해요"],
+    },
+    curiosity: ["나는 정재형일까,", "편재형일까?"],
+    screenshotCaption: "내 재물 기운 비율도 무료로 바로 나와요",
+  },
+  {
+    order: 13,
+    id: "R29",
+    category: "yeonae",
+    categoryLabel: "연애운",
+    title: "짝사랑이 유독 긴 사람 특징",
+    hook: ["고백 못 하고", "짝사랑만 반복하는 이유,", "알고 보니 있었어요"],
+    info: {
+      pre: "'식신'이 약하고 '관성'이 강하면",
+      emphasis: "마음을 표현하기보다",
+      post: "참는 쪽을 택하는 편이래요",
+      sub: ["거절에 대한 두려움이", "유독 크게 작용한다는 해석도 있어요"],
+    },
+    curiosity: ["나는 표현을", "잘하는 편일까?"],
+    screenshotCaption: "내 표현 성향 힌트도 무료 결과에서 확인돼요",
+  },
+  {
+    order: 14,
+    id: "R30",
+    category: "jigeop",
+    categoryLabel: "직업운",
+    title: "이직 잦은 사람, 사주에 신호 있나요",
+    hook: ["이직을", "3번 넘게 했다면,", "이 사주일 확률이", "높다고 해요"],
+    info: {
+      pre: "'상관'이 강하고 '관성'이 약하면",
+      emphasis: "정해진 틀보다 변화",
+      post: "를 자연스럽게 찾는 편이래요",
+      sub: ["나쁜 게 아니라", "적응력이 좋다는 뜻이기도 해요"],
+    },
+    curiosity: ["나는 안정형일까,", "변화형일까?"],
+    screenshotCaption: "내 직업 성향 기운도 무료로 확인 가능해요",
+  },
+  {
+    order: 15,
+    id: "R31",
+    category: "ingan",
+    categoryLabel: "인간관계",
+    title: "맨날 나만 손해보는 관계, 이유 있을까",
+    hook: ["연락도 내가 먼저,", "손해도 내가 먼저,", "이제 그만하고 싶다면"],
+    info: {
+      pre: "'비겁'이 약하고 '식상'이 강하면",
+      emphasis: "내가 맞추는 쪽",
+      post: "을 자주 택하는 편이래요",
+      sub: ["나쁜 성향이 아니라", "배려심이 큰 편이라는 해석이에요"],
+    },
+    curiosity: ["내 사주엔", "이 기운이 있을까?"],
+    screenshotCaption: "내 관계 성향 힌트도 무료로 확인돼요",
+  },
+  {
+    order: 16,
+    id: "R32",
+    category: "sangsik",
+    categoryLabel: "사주상식",
+    title: "이사 날짜, 아무 날이나 잡아도 될까",
+    hook: ["이사·개업 날짜,", "달력에서", "아무 날이나 고르면", "안 되는 이유가 있어요"],
+    info: {
+      pre: "'택일'은 그날의 기운이",
+      emphasis: "나와 잘 맞는지",
+      post: "를 보는 방법이에요",
+      sub: ["미신이라기보다", "확률을 조금 높이는 참고 정보에 가까워요"],
+    },
+    curiosity: ["그럼 나는", "어떤 기운을 타고났을까?"],
+    screenshotCaption: "내 사주 기운, 무료로 바로 확인 가능해요",
   },
 ];
 

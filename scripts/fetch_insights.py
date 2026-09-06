@@ -13,9 +13,12 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOKEN_PATH = os.path.join(BASE_DIR, "credentials", "instagram_token.json")
 RENDER_ROOT = os.environ.get("SAJU_RENDER_DIR", os.path.join(os.path.expanduser("~"), "SajuAutoRender"))
+# 게시 기록은 2026-09-05부로 컴퓨터 로컬(RENDER_ROOT)이 아니라 저장소 안
+# scripts/posted_state/에 git으로 공유되게 바뀌었다(run_daily.py/run_daily_cardnews.py 참고,
+# 중복 게시 방지 목적) — 노트북이 올린 항목도 여기서 보려면 이 위치를 봐야 한다.
 POSTED_DIRS = [
-    (os.path.join(RENDER_ROOT, "posted"), "릴스"),
-    (os.path.join(RENDER_ROOT, "posted_cardnews"), "카드뉴스"),
+    (os.path.join(BASE_DIR, "scripts", "posted_state", "reel"), "릴스"),
+    (os.path.join(BASE_DIR, "scripts", "posted_state", "cardnews"), "카드뉴스"),
 ]
 ANALYTICS_DIR = os.path.join(RENDER_ROOT, "analytics")
 SNAPSHOT_MD = os.path.join(ANALYTICS_DIR, "snapshot.md")

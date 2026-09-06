@@ -9,6 +9,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import publish_carousel  # noqa: E402
 import git_sync  # noqa: E402
+import refill_queue  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFEST_PATH = os.path.join(BASE_DIR, "scripts", "cardnews_manifest.json")
@@ -53,6 +54,10 @@ def main():
     # 실행될 때마다 다음 미게시 항목을 계속 찾아 올려서 한 창(예: 4시간) 안에 여러 건이 연달아
     # 게시돼버림(하루에 3건 나간 사고 있었음) — 절대 반복 트리거 걸지 말 것. run_daily.py 참고.
     git_sync.git_pull(BASE_DIR)
+    try:
+        refill_queue.ensure_cardnews_buffer()
+    except Exception as e:
+        print(f"자동 채우기 실패(무시하고 계속): {e}")
     entries = load_manifest()
     next_entry = next((e for e in entries if not is_posted(e["day"])), None)
 

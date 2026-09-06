@@ -9,6 +9,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import publish_instagram  # noqa: E402
 import git_sync  # noqa: E402
+import refill_queue  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFEST_PATH = os.path.join(BASE_DIR, "scripts", "reel_manifest.json")
@@ -59,6 +60,11 @@ def main():
     # shorts_auto의 run_queue.py는 매번 새 콘텐츠를 사람이 준비해야 해서 반복을 걸어도 안전하지만,
     # 여기는 manifest에 미리 만들어둔 항목이 쌓여있어서 절대 반복 트리거를 걸면 안 됨.
     git_sync.git_pull(BASE_DIR)
+    try:
+        refill_queue.ensure_reel_buffer()
+    except Exception as e:
+        # 자동 채우기가 실패해도(API 오류 등) 오늘 게시할 게 이미 있으면 게시는 계속 진행한다.
+        print(f"자동 채우기 실패(무시하고 계속): {e}")
     entries = load_manifest()
     next_entry = next((e for e in entries if not is_posted(e["day"])), None)
 

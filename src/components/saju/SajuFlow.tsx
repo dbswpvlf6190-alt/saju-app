@@ -43,7 +43,14 @@ async function calculateSajuRemote(birthInput: SajuInput): Promise<SajuResult> {
   return data.result as SajuResult;
 }
 
-export function SajuFlow({ reviews }: { reviews: ReviewItem[] }) {
+export function SajuFlow({
+  reviews,
+  entryMode = "default",
+}: {
+  reviews: ReviewItem[];
+  /** "typeTest"면 /type-test 진입으로 기록하고, 결과 화면에 유형 테스트 카드를 먼저 보여준다. */
+  entryMode?: "default" | "typeTest";
+}) {
   const [result, setResult] = useState<SajuResult | null>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -63,11 +70,11 @@ export function SajuFlow({ reviews }: { reviews: ReviewItem[] }) {
   }, [submitting]);
 
   useEffect(() => {
-    // 공유 링크(ShareButton이 붙이는 ?ref=share_kakao 등)로 들어온 방문인지 구분해서
-    // 같이 보낸다. 없으면 undefined라 sanitizeAnalyticsMeta가 알아서 필드째 빼준다.
+    // 공유 링크(ShareButton이 붙이는 ?ref=share_kakao 등)로 들어온 방문인지, /type-test로
+    // 들어온 방문인지 같이 기록해서 어느 진입점이 실제 결제까지 이어지는지 비교할 수 있게 한다.
     const ref = new URLSearchParams(window.location.search).get("ref") ?? undefined;
-    trackEvent("landing_view", ref ? { ref } : {});
-  }, []);
+    trackEvent("landing_view", { ...(ref && { ref }), entry: entryMode });
+  }, [entryMode]);
 
   // 모바일 결제창은 리디렉션 방식으로 돌아올 수 있어, 이때 URL의 paymentId와
   // 결제 시작 전 저장해둔 생년월일 정보(sessionStorage)로 결과 화면을 복원한다.
@@ -195,6 +202,7 @@ export function SajuFlow({ reviews }: { reviews: ReviewItem[] }) {
             onRestart={handleRestart}
             resumePaymentId={resumePaymentId}
             reviews={reviews}
+            showTypeReveal={entryMode === "typeTest"}
           />
         </div>
       )}

@@ -7,6 +7,7 @@ import type { SajuResult } from "@/lib/saju";
 // 완전히 트리쉐이킹하지 못해서, 클라이언트 컴포넌트에서는 실제로 쓰는 서브모듈을 직접 가져온다.
 import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
 import { getDailyFortuneDetail } from "@/lib/saju/dailyFortune";
+import { getTypeProfile } from "@/lib/saju/typeProfile";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { PremiumUnlock } from "./PremiumUnlock";
@@ -14,6 +15,7 @@ import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
 import { DailyFortuneCard } from "./DailyFortuneCard";
 import { PushOptIn } from "./PushOptIn";
+import { TypeRevealCard } from "./TypeRevealCard";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
 
@@ -34,17 +36,22 @@ export function ResultView({
   onRestart,
   resumePaymentId,
   reviews,
+  showTypeReveal,
 }: {
   name: string;
   result: SajuResult;
   onRestart: () => void;
   resumePaymentId: string | null;
   reviews: ReviewItem[];
+  /** /type-test에서 들어온 경우에만 true — 같은 결과를 캐주얼한 "유형 테스트" 카드로
+   * 먼저 보여준 뒤, 아래는 기존 정식 사주 결과 동선을 그대로 이어간다. */
+  showTypeReveal?: boolean;
 }) {
   const [isPaid, setIsPaid] = useState(false);
   const free = generateFreeContent(result);
   const premiumSections = getPremiumSections(result);
   const daily = getDailyFortuneDetail(result);
+  const type = showTypeReveal ? getTypeProfile(result.dayPillar.ganKor) : null;
 
   const freePreviewSections = FREE_PREVIEW_ORDER.map(
     (key) => premiumSections.find((s) => s.key === key)!,
@@ -56,6 +63,15 @@ export function ResultView({
 
   return (
     <div className="flex w-full max-w-md flex-col gap-8 pb-16">
+      {type && (
+        <TypeRevealCard
+          name={name}
+          dayMasterMetaphor={free.dayMasterMetaphor}
+          dominantWuxing={free.dominantWuxing}
+          type={type}
+        />
+      )}
+
       {/* ① 나의 사주 핵심 결과 — 결과가 뜨는 순간을 "펼쳐지는" 느낌으로 주기 위해 헤드라인은
           팝인, 네 기둥은 순서대로 나타나게 한다(reveal-in/-pop, globals.css). */}
       <div className="reveal-pop flex flex-col items-center gap-2 text-center">

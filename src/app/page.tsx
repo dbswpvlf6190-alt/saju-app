@@ -1,19 +1,14 @@
 import Link from "next/link";
 import { SajuFlow } from "@/components/saju/SajuFlow";
 import { SiteFooter } from "@/components/saju/SiteFooter";
-import { prisma } from "@/lib/db/prisma";
+import { getVisibleReviews } from "@/lib/reviews";
 
 // 후기 목록이 새로 등록돼도 반영되도록 60초 주기로 재생성한다(완전 동적으로 매번 DB를
 // 치는 것보다 가볍고, 완전 정적보다는 훨씬 자주 갱신된다).
 export const revalidate = 60;
 
 export default async function Home() {
-  const reviews = await prisma.review.findMany({
-    where: { visible: true },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-    select: { id: true, rating: true, content: true, productType: true, createdAt: true },
-  });
+  const reviews = await getVisibleReviews();
 
   return (
     <div className="bg-starfield flex flex-1 flex-col items-center bg-background px-5 py-14">
@@ -58,8 +53,15 @@ export default async function Home() {
       <div id="saju-form" className="mt-10 w-full max-w-md scroll-mt-10">
         {/* 후기는 결과 화면 안에서 4,900원 상세 분석 가치·CTA 바로 다음(구매 판단 시점)에
             노출한다 — SajuFlow → ResultView로 그대로 내려보내고 페이지 레벨에서는 더 렌더링하지 않는다. */}
-        <SajuFlow reviews={reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }))} />
+        <SajuFlow reviews={reviews} />
       </div>
+
+      <Link
+        href="/type-test"
+        className="mt-6 text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+      >
+        🧪 사주 심리테스트로 내 유형 알아보기
+      </Link>
 
       <SiteFooter />
     </div>

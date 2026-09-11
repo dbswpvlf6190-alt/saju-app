@@ -55,8 +55,9 @@ export function ResultView({
 
   return (
     <div className="flex w-full max-w-md flex-col gap-8 pb-16">
-      {/* ① 나의 사주 핵심 결과 */}
-      <div className="flex flex-col items-center gap-2 text-center">
+      {/* ① 나의 사주 핵심 결과 — 결과가 뜨는 순간을 "펼쳐지는" 느낌으로 주기 위해 헤드라인은
+          팝인, 네 기둥은 순서대로 나타나게 한다(reveal-in/-pop, globals.css). */}
+      <div className="reveal-pop flex flex-col items-center gap-2 text-center">
         <span className="text-sm text-foreground-muted">
           {name ? `${name}님의 사주` : "나의 사주"}
         </span>
@@ -66,10 +67,10 @@ export function ResultView({
       </div>
 
       <div className="grid grid-cols-4 gap-2">
-        <PillarCard label="년주" pillar={result.yearPillar} />
-        <PillarCard label="월주" pillar={result.monthPillar} />
-        <PillarCard label="일주" pillar={result.dayPillar} />
-        <PillarCard label="시주" pillar={result.timePillar} />
+        <PillarCard label="년주" pillar={result.yearPillar} revealDelayMs={120} />
+        <PillarCard label="월주" pillar={result.monthPillar} revealDelayMs={220} />
+        <PillarCard label="일주" pillar={result.dayPillar} revealDelayMs={320} />
+        <PillarCard label="시주" pillar={result.timePillar} revealDelayMs={420} />
       </div>
 
       {/* ② 기본 성향 */}

@@ -15,6 +15,21 @@ interface PendingPurchase {
   birthInput: SajuInput;
 }
 
+// 계산 자체는 순식간에 끝나지만, 곧바로 결과를 띄우면 "풀이"보다 그냥 폼 제출처럼
+// 느껴진다. 아래 문구를 순서대로 보여주며 최소 이 시간만큼은 로딩 화면을 유지해서
+// 실제로 사주를 짚어가는 듯한 느낌을 준다(수치는 과장 없이 진짜 계산 단계들이다).
+const LOADING_MESSAGES = [
+  "생년월일시를 절기력으로 변환하는 중...",
+  "년주·월주·일주·시주를 배치하는 중...",
+  "오행 균형을 계산하는 중...",
+  "일간을 확인하는 중...",
+] as const;
+const MIN_LOADING_MS = 1400;
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function calculateSajuRemote(birthInput: SajuInput): Promise<SajuResult> {
   const res = await fetch("/api/saju/calculate", {
     method: "POST",
@@ -35,8 +50,17 @@ export function SajuFlow({ reviews }: { reviews: ReviewItem[] }) {
   const [submitting, setSubmitting] = useState(false);
   const [resumePaymentId, setResumePaymentId] = useState<string | null>(null);
   const [savedInfo, setSavedInfo] = useState<SavedBirthInfo | null>(null);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const resultRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!submitting) return;
+    const id = setInterval(() => {
+      setLoadingMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+    }, MIN_LOADING_MS / LOADING_MESSAGES.length);
+    return () => clearInterval(id);
+  }, [submitting]);
 
   useEffect(() => {
     // 공유 링크(ShareButton이 붙이는 ?ref=share_kakao 등)로 들어온 방문인지 구분해서
@@ -78,9 +102,10 @@ export function SajuFlow({ reviews }: { reviews: ReviewItem[] }) {
   async function runCalculation(name: string, birthInput: SajuInput) {
     setSubmitting(true);
     setError(null);
+    setLoadingMessageIndex(0);
     try {
       trackEvent("saju_start", {});
-      const computed = await calculateSajuRemote(birthInput);
+      const [computed] = await Promise.all([calculateSajuRemote(birthInput), wait(MIN_LOADING_MS)]);
       setName(name);
       setResult(computed);
       saveLastBirthInfo({ name, birthInput });
@@ -124,23 +149,42 @@ export function SajuFlow({ reviews }: { reviews: ReviewItem[] }) {
   return (
     <div className="flex w-full flex-col items-center gap-16">
       <div ref={formRef} className="flex w-full flex-col items-center gap-4 pt-4">
-        {!result && savedInfo && (
-          <div className="flex w-full max-w-md flex-col gap-2 rounded-2xl border border-accent-gold/30 bg-accent-gold/10 p-4 text-center">
-            <p className="text-sm text-foreground-muted">
-              {savedInfo.name ? `${savedInfo.name}님, ` : ""}이전에 확인한 사주 결과가 있어요
-            </p>
-            <button
-              type="button"
-              onClick={handleRevisit}
-              disabled={submitting}
-              className="rounded-xl border border-accent-gold px-4 py-2.5 text-sm font-semibold text-accent-gold-soft transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              내 사주 다시 보기 · 오늘의 운세 보기
-            </button>
+        {!result && submitting ? (
+          // 계산 자체는 즉시 끝나지만, 곧장 결과를 띄우기보다 실제로 사주를 짚어가는 듯한
+          // 짧은 "풀이 중" 화면을 보여준다(runCalculation의 MIN_LOADING_MS와 짝을 이룬다).
+          <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-border-subtle bg-background-card/70 px-6 py-10 text-center">
+            <div className="flex gap-2">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="loading-dot h-2.5 w-2.5 rounded-full bg-accent-gold"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-foreground-muted">{LOADING_MESSAGES[loadingMessageIndex]}</p>
           </div>
-        )}
-        {!result && (
-          <BirthInfoForm onSubmit={handleSubmit} submitting={submitting} errorMessage={error} />
+        ) : (
+          <>
+            {!result && savedInfo && (
+              <div className="flex w-full max-w-md flex-col gap-2 rounded-2xl border border-accent-gold/30 bg-accent-gold/10 p-4 text-center">
+                <p className="text-sm text-foreground-muted">
+                  {savedInfo.name ? `${savedInfo.name}님, ` : ""}이전에 확인한 사주 결과가 있어요
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRevisit}
+                  disabled={submitting}
+                  className="rounded-xl border border-accent-gold px-4 py-2.5 text-sm font-semibold text-accent-gold-soft transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  내 사주 다시 보기 · 오늘의 운세 보기
+                </button>
+              </div>
+            )}
+            {!result && (
+              <BirthInfoForm onSubmit={handleSubmit} submitting={submitting} errorMessage={error} />
+            )}
+          </>
         )}
       </div>
       {result && (

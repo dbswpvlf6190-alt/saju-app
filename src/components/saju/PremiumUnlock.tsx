@@ -275,7 +275,12 @@ export function PremiumUnlock({
           text="나의 사주 심층 분석, 생각보다 자세해서 놀랐어요. 무료로 내 사주도 먼저 확인해보세요 🔮"
           shareLabel="💬 이 정도로 자세할 줄 몰랐어요 — 친구한테도 알려주기"
           ctaLabel="무료로 내 사주 확인하기"
-          card={{ variant: "saju", label: free.dayMasterLabel, sub: free.dayMasterMetaphor }}
+          card={{
+            variant: "saju",
+            label: free.dayMasterLabel,
+            sub: free.dayMasterMetaphor,
+            wuxing: free.dominantWuxing,
+          }}
           source="premium_unlocked"
         />
 

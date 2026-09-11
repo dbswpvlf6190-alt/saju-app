@@ -139,7 +139,12 @@ export function ResultView({
           text={`나의 사주는 ${free.dayMasterLabel}래요. 근데 이게 무슨 뜻인지 알아? 🔮 (30초, 무료로 확인)`}
           shareLabel="💬 내 사주, 친구는 뭐라고 나올까?"
           ctaLabel="무료로 내 사주 확인하기"
-          card={{ variant: "saju", label: free.dayMasterLabel, sub: free.dayMasterMetaphor }}
+          card={{
+            variant: "saju",
+            label: free.dayMasterLabel,
+            sub: free.dayMasterMetaphor,
+            wuxing: free.dominantWuxing,
+          }}
           source="free_result"
         />
         <button

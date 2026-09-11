@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { trackEvent } from "@/lib/analytics/track";
 import { shareToKakao } from "@/lib/kakao/share";
+import type { WuXing } from "@/lib/saju/ganzhi";
 
 /** 공유 카드 이미지에 넣을 결과 요약. 여기 들어가는 값도 공유 텍스트(text)에 이미
  * 노출되는 정도(일간 별명, 궁합 점수 등)로만 제한한다 — 이름·생년월일시는 절대 금지. */
 type ShareCard =
-  | { variant: "saju"; label: string; sub?: string }
+  | { variant: "saju"; label: string; sub?: string; wuxing?: WuXing }
   | { variant: "compat"; score: number; sub?: string };
 
 /** 생년월일·생시 같은 원본 개인정보는 공유 텍스트/URL에 절대 포함하지 않는다.
@@ -34,6 +35,7 @@ export function ShareButton({
   source?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [storyStatus, setStoryStatus] = useState<"idle" | "preparing" | "error">("idle");
 
   // 공유 링크에 방법별 ref를 붙여서, 랜딩 페이지에서 어떤 공유 경로로 새 방문자가
   // 들어왔는지 구분할 수 있게 한다(공유 기능이 실제 유입을 만드는지 확인하는 용도).
@@ -54,6 +56,52 @@ export function ShareButton({
     }
     if (card.sub) params.set("sub", card.sub);
     return `${window.location.origin}/api/og/share?${params.toString()}`;
+  }
+
+  // 인스타 스토리는 세로형(9:16) 이미지가 아니면 위아래가 잘려서 그대로 올릴 수 없어서,
+  // 카카오톡 카드용 가로형(buildImageUrl)과 별개로 /api/og/story를 따로 호출한다.
+  function buildStoryImageUrl(): string | undefined {
+    if (!card || typeof window === "undefined") return undefined;
+    const params = new URLSearchParams({ variant: card.variant });
+    if (card.variant === "saju") {
+      params.set("label", card.label);
+      if (card.wuxing) params.set("wx", card.wuxing);
+    } else {
+      params.set("score", String(card.score));
+    }
+    if (card.sub) params.set("sub", card.sub);
+    return `${window.location.origin}/api/og/story?${params.toString()}`;
+  }
+
+  async function handleStoryShare() {
+    trackEvent("share_click", { source: source ? `${source}_story` : "story" });
+    const imageUrl = buildStoryImageUrl();
+    if (!imageUrl) return;
+
+    setStoryStatus("preparing");
+    try {
+      const res = await fetch(imageUrl);
+      if (!res.ok) throw new Error("이미지를 만들지 못했어요.");
+      const blob = await res.blob();
+      const file = new File([blob], "saju-lab.png", { type: "image/png" });
+
+      // 모바일에서는 파일 첨부 공유 시트를 띄워 인스타그램 스토리로 바로 보낼 수 있게 한다.
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title, text });
+        setStoryStatus("idle");
+        return;
+      }
+
+      // 데스크톱 등 파일 공유를 지원하지 않는 환경은 새 탭에 이미지를 열어 저장 후 직접
+      // 업로드하게 한다.
+      const objectUrl = URL.createObjectURL(blob);
+      window.open(objectUrl, "_blank");
+      setStoryStatus("idle");
+    } catch {
+      // 사용자가 공유를 취소한 경우도 이 경로로 들어오므로 에러 문구를 오래 띄우지 않는다.
+      setStoryStatus("error");
+      setTimeout(() => setStoryStatus("idle"), 2000);
+    }
   }
 
   async function handleShare() {
@@ -92,12 +140,32 @@ export function ShareButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleShare}
-      className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
-    >
-      {copied ? "링크를 복사했어요" : shareLabel}
-    </button>
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={handleShare}
+        className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
+      >
+        {copied ? "링크를 복사했어요" : shareLabel}
+      </button>
+
+      {/* 카카오톡 공유(링크 카드)와 별개로, 세로형 결과 카드를 인스타 스토리에 바로 올릴 수
+          있는 경로. 카카오톡 밖에서도 바이럴 유입이 생기게 하려는 용도라 card가 있을 때만
+          노출한다. */}
+      {card && (
+        <button
+          type="button"
+          onClick={() => void handleStoryShare()}
+          disabled={storyStatus === "preparing"}
+          className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft disabled:opacity-50"
+        >
+          {storyStatus === "preparing"
+            ? "이미지 준비 중..."
+            : storyStatus === "error"
+              ? "공유에 실패했어요"
+              : "📱 인스타 스토리에 공유하기"}
+        </button>
+      )}
+    </div>
   );
 }

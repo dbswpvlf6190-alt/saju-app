@@ -13,6 +13,7 @@ import { PremiumUnlock } from "./PremiumUnlock";
 import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
 import { DailyFortuneCard } from "./DailyFortuneCard";
+import { PushOptIn } from "./PushOptIn";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
 
@@ -126,6 +127,10 @@ export function ResultView({
       {/* 여기서부터는 핵심 전환 목표(상세 분석 구매) 뒤에 오는 부가 기능들 — 유료 CTA보다
           눈에 띄지 않게 아래로 내려서 배치한다. */}
       <DailyFortuneCard daily={daily} />
+
+      {/* "오늘의 운세"를 막 확인한 바로 다음이 재방문 알림을 제안하기 가장 자연스러운
+          시점이라 이 자리에 둔다. */}
+      <PushOptIn />
 
       <Link
         href="/compatibility"

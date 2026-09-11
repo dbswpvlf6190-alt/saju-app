@@ -33,6 +33,8 @@ http://localhost:3000 에서 확인.
 | `NEXT_PUBLIC_PORTONE_STORE_ID` | 결제 기능에 필요 | 브라우저에 노출되는 값(비밀 아님) |
 | `NEXT_PUBLIC_PORTONE_CHANNEL_KEY` | 결제 기능에 필요 | 브라우저에 노출되는 값(비밀 아님) |
 | `PORTONE_API_SECRET` | 결제 기능에 필요 | 서버 전용, 절대 노출 금지 |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | 매일 오늘의 운세 웹 푸시 알림에 필요 | `npx web-push generate-vapid-keys`로 생성 |
+| `CRON_SECRET` | 매일 오늘의 운세 푸시 발송(Vercel Cron)에 필요 | 기존 파기/정산 크론과 동일한 값 재사용 |
 
 ## 스크립트
 

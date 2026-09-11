@@ -7,6 +7,10 @@
     {
       "path": "/api/internal/reconcile-orders",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/internal/send-daily-push",
+      "schedule": "0 23 * * *"
     }
   ]
 }

@@ -31,6 +31,9 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   daily_fortune_view: "오늘의 운세 조회",
   share_click: "공유 클릭",
   review_submit: "후기 작성",
+  push_opt_in_view: "푸시 알림 배너 노출",
+  push_subscribe: "푸시 알림 구독",
+  push_subscribe_denied: "푸시 알림 거부",
 };
 
 function pct(numerator: number, denominator: number): string {

@@ -15,6 +15,9 @@ export const ANALYTICS_EVENT_NAMES = [
   "daily_fortune_view",
   "share_click",
   "review_submit",
+  "push_opt_in_view",
+  "push_subscribe",
+  "push_subscribe_denied",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

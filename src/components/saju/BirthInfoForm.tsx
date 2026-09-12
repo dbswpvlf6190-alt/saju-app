@@ -42,22 +42,30 @@ export function BirthInfoForm({
   const [name, setName] = useState("");
   const [calendarType, setCalendarType] = useState<CalendarType>("solar");
   const [isLeapMonth, setIsLeapMonth] = useState(false);
-  const [year, setYear] = useState(2000);
-  const [month, setMonth] = useState(1);
-  const [day, setDay] = useState(1);
+  // 생년월일시는 일부러 기본값을 두지 않는다 — 기본값이 있으면 아무것도 안 고르고 바로
+  // 제출해도 그 기본값(예: 2000년 1월 1일)으로 계산이 되어버려서, 정작 본인의 생년월일시를
+  // 입력하지 않고도 "결과"가 나오는 것처럼 보이는 문제가 있었다.
+  const [year, setYear] = useState<number | null>(null);
+  const [month, setMonth] = useState<number | null>(null);
+  const [day, setDay] = useState<number | null>(null);
   const [timeUnknown, setTimeUnknown] = useState(false);
-  const [hour, setHour] = useState(12);
-  const [minute, setMinute] = useState(0);
+  const [hour, setHour] = useState<number | null>(null);
+  const [minute, setMinute] = useState<number | null>(null);
   const [gender, setGender] = useState<Gender>("female");
 
   // day는 그대로 두고(달을 바꿨다 되돌려도 원래 고른 날짜가 유지되도록), 실제로 존재하지
   // 않는 날짜가 되는 경우에만 선택지/제출값에서 그 달의 마지막 날로 보정해서 사용한다.
-  const dayCount = getDayCount(calendarType, year, month);
+  // year/month를 아직 안 골랐을 때는 날짜 목록 길이만 넉넉히(31일) 보여준다.
+  const dayCount = year !== null && month !== null ? getDayCount(calendarType, year, month) : 31;
   const dayOptions = Array.from({ length: dayCount }, (_, i) => i + 1);
-  const effectiveDay = Math.min(day, dayCount);
+  const effectiveDay = day !== null ? Math.min(day, dayCount) : null;
+
+  const canSubmit =
+    year !== null && month !== null && effectiveDay !== null && (timeUnknown || (hour !== null && minute !== null));
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!canSubmit || year === null || month === null || effectiveDay === null) return;
     onSubmit({
       name: name.trim(),
       calendarType,
@@ -66,8 +74,8 @@ export function BirthInfoForm({
       month,
       day: effectiveDay,
       timeUnknown,
-      hour,
-      minute,
+      hour: timeUnknown ? 0 : hour!,
+      minute: timeUnknown ? 0 : minute!,
       gender,
     });
   }
@@ -113,10 +121,13 @@ export function BirthInfoForm({
         <div className="grid grid-cols-3 gap-2">
           <select
             aria-label="년"
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
+            value={year ?? ""}
+            onChange={(e) => setYear(e.target.value ? Number(e.target.value) : null)}
             className={inputClass}
           >
+            <option value="" disabled>
+              년도
+            </option>
             {YEAR_OPTIONS.map((y) => (
               <option key={y} value={y}>
                 {y}년
@@ -125,10 +136,13 @@ export function BirthInfoForm({
           </select>
           <select
             aria-label="월"
-            value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
+            value={month ?? ""}
+            onChange={(e) => setMonth(e.target.value ? Number(e.target.value) : null)}
             className={inputClass}
           >
+            <option value="" disabled>
+              월
+            </option>
             {MONTH_OPTIONS.map((m) => (
               <option key={m} value={m}>
                 {m}월
@@ -137,10 +151,13 @@ export function BirthInfoForm({
           </select>
           <select
             aria-label="일"
-            value={effectiveDay}
-            onChange={(e) => setDay(Number(e.target.value))}
+            value={effectiveDay ?? ""}
+            onChange={(e) => setDay(e.target.value ? Number(e.target.value) : null)}
             className={inputClass}
           >
+            <option value="" disabled>
+              일
+            </option>
             {dayOptions.map((d) => (
               <option key={d} value={d}>
                 {d}일
@@ -178,10 +195,13 @@ export function BirthInfoForm({
           <div className="grid grid-cols-2 gap-2">
             <select
               aria-label="시"
-              value={hour}
-              onChange={(e) => setHour(Number(e.target.value))}
+              value={hour ?? ""}
+              onChange={(e) => setHour(e.target.value ? Number(e.target.value) : null)}
               className={inputClass}
             >
+              <option value="" disabled>
+                시
+              </option>
               {Array.from({ length: 24 }, (_, h) => h).map((h) => (
                 <option key={h} value={h}>
                   {String(h).padStart(2, "0")}시
@@ -190,10 +210,13 @@ export function BirthInfoForm({
             </select>
             <select
               aria-label="분"
-              value={minute}
-              onChange={(e) => setMinute(Number(e.target.value))}
+              value={minute ?? ""}
+              onChange={(e) => setMinute(e.target.value ? Number(e.target.value) : null)}
               className={inputClass}
             >
+              <option value="" disabled>
+                분
+              </option>
               {Array.from({ length: 60 }, (_, m) => m).map((m) => (
                 <option key={m} value={m}>
                   {String(m).padStart(2, "0")}분
@@ -235,10 +258,10 @@ export function BirthInfoForm({
 
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !canSubmit}
         className="mt-2 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {submitting ? "사주를 풀이하는 중..." : "무료로 사주 보기"}
+        {submitting ? "사주를 풀이하는 중..." : canSubmit ? "무료로 사주 보기" : "생년월일시를 선택해주세요"}
       </button>
     </form>
   );

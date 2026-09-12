@@ -46,6 +46,18 @@ export default async function Home() {
             >
               🌙 오늘의 운세
             </a>
+            <Link
+              href="/type-test"
+              className="rounded-xl border border-border-subtle px-4 py-2.5 text-center text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
+            >
+              🧪 심리테스트
+            </Link>
+            <Link
+              href="/exam-luck"
+              className="rounded-xl border border-border-subtle px-4 py-2.5 text-center text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
+            >
+              📚 합격운 흐름
+            </Link>
           </div>
         </div>
       </main>
@@ -54,21 +66,6 @@ export default async function Home() {
         {/* 후기는 결과 화면 안에서 4,900원 상세 분석 가치·CTA 바로 다음(구매 판단 시점)에
             노출한다 — SajuFlow → ResultView로 그대로 내려보내고 페이지 레벨에서는 더 렌더링하지 않는다. */}
         <SajuFlow reviews={reviews} />
-      </div>
-
-      <div className="mt-6 flex flex-col items-center gap-2">
-        <Link
-          href="/type-test"
-          className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
-        >
-          🧪 사주 심리테스트로 내 유형 알아보기
-        </Link>
-        <Link
-          href="/exam-luck"
-          className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
-        >
-          📚 수험생을 위한 합격운 흐름 보기
-        </Link>
       </div>
 
       <SiteFooter />

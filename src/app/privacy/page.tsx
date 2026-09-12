@@ -68,6 +68,12 @@ export default function PrivacyPage() {
             <strong>Vercel, Neon(데이터베이스 호스팅)</strong>: 서비스 인프라 운영을 위해
             주문 데이터가 저장되는 서버를 제공합니다.
           </li>
+          <li>
+            <strong>카카오 애드핏(Kakao AdFit)</strong>: 서비스 운영 재원 마련을 위해 무료
+            이용 화면에 배너 광고를 게재합니다. 광고 게재 과정에서 애드핏 SDK가 광고 식별자,
+            쿠키, 기기·브라우저 정보 등을 수집·이용할 수 있으며, 이는 카카오의 광고 정책에
+            따라 처리됩니다. 유료 결제를 완료한 이용자에게는 광고가 노출되지 않습니다.
+          </li>
         </ul>
       </section>
 

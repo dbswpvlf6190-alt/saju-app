@@ -90,10 +90,19 @@ export function ResultView({
         <PillarCard label="시주" pillar={result.timePillar} revealDelayMs={420} />
       </div>
 
-      {/* ② 기본 성향 */}
+      {/* ② 기본 성향 — 성격 설명으로 공감을 쌓은 바로 다음 문장을 블러 처리해서 궁금증으로
+          이어붙인다(free.personalityHook, content.ts). 상세 분석 잠금 미리보기(PremiumUnlock)와
+          같은 방식이지만 여긴 오행(5종) 대신 일간(10종) 분기라 훨씬 구체적으로 느껴진다. */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
         <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
         <p className="leading-relaxed text-foreground">{free.personality}</p>
+        <p className="leading-relaxed text-foreground">
+          {free.personalityHook.visible}{" "}
+          <span className="select-none text-foreground-muted/40 blur-[3px]">
+            {free.personalityHook.blind}
+          </span>{" "}
+          <span className="text-xs text-accent-gold-soft">🔒</span>
+        </p>
       </div>
 
       {/* ③ 오행 분석 */}

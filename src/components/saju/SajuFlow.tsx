@@ -46,11 +46,15 @@ async function calculateSajuRemote(birthInput: SajuInput): Promise<SajuResult> {
 export function SajuFlow({
   reviews,
   entryMode = "default",
+  focus,
 }: {
   reviews: ReviewItem[];
   /** "typeTest"/"examLuck"이면 각각 /type-test, /exam-luck 진입으로 기록하고, 결과
    * 화면에 그에 맞는 카드를 먼저 보여준다. */
   entryMode?: "default" | "typeTest" | "examLuck";
+  /** 홈 화면 페르소나 선택("돈 문제가 궁금해요"/"연애가 궁금해요")에서 넘어온 관심사.
+   * ResultView로 그대로 전달해 무료 요약 노출 순서만 바꾼다. */
+  focus?: "wealth" | "love";
 }) {
   const [result, setResult] = useState<SajuResult | null>(null);
   const [name, setName] = useState("");
@@ -204,6 +208,7 @@ export function SajuFlow({
             resumePaymentId={resumePaymentId}
             reviews={reviews}
             revealMode={entryMode === "default" ? undefined : entryMode}
+            focus={focus}
           />
         </div>
       )}

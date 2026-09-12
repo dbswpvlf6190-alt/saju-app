@@ -48,8 +48,9 @@ export function SajuFlow({
   entryMode = "default",
 }: {
   reviews: ReviewItem[];
-  /** "typeTest"면 /type-test 진입으로 기록하고, 결과 화면에 유형 테스트 카드를 먼저 보여준다. */
-  entryMode?: "default" | "typeTest";
+  /** "typeTest"/"examLuck"이면 각각 /type-test, /exam-luck 진입으로 기록하고, 결과
+   * 화면에 그에 맞는 카드를 먼저 보여준다. */
+  entryMode?: "default" | "typeTest" | "examLuck";
 }) {
   const [result, setResult] = useState<SajuResult | null>(null);
   const [name, setName] = useState("");
@@ -202,7 +203,7 @@ export function SajuFlow({
             onRestart={handleRestart}
             resumePaymentId={resumePaymentId}
             reviews={reviews}
-            showTypeReveal={entryMode === "typeTest"}
+            revealMode={entryMode === "default" ? undefined : entryMode}
           />
         </div>
       )}

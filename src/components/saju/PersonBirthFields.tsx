@@ -202,8 +202,8 @@ export function PersonBirthFields({
         <span className="text-sm text-foreground-muted">성별 (필수)</span>
         <div className="grid grid-cols-2 gap-2">
           {([
-            ["female", "여성"],
             ["male", "남성"],
+            ["female", "여성"],
           ] as [Gender, string][]).map(([g, label]) => (
             <button
               key={g}

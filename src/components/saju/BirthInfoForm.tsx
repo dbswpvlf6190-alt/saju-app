@@ -231,8 +231,8 @@ export function BirthInfoForm({
         <span className="text-sm text-foreground-muted">성별</span>
         <div className="grid grid-cols-2 gap-2">
           {([
-            ["female", "여성"],
             ["male", "남성"],
+            ["female", "여성"],
           ] as [Gender, string][]).map(([value, label]) => (
             <button
               key={value}

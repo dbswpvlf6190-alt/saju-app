@@ -21,16 +21,25 @@ import { ExamLuckCard } from "./ExamLuckCard";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
 
-// 무료로 공개하는 3개 카테고리 + 노출 순서. relationship/yearly는 유료 상세 분석에서만
+// 무료로 공개하는 3개 카테고리 + 기본 노출 순서. relationship/yearly는 유료 상세 분석에서만
 // 제공한다(기존 상품 구성 그대로 유지 — 여기서 새 카테고리를 만들지 않는다).
 // PremiumUnlock의 잠긴 미리보기 목록(연애·재물·직업·인간관계·올해의 흐름 순)과 앞 3개
 // 순서를 맞춰서, 방금 본 무료 요약이 바로 아래 유료 미리보기로 자연스럽게 이어지게 한다.
-const FREE_PREVIEW_ORDER = ["love", "wealth", "career"] as const;
-const FREE_PREVIEW_EMOJI: Record<(typeof FREE_PREVIEW_ORDER)[number], string> = {
+const DEFAULT_FREE_PREVIEW_ORDER = ["love", "wealth", "career"] as const;
+type FreePreviewKey = (typeof DEFAULT_FREE_PREVIEW_ORDER)[number];
+const FREE_PREVIEW_EMOJI: Record<FreePreviewKey, string> = {
   wealth: "💰",
   love: "❤️",
   career: "💼",
 };
+
+// 홈 화면에서 "돈 문제/연애가 궁금해요"를 먼저 고르고 들어온 경우, 그 관심사를 무료 요약
+// 맨 앞으로 올린다 — 같은 계산 결과를 다시 하는 게 아니라 보여주는 순서만 바꾸는 것이다.
+function buildFreePreviewOrder(focus?: "wealth" | "love"): FreePreviewKey[] {
+  if (!focus) return [...DEFAULT_FREE_PREVIEW_ORDER];
+  const rest = DEFAULT_FREE_PREVIEW_ORDER.filter((key) => key !== focus);
+  return [focus, ...rest];
+}
 
 export function ResultView({
   name,
@@ -39,6 +48,7 @@ export function ResultView({
   resumePaymentId,
   reviews,
   revealMode,
+  focus,
 }: {
   name: string;
   result: SajuResult;
@@ -48,6 +58,9 @@ export function ResultView({
   /** /type-test·/exam-luck처럼 별도 랜딩으로 들어온 경우에만 지정된다 — 같은 계산 결과를
    * 그 랜딩에 맞는 카드로 먼저 보여준 뒤, 아래는 기존 정식 사주 결과 동선을 그대로 이어간다. */
   revealMode?: "typeTest" | "examLuck";
+  /** 홈 화면 페르소나 선택("돈 문제가 궁금해요"/"연애가 궁금해요")에서 넘어온 관심사.
+   * 무료 요약 노출 순서만 바꾸고, 계산이나 유료 상품 구성에는 영향 없다. */
+  focus?: "wealth" | "love";
 }) {
   const [isPaid, setIsPaid] = useState(false);
   const free = generateFreeContent(result);
@@ -56,7 +69,7 @@ export function ResultView({
   const type = revealMode === "typeTest" ? getTypeProfile(result.dayPillar.ganKor) : null;
   const examLuck = revealMode === "examLuck" ? getExamLuckFlow(free.dominantWuxing) : null;
 
-  const freePreviewSections = FREE_PREVIEW_ORDER.map(
+  const freePreviewSections = buildFreePreviewOrder(focus).map(
     (key) => premiumSections.find((s) => s.key === key)!,
   );
 
@@ -124,7 +137,7 @@ export function ResultView({
         {freePreviewSections.map((section) => (
           <div key={section.key}>
             <span className="text-sm font-medium text-foreground">
-              {FREE_PREVIEW_EMOJI[section.key as (typeof FREE_PREVIEW_ORDER)[number]]} {section.title}
+              {FREE_PREVIEW_EMOJI[section.key as FreePreviewKey]} {section.title}
             </span>
             <p className="text-sm leading-relaxed text-foreground-muted">{section.teaser}</p>
           </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   DEFAULT_PERSON_VALUES,
   PersonBirthFields,
+  isPersonComplete,
   personToSajuInput,
   type PersonFormValues,
 } from "./PersonBirthFields";
@@ -26,9 +27,11 @@ export function CompatibilityForm({
 }) {
   const [self, setSelf] = useState<PersonFormValues>(DEFAULT_PERSON_VALUES);
   const [partner, setPartner] = useState<PersonFormValues>({ ...DEFAULT_PERSON_VALUES, gender: "male" });
+  const canSubmit = isPersonComplete(self) && isPersonComplete(partner);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!canSubmit) return;
     onSubmit({
       selfName: self.name.trim(),
       partnerName: partner.name.trim(),
@@ -62,10 +65,14 @@ export function CompatibilityForm({
 
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !canSubmit}
         className="rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {submitting ? "궁합을 분석하는 중..." : "❤️ 무료로 궁합 보기"}
+        {submitting
+          ? "궁합을 분석하는 중..."
+          : canSubmit
+            ? "❤️ 무료로 궁합 보기"
+            : "두 사람의 생년월일시를 선택해주세요"}
       </button>
     </form>
   );

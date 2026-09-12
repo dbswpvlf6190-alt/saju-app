@@ -6,27 +6,36 @@ export interface PersonFormValues {
   name: string;
   calendarType: CalendarType;
   isLeapMonth: boolean;
-  year: number;
-  month: number;
-  day: number;
+  year: number | null;
+  month: number | null;
+  day: number | null;
   timeUnknown: boolean;
-  hour: number;
-  minute: number;
+  hour: number | null;
+  minute: number | null;
   gender: Gender;
 }
 
+// 생년월일시는 일부러 기본값을 두지 않는다 — 기본값이 있으면 아무것도 안 고르고 바로
+// 제출해도 그 기본값(2000년 1월 1일 등)으로 궁합이 계산돼서, 본인/상대방의 실제
+// 생년월일시를 입력하지 않고도 "결과"가 나오는 것처럼 보이는 문제가 있었다
+// (BirthInfoForm.tsx와 동일한 이유).
 export const DEFAULT_PERSON_VALUES: PersonFormValues = {
   name: "",
   calendarType: "solar",
   isLeapMonth: false,
-  year: 2000,
-  month: 1,
-  day: 1,
+  year: null,
+  month: null,
+  day: null,
   timeUnknown: false,
-  hour: 12,
-  minute: 0,
+  hour: null,
+  minute: null,
   gender: "female",
 };
+
+/** 제출 가능한 상태인지(생년월일 + 시간을 모른다고 체크 안 했다면 시각까지) 확인한다. */
+export function isPersonComplete(p: PersonFormValues): boolean {
+  return p.year !== null && p.month !== null && p.day !== null && (p.timeUnknown || (p.hour !== null && p.minute !== null));
+}
 
 const YEAR_OPTIONS = Array.from({ length: 2100 - 1900 + 1 }, (_, i) => 2100 - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -56,9 +65,10 @@ export function PersonBirthFields({
   value: PersonFormValues;
   onChange: (next: PersonFormValues) => void;
 }) {
-  const dayCount = getDayCount(value.calendarType, value.year, value.month);
+  const dayCount =
+    value.year !== null && value.month !== null ? getDayCount(value.calendarType, value.year, value.month) : 31;
   const dayOptions = Array.from({ length: dayCount }, (_, i) => i + 1);
-  const effectiveDay = Math.min(value.day, dayCount);
+  const effectiveDay = value.day !== null ? Math.min(value.day, dayCount) : null;
 
   function patch(partial: Partial<PersonFormValues>) {
     onChange({ ...value, ...partial });
@@ -107,10 +117,13 @@ export function PersonBirthFields({
         <div className="grid grid-cols-3 gap-2">
           <select
             aria-label="년"
-            value={value.year}
-            onChange={(e) => patch({ year: Number(e.target.value) })}
+            value={value.year ?? ""}
+            onChange={(e) => patch({ year: e.target.value ? Number(e.target.value) : null })}
             className={inputClass}
           >
+            <option value="" disabled>
+              년도
+            </option>
             {YEAR_OPTIONS.map((y) => (
               <option key={y} value={y}>
                 {y}년
@@ -119,10 +132,13 @@ export function PersonBirthFields({
           </select>
           <select
             aria-label="월"
-            value={value.month}
-            onChange={(e) => patch({ month: Number(e.target.value) })}
+            value={value.month ?? ""}
+            onChange={(e) => patch({ month: e.target.value ? Number(e.target.value) : null })}
             className={inputClass}
           >
+            <option value="" disabled>
+              월
+            </option>
             {MONTH_OPTIONS.map((m) => (
               <option key={m} value={m}>
                 {m}월
@@ -131,10 +147,13 @@ export function PersonBirthFields({
           </select>
           <select
             aria-label="일"
-            value={effectiveDay}
-            onChange={(e) => patch({ day: Number(e.target.value) })}
+            value={effectiveDay ?? ""}
+            onChange={(e) => patch({ day: e.target.value ? Number(e.target.value) : null })}
             className={inputClass}
           >
+            <option value="" disabled>
+              일
+            </option>
             {dayOptions.map((d) => (
               <option key={d} value={d}>
                 {d}일
@@ -172,10 +191,13 @@ export function PersonBirthFields({
           <div className="grid grid-cols-2 gap-2">
             <select
               aria-label="시"
-              value={value.hour}
-              onChange={(e) => patch({ hour: Number(e.target.value) })}
+              value={value.hour ?? ""}
+              onChange={(e) => patch({ hour: e.target.value ? Number(e.target.value) : null })}
               className={inputClass}
             >
+              <option value="" disabled>
+                시
+              </option>
               {Array.from({ length: 24 }, (_, h) => h).map((h) => (
                 <option key={h} value={h}>
                   {String(h).padStart(2, "0")}시
@@ -184,10 +206,13 @@ export function PersonBirthFields({
             </select>
             <select
               aria-label="분"
-              value={value.minute}
-              onChange={(e) => patch({ minute: Number(e.target.value) })}
+              value={value.minute ?? ""}
+              onChange={(e) => patch({ minute: e.target.value ? Number(e.target.value) : null })}
               className={inputClass}
             >
+              <option value="" disabled>
+                분
+              </option>
               {Array.from({ length: 60 }, (_, m) => m).map((m) => (
                 <option key={m} value={m}>
                   {String(m).padStart(2, "0")}분
@@ -202,8 +227,8 @@ export function PersonBirthFields({
         <span className="text-sm text-foreground-muted">성별 (필수)</span>
         <div className="grid grid-cols-2 gap-2">
           {([
-            ["female", "여성"],
             ["male", "남성"],
+            ["female", "여성"],
           ] as [Gender, string][]).map(([g, label]) => (
             <button
               key={g}
@@ -224,15 +249,17 @@ export function PersonBirthFields({
   );
 }
 
+/** isPersonComplete(p)로 검증된 뒤에만 호출한다는 전제로, 필수값의 null 아님을
+ * 단언한다(!) — 호출부(CompatibilityForm)가 검증 전에는 제출 버튼을 막아둔다. */
 export function personToSajuInput(p: PersonFormValues) {
   return {
     calendarType: p.calendarType,
     isLeapMonth: p.calendarType === "lunar" ? p.isLeapMonth : false,
-    year: p.year,
-    month: p.month,
-    day: Math.min(p.day, getDayCount(p.calendarType, p.year, p.month)),
-    hour: p.timeUnknown ? undefined : p.hour,
-    minute: p.timeUnknown ? undefined : p.minute,
+    year: p.year!,
+    month: p.month!,
+    day: Math.min(p.day!, getDayCount(p.calendarType, p.year!, p.month!)),
+    hour: p.timeUnknown ? undefined : p.hour!,
+    minute: p.timeUnknown ? undefined : p.minute!,
     gender: p.gender,
   };
 }

@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { SajuFlow } from "@/components/saju/SajuFlow";
+import { PersonaHome } from "@/components/saju/PersonaHome";
 import { SiteFooter } from "@/components/saju/SiteFooter";
 import { getVisibleReviews } from "@/lib/reviews";
 
@@ -12,65 +11,7 @@ export default async function Home() {
 
   return (
     <div className="bg-starfield flex flex-1 flex-col items-center bg-background px-5 py-14">
-      <main className="flex w-full max-w-md flex-col items-center gap-4 text-center">
-        <span className="text-xs font-medium tracking-[0.2em] text-accent-gold-soft">
-          SAJU LAB
-        </span>
-        <h1 className="font-serif text-3xl leading-snug text-foreground">
-          생년월일시로 읽는
-          <br />
-          나의 사주팔자
-        </h1>
-        <p className="max-w-xs text-sm leading-relaxed text-foreground-muted">
-          정확한 절기·음양력 계산으로 나의 사주를 무료로 확인하고, 성격부터 오행 균형까지
-          한눈에 살펴보세요.
-        </p>
-
-        <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
-          <a
-            href="#saju-form"
-            className="rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430]"
-          >
-            🔮 무료 사주 시작하기
-          </a>
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              href="/compatibility"
-              className="rounded-xl border border-border-subtle px-4 py-2.5 text-center text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
-            >
-              ❤️ 궁합 보기
-            </Link>
-            <a
-              href="#saju-form"
-              className="rounded-xl border border-border-subtle px-4 py-2.5 text-center text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
-            >
-              🌙 오늘의 운세
-            </a>
-          </div>
-        </div>
-      </main>
-
-      <div id="saju-form" className="mt-10 w-full max-w-md scroll-mt-10">
-        {/* 후기는 결과 화면 안에서 4,900원 상세 분석 가치·CTA 바로 다음(구매 판단 시점)에
-            노출한다 — SajuFlow → ResultView로 그대로 내려보내고 페이지 레벨에서는 더 렌더링하지 않는다. */}
-        <SajuFlow reviews={reviews} />
-      </div>
-
-      <div className="mt-6 flex flex-col items-center gap-2">
-        <Link
-          href="/type-test"
-          className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
-        >
-          🧪 사주 심리테스트로 내 유형 알아보기
-        </Link>
-        <Link
-          href="/exam-luck"
-          className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
-        >
-          📚 수험생을 위한 합격운 흐름 보기
-        </Link>
-      </div>
-
+      <PersonaHome reviews={reviews} />
       <SiteFooter />
     </div>
   );

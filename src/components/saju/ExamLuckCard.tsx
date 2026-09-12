@@ -1,6 +1,7 @@
 import type { WuXing } from "@/lib/saju/ganzhi";
 import type { ExamLuckFlow } from "@/lib/saju/examLuck";
 import { ShareButton } from "./ShareButton";
+import { WuxingMascot } from "./WuxingMascot";
 
 /** /exam-luck 진입자에게만 보여주는 "합격운 흐름" 카드. 특정 대학명이나 숫자 확률은
  * 절대 쓰지 않는다(examLuck.ts 참고) — 강점과 주의할 점을 함께 담은 정성적 흐름만
@@ -19,6 +20,7 @@ export function ExamLuckCard({
       <span className="text-xs font-medium tracking-[0.2em] text-accent-gold-soft">
         나의 합격운 흐름
       </span>
+      <WuxingMascot wuxing={dominantWuxing} size={100} />
       <h2 className="font-serif text-2xl text-accent-gold-soft">
         {name ? `${name}님은 ` : "나는"}
         {flow.badgeLabel}

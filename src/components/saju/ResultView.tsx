@@ -18,6 +18,7 @@ import { DailyFortuneCard } from "./DailyFortuneCard";
 import { PushOptIn } from "./PushOptIn";
 import { TypeRevealCard } from "./TypeRevealCard";
 import { ExamLuckCard } from "./ExamLuckCard";
+import { WuxingMascot } from "./WuxingMascot";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
 
@@ -83,7 +84,7 @@ export function ResultView({
         <TypeRevealCard
           name={name}
           dayMasterMetaphor={free.dayMasterMetaphor}
-          dominantWuxing={free.dominantWuxing}
+          wuxing={result.dayPillar.ganWuxing}
           type={type}
         />
       )}
@@ -98,6 +99,7 @@ export function ResultView({
         <span className="text-sm text-foreground-muted">
           {name ? `${name}님의 사주` : "나의 사주"}
         </span>
+        <WuxingMascot wuxing={result.dayPillar.ganWuxing} size={104} />
         <h2 className="font-serif text-2xl text-accent-gold-soft">{free.dayMasterLabel}</h2>
         <p className="text-sm text-foreground-muted">{free.dayMasterMetaphor}</p>
         <p className="mt-1 max-w-xs text-sm leading-relaxed text-foreground">{free.balanceNote}</p>

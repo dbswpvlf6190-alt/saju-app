@@ -78,6 +78,12 @@ export function ShareButton({
     const imageUrl = buildStoryImageUrl();
     if (!imageUrl) return;
 
+    // 브라우저는 클릭 이벤트 안에서 "동기적으로" 연 창만 정상 팝업으로 인정한다.
+    // 아래 fetch가 끝난 뒤에 window.open을 부르면 사용자 제스처 유효 시간이 지나있어서
+    // 에러 없이 조용히 팝업이 차단된다(데스크톱에서 실제로 겪은 버그). 그래서 빈 탭을
+    // 클릭 즉시 먼저 열어두고, 이미지가 준비되면 그 탭 주소만 바꿔치기한다.
+    const preOpenedTab = window.open("", "_blank");
+
     setStoryStatus("preparing");
     try {
       const res = await fetch(imageUrl);
@@ -87,6 +93,7 @@ export function ShareButton({
 
       // 모바일에서는 파일 첨부 공유 시트를 띄워 인스타그램 스토리로 바로 보낼 수 있게 한다.
       if (navigator.canShare?.({ files: [file] })) {
+        preOpenedTab?.close(); // 이 경로는 새 탭이 필요 없으니 미리 열어둔 빈 탭은 정리한다.
         await navigator.share({ files: [file], title, text });
         setStoryStatus("idle");
         return;
@@ -95,9 +102,15 @@ export function ShareButton({
       // 데스크톱 등 파일 공유를 지원하지 않는 환경은 새 탭에 이미지를 열어 저장 후 직접
       // 업로드하게 한다.
       const objectUrl = URL.createObjectURL(blob);
-      window.open(objectUrl, "_blank");
+      if (preOpenedTab) {
+        preOpenedTab.location.href = objectUrl;
+      } else {
+        // 팝업 차단 설정 등으로 미리 열기 자체가 실패했을 때의 마지막 시도.
+        window.open(objectUrl, "_blank");
+      }
       setStoryStatus("idle");
     } catch {
+      preOpenedTab?.close();
       // 사용자가 공유를 취소한 경우도 이 경로로 들어오므로 에러 문구를 오래 띄우지 않는다.
       setStoryStatus("error");
       setTimeout(() => setStoryStatus("idle"), 2000);

@@ -8,6 +8,7 @@ import type { SajuResult } from "@/lib/saju";
 import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
 import { getDailyFortuneDetail } from "@/lib/saju/dailyFortune";
 import { getTypeProfile } from "@/lib/saju/typeProfile";
+import { getExamLuckFlow } from "@/lib/saju/examLuck";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { PremiumUnlock } from "./PremiumUnlock";
@@ -16,6 +17,7 @@ import { ShareButton } from "./ShareButton";
 import { DailyFortuneCard } from "./DailyFortuneCard";
 import { PushOptIn } from "./PushOptIn";
 import { TypeRevealCard } from "./TypeRevealCard";
+import { ExamLuckCard } from "./ExamLuckCard";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
 
@@ -36,22 +38,23 @@ export function ResultView({
   onRestart,
   resumePaymentId,
   reviews,
-  showTypeReveal,
+  revealMode,
 }: {
   name: string;
   result: SajuResult;
   onRestart: () => void;
   resumePaymentId: string | null;
   reviews: ReviewItem[];
-  /** /type-test에서 들어온 경우에만 true — 같은 결과를 캐주얼한 "유형 테스트" 카드로
-   * 먼저 보여준 뒤, 아래는 기존 정식 사주 결과 동선을 그대로 이어간다. */
-  showTypeReveal?: boolean;
+  /** /type-test·/exam-luck처럼 별도 랜딩으로 들어온 경우에만 지정된다 — 같은 계산 결과를
+   * 그 랜딩에 맞는 카드로 먼저 보여준 뒤, 아래는 기존 정식 사주 결과 동선을 그대로 이어간다. */
+  revealMode?: "typeTest" | "examLuck";
 }) {
   const [isPaid, setIsPaid] = useState(false);
   const free = generateFreeContent(result);
   const premiumSections = getPremiumSections(result);
   const daily = getDailyFortuneDetail(result);
-  const type = showTypeReveal ? getTypeProfile(result.dayPillar.ganKor) : null;
+  const type = revealMode === "typeTest" ? getTypeProfile(result.dayPillar.ganKor) : null;
+  const examLuck = revealMode === "examLuck" ? getExamLuckFlow(free.dominantWuxing) : null;
 
   const freePreviewSections = FREE_PREVIEW_ORDER.map(
     (key) => premiumSections.find((s) => s.key === key)!,
@@ -72,6 +75,10 @@ export function ResultView({
         />
       )}
 
+      {examLuck && (
+        <ExamLuckCard name={name} dominantWuxing={free.dominantWuxing} flow={examLuck} />
+      )}
+
       {/* ① 나의 사주 핵심 결과 — 결과가 뜨는 순간을 "펼쳐지는" 느낌으로 주기 위해 헤드라인은
           팝인, 네 기둥은 순서대로 나타나게 한다(reveal-in/-pop, globals.css). */}
       <div className="reveal-pop flex flex-col items-center gap-2 text-center">
@@ -90,10 +97,19 @@ export function ResultView({
         <PillarCard label="시주" pillar={result.timePillar} revealDelayMs={420} />
       </div>
 
-      {/* ② 기본 성향 */}
+      {/* ② 기본 성향 — 성격 설명으로 공감을 쌓은 바로 다음 문장을 블러 처리해서 궁금증으로
+          이어붙인다(free.personalityHook, content.ts). 상세 분석 잠금 미리보기(PremiumUnlock)와
+          같은 방식이지만 여긴 오행(5종) 대신 일간(10종) 분기라 훨씬 구체적으로 느껴진다. */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
         <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
         <p className="leading-relaxed text-foreground">{free.personality}</p>
+        <p className="leading-relaxed text-foreground">
+          {free.personalityHook.visible}{" "}
+          <span className="select-none text-foreground-muted/40 blur-[3px]">
+            {free.personalityHook.blind}
+          </span>{" "}
+          <span className="text-xs text-accent-gold-soft">🔒</span>
+        </p>
       </div>
 
       {/* ③ 오행 분석 */}

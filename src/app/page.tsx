@@ -56,12 +56,20 @@ export default async function Home() {
         <SajuFlow reviews={reviews} />
       </div>
 
-      <Link
-        href="/type-test"
-        className="mt-6 text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
-      >
-        🧪 사주 심리테스트로 내 유형 알아보기
-      </Link>
+      <div className="mt-6 flex flex-col items-center gap-2">
+        <Link
+          href="/type-test"
+          className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+        >
+          🧪 사주 심리테스트로 내 유형 알아보기
+        </Link>
+        <Link
+          href="/exam-luck"
+          className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+        >
+          📚 수험생을 위한 합격운 흐름 보기
+        </Link>
+      </div>
 
       <SiteFooter />
     </div>

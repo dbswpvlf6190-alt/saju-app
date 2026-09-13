@@ -1,4 +1,5 @@
 import { PersonaHome } from "@/components/saju/PersonaHome";
+import { FaqSection } from "@/components/saju/FaqSection";
 import { SiteFooter } from "@/components/saju/SiteFooter";
 import { getVisibleReviews } from "@/lib/reviews";
 
@@ -12,6 +13,7 @@ export default async function Home() {
   return (
     <div className="bg-starfield flex flex-1 flex-col items-center bg-background px-5 py-14">
       <PersonaHome reviews={reviews} />
+      <FaqSection />
       <SiteFooter />
     </div>
   );

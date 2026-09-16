@@ -37,6 +37,18 @@ enum OrderStatus {
   CANCELED
 }
 
+// 인스타 팔로우+댓글 추첨 이벤트로 매주 발급하는 무료 리포트 코드. 관리자가 /admin에서
+// 코드를 발급해 당첨자에게 DM으로 전달하면, 사용자는 결제 화면에서 코드를 입력해 결제 없이
+// 프리미엄 리포트를 받는다(코드 1개 = 1회용, /api/coupons/redeem에서 amount 0인 Order로 전환).
+model Coupon {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime
+  usedAt      DateTime?
+  usedOrderId String?
+}
+
 // 결제 완료(PAID) 주문에 한해 남길 수 있는 후기. paymentId로 실제 구매를 증명하며,
 // 후기 작성자의 신원(이름/연락처 등)은 별도로 저장하지 않는다.
 model Review {

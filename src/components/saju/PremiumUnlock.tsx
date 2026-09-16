@@ -24,6 +24,7 @@ import {
 } from "@/lib/payment/ctaCopy";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
+import { NewYearUpsellCard } from "./NewYearUpsellCard";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -52,6 +53,10 @@ export function PremiumUnlock({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState(name);
   const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  const [showCouponInput, setShowCouponInput] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponStatus, setCouponStatus] = useState<"idle" | "redeeming" | "error">("idle");
+  const [couponError, setCouponError] = useState<string | null>(null);
   // 상품 가치 + CTA를 먼저 보여주고, 클릭해서 구매 의사를 밝힌 뒤에야 이름·이메일·휴대폰
   // 입력폼을 보여주기 위한 2단계 흐름. 결제 실패로 되돌아와도 입력폼은 유지해야 하므로
   // 여기서 "details"로 넘어간 뒤에는 "intro"로 되돌리지 않는다. 모바일 결제창 리디렉션
@@ -140,6 +145,35 @@ export function PremiumUnlock({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumePaymentId]);
+
+  async function handleRedeemCoupon() {
+    if (!couponCode.trim()) {
+      setCouponStatus("error");
+      setCouponError("쿠폰 코드를 입력해 주세요.");
+      return;
+    }
+    setCouponStatus("redeeming");
+    setCouponError(null);
+    try {
+      const res = await fetch("/api/coupons/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), birthInput: resultToInput(result) }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? "쿠폰 사용에 실패했습니다.");
+      }
+      trackEvent("coupon_redeemed", { productType: "premium_report" });
+      setStatus("processing");
+      await fetchReport(data.paymentId);
+      setCouponStatus("idle");
+    } catch (e) {
+      setCouponStatus("error");
+      setStatus("locked");
+      setCouponError(e instanceof Error ? e.message : "쿠폰 사용 중 오류가 발생했습니다.");
+    }
+  }
 
   async function handlePurchase() {
     trackEvent("checkout_start", { productType: "premium_report" });
@@ -267,6 +301,11 @@ export function PremiumUnlock({
           </>
         )}
 
+        {/* 시즌 한정 업셀(2027 신년운세). 방금 리포트를 받아 신뢰가 가장 높은 시점 바로
+            아래에 배치한다 — 결제 정보(이름·이메일·휴대폰)는 방금 입력한 값을 그대로
+            재사용해서, 다시 입력하는 마찰 없이 버튼 한 번으로 추가 결제가 끝나게 한다. */}
+        <NewYearUpsellCard result={result} fullName={fullName} email={email} phoneNumber={phoneNumber} />
+
         {/* 구매 후 공유. 결제까지 마친 시점이라 서비스에 대한 신뢰가 가장 높은 순간이고,
             공유 카드에는 무료 결과와 동일한 요약값(일간 별명·비유)만 담아 유료 리포트
             본문은 절대 노출하지 않는다. */}
@@ -349,6 +388,43 @@ export function PremiumUnlock({
               환불정책 확인하기
             </Link>
           </div>
+
+          {/* 인스타 팔로우+댓글 추첨 이벤트 당첨자용. 결제 CTA보다 눈에 띄지 않게 작은
+              토글 링크로만 노출해서, 일반 구매 동선을 방해하지 않는다. */}
+          {showCouponInput ? (
+            <div className="flex flex-col gap-2 rounded-xl border border-border-subtle bg-background-elevated/60 p-3">
+              <label htmlFor="coupon-code" className="text-xs text-foreground-muted">
+                쿠폰 코드
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="coupon-code"
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="SAJU****"
+                  className="w-full rounded-lg border border-border-subtle bg-background-card px-3 py-2 text-sm text-foreground outline-none focus:border-accent-gold"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleRedeemCoupon()}
+                  disabled={couponStatus === "redeeming"}
+                  className="shrink-0 rounded-lg border border-accent-gold px-3 py-2 text-sm font-medium text-accent-gold-soft transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {couponStatus === "redeeming" ? "확인 중..." : "코드 사용하기"}
+                </button>
+              </div>
+              {couponError && <p className="text-xs text-red-300">{couponError}</p>}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowCouponInput(true)}
+              className="text-center text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+            >
+              쿠폰 코드가 있으신가요?
+            </button>
+          )}
         </div>
       ) : (
         // 2단계: CTA를 눌러 구매 의사를 밝힌 뒤에만 결제 정보 입력란이 나타난다.

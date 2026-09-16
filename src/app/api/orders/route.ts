@@ -19,7 +19,7 @@ interface CreateOrderBody {
 type BirthInputPayload = SajuInput | { self: SajuInput; partner: SajuInput };
 
 function validateAndBuildPayload(body: CreateOrderBody, productType: ProductType): BirthInputPayload {
-  if (productType === "premium_report") {
+  if (productType === "premium_report" || productType === "new_year_report") {
     if (!body.birthInput) throw new SajuInputError("생년월일 정보가 필요합니다.");
     calculateSaju(body.birthInput);
     return body.birthInput;

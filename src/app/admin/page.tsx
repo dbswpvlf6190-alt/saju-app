@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminReviewToggle } from "@/components/admin/AdminReviewToggle";
+import { CouponIssuer } from "@/components/admin/CouponIssuer";
 import { reconcileStalePendingOrders } from "@/lib/payment/reconcile";
 import { getFunnelSummary } from "@/lib/analytics/funnelSummary";
 import type { AnalyticsEventName } from "@/lib/analytics/events";
@@ -34,6 +35,7 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   push_opt_in_view: "푸시 알림 배너 노출",
   push_subscribe: "푸시 알림 구독",
   push_subscribe_denied: "푸시 알림 거부",
+  coupon_redeemed: "쿠폰 사용",
 };
 
 function pct(numerator: number, denominator: number): string {
@@ -48,12 +50,13 @@ export default async function AdminPage() {
   // PENDING 주문을 즉시 재검증해서 화면에 최신 상태가 보이게 한다.
   await reconcileStalePendingOrders();
 
-  const [orders, paidAgg, statusCounts, reviews, funnel] = await Promise.all([
+  const [orders, paidAgg, statusCounts, reviews, funnel, coupons] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amount: true }, _count: true }),
     prisma.order.groupBy({ by: ["status"], _count: true }),
     prisma.review.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     getFunnelSummary(7),
+    prisma.coupon.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
   ]);
 
   const totalRevenue = paidAgg._sum.amount ?? 0;
@@ -165,8 +168,45 @@ export default async function AdminPage() {
           </tbody>
         </table>
       </div>
+      <h2 className="font-serif text-xl text-accent-gold-soft">인스타 추첨 쿠폰</h2>
+      <CouponIssuer />
+      <div className="overflow-x-auto rounded-2xl border border-border-subtle">
+        <table className="w-full min-w-[480px] text-left text-sm">
+          <thead className="bg-background-elevated text-foreground-muted">
+            <tr>
+              <th className="px-4 py-3">코드</th>
+              <th className="px-4 py-3">상태</th>
+              <th className="px-4 py-3">발급일</th>
+              <th className="px-4 py-3">만료일</th>
+            </tr>
+          </thead>
+          <tbody>
+            {coupons.map((coupon) => (
+              <tr key={coupon.id} className="border-t border-border-subtle">
+                <td className="px-4 py-3 font-mono text-xs">{coupon.code}</td>
+                <td className="px-4 py-3">{couponStatusLabel(coupon)}</td>
+                <td className="px-4 py-3 text-foreground-muted">{coupon.createdAt.toLocaleString("ko-KR")}</td>
+                <td className="px-4 py-3 text-foreground-muted">{coupon.expiresAt.toLocaleString("ko-KR")}</td>
+              </tr>
+            ))}
+            {coupons.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-6 text-center text-foreground-muted">
+                  아직 발급한 쿠폰이 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
+}
+
+function couponStatusLabel(coupon: { usedAt: Date | null; expiresAt: Date }): string {
+  if (coupon.usedAt) return "사용됨";
+  if (coupon.expiresAt < new Date()) return "만료됨";
+  return "사용 가능";
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {

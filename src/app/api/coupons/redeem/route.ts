@@ -1,9 +1,10 @@
 import { randomUUID } from "crypto";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { calculateSaju, SajuInputError, type SajuInput } from "@/lib/saju";
 import { prisma } from "@/lib/db/prisma";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { orderAccessCookieName, signOrderAccessToken } from "@/lib/payment/orderAccess";
+import { warmReportCache } from "@/lib/reports/warm";
 
 interface RedeemCouponBody {
   code?: string;
@@ -84,6 +85,10 @@ export async function POST(req: NextRequest) {
         },
       });
       await prisma.coupon.update({ where: { code }, data: { usedOrderId: order.id } });
+
+      // 응답은 즉시 내려주고, 리포트 생성은 응답 이후 백그라운드에서 미리 시작해둔다 —
+      // 코드 입력 화면이 결과 화면으로 전환되는 그 사이에 미리 만들어두면 체감 대기시간이 줄어든다.
+      after(() => warmReportCache(order));
 
       const response = NextResponse.json({ paymentId: order.paymentId });
       response.cookies.set(orderAccessCookieName(order.paymentId), await signOrderAccessToken(order.paymentId), {

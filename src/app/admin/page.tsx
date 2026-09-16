@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminReviewToggle } from "@/components/admin/AdminReviewToggle";
 import { CouponIssuer } from "@/components/admin/CouponIssuer";
+import { AdminPreviewTool } from "@/components/admin/AdminPreviewTool";
 import { reconcileStalePendingOrders } from "@/lib/payment/reconcile";
 import { getFunnelSummary } from "@/lib/analytics/funnelSummary";
 import type { AnalyticsEventName } from "@/lib/analytics/events";
@@ -168,6 +169,9 @@ export default async function AdminPage() {
           </tbody>
         </table>
       </div>
+      <h2 className="font-serif text-xl text-accent-gold-soft">AI 콘텐츠 미리보기 (결제 없음)</h2>
+      <AdminPreviewTool />
+
       <h2 className="font-serif text-xl text-accent-gold-soft">인스타 추첨 쿠폰</h2>
       <CouponIssuer />
       <div className="overflow-x-auto rounded-2xl border border-border-subtle">

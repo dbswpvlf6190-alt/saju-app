@@ -16,3 +16,7 @@ export const PRODUCT_CATALOG: Record<ProductType, { amount: number; name: string
 export function isProductType(value: unknown): value is ProductType {
   return value === "premium_report" || value === "compatibility_report";
 }
+
+// 인스타 추첨 이벤트로 발급하는 무료 리포트 쿠폰의 유효기간. 당첨자가 DM을 늦게 확인해도
+// 쓸 수 있도록 매주 추첨 주기보다 넉넉하게 잡는다.
+export const COUPON_EXPIRY_DAYS = 14;

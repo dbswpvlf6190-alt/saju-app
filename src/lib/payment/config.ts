@@ -4,17 +4,24 @@ export const PREMIUM_REPORT_NAME = "사주 상세 분석 리포트";
 export const COMPATIBILITY_REPORT_PRICE_KRW = 4900;
 export const COMPATIBILITY_REPORT_NAME = "궁합 상세 분석 리포트";
 
-export type ProductType = "premium_report" | "compatibility_report";
+// 이번 시즌(2026년 11월~2027년 2월) 한정 업셀 상품의 대상 연도. 다음 신년운세 시즌에는
+// 이 값과 NEW_YEAR_REPORT_NAME을 함께 다음 해로 갱신해야 한다.
+export const NEW_YEAR_REPORT_TARGET_YEAR = 2027;
+export const NEW_YEAR_REPORT_PRICE_KRW = 3900;
+export const NEW_YEAR_REPORT_NAME = `${NEW_YEAR_REPORT_TARGET_YEAR} 신년운세`;
+
+export type ProductType = "premium_report" | "compatibility_report" | "new_year_report";
 
 /** 상품 가격/이름은 오직 이 카탈로그(서버)만이 결정한다. 클라이언트가 보낸 금액은 절대
  * 신뢰하지 않는다 — 개발자 도구로 금액을 조작해도 여기 정의된 값 외에는 결제가 생성되지 않는다. */
 export const PRODUCT_CATALOG: Record<ProductType, { amount: number; name: string }> = {
   premium_report: { amount: PREMIUM_REPORT_PRICE_KRW, name: PREMIUM_REPORT_NAME },
   compatibility_report: { amount: COMPATIBILITY_REPORT_PRICE_KRW, name: COMPATIBILITY_REPORT_NAME },
+  new_year_report: { amount: NEW_YEAR_REPORT_PRICE_KRW, name: NEW_YEAR_REPORT_NAME },
 };
 
 export function isProductType(value: unknown): value is ProductType {
-  return value === "premium_report" || value === "compatibility_report";
+  return value === "premium_report" || value === "compatibility_report" || value === "new_year_report";
 }
 
 // 인스타 추첨 이벤트로 발급하는 무료 리포트 쿠폰의 유효기간. 당첨자가 DM을 늦게 확인해도

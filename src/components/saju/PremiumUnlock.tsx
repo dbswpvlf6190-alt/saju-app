@@ -24,6 +24,7 @@ import {
 } from "@/lib/payment/ctaCopy";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
+import { NewYearUpsellCard } from "./NewYearUpsellCard";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -299,6 +300,11 @@ export function PremiumUnlock({
             </button>
           </>
         )}
+
+        {/* 시즌 한정 업셀(2027 신년운세). 방금 리포트를 받아 신뢰가 가장 높은 시점 바로
+            아래에 배치한다 — 결제 정보(이름·이메일·휴대폰)는 방금 입력한 값을 그대로
+            재사용해서, 다시 입력하는 마찰 없이 버튼 한 번으로 추가 결제가 끝나게 한다. */}
+        <NewYearUpsellCard result={result} fullName={fullName} email={email} phoneNumber={phoneNumber} />
 
         {/* 구매 후 공유. 결제까지 마친 시점이라 서비스에 대한 신뢰가 가장 높은 순간이고,
             공유 카드에는 무료 결과와 동일한 요약값(일간 별명·비유)만 담아 유료 리포트

@@ -143,6 +143,18 @@ function computeWuxing(pillars: Pillar[]): {
 }
 
 /**
+ * 특정 연도 자체의 세운(歲運) 간지를 계산한다 — 개인 생년월일과 무관하게, 그 해가 어떤
+ * 간지의 해인지만 구한다(예: 2027 = 정미년). 사주 연주는 입춘(절기) 기준으로 바뀌므로 1월
+ * 초/2월 초처럼 그 경계에 걸친 날짜를 쓰면 전년도 간지가 나올 수 있어, 경계에서 충분히
+ * 떨어진 그 해 7월 1일 정오를 기준일로 삼는다.
+ */
+export function getYearGanzhi(year: number): Pillar {
+  const solar = Solar.fromYmdHms(year, 7, 1, 12, 0, 0);
+  const eightChar = solar.getLunar().getEightChar();
+  return buildPillar(eightChar.getYearGan(), eightChar.getYearZhi());
+}
+
+/**
  * 생년월일시/성별을 입력받아 사주팔자(년주/월주/일주/시주)와 오행 비율을 계산한다.
  * 음력 입력은 윤달을 포함해 정확히 처리하며, 절기 기준 월주 계산은 lunar-typescript에 위임한다.
  */

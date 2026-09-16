@@ -7,9 +7,10 @@ import {
   type CompatibilityReportCache,
 } from "@/lib/saju/compatibility";
 import { prisma } from "@/lib/db/prisma";
-import { AiInterpretationError, interpretSajuSection } from "@/lib/ai/interpretSaju";
+import { AiInterpretationError, interpretNewYearFortune, interpretSajuSection } from "@/lib/ai/interpretSaju";
 import { interpretCompatibilitySection } from "@/lib/ai/interpretCompatibility";
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
+import { NEW_YEAR_REPORT_TARGET_YEAR } from "@/lib/payment/config";
 
 const PREMIUM_SECTION_KEYS: PremiumSectionKey[] = ["love", "wealth", "career", "relationship", "yearly"];
 
@@ -58,6 +59,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ paym
 
     if (order.productType === "compatibility_report") {
       return await getCompatibilityReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+    }
+
+    if (order.productType === "new_year_report") {
+      return await getNewYearReport(order.paymentId, order.birthInputJson, order.aiResultJson);
     }
 
     // premium_report
@@ -165,6 +170,29 @@ async function getCompatibilityReport(paymentId: string, birthInputJson: string,
   }
 
   return NextResponse.json({ status: "PAID", sections, scores });
+}
+
+/** 결제 완료 화면 하단 업셀 상품("N년 신년운세")의 리포트. 섹션이 1개뿐이라는 점만 빼면
+ * premium_report와 동일한 지연 생성·캐싱·부분 실패 재시도 패턴(finalizeSections)을 그대로 쓴다. */
+async function getNewYearReport(paymentId: string, birthInputJson: string, aiResultJson: string | null) {
+  const cached = (aiResultJson ? JSON.parse(aiResultJson) : {}) as Record<string, string>;
+  if (cached.newYear) {
+    return NextResponse.json({ status: "PAID", sections: { newYear: cached.newYear } });
+  }
+
+  let birthInput: SajuInput;
+  try {
+    birthInput = JSON.parse(birthInputJson) as SajuInput;
+  } catch {
+    console.error("신년운세 주문의 생년월일 데이터가 손상되었습니다:", paymentId);
+    return NextResponse.json({ status: "PAID", error: "리포트 생성 중 오류가 발생했습니다." }, { status: 500 });
+  }
+  const result = calculateSaju(birthInput);
+
+  const settled = await Promise.allSettled([
+    (async () => ["newYear", await interpretNewYearFortune(result, NEW_YEAR_REPORT_TARGET_YEAR)] as const)(),
+  ]);
+  return await finalizeSections(paymentId, cached, settled, ["newYear"]);
 }
 
 async function finalizeSections(

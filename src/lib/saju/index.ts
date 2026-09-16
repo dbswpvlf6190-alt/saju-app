@@ -1,4 +1,4 @@
-export { calculateSaju, SajuInputError } from "./engine";
+export { calculateSaju, getYearGanzhi, SajuInputError } from "./engine";
 export { resultToInput } from "./types";
 export type { CalendarType, Gender, Pillar, SajuInput, SajuResult, ZiHourMode } from "./types";
 export type { WuXing } from "./ganzhi";

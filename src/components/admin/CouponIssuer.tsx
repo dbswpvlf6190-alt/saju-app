@@ -10,7 +10,18 @@ export function CouponIssuer() {
   const [pending, setPending] = useState(false);
   const [issuedCodes, setIssuedCodes] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const router = useRouter();
+
+  async function handleCopy(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 1500);
+    } catch {
+      // 클립보드 권한이 없어도 코드 자체는 화면에 그대로 보이니 복사만 못 할 뿐 문제 없다.
+    }
+  }
 
   async function handleIssue() {
     setPending(true);
@@ -61,13 +72,23 @@ export function CouponIssuer() {
       {error && <p className="text-sm text-red-300">{error}</p>}
 
       {issuedCodes && issuedCodes.length > 0 && (
-        <div className="flex flex-col gap-1 rounded-xl bg-background-elevated px-3 py-2">
-          <p className="text-xs text-foreground-muted">발급된 코드 — 당첨자 DM으로 전달해 주세요.</p>
-          {issuedCodes.map((code) => (
-            <span key={code} className="font-mono text-sm text-accent-gold-soft">
-              {code}
-            </span>
-          ))}
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-foreground-muted">발급된 코드 — 눌러서 복사, 당첨자 DM으로 전달해 주세요.</p>
+          <div className="flex flex-col gap-2">
+            {issuedCodes.map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => void handleCopy(code)}
+                className="flex items-center justify-between rounded-xl border border-accent-gold/50 bg-background-elevated px-4 py-3 text-left transition-colors hover:border-accent-gold"
+              >
+                <span className="font-mono text-xl font-bold tracking-wide text-foreground">{code}</span>
+                <span className="shrink-0 text-xs text-accent-gold-soft">
+                  {copiedCode === code ? "복사됨!" : "복사"}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

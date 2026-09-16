@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { AdminReviewToggle } from "@/components/admin/AdminReviewToggle";
 import { CouponIssuer } from "@/components/admin/CouponIssuer";
+import { CopyableCode } from "@/components/admin/CopyableCode";
 import { AdminPreviewTool } from "@/components/admin/AdminPreviewTool";
 import { reconcileStalePendingOrders } from "@/lib/payment/reconcile";
 import { getFunnelSummary } from "@/lib/analytics/funnelSummary";
@@ -187,7 +188,9 @@ export default async function AdminPage() {
           <tbody>
             {coupons.map((coupon) => (
               <tr key={coupon.id} className="border-t border-border-subtle">
-                <td className="px-4 py-3 font-mono text-xs">{coupon.code}</td>
+                <td className="px-4 py-3">
+                  <CopyableCode code={coupon.code} />
+                </td>
                 <td className="px-4 py-3">{couponStatusLabel(coupon)}</td>
                 <td className="px-4 py-3 text-foreground-muted">{coupon.createdAt.toLocaleString("ko-KR")}</td>
                 <td className="px-4 py-3 text-foreground-muted">{coupon.expiresAt.toLocaleString("ko-KR")}</td>

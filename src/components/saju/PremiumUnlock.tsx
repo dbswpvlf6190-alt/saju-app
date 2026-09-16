@@ -450,9 +450,9 @@ export function PremiumUnlock({
             <button
               type="button"
               onClick={() => setShowCouponInput(true)}
-              className="text-center text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+              className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
             >
-              쿠폰 코드가 있으신가요?
+              🎟️ 쿠폰 코드가 있으신가요?
             </button>
           )}
         </div>

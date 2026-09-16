@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { fetchPortOnePayment, PortOneVerificationError } from "@/lib/payment/verify";
 import { finalizeOrderFromPortOnePayment } from "@/lib/payment/settle";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
+import { warmReportCache } from "@/lib/reports/warm";
 
 /**
  * 클라이언트가 PortOne 결제창에서 성공 응답을 받은 뒤 호출한다.
@@ -63,6 +64,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
         { status: 400 },
       );
     }
+
+    // 응답은 즉시 내려주고, AI 리포트 생성은 응답 이후 백그라운드에서 미리 시작해둔다
+    // (warmReportCache.ts) — 결제창이 닫히고 화면이 전환되는 그 몇 초 사이에 미리 만들어두면
+    // 사용자가 실제로 리포트 화면을 열었을 때 체감 대기시간이 크게 줄어든다.
+    after(() => warmReportCache(order));
 
     return NextResponse.json({ status: result.status });
   } catch (e) {

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import type { PremiumSection, SajuResult } from "@/lib/saju";
+import type { PremiumSection, PremiumSectionKey, SajuResult } from "@/lib/saju";
 // ResultView.tsx와 같은 이유로 배럴 대신 서브모듈에서 직접 가져온다.
 import { resultToInput } from "@/lib/saju/types";
 import { generateFreeContent } from "@/lib/saju/content";
@@ -29,6 +29,7 @@ import { NewYearUpsellCard } from "./NewYearUpsellCard";
 type Status = "locked" | "processing" | "unlocked" | "error";
 
 const PENDING_KEY = "saju:pendingPurchase";
+const PREMIUM_SECTION_KEYS: PremiumSectionKey[] = ["love", "wealth", "career", "relationship", "yearly"];
 
 export function PremiumUnlock({
   result,
@@ -74,31 +75,49 @@ export function PremiumUnlock({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchReport = useCallback(async (paymentId: string) => {
-    const reportRes = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
-    const reportData = await reportRes.json();
-
-    // 일부 항목만 실패한 경우에도 성공한 항목은 그대로 보여주고, 실패한 항목만
-    // 다시 시도할 수 있게 한다 — 전부 다시 기다리게 하지 않기 위함이다.
-    if (reportData.sections && Object.keys(reportData.sections).length > 0) {
-      setSections(reportData.sections);
-      setMissingSections(reportData.missingSections ?? []);
-      setActivePaymentId(paymentId);
-      setStatus("unlocked");
-      onUnlockedChange?.(true);
-      if (!reportData.missingSections?.length) {
-        setErrorMessage(null);
-        sessionStorage.removeItem(PENDING_KEY);
-      } else {
-        setErrorMessage(reportData.error ?? "일부 항목을 불러오지 못했어요.");
-      }
+  /** 항목 하나를 요청해서 성공하면 sections에 바로 반영한다. 5개를 한 번에 묶어 요청하면
+   * 제일 늦게 끝나는 항목만큼 화면이 계속 비어 있어서, 항목별로 쪼개 병렬 요청하고 먼저
+   * 끝난 것부터 바로 보여주기 위함이다(?section=, /api/orders/[paymentId]/route.ts). */
+  const fetchSection = useCallback(async (paymentId: string, key: PremiumSectionKey) => {
+    const res = await fetch(`/api/orders/${encodeURIComponent(paymentId)}?section=${key}`);
+    const data = await res.json();
+    if (data.sections?.[key]) {
+      setSections((prev) => ({ ...(prev ?? {}), [key]: data.sections[key] }));
       return;
     }
+    throw new Error(data.error ?? "항목을 불러오지 못했습니다.");
+  }, []);
 
-    if (!reportRes.ok) {
-      throw new Error(reportData.error ?? "리포트를 불러오지 못했습니다.");
-    }
-  }, [onUnlockedChange]);
+  const fetchReport = useCallback(
+    async (paymentId: string) => {
+      // 5개 요청이 다 끝나길 기다리지 않고, 첫 요청을 보내는 즉시 언락 화면으로 전환한다.
+      // 각 항목은 도착하는 대로 위 fetchSection이 sections에 채워 넣고, 아직 안 끝난
+      // 항목은 missingSections와 동일한 방식(불러오는 중 표시)으로 자연스럽게 보인다.
+      setActivePaymentId(paymentId);
+      setStatus("unlocked");
+      setSections((prev) => prev ?? {});
+      // missingSections는 "아직 안 끝남"이 아니라 "재시도가 필요한 실패"만 담는다 — 여기서
+      // 비워둬야 아직 도착 안 한 항목들이 (틀리게) "생성 실패"가 아니라 "불러오는 중"으로 보인다.
+      setMissingSections([]);
+      setErrorMessage(null);
+      onUnlockedChange?.(true);
+
+      const settled = await Promise.allSettled(
+        PREMIUM_SECTION_KEYS.map((key) => fetchSection(paymentId, key)),
+      );
+      const failedKeys = PREMIUM_SECTION_KEYS.filter((_, i) => settled[i].status === "rejected");
+      setMissingSections(failedKeys);
+      if (failedKeys.length > 0) {
+        const firstFailure = settled.find((o) => o.status === "rejected") as PromiseRejectedResult | undefined;
+        setErrorMessage(
+          firstFailure?.reason instanceof Error ? firstFailure.reason.message : "일부 항목을 불러오지 못했어요.",
+        );
+      } else {
+        sessionStorage.removeItem(PENDING_KEY);
+      }
+    },
+    [fetchSection, onUnlockedChange],
+  );
 
   const finalizeOrder = useCallback(
     async (paymentId: string) => {
@@ -125,15 +144,26 @@ export function PremiumUnlock({
   );
 
   async function handleRetryMissing() {
-    if (!activePaymentId) return;
+    if (!activePaymentId || missingSections.length === 0) return;
     setStatus("processing");
-    try {
-      await fetchReport(activePaymentId);
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : "다시 시도하는 중 오류가 발생했습니다.");
-    } finally {
-      setStatus("unlocked");
+    const keysToRetry = missingSections as PremiumSectionKey[];
+    setMissingSections([]);
+    setErrorMessage(null);
+
+    const settled = await Promise.allSettled(
+      keysToRetry.map((key) => fetchSection(activePaymentId, key)),
+    );
+    const stillFailed = keysToRetry.filter((_, i) => settled[i].status === "rejected");
+    setMissingSections(stillFailed);
+    if (stillFailed.length > 0) {
+      const firstFailure = settled.find((o) => o.status === "rejected") as PromiseRejectedResult | undefined;
+      setErrorMessage(
+        firstFailure?.reason instanceof Error ? firstFailure.reason.message : "다시 시도하는 중 오류가 발생했습니다.",
+      );
+    } else {
+      sessionStorage.removeItem(PENDING_KEY);
     }
+    setStatus("unlocked");
   }
 
   useEffect(() => {

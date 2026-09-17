@@ -102,7 +102,16 @@ def save_json(path, data):
 
 
 def git(args):
-    return subprocess.run(["git"] + args, cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    # GCM(Git Credential Manager)이 데스크톱 세션 없이 응답 없는 인증창을 띄우려다
+    # 몇 시간씩 멈추는 문제를 shorts_auto 쪽에서 실제로 겪음(2026-09-16/17) — 예방적 방어.
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never"}
+    try:
+        return subprocess.run(
+            ["git"] + args, cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace",
+            env=env, timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(args, returncode=124, stdout="", stderr="git 명령이 120초 내에 끝나지 않아 중단함 (인증 프롬프트 등에서 멈췄을 가능성)")
 
 
 def git_commit_push(paths, message):

@@ -7,6 +7,8 @@ import time
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
+if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
+    sys.stderr.reconfigure(encoding="utf-8")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import instagram_upload  # noqa: E402
@@ -23,7 +25,17 @@ GITHUB_REPO = "dbswpvlf6190-alt/saju-media-host"  # TODO: 사용자 승인 후 �
 
 
 def run(cmd, cwd):
-    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    # GCM(Git Credential Manager)이 데스크톱 세션 없는 Task Scheduler 환경에서 응답 없는
+    # 인증창을 띄우려다 몇 시간씩(심지어 하루 이상) 멈추는 문제가 실제로 발생함
+    # (2026-09-16 20:00 reel 16 처리가 그대로 멈춰서 Task Scheduler에 강제 종료당함,
+    # shorts_auto 쪽 media_host push에서도 동일 증상 확인됨, 2026-09-17). URL에 토큰이
+    # 이미 포함돼 있어 credential helper가 끼어들 필요가 없으므로 프롬프트 자체를
+    # 차단하고, 그래도 멈추면 짧은 timeout으로 빨리 실패하게 함.
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never"}
+    result = subprocess.run(
+        cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+        env=env, timeout=120,
+    )
     if result.returncode != 0:
         raise RuntimeError(f"git 명령 실패: {' '.join(cmd)}\n{result.stdout}\n{result.stderr}")
     return result.stdout

@@ -8,6 +8,8 @@ import time
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
+if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
+    sys.stderr.reconfigure(encoding="utf-8")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import instagram_upload  # noqa: E402
@@ -22,7 +24,12 @@ GITHUB_REPO = "dbswpvlf6190-alt/saju-media-host"
 
 
 def run(cmd, cwd):
-    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    # publish_instagram.py와 동일한 GCM 응답없는 인증창 멈춤 문제 예방 (2026-09-17).
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never"}
+    result = subprocess.run(
+        cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+        env=env, timeout=120,
+    )
     if result.returncode != 0:
         raise RuntimeError(f"git 명령 실패: {' '.join(cmd)}\n{result.stdout}\n{result.stderr}")
     return result.stdout

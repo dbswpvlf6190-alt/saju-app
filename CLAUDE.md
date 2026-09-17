@@ -1,1 +1,2 @@
 @AGENTS.md
+@OPS_NOTES.md

@@ -16,7 +16,10 @@ export interface BirthInfoFormValues {
   gender: Gender;
 }
 
-const YEAR_OPTIONS = Array.from({ length: 2100 - 1900 + 1 }, (_, i) => 2100 - i);
+// 연도 선택지는 올해부터 거꾸로 내려가게 한다 — 미래 연도(2100 등)부터 시작하면
+// 실제로 필요한 과거 연도까지 스크롤이 너무 길어진다.
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 1900 + 1 }, (_, i) => CURRENT_YEAR - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 /** 양력은 실제 그 달의 마지막 날짜(윤년 2월 포함)를 정확히 계산한다.

@@ -35,18 +35,20 @@ def is_posted(day):
 
 def mark_posted(day, entry, media_id):
     os.makedirs(POSTED_DIR, exist_ok=True)
+    record = {
+        "day": day,
+        "id": entry["id"],
+        "media_id": media_id,
+        "posted_at": datetime.now(timezone.utc).isoformat(),
+    }
+    # 고정댓글 문구와 CTA 유형도 같이 남겨서(인스타 API는 댓글 고정을 지원하지 않아 사람이 직접 고정해야 함),
+    # 성과 기록(fetch_insights)이 CTA 유형별 반응을 비교할 수 있게 한다.
+    if entry.get("pinned_comment"):
+        record["pinned_comment"] = entry["pinned_comment"]
+    if entry.get("cta_type"):
+        record["cta_type"] = entry["cta_type"]
     with open(posted_path(day), "w", encoding="utf-8") as f:
-        json.dump(
-            {
-                "day": day,
-                "id": entry["id"],
-                "media_id": media_id,
-                "posted_at": datetime.now(timezone.utc).isoformat(),
-            },
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
+        json.dump(record, f, ensure_ascii=False, indent=2)
     rel_path = os.path.relpath(posted_path(day), BASE_DIR)
     git_sync.git_commit_push(BASE_DIR, [rel_path], f"posted: reel day {day}")
 
@@ -95,6 +97,17 @@ def main():
         )
         mark_posted(day, next_entry, media_id)
         print(f"Day {day} 게시 완료 (media_id={media_id})")
+        if next_entry.get("pinned_comment"):
+            print("---- 고정댓글(인스타에서 직접 댓글 달고 고정해주세요) ----")
+            print(next_entry["pinned_comment"])
+            # 작업 스케줄러로 돌 땐 출력이 안 보이니, 열어보기 쉬운 위치(저장소 밖 로컬)에도 남겨둔다.
+            try:
+                render_root = os.environ.get("SAJU_RENDER_DIR", os.path.join(os.path.expanduser("~"), "SajuAutoRender"))
+                os.makedirs(render_root, exist_ok=True)
+                with open(os.path.join(render_root, "pinned_comment_latest.txt"), "w", encoding="utf-8") as pf:
+                    pf.write(f"Day {day} ({next_entry['id']}) 고정댓글 — 인스타에서 이 문구로 댓글 달고 고정하세요\n\n{next_entry['pinned_comment']}\n")
+            except OSError as e:
+                print(f"고정댓글 파일 저장 실패(무시): {e}")
     finally:
         git_sync.release_lock(BASE_DIR, lock_rel)
 

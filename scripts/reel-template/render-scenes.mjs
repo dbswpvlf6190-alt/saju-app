@@ -53,13 +53,19 @@ export async function renderScenes(entry, outDir) {
     ]),
   );
 
-  // 5. CTA (13~17s)
+  // 5. CTA (13~17s) — 새 구조(structure 2)는 릴스마다 CTA 유형(A/B/C)이 달라 entry.cta를 쓰고,
+  // 예전 릴스는 기존 고정 문구를 그대로 쓴다.
+  const cta = entry.cta ?? {
+    pre: `${entry.categoryLabel} 궁금증, 풀렸나요?`,
+    headline: CTA_HEADLINE,
+    button: CTA_BUTTON,
+  };
   await renderTo(
     `${outDir}/5-cta.png`,
     frame([
-      line(`${entry.categoryLabel} 궁금증, 풀렸나요?`, { size: 32, color: MUTED, weight: 600 }),
-      line(CTA_HEADLINE, { size: 88, color: GOLD, weight: 700, mt: 26 }),
-      ctaButton(CTA_BUTTON),
+      line(cta.pre, { size: 32, color: MUTED, weight: 600 }),
+      line(cta.headline, { size: cta.headline.length > 10 ? 68 : 88, color: GOLD, weight: 700, mt: 26 }),
+      ctaButton(cta.button),
     ]),
   );
 }

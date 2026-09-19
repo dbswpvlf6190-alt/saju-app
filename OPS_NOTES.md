@@ -26,3 +26,12 @@
 **캐치업 완료**: 릴스 16번(R31)은 `instagram_upload.upload_reel()`을 이미 push된 영상 URL로 직접 호출해서 수동 게시 완료(media_id 확인됨) → `run_daily.mark_posted(16, ...)`로 posted 기록 남기고 `git_sync.release_lock()`으로 락 해제까지 정상 마무리함. 데스크톱이 그동안 못 올렸던 카드뉴스/릴스 파일들(`saju_12_R27.mp4` 등)도 이번에 merge되어 `saju-media-host`에 같이 push됨.
 
 **앞으로 확인할 것**: 새 세션에서 "오늘 릴스/카드뉴스 잘 올라갔나" 확인할 때, `scripts/posted_state/reel/`, `scripts/posted_state/cardnews/`에 오래된(3시간 이상) `.lock` 파일이 남아있는지부터 볼 것 — 남아있으면 그 처리가 멈춘 채 방치된 것.
+
+## 2026-09-19 릴스 자동 제작 규칙 + 목소리 교체 + 성과 기록
+
+- **목소리**: 릴스 나레이션은 Supertonic M3(남성) — `reel-template/build.mjs`가 `C:\shorts_auto\vendor\supertonic_clone`(엔진)과 `C:\shorts_auto\assets\voice_style_M3.json`을 씀. 엔진이 없는 컴퓨터(노트북 미설치)에선 edge-tts 여성 목소리로 자동 대체되고 "[경고]"가 로그에 남음 → 노트북에도 shorts_auto `CLAUDE.md`의 엔진 설치 절차를 따르면 통일됨. 경로는 환경변수 `SUPERTONIC_DIR`/`SUPERTONIC_STYLE`로 바꿀 수 있음.
+- **대본 규칙** (`scripts/reel_rules.py`, 사용자 기획서 반영): 사람의 관심사에서 출발하는 소재(연애/궁합/재물/직장/성격/인간관계/운세/사주 사실)를 스스로 고르고, HOOK → CURIOSITY → 핵심 → 내 사주 확인 유도(앱 화면) → CTA 순서(`structure: 2`), 20~35초. `refill_queue.py`가 큐 3개 미만일 때 생성하며, 결과는 코드로 검증한다(글자수 예산, 단정·공포 표현 금지어, "무료"는 여덟 글자·오행 비율·일간·성향 해석만 가리킬 것, 최근 콘텐츠와 제목·훅·소재 유사도). 탈락 항목은 사유를 알려 최대 3회 재생성.
+- **CTA**: A/B/C를 번갈아 코드가 붙임(LLM이 쓰지 않음). 무료 쿠폰 조건이 "팔로우 + 댓글 '사주'"라서 쿠폰을 언급하는 A/B에는 팔로우 조건을 명시함(기획서 원문 A에는 팔로우가 없었음). **쿠폰 DM은 아직 수동**.
+- **고정댓글**: 릴스마다 문구가 `reel_manifest.json`의 `pinned_comment`에 생김. 인스타 API는 댓글 고정을 지원하지 않아 **사람이 직접 댓글 달고 고정**해야 함. 게시 후 `~/SajuAutoRender/pinned_comment_latest.txt`와 `posted_state/reel/NN.json`에 남음(자동 댓글 게시는 아직 안 함).
+- **성과 기록**: `fetch_insights.py`(매일 09:00)가 `scripts/performance/latest.json`(게시물별 지표 + 대본 정보 + 팔로워 증감 + 앱 이벤트/쿠폰 사용)과 `followers_log.json`을 git에 커밋. 대본 생성 시 상·하위 성과가 프롬프트에 참고로 들어감(게시 24시간 이상 지난 릴스 4개 이상일 때). 한계: 앱 이벤트에 유입 경로가 없어 "어느 릴스에서 왔는지"는 못 구하고 일자별 총량만 봄.
+- **git 커밋 범위 버그 수정**: `git_sync.git_commit_push`/`refill_queue.git_commit_push`가 이제 지정한 경로만 커밋함(예전엔 무관하게 staged된 파일이 락 커밋에 딸려 들어갔음).

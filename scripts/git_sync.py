@@ -36,7 +36,7 @@ def git_commit_push(cwd, paths, message):
     """지정한 경로만 커밋해서 push. 실패해도 예외를 던지지 않는다(네트워크 문제로 전체
     실행이 멈추면 안 되므로) — 성공 여부만 반환해서 호출부가 판단하게 한다."""
     git(["add"] + paths, cwd)
-    commit = git(["commit", "-m", message], cwd)
+    commit = git(["commit", "-m", message, "--"] + paths, cwd)
     if commit.returncode != 0:
         if "nothing to commit" in (commit.stdout + commit.stderr).lower():
             return True  # 변경사항 없음 -> 이미 최신 상태이므로 성공으로 취급

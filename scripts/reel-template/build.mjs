@@ -83,7 +83,7 @@ function narrationTexts(entry) {
     info: `${info.pre} ${info.emphasis} ${info.post}. ${info.sub.join(" ")}`,
     curiosity: entry.curiosity.join(" "),
     screenshot: entry.screenshotCaption,
-    cta: CTA_NARRATION,
+    cta: entry.cta?.narration ?? CTA_NARRATION,
   };
 }
 
@@ -167,7 +167,10 @@ async function buildOne(entry) {
 
   // 1) 장면별 나레이션 생성 후 실제 길이 측정 → 그 길이로 장면 타임라인을 정한다.
   const texts = narrationTexts(entry);
-  const order = ["hook", "info", "curiosity", "screenshot", "cta"];
+  // structure 2(기획서 구조): HOOK → CURIOSITY → INFO(핵심) → 앱 화면(내 사주 확인 유도) → CTA. 예전 릴스는 기존 순서 유지.
+  const order = entry.structure === 2 ? ["hook", "curiosity", "info", "screenshot", "cta"] : ["hook", "info", "curiosity", "screenshot", "cta"];
+  const pngFor = { hook: "1-hook.png", info: "2-info.png", curiosity: "3-curiosity.png", screenshot: "4-screenshot.png", cta: "5-cta.png" };
+  const scenePngs = order.map((k) => `${sceneDirPath}/${pngFor[k]}`);
   const narrationPaths = order.map((k) => synthesize(texts[k], `${sceneDirPath}/${k}`));
   const D = narrationPaths.map((p) => Math.max(MIN_SCENE, probeDuration(p) + SCENE_PAD));
 
@@ -182,11 +185,11 @@ async function buildOne(entry) {
   const bedDur = Math.ceil(total) + 1;
   const args = [
     "-y",
-    "-loop", "1", "-framerate", "30", "-t", String(D[0]), "-i", `${sceneDirPath}/1-hook.png`,
-    "-loop", "1", "-framerate", "30", "-t", String(D[1]), "-i", `${sceneDirPath}/2-info.png`,
-    "-loop", "1", "-framerate", "30", "-t", String(D[2]), "-i", `${sceneDirPath}/3-curiosity.png`,
-    "-loop", "1", "-framerate", "30", "-t", String(D[3]), "-i", `${sceneDirPath}/4-screenshot.png`,
-    "-loop", "1", "-framerate", "30", "-t", String(D[4]), "-i", `${sceneDirPath}/5-cta.png`,
+    "-loop", "1", "-framerate", "30", "-t", String(D[0]), "-i", scenePngs[0],
+    "-loop", "1", "-framerate", "30", "-t", String(D[1]), "-i", scenePngs[1],
+    "-loop", "1", "-framerate", "30", "-t", String(D[2]), "-i", scenePngs[2],
+    "-loop", "1", "-framerate", "30", "-t", String(D[3]), "-i", scenePngs[3],
+    "-loop", "1", "-framerate", "30", "-t", String(D[4]), "-i", scenePngs[4],
     "-f", "lavfi", "-t", String(bedDur), "-i", "sine=frequency=110",
     "-f", "lavfi", "-t", String(bedDur), "-i", "sine=frequency=130.81",
     "-f", "lavfi", "-t", String(bedDur), "-i", "sine=frequency=164.81",

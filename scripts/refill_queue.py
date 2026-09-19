@@ -10,9 +10,13 @@ import os
 import re
 import subprocess
 import sys
+from datetime import datetime
 
 import requests
 from dotenv import load_dotenv
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import reel_rules  # noqa: E402
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -32,33 +36,6 @@ REEL_MANIFEST = os.path.join(SCRIPTS_DIR, "reel_manifest.json")
 CARDNEWS_MANIFEST = os.path.join(SCRIPTS_DIR, "cardnews_manifest.json")
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-
-SYSTEM_PROMPT_REELS = """당신은 인스타그램 사주 콘텐츠 계정 '사주랩'의 릴스 대본을 쓰는 카피라이터입니다.
-다음 원칙을 반드시 지키세요.
-
-1. "반드시 ~하게 된다"처럼 단정하지 말고, "~한 편이에요", "~라는 해석이 있어요"처럼 가능성을 전하는 어조를 쓰세요.
-2. 오행·십성 같은 명리학 개념을 언급하되, 전문 용어가 나오면 바로 쉬운 말로 풀어주세요.
-3. caption/ctaLine/screenshotCaption에서 "무료로 확인 가능"이라고 연결지을 수 있는 건 오직
-   이 4가지뿐입니다: 사주 여덟 글자, 오행 비율, 일간, 전반적 성향 해석. 이 4가지 이외의
-   구체적 용어(십성 구성, 삼재 계산, 택일, 궁합 점수, 대운, 십신 분석 등)를 "무료로 확인
-   가능"이라고 쓰면 실제로 없는 기능을 있다고 속이는 것이 됩니다 — 카드 본문에서 그 개념을
-   설명하는 건 괜찮지만, 무료 확인 유도 문구에서는 반드시 위 4가지 표현으로만 마무리하세요.
-4. 각 릴스는 다음 필드로 구성됩니다:
-   - category: sangsik/jaemul/yeonae/jigeop/saengnyeon/ingan 중 하나 (영문 슬러그)
-   - categoryLabel: 사주상식/재물운/연애운/직업운/생년월일 운세/인간관계 (category와 짝이 맞아야 함)
-   - title: 짧은 제목
-   - hook: 화면에 순서대로 뜨는 3~4개의 짧은 문장 조각 배열(조각당 5~12자 내외)
-   - info: {"pre":"...","emphasis":"...","post":"...","sub":["...","..."]} — pre+emphasis+post가
-     자연스럽게 이어지는 한 문장, sub는 보충 설명 1~2문장 배열
-   - curiosity: 다음 화면이 궁금해지게 만드는 2줄(배열)
-   - screenshotCaption: 앱 화면 스크린샷 위에 뜨는 한 줄 설명(무료 결과에 실제 있는 내용만)
-   - caption: 인스타그램 게시물 캡션. 본문 1~2문장 + 빈 줄 + "팔로우하면 매일 새로운 사주 이야기
-     올려드려요 🔔" + 줄바꿈 + "이 글이 도움되셨다면 친구한테도 공유해보세요 💌" + 빈 줄 +
-     해시태그 5~6개(#사주 #무료사주 필수 포함)
-5. "이미 사용한 제목" 목록과 소재·후킹 방식이 겹치지 않게 하세요. 궁금증 유발형, 비교형,
-   숫자 제시형, 경고·주의환기형, 직접 호소형을 번갈아 쓰세요 — 같은 톤을 반복하지 마세요.
-
-요청받은 개수만큼 JSON 배열로만 응답하세요. 코드블록이나 설명 문장 없이 순수 JSON 배열만 출력하세요."""
 
 SYSTEM_PROMPT_CARDNEWS = """당신은 인스타그램 사주 콘텐츠 계정 '사주랩'의 카드뉴스(캐러셀) 대본을 쓰는
 카피라이터입니다. 다음 원칙을 반드시 지키세요.
@@ -116,7 +93,7 @@ def git(args):
 
 def git_commit_push(paths, message):
     git(["add"] + paths)
-    commit = git(["commit", "-m", message])
+    commit = git(["commit", "-m", message, "--"] + paths)
     if commit.returncode != 0:
         if "nothing to commit" in (commit.stdout + commit.stderr).lower():
             return True
@@ -130,6 +107,14 @@ def git_commit_push(paths, message):
 
 
 def call_claude(system_prompt, used_titles, count):
+    return call_claude_raw(
+        system_prompt,
+        f"이미 사용한 제목 목록: {json.dumps(used_titles, ensure_ascii=False)}\n\n"
+        f"위 목록과 겹치지 않게 새로운 소재로 {count}개 만들어줘.",
+    )
+
+
+def call_claude_raw(system_prompt, user_content):
     if not ANTHROPIC_API_KEY:
         raise RuntimeError("ANTHROPIC_API_KEY가 없어서 자동 채우기를 할 수 없습니다.")
     resp = requests.post(
@@ -147,13 +132,7 @@ def call_claude(system_prompt, used_titles, count):
             # 예산을 먼저 다 써버려 실제 JSON 답변이 나오기 전에 잘리는 문제가 있었다.
             "thinking": {"type": "disabled"},
             "system": system_prompt,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": f"이미 사용한 제목 목록: {json.dumps(used_titles, ensure_ascii=False)}\n\n"
-                    f"위 목록과 겹치지 않게 새로운 소재로 {count}개 만들어줘.",
-                }
-            ],
+            "messages": [{"role": "user", "content": user_content}],
         },
         timeout=120,
     )
@@ -172,6 +151,47 @@ def next_id(existing_ids, prefix):
     return max(nums, default=0) + 1
 
 
+def probe_duration(path):
+    try:
+        out = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
+            capture_output=True, text=True, timeout=60,
+        ).stdout.strip()
+        return round(float(out), 1)
+    except (ValueError, subprocess.TimeoutExpired, OSError):
+        return None
+
+
+def generate_reel_items(reels, need):
+    """기획서 규칙으로 대본을 만들고, 검증(형식·글자수·금지 표현·무료 표현·중복)을 통과한 것만 모은다.
+    탈락 사유는 다음 시도에 알려줘서 고치게 한다(최대 3회)."""
+    accepted = []
+    feedback = ""
+    for attempt in range(1, 4):
+        want = need - len(accepted)
+        if want <= 0:
+            break
+        # 넉넉히 요청해서 일부가 탈락해도 목표 개수에 도달하기 쉽게 한다
+        request_count = want if attempt > 1 else want + 1
+        user_msg = reel_rules.build_user_message(reels + accepted, request_count, None) + feedback
+        candidates = call_claude_raw(reel_rules.SYSTEM_PROMPT_REELS, user_msg)
+        rejected = []
+        for item in candidates:
+            if len(accepted) >= need:
+                break
+            problems = reel_rules.validate_item(item, reels, accepted)
+            if problems:
+                rejected.append((item.get("title", "?"), problems))
+            else:
+                accepted.append(item)
+        for title, problems in rejected:
+            log(f"탈락(시도 {attempt}): {title} — {'; '.join(problems)}")
+        if rejected and len(accepted) < need:
+            lines = [f"- {t}: {'; '.join(pr)}" for t, pr in rejected]
+            feedback = "\n\n이전 시도에서 아래 사유로 탈락했어. 같은 실수를 하지 말고 새 소재로 다시 만들어줘:\n" + "\n".join(lines)
+    return accepted
+
+
 def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     manifest = load_json(REEL_MANIFEST)
     posted_dir = os.path.join(SCRIPTS_DIR, "posted_state", "reel")
@@ -184,35 +204,53 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     log(f"릴스 대기열 {len(unposted)}개 남음 — {need}개 새로 생성")
 
     reels = load_json(REELS_JSON)
-    used_titles = [r["title"] for r in reels]
-    new_items = call_claude(SYSTEM_PROMPT_REELS, used_titles, need)
+    new_items = generate_reel_items(reels, need)
+    if not new_items:
+        raise RuntimeError("검증을 통과한 릴스 대본을 하나도 만들지 못했습니다(위 탈락 사유 참고).")
+    if len(new_items) < need:
+        log(f"목표 {need}개 중 {len(new_items)}개만 검증 통과 — 그대로 진행")
 
     next_num = next_id([r["id"] for r in reels], "R")
     next_order = max((r["order"] for r in reels), default=-1) + 1
     next_day = max((e["day"] for e in manifest), default=0) + 1
+    created_at = datetime.now().strftime("%Y-%m-%d")
 
     new_ids = []
+    new_entries = []
     for item in new_items:
         rid = f"R{next_num:02d}"
+        cta_type = reel_rules.next_cta_type(reels)
+        cta = reel_rules.CTAS[cta_type]
         entry = {
             "order": next_order,
             "id": rid,
+            "structure": 2,  # 장면 순서: HOOK → CURIOSITY → INFO → 앱 화면 → CTA (기획서 구조)
             "category": item["category"],
-            "categoryLabel": item["categoryLabel"],
+            "categoryLabel": reel_rules.CATEGORY_MAP[item["category"]],
+            "subcategory": item["subcategory"],
             "title": item["title"],
+            "topic": item["topic"],
+            "keywords": item["keywords"],
             "hook": item["hook"],
             "info": item["info"],
             "curiosity": item["curiosity"],
             "screenshotCaption": item["screenshotCaption"],
+            "ctaType": cta_type,
+            "cta": {k: cta[k] for k in ("pre", "headline", "button", "narration")},
+            "pinnedComment": reel_rules.build_pinned_comment(item),
+            "createdAt": created_at,
         }
         reels.append(entry)
+        new_entries.append(entry)
         manifest.append({
             "day": next_day,
             "id": rid,
-            "category": item["categoryLabel"],
+            "category": entry["categoryLabel"],
             "video": f"reels/{next_order:02d}_{rid}_{item['category']}.mp4",
             "remote_name": f"saju_{next_day:02d}_{rid}.mp4",
-            "caption": item["caption"],
+            "caption": reel_rules.build_caption(item, cta_type),
+            "pinned_comment": entry["pinnedComment"],
+            "cta_type": cta_type,
         })
         new_ids.append(rid)
         next_num += 1
@@ -225,6 +263,11 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     for rid in new_ids:
         subprocess.run(["node", os.path.join(REEL_TEMPLATE_DIR, "build.mjs"), rid], cwd=PROJECT_ROOT, check=True)
 
+    for entry, m in zip(new_entries, manifest[-len(new_ids):]):
+        entry["durationSec"] = probe_duration(os.path.join(PROJECT_ROOT, m["video"]))
+        if entry["durationSec"] and entry["durationSec"] > 40:
+            log(f"경고: {entry['id']} 길이 {entry['durationSec']}초 (40초 초과)")
+    save_json(REELS_JSON, reels)
     save_json(REEL_MANIFEST, manifest)
 
     ok = git_commit_push(

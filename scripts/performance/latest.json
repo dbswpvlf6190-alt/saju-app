@@ -1,0 +1,891 @@
+{
+  "generated_at": "2026-09-19T11:27:53",
+  "account": {
+    "followers": 5,
+    "media_count": 42,
+    "followers_delta_7d": null,
+    "followers_delta_30d": null
+  },
+  "items": [
+    {
+      "type": "릴스",
+      "day": 1,
+      "id": "R25",
+      "posted_at": "2026-08-28T23:58:58.593976+00:00",
+      "title": "사주팔자란 정확히 무엇인가",
+      "category": "사주상식",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "사주가 미신이라고",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 506.5,
+      "metrics": {
+        "reach": 147,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 150
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 2,
+      "id": "R01",
+      "posted_at": "2026-08-29T11:26:28.663203+00:00",
+      "title": "돈이 안 모이는 이유",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "월급 들어오고 3일 만에",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 495.0,
+      "metrics": {
+        "reach": 6,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 6
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 3,
+      "id": "R07",
+      "posted_at": "2026-08-30T11:00:54.881030+00:00",
+      "title": "썸 탈 때 눈치 없는 사주",
+      "category": "연애운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "썸 탈 때마다",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 471.4,
+      "metrics": {
+        "reach": 123,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 129
+      },
+      "interaction_rate": 0.0163
+    },
+    {
+      "type": "릴스",
+      "day": 4,
+      "id": "R19",
+      "posted_at": "2026-08-31T01:03:40.961962+00:00",
+      "title": "생시 몰라도 되는 이유",
+      "category": "생년월일 운세",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "생시 몰라서",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 457.4,
+      "metrics": {
+        "reach": 105,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 125
+      },
+      "interaction_rate": 0.0095
+    },
+    {
+      "type": "릴스",
+      "day": 5,
+      "id": "R13",
+      "posted_at": "2026-08-31T11:00:54.414304+00:00",
+      "title": "조직생활 잘 맞는 사주",
+      "category": "직업운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "회사 체질 아니라는",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 447.4,
+      "metrics": {
+        "reach": 19,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 20
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 6,
+      "id": "R02",
+      "posted_at": "2026-09-01T11:00:53.465802+00:00",
+      "title": "편재가 많은 사람 특징",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "부수입 아이디어만",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 423.4,
+      "metrics": {
+        "reach": 24,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 29
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 7,
+      "id": "R08",
+      "posted_at": "2026-09-02T11:00:54.014712+00:00",
+      "title": "표현 서툰 사람 vs 직진형",
+      "category": "연애운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "좋아하면서",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 399.4,
+      "metrics": {
+        "reach": 69,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 77
+      },
+      "interaction_rate": 0.0145
+    },
+    {
+      "type": "릴스",
+      "day": 8,
+      "id": "R20",
+      "posted_at": "2026-09-02T11:31:13.523971+00:00",
+      "title": "음력 양력 헷갈리는 이유",
+      "category": "생년월일 운세",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "음력이든 양력이든,",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 398.9,
+      "metrics": {
+        "reach": 8,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 9
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 9,
+      "id": "R14",
+      "posted_at": "2026-09-02T12:01:34.587316+00:00",
+      "title": "프리랜서 체질 특징",
+      "category": "직업운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "혼자 일하는 게",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 398.4,
+      "metrics": {
+        "reach": 6,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 6
+      },
+      "interaction_rate": 0.3333
+    },
+    {
+      "type": "릴스",
+      "day": 10,
+      "id": "R03",
+      "posted_at": "2026-09-03T11:01:18.463421+00:00",
+      "title": "부자 사주는 따로 있다?",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "부자 사주 있냐는",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 375.4,
+      "metrics": {
+        "reach": 25,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 27
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 11,
+      "id": "R26",
+      "posted_at": "2026-09-03T21:50:13.531702+00:00",
+      "title": "힘들 때 나타나는 귀인",
+      "category": "인간관계",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "힘들 때마다",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 364.6,
+      "metrics": {
+        "reach": 49,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 56
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 12,
+      "id": "R27",
+      "posted_at": "2026-09-06T02:03:23.470989+00:00",
+      "title": "삼재, 진짜 의미는 이거예요",
+      "category": "사주상식",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "내 띠가",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 312.4,
+      "metrics": {
+        "reach": 102,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 108
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 13,
+      "id": "R28",
+      "posted_at": "2026-09-11T13:05:17.131917+00:00",
+      "title": "월급 관리, 사주로 스타일이 갈린대요",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "월급 관리 잘하는 사람과",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 181.4,
+      "metrics": {
+        "reach": 23,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 24
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 14,
+      "id": "R29",
+      "posted_at": "2026-09-12T13:37:59.810233+00:00",
+      "title": "짝사랑이 유독 긴 사람 특징",
+      "category": "연애운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "고백 못 하고",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 156.8,
+      "metrics": {
+        "reach": 127,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 138
+      },
+      "interaction_rate": 0.0079
+    },
+    {
+      "type": "릴스",
+      "day": 15,
+      "id": "R30",
+      "posted_at": "2026-09-13T11:00:57.030196+00:00",
+      "title": "이직 잦은 사람, 사주에 신호 있나요",
+      "category": "직업운",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "이직을",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 135.4,
+      "metrics": {
+        "reach": 102,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 111
+      },
+      "interaction_rate": 0.0098
+    },
+    {
+      "type": "릴스",
+      "day": 16,
+      "id": "R31",
+      "posted_at": "2026-09-17T10:34:14.148797+00:00",
+      "title": "맨날 나만 손해보는 관계, 이유 있을까",
+      "category": "인간관계",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "연락도 내가 먼저,",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 39.9,
+      "metrics": {
+        "reach": 119,
+        "likes": 2,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 3,
+        "views": 127
+      },
+      "interaction_rate": 0.0252
+    },
+    {
+      "type": "릴스",
+      "day": 17,
+      "id": "R32",
+      "posted_at": "2026-09-17T20:55:57.379735+00:00",
+      "title": "이사 날짜, 아무 날이나 잡아도 될까",
+      "category": "사주상식",
+      "subcategory": null,
+      "topic": null,
+      "hook_first": "이사·개업 날짜,",
+      "ctaType": null,
+      "durationSec": null,
+      "keywords": null,
+      "age_hours": 29.5,
+      "metrics": {
+        "reach": 102,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 108
+      },
+      "interaction_rate": 0.0098
+    },
+    {
+      "type": "카드뉴스",
+      "day": 1,
+      "id": "C01",
+      "posted_at": "2026-08-29T00:16:04.944599+00:00",
+      "title": "오행, 3분이면 완전히 이해돼요",
+      "category": "사주상식",
+      "age_hours": 506.2,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 4
+      },
+      "interaction_rate": 0.5
+    },
+    {
+      "type": "카드뉴스",
+      "day": 2,
+      "id": "C02",
+      "posted_at": "2026-08-29T02:01:09.683586+00:00",
+      "title": "사주 용어, 헷갈리셨죠?",
+      "category": "사주상식",
+      "age_hours": 504.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 4
+      },
+      "interaction_rate": 0.5
+    },
+    {
+      "type": "카드뉴스",
+      "day": 3,
+      "id": "C03",
+      "posted_at": "2026-08-30T02:01:13.046674+00:00",
+      "title": "재물운 좋은 사람들의 공통점",
+      "category": "재물운",
+      "age_hours": 480.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 5
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 4,
+      "id": "C04",
+      "posted_at": "2026-08-31T01:05:08.024709+00:00",
+      "title": "연애할 때 나는 어떤 스타일일까?",
+      "category": "연애운",
+      "age_hours": 457.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 8
+      },
+      "interaction_rate": 0.5
+    },
+    {
+      "type": "카드뉴스",
+      "day": 5,
+      "id": "C05",
+      "posted_at": "2026-08-31T02:00:51.461617+00:00",
+      "title": "이직·승진 타이밍, 신호가 있대요",
+      "category": "직업운",
+      "age_hours": 456.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 9
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 6,
+      "id": "C06",
+      "posted_at": "2026-09-01T02:01:01.149101+00:00",
+      "title": "태어난 계절, 기운에 힌트를 준대요",
+      "category": "생년월일",
+      "age_hours": 432.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 6
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 7,
+      "id": "C07",
+      "posted_at": "2026-09-02T02:01:00.318915+00:00",
+      "title": "궁합 볼 때, 뭘 보는 건지 아세요?",
+      "category": "연애운",
+      "age_hours": 408.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 3
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 8,
+      "id": "C08",
+      "posted_at": "2026-09-03T02:00:57.168752+00:00",
+      "title": "재물 그릇이 크다는 사주, 신호래요",
+      "category": "재물운",
+      "age_hours": 384.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 3
+      },
+      "interaction_rate": 1.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 9,
+      "id": "C09",
+      "posted_at": "2026-09-03T02:30:43.436706+00:00",
+      "title": "조직형 vs 자율형, 나는 어느 쪽?",
+      "category": "직업운",
+      "age_hours": 383.9,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 8
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 10,
+      "id": "C10",
+      "posted_at": "2026-09-03T03:00:54.726566+00:00",
+      "title": "사주가 자기이해 도구인 이유",
+      "category": "사주상식",
+      "age_hours": 383.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 6
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 11,
+      "id": "C11",
+      "posted_at": "2026-09-03T21:41:56.973555+00:00",
+      "title": "내 인생 귀인, 사주에 신호가 있대요",
+      "category": "인간관계",
+      "age_hours": 364.7,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 17
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 12,
+      "id": "C12",
+      "posted_at": "2026-09-06T02:01:08.344084+00:00",
+      "title": "삼재, 무섭게만 알고 계셨나요",
+      "category": "사주상식",
+      "age_hours": 312.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 7
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 13,
+      "id": "C13",
+      "posted_at": "2026-09-06T02:04:44.404208+00:00",
+      "title": "정재 vs 편재, 나는 어느 쪽?",
+      "category": "재물운",
+      "age_hours": 312.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 5
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 14,
+      "id": "C14",
+      "posted_at": "2026-09-11T13:05:49.932135+00:00",
+      "title": "짝사랑이 유독 긴 사람 특징",
+      "category": "연애운",
+      "age_hours": 181.3,
+      "metrics": {
+        "reach": 3,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 9
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 15,
+      "id": "C15",
+      "posted_at": "2026-09-12T02:01:14.803495+00:00",
+      "title": "N잡·부업 체질, 신호가 있대요",
+      "category": "직업운",
+      "age_hours": 168.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 6
+      },
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 16,
+      "id": "C16",
+      "posted_at": "2026-09-13T02:01:08.897567+00:00",
+      "title": "맨날 나만 손해보는 관계, 신호 있나요",
+      "category": "인간관계",
+      "age_hours": 144.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 14
+      },
+      "interaction_rate": 0.5
+    },
+    {
+      "type": "카드뉴스",
+      "day": 17,
+      "id": "C17",
+      "posted_at": "2026-09-18T14:30:13.063930+00:00",
+      "title": "이사 날짜, 아무 날이나 잡아도 될까",
+      "category": "사주상식",
+      "age_hours": 11.9,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 10
+      },
+      "interaction_rate": 0.5
+    },
+    {
+      "type": "카드뉴스",
+      "day": 18,
+      "id": "C18",
+      "posted_at": "2026-09-19T02:01:10.360966+00:00",
+      "title": "십성이라는 말, 사실 어렵지 않아요",
+      "category": "사주상식",
+      "age_hours": 0.4,
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 4
+      }
+    }
+  ],
+  "app": {
+    "daily_events": {
+      "2026-08-27": {
+        "free_result_view": 44,
+        "landing_view": 65,
+        "payment_success": 1,
+        "saju_complete": 29,
+        "saju_start": 29
+      },
+      "2026-08-28": {
+        "free_result_view": 27,
+        "landing_view": 44,
+        "payment_success": 4,
+        "saju_complete": 16,
+        "saju_start": 16
+      },
+      "2026-08-29": {
+        "free_result_view": 1,
+        "landing_view": 11
+      },
+      "2026-08-30": {
+        "free_result_view": 1,
+        "landing_view": 3,
+        "saju_complete": 1,
+        "saju_start": 1
+      },
+      "2026-09-01": {
+        "landing_view": 1
+      },
+      "2026-09-02": {
+        "free_result_view": 2,
+        "landing_view": 2,
+        "saju_complete": 2,
+        "saju_start": 2
+      },
+      "2026-09-03": {
+        "landing_view": 4
+      },
+      "2026-09-04": {
+        "free_result_view": 3,
+        "landing_view": 4,
+        "saju_complete": 3,
+        "saju_start": 3
+      },
+      "2026-09-05": {
+        "landing_view": 3
+      },
+      "2026-09-06": {
+        "landing_view": 1
+      },
+      "2026-09-07": {
+        "landing_view": 3
+      },
+      "2026-09-08": {
+        "landing_view": 1
+      },
+      "2026-09-09": {
+        "landing_view": 2
+      },
+      "2026-09-10": {
+        "free_result_view": 2,
+        "landing_view": 4,
+        "saju_complete": 2,
+        "saju_start": 2
+      },
+      "2026-09-11": {
+        "free_result_view": 21,
+        "landing_view": 47,
+        "saju_complete": 20,
+        "saju_start": 20
+      },
+      "2026-09-12": {
+        "free_result_view": 2,
+        "landing_view": 10,
+        "saju_complete": 2,
+        "saju_start": 2
+      },
+      "2026-09-13": {
+        "free_result_view": 2,
+        "landing_view": 6,
+        "saju_complete": 2,
+        "saju_start": 2
+      },
+      "2026-09-14": {
+        "landing_view": 1
+      },
+      "2026-09-15": {
+        "landing_view": 1
+      },
+      "2026-09-16": {
+        "coupon_redeemed": 2,
+        "free_result_view": 20,
+        "landing_view": 29,
+        "saju_complete": 18,
+        "saju_start": 18
+      },
+      "2026-09-17": {
+        "free_result_view": 3,
+        "landing_view": 7,
+        "saju_complete": 3,
+        "saju_start": 3
+      },
+      "2026-09-18": {
+        "free_result_view": 11,
+        "landing_view": 16,
+        "saju_complete": 11,
+        "saju_start": 11
+      }
+    },
+    "coupons": {
+      "issued": 10,
+      "used": 2
+    }
+  }
+}

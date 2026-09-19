@@ -9,6 +9,7 @@
 //
 // 실행: node scripts/reel-template/build.mjs
 import { mkdir, rm } from "node:fs/promises";
+import { existsSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { REELS_IN_UPLOAD_ORDER, CTA_NARRATION } from "./content.mjs";
@@ -19,8 +20,14 @@ const OUT_DIR = new URL("./reels/", PROJECT_ROOT);
 const TMP_ROOT = new URL("./scripts/reel-template/.tmp/", PROJECT_ROOT);
 
 const FADE = 0.2;
-const VOICE = "ko-KR-SunHiNeural";
-const VOICE_RATE = "+20%";
+// 2026-09-19: 나레이션 목소리를 edge-tts SunHi(여성) → Supertonic 기본 음성 M3(남성)로 교체.
+// 엔진/스타일은 daily.factlab(shorts_auto)과 같은 것을 재사용한다(사용자가 샘플로 직접 고른 목소리).
+// 엔진이 없는 컴퓨터(노트북에 아직 미설치 등)에선 영상 게시가 멈추지 않도록 edge-tts로 대체한다.
+const SUPERTONIC_DIR = process.env.SUPERTONIC_DIR ?? "C:\\shorts_auto\\vendor\\supertonic_clone";
+const SUPERTONIC_STYLE = process.env.SUPERTONIC_STYLE ?? "C:\\shorts_auto\\assets\\voice_style_M3.json";
+const VOICE_SPEED = 1.2;
+const FALLBACK_VOICE = "ko-KR-SunHiNeural";
+const FALLBACK_RATE = "+20%";
 // 나레이션 실제 길이 + 이 여유(초)를 장면 길이로 쓴다 — 말 끝나자마자 바로 전환되면 급해 보여서 약간 숨 쉴 틈을 둠.
 const SCENE_PAD = 0.3;
 // 아무리 짧은 나레이션이어도 장면이 너무 순식간에 지나가면 어색하니 최소 길이를 둔다.
@@ -36,12 +43,30 @@ function cumulativeOffsets(durations, fade) {
   return { offsets, total: dur };
 }
 
-function synthesize(text, outPath) {
+// outBase 확장자 없이 받아서, 실제로 만든 파일 경로(.wav 또는 대체 시 .mp3)를 돌려준다.
+function synthesize(text, outBase) {
+  const python = `${SUPERTONIC_DIR}\\venv\\Scripts\\python.exe`;
+  const narrate = `${SUPERTONIC_DIR}\\narrate.py`;
+  if (existsSync(python) && existsSync(narrate) && existsSync(SUPERTONIC_STYLE)) {
+    const textFile = `${outBase}.txt`;
+    const timingFile = `${outBase}.json`;
+    const wavPath = `${outBase}.wav`;
+    writeFileSync(textFile, text, "utf-8");
+    execFileSync(
+      python,
+      [narrate, "--text-file", textFile, "--style", SUPERTONIC_STYLE, "--speed", String(VOICE_SPEED), "--out-audio", wavPath, "--out-timing", timingFile],
+      { stdio: ["ignore", "ignore", "inherit"], env: { ...process.env, PYTHONIOENCODING: "utf-8" } },
+    );
+    return wavPath;
+  }
+  console.warn("[경고] Supertonic 엔진을 찾지 못해 edge-tts로 대체합니다 (목소리가 달라짐): " + SUPERTONIC_DIR);
+  const mp3Path = `${outBase}.mp3`;
   execFileSync(
     "edge-tts",
-    ["--voice", VOICE, "--rate", VOICE_RATE, "--text", text, "--write-media", outPath],
+    ["--voice", FALLBACK_VOICE, "--rate", FALLBACK_RATE, "--text", text, "--write-media", mp3Path],
     { stdio: ["ignore", "ignore", "ignore"] },
   );
+  return mp3Path;
 }
 
 function probeDuration(path) {
@@ -84,7 +109,7 @@ function buildNarrationFilter(sceneStarts) {
   const tracks = delays.map((ms, i) => `[${19 + i}:a]adelay=${ms}|${ms}[n${i}]`);
   return [
     ...tracks,
-    `[n0][n1][n2][n3][n4]amix=inputs=5:duration=longest:normalize=0,volume=1.6[narrmix]`,
+    `[n0][n1][n2][n3][n4]amix=inputs=5:duration=longest:normalize=0,volume=3.6[narrmix]`,
     `[narrmix]pan=stereo|c0=c0|c1=c0[narrstereo]`,
   ].join(";");
 }
@@ -143,10 +168,7 @@ async function buildOne(entry) {
   // 1) 장면별 나레이션 생성 후 실제 길이 측정 → 그 길이로 장면 타임라인을 정한다.
   const texts = narrationTexts(entry);
   const order = ["hook", "info", "curiosity", "screenshot", "cta"];
-  const narrationPaths = order.map((k) => `${sceneDirPath}/${k}.mp3`);
-  for (let i = 0; i < order.length; i++) {
-    synthesize(texts[order[i]], narrationPaths[i]);
-  }
+  const narrationPaths = order.map((k) => synthesize(texts[k], `${sceneDirPath}/${k}`));
   const D = narrationPaths.map((p) => Math.max(MIN_SCENE, probeDuration(p) + SCENE_PAD));
 
   const { offsets, total } = cumulativeOffsets(D, FADE);

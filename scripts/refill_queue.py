@@ -173,7 +173,8 @@ def generate_reel_items(reels, need):
             break
         # 넉넉히 요청해서 일부가 탈락해도 목표 개수에 도달하기 쉽게 한다
         request_count = want if attempt > 1 else want + 1
-        user_msg = reel_rules.build_user_message(reels + accepted, request_count, None) + feedback
+        formats = reel_rules.pick_formats(reels + accepted, request_count)
+        user_msg = reel_rules.build_user_message(reels + accepted, request_count, formats) + feedback
         candidates = call_claude_raw(reel_rules.SYSTEM_PROMPT_REELS, user_msg)
         rejected = []
         for item in candidates:
@@ -228,6 +229,7 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
             "category": item["category"],
             "categoryLabel": reel_rules.CATEGORY_MAP[item["category"]],
             "subcategory": item["subcategory"],
+            "format": item["format"],
             "title": item["title"],
             "topic": item["topic"],
             "keywords": item["keywords"],

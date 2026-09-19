@@ -85,7 +85,7 @@ def load_content_meta():
             for r in json.load(f):
                 meta[r["id"]] = {
                     "title": r.get("title"), "category": r.get("categoryLabel"), "subcategory": r.get("subcategory"),
-                    "topic": r.get("topic"), "hook_first": (r.get("hook") or [None])[0],
+                    "topic": r.get("topic"), "format": r.get("format"), "hook_first": (r.get("hook") or [None])[0],
                     "ctaType": r.get("ctaType"), "durationSec": r.get("durationSec"), "keywords": r.get("keywords"),
                 }
     except (OSError, json.JSONDecodeError):

@@ -7,6 +7,7 @@
 """
 import json
 import os
+import random
 import re
 from datetime import datetime
 from difflib import SequenceMatcher
@@ -51,12 +52,52 @@ CTAS = {
 }
 CTA_ORDER = ["A", "B", "C"]
 
+# 콘텐츠 형식(2026-09-19 기획서 "콘텐츠 형식 다양화"). 형식은 코드가 배정하고(연속 2회 이상 같은 형식 금지),
+# LLM은 배정받은 형식에 맞게 hook/curiosity/info를 쓴다.
+FORMATS = {
+    "자기진단형": "'이런 사람이라면 확인해보세요' — hook에서 시청자가 해당되는지 스스로 체크하게 만든다",
+    "궁금증형": "'왜 이런 사람이 나에게 끌릴까?' — 이유를 묻는 질문으로 시작하고 답은 조금씩 푼다",
+    "관계형": "'좋아하는데 계속 싸우는 커플' — 두 사람 사이의 관계 패턴(연인·친구·가족·직장)을 다룬다",
+    "상황형": "'연애 시작하면 갑자기 연락이 줄어드는 사람' — 구체적인 일상 상황 하나를 콕 집는다",
+    "반전형": "'돈이 없어서 불안한 게 아닐 수도 있습니다' — 통념을 뒤집는 문장으로 시작한다",
+    "비교형": "'좋아하는 사람과 잘 맞는 사람은 다릅니다' — 두 가지를 견줘서 차이를 보여준다",
+    "리스트형": "'사주에서 보는 연애 성향 3가지' — 항목 3개를 짧게 나열한다(info의 sub에 항목을 담아도 됨)",
+    "댓글참여형": "'이 중 몇 개나 해당되는지 확인해보세요' — 항목을 던지고 몇 개 해당되는지 세어보게 한다",
+    "결과확인형": "'내 사주에서는 뭐가 가장 강할까요?' — 내 결과를 직접 확인하고 싶게 만든다",
+    "스토리형": "실제 일상 상황을 짧은 이야기로 시작(예: '어제 친구가 그러더라고요…')한 뒤 사주 관점으로 연결한다",
+}
+
+# 같은 문장 구조가 반복되면 안 됨(기획서): 아래 패턴이 LLM이 쓴 필드에 있으면 그 항목을 탈락시킨다.
+REPEATED_PATTERNS = [
+    (re.compile(r"사주에서는[^.?!\n]{0,50}(라고 봅니다|고 봅니다|라고 봐요|고 봐요|라고 본다|고 본다)"), "'사주에서는 ~라고 봅니다' 구조"),
+    (re.compile(r"중요한 ?건"), "'중요한 건 ~입니다' 구조"),
+    (re.compile(r"내 사주는 어떨까요"), "'내 사주는 어떨까요?' 문구"),
+]
+
+
+def pick_formats(recent_entries, count, rng=None):
+    """최근에 쓴 형식을 피해서 count개를 배정한다. 서로 이웃한 형식이 같지 않고, 직전 릴스의 형식과도 다르다."""
+    rng = rng or random
+    recent_formats = [e.get("format") for e in recent_entries if e.get("format") in FORMATS]
+    avoid = set(recent_formats[-3:])
+    pool = [f for f in FORMATS if f not in avoid] or list(FORMATS)
+    picked = []
+    prev = recent_formats[-1] if recent_formats else None
+    while len(picked) < count:
+        cands = [f for f in pool if f != prev and f not in picked[-3:]] or [f for f in FORMATS if f != prev]
+        choice = rng.choice(cands)
+        picked.append(choice)
+        prev = choice
+    return picked
+
+
 # 단정·공포 표현 금지(기획서 9번). 이 단어가 LLM이 쓴 필드에 있으면 그 항목은 탈락시킨다.
 BANNED_WORDS = [
     "무조건", "100%", "100퍼", "반드시", "평생", "이혼한다", "이혼하게", "바람핀다", "바람을 핀다",
     "나쁜 사람", "성공한다", "부자가 된다", "부자 된다",
     "사망", "죽는", "죽음", "질병", "병에 걸", "임신", "교통사고", "범죄", "정신질환", "우울증",
 ]
+SHOT_FORBIDDEN = ["궁합", "택일", "삼재", "대운", "십성", "십신", "점수", "비교해"]
 # 앱에서 실제로 무료로 볼 수 있는 것(기존 규칙 유지). "무료"가 들어간 LLM 작성 문구는 이 중 하나를 가리켜야 한다.
 FREE_OK_TERMS = ["여덟 글자", "오행", "일간", "성향"]
 
@@ -94,6 +135,21 @@ SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·
 한 번에 여러 개를 만들 땐 서로 카테고리·훅 유형(질문형/상황 공감형/반전형/숫자형/경고형)을 최대한 다르게 하세요.
 '성과 참고'가 있으면 반응이 좋았던 방향(카테고리·훅 유형·CTA)은 참고하되 소재를 그대로 베끼지 마세요.
 
+[콘텐츠 형식 — 매일 같은 정보 전달형 구조를 쓰지 않는다]
+사용자 메시지의 '형식 배정'대로 각 항목의 형식을 정해 그 형식답게 hook/curiosity/info를 쓰세요(출력의 "format" 필드에 그 이름을 그대로 적기). 형식은 다음 10가지입니다.
+- 자기진단형: "이런 사람이라면 확인해보세요" — hook에서 시청자가 해당되는지 스스로 체크하게 만든다
+- 궁금증형: "왜 이런 사람이 나에게 끌릴까?" — 이유를 묻는 질문으로 시작하고 답은 조금씩 푼다
+- 관계형: "좋아하는데 계속 싸우는 커플" — 두 사람 사이의 관계 패턴(연인·친구·가족·직장)을 다룬다
+- 상황형: "연애 시작하면 갑자기 연락이 줄어드는 사람" — 구체적인 일상 상황 하나를 콕 집는다
+- 반전형: "돈이 없어서 불안한 게 아닐 수도 있습니다" — 통념을 뒤집는 문장으로 시작한다
+- 비교형: "좋아하는 사람과 잘 맞는 사람은 다릅니다" — 두 가지를 견줘서 차이를 보여준다
+- 리스트형: "사주에서 보는 연애 성향 3가지" — 항목 3개를 짧게 나열한다(info의 sub에 항목을 담아도 됨)
+- 댓글참여형: "이 중 몇 개나 해당되는지 확인해보세요" — 항목을 던지고 몇 개 해당되는지 세어보게 한다
+- 결과확인형: "내 사주에서는 뭐가 가장 강할까요?" — 내 결과를 직접 확인하고 싶게 만든다
+- 스토리형: 실제 일상 상황을 짧은 이야기로 시작("어제 친구가 그러더라고요…")한 뒤 사주 관점으로 연결한다
+같은 형식을 연속 2회 이상 쓰지 않습니다(코드가 배정하니 배정을 따르세요). 어떤 형식이든 아래 [영상 구조]의 필드 예산(글자 수)은 지켜야 합니다.
+다음 문장 구조는 반복하지 마세요: "사주에서는 ~라고 봅니다.", "중요한 건 ~입니다.", "내 사주는 어떨까요?". 문장 시작과 끝맺음을 매번 다르게 쓰세요(같은 배치 안에서도).
+
 [영상 구조 — 화면에 뜨는 글자와 음성 나레이션이 같은 문장으로 읽힙니다]
 - hook (0~2초, STOP HOOK): 시청자가 자신을 대입하는 질문/상황. "안녕하세요", "오늘은 ~알아보겠습니다", "여러분 사주 보시나요", "오늘 알아볼 것은 오행입니다"로 시작 금지.
   3~4개 조각(조각당 5~14자, 이어 읽으면 자연스러운 한 흐름). 전체 공백 제외 34자 이내.
@@ -114,6 +170,7 @@ SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·
 [출력 형식] 요청받은 개수만큼 JSON 배열로만 응답(코드블록·설명 금지). 각 항목:
 {
  "category": "yeonae|jaemul|jigeop|ingan|saengnyeon|sangsik 중 하나",
+ "format": "배정받은 형식 이름(위 10가지 중 하나)",
  "subcategory": "연애|궁합|재물|직장|성격|결혼·인간관계|운세|사주 사실 중 하나",
  "title": "짧은 제목(내부용)",
  "topic": "핵심 소재 한 문장(최근 콘텐츠와 비교용)",
@@ -166,7 +223,7 @@ def load_performance_highlights(limit=3):
         m = i["metrics"]
         return {
             "title": i.get("title"), "category": i.get("category"), "topic": i.get("topic"),
-            "hook": i.get("hook_first"), "ctaType": i.get("ctaType"),
+            "format": i.get("format"), "hook": i.get("hook_first"), "ctaType": i.get("ctaType"),
             "views": m.get("views"), "reach": m.get("reach"), "comments": m.get("comments"),
             "saved": m.get("saved"), "shares": m.get("shares"),
         }
@@ -174,17 +231,19 @@ def load_performance_highlights(limit=3):
     return {"top": [brief(i) for i in items[:limit]], "bottom": [brief(i) for i in items[-limit:]]}
 
 
-def build_user_message(recent_entries, count, cta_type):
+def build_user_message(recent_entries, count, formats):
     recent = [
         {
             "title": e.get("title"), "category": e.get("categoryLabel"), "subcategory": e.get("subcategory"),
-            "topic": e.get("topic"), "hook_first": (e.get("hook") or [""])[0], "ctaType": e.get("ctaType"),
+            "topic": e.get("topic"), "format": e.get("format"), "hook_first": (e.get("hook") or [""])[0],
+            "info_opening": ((e.get("info") or {}).get("pre") or "")[:14], "ctaType": e.get("ctaType"),
         }
         for e in recent_entries[-40:]
     ]
     msg = {
         "오늘 날짜": today_kst_text(),
         "만들 개수": count,
+        "형식 배정(순서대로 이 형식으로 작성)": formats,
         "최근 콘텐츠(겹치면 안 됨, 오래된 순)": recent,
     }
     perf = load_performance_highlights()
@@ -211,6 +270,13 @@ def validate_item(item, recent_entries, batch_so_far=()):
     try:
         if item.get("category") not in CATEGORY_MAP:
             problems.append(f"category가 허용값이 아님: {item.get('category')}")
+        fmt = item.get("format")
+        if fmt not in FORMATS:
+            problems.append(f"format이 10가지 형식 중 하나가 아님: {fmt}")
+        else:
+            prev_formats = [e.get("format") for e in list(recent_entries) + list(batch_so_far) if e.get("format") in FORMATS]
+            if prev_formats and prev_formats[-1] == fmt:
+                problems.append(f"직전 릴스와 같은 형식({fmt}) — 연속 사용 금지")
         hook = item.get("hook")
         if not (isinstance(hook, list) and MAX_HOOK_FRAGMENTS[0] <= len(hook) <= MAX_HOOK_FRAGMENTS[1] and all(isinstance(h, str) and h.strip() for h in hook)):
             problems.append("hook은 3~4개 문자열 조각이어야 함")
@@ -247,9 +313,22 @@ def validate_item(item, recent_entries, batch_so_far=()):
         hits = [w for w in BANNED_WORDS if w in text_all]
         if hits:
             problems.append(f"금지 표현 포함: {hits}")
+        for pattern, label in REPEATED_PATTERNS:
+            if pattern.search(text_all):
+                problems.append(f"반복 금지 문장 구조 사용: {label}")
+        # 핵심 문장의 시작이 최근 콘텐츠와 자꾸 같아지는 것도 반복으로 본다(최근 5개 중 2개 이상 같으면 탈락)
+        opening = nospace_len(info["pre"]) and re.sub(r"\s+", "", info["pre"])[:5]
+        prior = [e for e in list(recent_entries) + list(batch_so_far) if isinstance(e.get("info"), dict)][-5:]
+        same = sum(1 for e in prior if re.sub(r"\s+", "", e["info"].get("pre", ""))[:5] == opening)
+        if opening and same >= 2:
+            problems.append(f"info 문장 시작('{opening}…')이 최근 콘텐츠와 반복됨")
         first_hook = "".join(hook)
         if re.match(r"^\s*(안녕|여러분|오늘은|오늘 알아)", first_hook):
             problems.append("hook이 금지된 인사/설명형 시작임")
+        # 화면에는 한 사람의 무료 결과(사주 여덟 글자·오행 비율)만 나온다 — 그 화면 위에 다른 기능을 약속하는 자막 금지
+        shot_hits = [w for w in SHOT_FORBIDDEN if w in item["screenshotCaption"]]
+        if shot_hits:
+            problems.append(f"screenshotCaption이 화면에 없는 기능을 언급함: {shot_hits} (화면은 한 사람의 무료 결과)")
         for k in ("screenshotCaption", "captionBody"):
             if "무료" in item[k] and not any(t in item[k] for t in FREE_OK_TERMS):
                 problems.append(f"{k}에서 '무료'가 무료 제공 4가지(여덟 글자·오행 비율·일간·성향 해석)를 가리키지 않음")

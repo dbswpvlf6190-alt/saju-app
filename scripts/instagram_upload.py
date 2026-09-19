@@ -89,6 +89,7 @@ def _refresh_token(token_data):
             "grant_type": "ig_refresh_token",
             "access_token": token_data["access_token"],
         },
+        timeout=30,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -128,6 +129,7 @@ def upload_reel(video_url, caption):
             "caption": caption,
             "access_token": access_token,
         },
+        timeout=30,
     )
     if create_resp.status_code != 200:
         print(f"미디어 생성 실패 응답: {create_resp.status_code} {create_resp.text}")
@@ -139,6 +141,7 @@ def upload_reel(video_url, caption):
         status_resp = requests.get(
             f"https://graph.instagram.com/v21.0/{container_id}",
             params={"fields": "status_code", "access_token": access_token},
+            timeout=15,
         )
         status_resp.raise_for_status()
         status = status_resp.json().get("status_code")
@@ -153,6 +156,7 @@ def upload_reel(video_url, caption):
     publish_resp = requests.post(
         f"https://graph.instagram.com/v21.0/{user_id}/media_publish",
         data={"creation_id": container_id, "access_token": access_token},
+        timeout=30,
     )
     publish_resp.raise_for_status()
     media_id = publish_resp.json()["id"]
@@ -176,6 +180,7 @@ def upload_carousel(image_urls, caption):
                 "is_carousel_item": "true",
                 "access_token": access_token,
             },
+            timeout=30,
         )
         if item_resp.status_code != 200:
             print(f"슬라이드 {i + 1} 컨테이너 생성 실패: {item_resp.status_code} {item_resp.text}")
@@ -191,6 +196,7 @@ def upload_carousel(image_urls, caption):
             "children": ",".join(child_ids),
             "access_token": access_token,
         },
+        timeout=30,
     )
     if create_resp.status_code != 200:
         print(f"캐러셀 컨테이너 생성 실패 응답: {create_resp.status_code} {create_resp.text}")
@@ -202,6 +208,7 @@ def upload_carousel(image_urls, caption):
         status_resp = requests.get(
             f"https://graph.instagram.com/v21.0/{container_id}",
             params={"fields": "status_code", "access_token": access_token},
+            timeout=15,
         )
         status_resp.raise_for_status()
         status = status_resp.json().get("status_code")
@@ -216,6 +223,7 @@ def upload_carousel(image_urls, caption):
     publish_resp = requests.post(
         f"https://graph.instagram.com/v21.0/{user_id}/media_publish",
         data={"creation_id": container_id, "access_token": access_token},
+        timeout=30,
     )
     publish_resp.raise_for_status()
     media_id = publish_resp.json()["id"]

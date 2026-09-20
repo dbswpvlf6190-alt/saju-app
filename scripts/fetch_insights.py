@@ -121,7 +121,7 @@ def load_content_meta():
     try:
         with open(CARDSETS_JSON, "r", encoding="utf-8") as f:
             for c in json.load(f):
-                meta[c["id"]] = {"title": c.get("title"), "category": c.get("category")}
+                meta[c["id"]] = {"title": c.get("title"), "category": c.get("category"), "subcategory": c.get("subcategory"), "topic": c.get("topic"), "format": c.get("format"), "hook_first": c.get("title"), "ctaType": c.get("ctaType")}
     except (OSError, json.JSONDecodeError):
         pass
     return meta

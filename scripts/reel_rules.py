@@ -78,16 +78,18 @@ REPEATED_PATTERNS = [
 ]
 
 
-def pick_formats(recent_entries, count, rng=None):
-    """최근에 쓴 형식을 피해서 count개를 배정한다. 서로 이웃한 형식이 같지 않고, 직전 릴스의 형식과도 다르다."""
+def pick_formats(recent_entries, count, rng=None, allowed=None):
+    """최근에 쓴 형식을 피해서 count개를 배정한다. 서로 이웃한 형식이 같지 않고, 직전 릴스의 형식과도 다르다.
+    allowed를 주면 그 형식들 안에서만 배정한다(카드뉴스는 캐러셀에 맞는 일부 형식만 사용)."""
     rng = rng or random
+    universe = [f for f in FORMATS if allowed is None or f in allowed]
     recent_formats = [e.get("format") for e in recent_entries if e.get("format") in FORMATS]
     avoid = set(recent_formats[-3:])
-    pool = [f for f in FORMATS if f not in avoid] or list(FORMATS)
+    pool = [f for f in universe if f not in avoid] or list(universe)
     picked = []
     prev = recent_formats[-1] if recent_formats else None
     while len(picked) < count:
-        cands = [f for f in pool if f != prev and f not in picked[-3:]] or [f for f in FORMATS if f != prev]
+        cands = [f for f in pool if f != prev and f not in picked[-3:]] or [f for f in universe if f != prev]
         choice = rng.choice(cands)
         picked.append(choice)
         prev = choice

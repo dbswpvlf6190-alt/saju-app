@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reel_rules  # noqa: E402
+import cardnews_rules  # noqa: E402
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -36,32 +37,6 @@ REEL_MANIFEST = os.path.join(SCRIPTS_DIR, "reel_manifest.json")
 CARDNEWS_MANIFEST = os.path.join(SCRIPTS_DIR, "cardnews_manifest.json")
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-
-SYSTEM_PROMPT_CARDNEWS = """당신은 인스타그램 사주 콘텐츠 계정 '사주랩'의 카드뉴스(캐러셀) 대본을 쓰는
-카피라이터입니다. 다음 원칙을 반드시 지키세요.
-
-1. "반드시 ~하게 된다"처럼 단정하지 말고, "~한 편이에요", "~라는 해석이 있어요"처럼 가능성을 전하는 어조를 쓰세요.
-2. 오행·십성 같은 명리학 개념을 언급하되, 전문 용어가 나오면 바로 쉬운 말로 풀어주세요.
-3. caption/ctaLine에서 "무료로 확인 가능"이라고 연결지을 수 있는 건 오직 이 4가지뿐입니다:
-   사주 여덟 글자, 오행 비율, 일간, 전반적 성향 해석. 이 4가지 이외의 구체적 용어(십성 구성,
-   삼재 계산, 택일, 궁합 점수, 대운, 십신 분석 등)를 "무료로 확인 가능"이라고 쓰면 실제로
-   없는 기능을 있다고 속이는 것이 됩니다 — 카드 본문(items)에서 그 개념을 설명하는 건
-   괜찮지만, 무료 확인 유도 문구에서는 반드시 위 4가지 표현으로만 마무리하세요.
-4. 각 세트는 다음 필드로 구성됩니다:
-   - category: 사주상식/재물운/연애운/직업운/생년월일/인간관계 중 하나 (한글)
-   - title: 표지 제목
-   - coverSub: 표지 부제
-   - items: 3~5개, 각각 {"symbol":"한자 1글자","label":"짧은 이름","keyword":"핵심 키워드",
-     "desc":"1~2문장 설명"}
-   - ctaLine: 마지막 CTA 화면의 짧은 유도 문구
-   - caption: 인스타그램 캡션. 본문 1~2문장(저장 유도, "📌" 포함) + 빈 줄 + 무료 확인 안내 +
-     빈 줄 + "팔로우하면 매일 새로운 사주 이야기 올려드려요 🔔" + 줄바꿈 + "이 글이 도움되셨다면
-     친구한테도 공유해보세요 💌" + 빈 줄 + 해시태그 5~6개
-
-5. "이미 사용한 제목" 목록과 소재가 겹치지 않게 새로운 각도를 다루세요.
-
-요청받은 개수만큼 JSON 배열로만 응답하세요. 코드블록이나 설명 문장 없이 순수 JSON 배열만 출력하세요."""
-
 
 def log(msg):
     print(f"[refill_queue] {msg}")
@@ -280,6 +255,35 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     log(f"git push {'성공' if ok else '실패'}")
 
 
+def generate_card_items(cardsets, need):
+    """cardnews_rules 기준으로 카드뉴스 대본을 만들고 검증 통과분만 모은다(탈락 사유는 다음 시도에 전달, 최대 3회)."""
+    accepted = []
+    feedback = ""
+    for attempt in range(1, 4):
+        want = need - len(accepted)
+        if want <= 0:
+            break
+        request_count = want if attempt > 1 else want + 1
+        formats = cardnews_rules.pick_formats(cardsets + accepted, request_count)
+        user_msg = cardnews_rules.build_user_message(cardsets + accepted, request_count, formats) + feedback
+        candidates = call_claude_raw(cardnews_rules.SYSTEM_PROMPT_CARDNEWS, user_msg)
+        rejected = []
+        for item in candidates:
+            if len(accepted) >= need:
+                break
+            problems = cardnews_rules.validate_item(item, cardsets, accepted)
+            if problems:
+                rejected.append((item.get("title", "?"), problems))
+            else:
+                accepted.append(item)
+        for title, problems in rejected:
+            log(f"탈락(시도 {attempt}): {title} — {'; '.join(problems)}")
+        if rejected and len(accepted) < need:
+            lines = [f"- {t}: {'; '.join(pr)}" for t, pr in rejected]
+            feedback = "\n\n이전 시도에서 아래 사유로 탈락했어. 같은 실수를 하지 말고 새 소재로 다시 만들어줘:\n" + "\n".join(lines)
+    return accepted
+
+
 def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     manifest = load_json(CARDNEWS_MANIFEST)
     posted_dir = os.path.join(SCRIPTS_DIR, "posted_state", "cardnews")
@@ -292,25 +296,40 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     log(f"카드뉴스 대기열 {len(unposted)}개 남음 — {need}개 새로 생성")
 
     cardsets = load_json(CARDSETS_JSON)
-    used_titles = [c["title"] for c in cardsets]
-    new_items = call_claude(SYSTEM_PROMPT_CARDNEWS, used_titles, need)
+    new_items = generate_card_items(cardsets, need)
+    if not new_items:
+        raise RuntimeError("검증을 통과한 카드뉴스 대본을 하나도 만들지 못했습니다(위 탈락 사유 참고).")
+    if len(new_items) < need:
+        log(f"목표 {need}개 중 {len(new_items)}개만 검증 통과 — 그대로 진행")
 
     next_num = next_id([c["id"] for c in cardsets], "C")
     next_order = max((c["order"] for c in cardsets), default=-1) + 1
     next_day = max((e["day"] for e in manifest), default=0) + 1
+    created_at = datetime.now().strftime("%Y-%m-%d")
 
     new_ids = []
     for item in new_items:
         cid = f"C{next_num:02d}"
+        cta_type = reel_rules.next_cta_type(cardsets)
+        cta = reel_rules.CTAS[cta_type]
         entry = {
             "id": cid,
             "order": next_order,
+            "structure": 2,  # 표지=훅, 마지막 장=CTA(A/B/C) — 2026-09-20 카드뉴스 실험
             "category": item["category"],
+            "subcategory": item["subcategory"],
+            "format": item["format"],
             "title": item["title"],
+            "hookAccent": item["hookAccent"].strip(),
             "coverSub": item["coverSub"],
+            "topic": item["topic"],
+            "keywords": item["keywords"],
             "items": item["items"],
-            "ctaLine": item["ctaLine"],
-            "caption": item["caption"],
+            "ctaType": cta_type,
+            "cta": {k: cta[k] for k in ("pre", "headline", "button")},
+            "ctaLine": cta["pre"],
+            "pinnedComment": cardnews_rules.build_pinned_comment(item),
+            "createdAt": created_at,
         }
         cardsets.append(entry)
         dir_name = f"{next_order + 1:02d}_{cid}"
@@ -320,7 +339,9 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
             "category": item["category"],
             "dir": f"cardnews/{dir_name}",
             "remote_prefix": f"saju_cardnews_{dir_name}",
-            "caption": item["caption"],
+            "caption": cardnews_rules.build_caption(item, cta_type),
+            "pinned_comment": entry["pinnedComment"],
+            "cta_type": cta_type,
         })
         new_ids.append(cid)
         next_num += 1

@@ -99,8 +99,8 @@ export function lines(arr, opts) {
   return arr.map((t, i) => line(t, { ...opts, mt: i === 0 ? (opts?.mt ?? 0) : 10 }));
 }
 
-export function keyword(text) {
-  return el("div", { fontSize: 76, fontWeight: 700, color: GOLD, textAlign: "center", marginTop: 28, display: "flex" }, text);
+export function keyword(text, size = 76) {
+  return el("div", { fontSize: size, fontWeight: 700, color: GOLD, textAlign: "center", marginTop: 28, display: "flex" }, text);
 }
 
 export function ctaButton(text) {

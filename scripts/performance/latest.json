@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-20T10:18:38",
+  "generated_at": "2026-09-20T10:23:56",
   "account": {
     "followers": 5,
     "media_count": 43,
@@ -19,9 +19,9 @@
       "format": null,
       "hook_first": "사주가 미신이라고",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 529.3,
+      "age_hours": 529.4,
       "metrics": {
         "reach": 147,
         "likes": 0,
@@ -29,8 +29,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 150
+        "views": 150,
+        "avg_watch_sec": 2.64
       },
+      "watch_ratio": 0.097,
       "interaction_rate": 0.0
     },
     {
@@ -45,9 +47,9 @@
       "format": null,
       "hook_first": "월급 들어오고 3일 만에",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 517.8,
+      "age_hours": 517.9,
       "metrics": {
         "reach": 6,
         "likes": 0,
@@ -55,8 +57,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 6
+        "views": 6,
+        "avg_watch_sec": 2.81
       },
+      "watch_ratio": 0.138,
       "interaction_rate": 0.0
     },
     {
@@ -71,7 +75,7 @@
       "format": null,
       "hook_first": "썸 탈 때마다",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
       "age_hours": 494.3,
       "metrics": {
@@ -81,8 +85,10 @@
         "saved": 1,
         "shares": 0,
         "total_interactions": 2,
-        "views": 129
+        "views": 129,
+        "avg_watch_sec": 2.38
       },
+      "watch_ratio": 0.117,
       "interaction_rate": 0.0163
     },
     {
@@ -97,9 +103,9 @@
       "format": null,
       "hook_first": "생시 몰라서",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 480.2,
+      "age_hours": 480.3,
       "metrics": {
         "reach": 105,
         "likes": 1,
@@ -107,8 +113,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 1,
-        "views": 125
+        "views": 125,
+        "avg_watch_sec": 3.42
       },
+      "watch_ratio": 0.168,
       "interaction_rate": 0.0095
     },
     {
@@ -123,7 +131,7 @@
       "format": null,
       "hook_first": "회사 체질 아니라는",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
       "age_hours": 470.3,
       "metrics": {
@@ -133,8 +141,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 20
+        "views": 20,
+        "avg_watch_sec": 2.15
       },
+      "watch_ratio": 0.106,
       "interaction_rate": 0.0
     },
     {
@@ -149,7 +159,7 @@
       "format": null,
       "hook_first": "부수입 아이디어만",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
       "age_hours": 446.3,
       "metrics": {
@@ -159,8 +169,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 29
+        "views": 29,
+        "avg_watch_sec": 1.96
       },
+      "watch_ratio": 0.097,
       "interaction_rate": 0.0
     },
     {
@@ -175,7 +187,7 @@
       "format": null,
       "hook_first": "좋아하면서",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
       "age_hours": 422.3,
       "metrics": {
@@ -185,8 +197,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 1,
-        "views": 77
+        "views": 77,
+        "avg_watch_sec": 1.99
       },
+      "watch_ratio": 0.098,
       "interaction_rate": 0.0145
     },
     {
@@ -201,7 +215,7 @@
       "format": null,
       "hook_first": "음력이든 양력이든,",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
       "age_hours": 421.8,
       "metrics": {
@@ -211,8 +225,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 9
+        "views": 9,
+        "avg_watch_sec": 3.07
       },
+      "watch_ratio": 0.151,
       "interaction_rate": 0.0
     },
     {
@@ -227,7 +243,7 @@
       "format": null,
       "hook_first": "혼자 일하는 게",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
       "age_hours": 421.3,
       "metrics": {
@@ -237,8 +253,10 @@
         "saved": 1,
         "shares": 0,
         "total_interactions": 2,
-        "views": 6
+        "views": 6,
+        "avg_watch_sec": 5.69
       },
+      "watch_ratio": 0.28,
       "interaction_rate": 0.3333
     },
     {
@@ -253,7 +271,7 @@
       "format": null,
       "hook_first": "부자 사주 있냐는",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
       "age_hours": 398.3,
       "metrics": {
@@ -263,8 +281,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 27
+        "views": 27,
+        "avg_watch_sec": 1.98
       },
+      "watch_ratio": 0.098,
       "interaction_rate": 0.0
     },
     {
@@ -279,9 +299,9 @@
       "format": null,
       "hook_first": "힘들 때마다",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 387.4,
+      "age_hours": 387.5,
       "metrics": {
         "reach": 49,
         "likes": 0,
@@ -289,8 +309,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 56
+        "views": 56,
+        "avg_watch_sec": 3.66
       },
+      "watch_ratio": 0.18,
       "interaction_rate": 0.0
     },
     {
@@ -305,9 +327,9 @@
       "format": null,
       "hook_first": "내 띠가",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 335.2,
+      "age_hours": 335.3,
       "metrics": {
         "reach": 103,
         "likes": 0,
@@ -315,8 +337,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 109
+        "views": 109,
+        "avg_watch_sec": 4.4
       },
+      "watch_ratio": 0.167,
       "interaction_rate": 0.0
     },
     {
@@ -331,9 +355,9 @@
       "format": null,
       "hook_first": "월급 관리 잘하는 사람과",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 204.2,
+      "age_hours": 204.3,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -341,8 +365,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 25
+        "views": 25,
+        "avg_watch_sec": 3.83
       },
+      "watch_ratio": 0.14,
       "interaction_rate": 0.0
     },
     {
@@ -357,7 +383,7 @@
       "format": null,
       "hook_first": "고백 못 하고",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 27.3,
       "keywords": null,
       "age_hours": 179.7,
       "metrics": {
@@ -367,8 +393,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 1,
-        "views": 139
+        "views": 139,
+        "avg_watch_sec": 3.87
       },
+      "watch_ratio": 0.142,
       "interaction_rate": 0.0078
     },
     {
@@ -383,7 +411,7 @@
       "format": null,
       "hook_first": "이직을",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 26.3,
       "keywords": null,
       "age_hours": 158.3,
       "metrics": {
@@ -393,8 +421,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 1,
-        "views": 111
+        "views": 111,
+        "avg_watch_sec": 3.78
       },
+      "watch_ratio": 0.144,
       "interaction_rate": 0.0098
     },
     {
@@ -409,9 +439,9 @@
       "format": null,
       "hook_first": "연락도 내가 먼저,",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 62.7,
+      "age_hours": 62.8,
       "metrics": {
         "reach": 120,
         "likes": 2,
@@ -419,8 +449,10 @@
         "saved": 1,
         "shares": 0,
         "total_interactions": 3,
-        "views": 128
+        "views": 128,
+        "avg_watch_sec": 5.0
       },
+      "watch_ratio": 0.19,
       "interaction_rate": 0.025
     },
     {
@@ -435,7 +467,7 @@
       "format": null,
       "hook_first": "이사·개업 날짜,",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 26.3,
       "keywords": null,
       "age_hours": 52.4,
       "metrics": {
@@ -445,8 +477,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 1,
-        "views": 108
+        "views": 108,
+        "avg_watch_sec": 1.79
       },
+      "watch_ratio": 0.068,
       "interaction_rate": 0.0098
     },
     {
@@ -461,7 +495,7 @@
       "format": null,
       "hook_first": "사주에 나무 기운이",
       "ctaType": null,
-      "durationSec": null,
+      "durationSec": 32.3,
       "keywords": null,
       "age_hours": 14.3,
       "metrics": {
@@ -471,8 +505,10 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 151
+        "views": 151,
+        "avg_watch_sec": 4.45
       },
+      "watch_ratio": 0.138,
       "interaction_rate": 0.0
     },
     {
@@ -482,7 +518,7 @@
       "posted_at": "2026-08-29T00:16:04.944599+00:00",
       "title": "오행, 3분이면 완전히 이해돼요",
       "category": "사주상식",
-      "age_hours": 529.0,
+      "age_hours": 529.1,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -539,7 +575,7 @@
       "posted_at": "2026-08-31T01:05:08.024709+00:00",
       "title": "연애할 때 나는 어떤 스타일일까?",
       "category": "연애운",
-      "age_hours": 480.2,
+      "age_hours": 480.3,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -672,7 +708,7 @@
       "posted_at": "2026-09-03T21:41:56.973555+00:00",
       "title": "내 인생 귀인, 사주에 신호가 있대요",
       "category": "인간관계",
-      "age_hours": 387.6,
+      "age_hours": 387.7,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -710,7 +746,7 @@
       "posted_at": "2026-09-06T02:04:44.404208+00:00",
       "title": "정재 vs 편재, 나는 어느 쪽?",
       "category": "재물운",
-      "age_hours": 335.2,
+      "age_hours": 335.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -729,7 +765,7 @@
       "posted_at": "2026-09-11T13:05:49.932135+00:00",
       "title": "짝사랑이 유독 긴 사람 특징",
       "category": "연애운",
-      "age_hours": 204.2,
+      "age_hours": 204.3,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -786,7 +822,7 @@
       "posted_at": "2026-09-18T14:30:13.063930+00:00",
       "title": "이사 날짜, 아무 날이나 잡아도 될까",
       "category": "사주상식",
-      "age_hours": 34.8,
+      "age_hours": 34.9,
       "metrics": {
         "reach": 2,
         "likes": 1,

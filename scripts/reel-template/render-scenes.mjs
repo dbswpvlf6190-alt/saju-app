@@ -1,11 +1,29 @@
 // 사주랩 릴스 템플릿 시스템 — 장면 렌더러
 // 콘텐츠 항목(content.mjs) 하나를 받아 5장 PNG(HOOK/INFO/CURIOSITY/SCREENSHOT/CTA)를 생성한다.
-import { frame, line, lines, ctaButton, renderTo, getScreenshotDataUri, GOLD, SOFT_GOLD, IVORY, MUTED } from "./theme.mjs";
+import { frame, line, lines, ctaButton, renderTo, getScreenshotDataUri, GOLD, SOFT_GOLD, IVORY, MUTED, el } from "./theme.mjs";
 import { CTA_HEADLINE, CTA_BUTTON } from "./content.mjs";
 
 export async function renderScenes(entry, outDir) {
   // 1. HOOK (0~2s)
-  await renderTo(`${outDir}/1-hook.png`, frame(lines(entry.hook, { size: 84, weight: 700 })));
+  // hookAccent가 들어있는 조각은 금색으로 강조한다(첫 3초 이탈 대응 — 눈이 먼저 갈 지점을 만든다).
+  const accent = entry.hookAccent;
+  await renderTo(
+    `${outDir}/1-hook.png`,
+    frame(entry.hook.map((t, i) => line(t, { size: 84, weight: 700, color: accent && t.includes(accent) ? GOLD : IVORY, mt: i === 0 ? 0 : 10 }))),
+  );
+
+  // 영상 처음부터 끝까지 상단에 떠 있는 한 줄 CTA(대부분 3초 안에 이탈해 후반 CTA를 못 보므로).
+  // 세이프존(상단 약 300px) 바로 아래에 두고, 투명 배경 PNG로 만들어 build.mjs가 전 구간에 덮는다.
+  if (entry.cta?.pill) {
+    await renderTo(
+      `${outDir}/pill.png`,
+      el("div", { width: "100%", height: "100%", display: "flex", position: "relative" }, [
+        el("div", { position: "absolute", left: 0, right: 0, top: 236, display: "flex", justifyContent: "center" },
+          el("div", { padding: "18px 40px", borderRadius: 999, background: "rgba(10, 8, 20, 0.82)", border: `2px solid ${GOLD}`, display: "flex" },
+            el("div", { fontSize: 38, fontWeight: 700, color: GOLD, display: "flex" }, entry.cta.pill))),
+      ]),
+    );
+  }
 
   // 2. INFO (2~7s) — 핵심 키워드만 금색 강조
   await renderTo(

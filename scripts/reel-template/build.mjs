@@ -171,13 +171,16 @@ async function buildOne(entry) {
   const order = entry.structure === 2 ? ["hook", "curiosity", "info", "screenshot", "cta"] : ["hook", "info", "curiosity", "screenshot", "cta"];
   const pngFor = { hook: "1-hook.png", info: "2-info.png", curiosity: "3-curiosity.png", screenshot: "4-screenshot.png", cta: "5-cta.png" };
   const scenePngs = order.map((k) => `${sceneDirPath}/${pngFor[k]}`);
+  const pillPath = entry.cta?.pill ? `${sceneDirPath}/pill.png` : null;
   const narrationPaths = order.map((k) => synthesize(texts[k], `${sceneDirPath}/${k}`));
   const D = narrationPaths.map((p) => Math.max(MIN_SCENE, probeDuration(p) + SCENE_PAD));
 
   const { offsets, total } = cumulativeOffsets(D, FADE);
   const sceneStarts = [0, ...offsets];
 
-  const videoFilter = buildVideoFilter(D, offsets);
+  let videoFilter = buildVideoFilter(D, offsets);
+  // 상단 고정 CTA 자막(pill.png)을 전 구간에 덮는다. 입력 인덱스 24(나레이션 5개 바로 뒤).
+  if (pillPath) videoFilter = videoFilter.replace(/\[vout\]$/, "[vbase]") + ";[vbase][24:v]overlay=0:0:format=auto[vout]";
   const narrationFilter = buildNarrationFilter(sceneStarts);
   const audioFilter = buildAudioFilter(D, offsets, total);
   const filterComplex = `${videoFilter};${narrationFilter};${audioFilter}`;
@@ -209,6 +212,7 @@ async function buildOne(entry) {
     "-i", narrationPaths[2],
     "-i", narrationPaths[3],
     "-i", narrationPaths[4],
+    ...(pillPath ? ["-i", pillPath] : []),
     "-filter_complex", filterComplex,
     "-map", "[vout]", "-map", "[aout]",
     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-ar", "44100",

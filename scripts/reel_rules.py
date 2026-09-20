@@ -29,6 +29,7 @@ SUBCATEGORIES = ["연애", "궁합", "재물", "직장", "성격", "결혼·인�
 # 무료 쿠폰은 실제로 "팔로우 + 댓글"이 조건이라, 쿠폰을 언급하는 CTA는 팔로우 조건을 반드시 표시한다.
 CTAS = {
     "A": {
+        "pill": "댓글 '사주' + 팔로우 → 무료 쿠폰 🎟️",  # 영상 처음부터 끝까지 상단에 고정 노출되는 한 줄 CTA
         "pre": "내 사주가 궁금하다면?",
         "headline": "댓글에 '사주'라고 남겨주세요",
         "button": "팔로우하면 무료 쿠폰 🎟️",
@@ -36,6 +37,7 @@ CTAS = {
         "caption": "궁금하면 댓글에 '사주'라고 남겨주세요. 팔로우하면 무료 쿠폰 드릴게요 🎟️",
     },
     "B": {
+        "pill": "'사주' 댓글 + 팔로우하면 무료 쿠폰 🎟️",  # 영상 처음부터 끝까지 상단에 고정 노출되는 한 줄 CTA
         "pre": "내 사주도 궁금하다면?",
         "headline": "'사주'라고 댓글 남겨주세요",
         "button": "팔로우 + 댓글 → 무료 쿠폰 🎟️",
@@ -43,6 +45,7 @@ CTAS = {
         "caption": "내 사주도 궁금하다면 '사주'라고 댓글 남겨주세요. 팔로우하면 무료 쿠폰을 받을 수 있어요 🎟️",
     },
     "C": {
+        "pill": "댓글에 '사주' 남겨주세요 💬",  # 영상 처음부터 끝까지 상단에 고정 노출되는 한 줄 CTA
         "pre": "내 사주에서는 어떻게 나올까?",
         "headline": "댓글에 '사주' 남겨주세요",
         "button": "내 사주 결과 궁금하다면 💬",
@@ -101,9 +104,9 @@ SHOT_FORBIDDEN = ["궁합", "택일", "삼재", "대운", "십성", "십신", "�
 # 앱에서 실제로 무료로 볼 수 있는 것(기존 규칙 유지). "무료"가 들어간 LLM 작성 문구는 이 중 하나를 가리켜야 한다.
 FREE_OK_TERMS = ["여덟 글자", "오행", "일간", "성향"]
 
-MAX_HOOK_FRAGMENTS = (3, 4)
+MAX_HOOK_FRAGMENTS = (2, 3)
 # 글자 수(공백 제외) 상한 — 실측: 공백 제외 약 210자 ≈ 32~33초(20~35초 목표, 40초 초과 금지).
-BUDGET = {"hook": 34, "curiosity": 34, "info": 100, "shot": 30, "body": 110}
+BUDGET = {"hook": 24, "curiosity": 34, "info": 100, "shot": 30, "body": 110}
 
 SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·유튜브 쇼츠용 사주 콘텐츠 계정 '사주랩'의 숏폼 전략가이자 대본 작가입니다.
 
@@ -151,8 +154,12 @@ SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·
 다음 문장 구조는 반복하지 마세요: "사주에서는 ~라고 봅니다.", "중요한 건 ~입니다.", "내 사주는 어떨까요?". 문장 시작과 끝맺음을 매번 다르게 쓰세요(같은 배치 안에서도).
 
 [영상 구조 — 화면에 뜨는 글자와 음성 나레이션이 같은 문장으로 읽힙니다]
-- hook (0~2초, STOP HOOK): 시청자가 자신을 대입하는 질문/상황. "안녕하세요", "오늘은 ~알아보겠습니다", "여러분 사주 보시나요", "오늘 알아볼 것은 오행입니다"로 시작 금지.
-  3~4개 조각(조각당 5~14자, 이어 읽으면 자연스러운 한 흐름). 전체 공백 제외 34자 이내.
+- hook (0~2초, STOP HOOK): 지금까지 릴스의 평균 시청 시간이 3초 안팎이라 대부분 첫 3초에 넘겨집니다. 첫 3초가 전부입니다.
+  · 시청자를 콕 집는 말로 시작: 내가/네가 겪는 구체적인 상황이나 통념을 뒤집는 한마디("연락도 내가 먼저, 손해도 내가 먼저", "생시 몰라서 사주 못 본다는 말, 반은 틀렸어요" 같은 방향).
+  · 첫 조각은 10자 이내로 짧고 강하게. 설명투("~이유가 있어요", "~에 대해 알아볼게요", "~알려드릴게요")로 끝내지 말고, 제작자 시점("저는 항상 ~", "제가 ~")도 금지.
+  · 2~3개 조각(조각당 14자 이내, 이어 읽으면 자연스러운 한 흐름). 전체 공백 제외 24자 이내. 답은 여기서 풀지 말고 curiosity로 넘김.
+  · hookAccent: 훅 조각 안에 글자 그대로 들어있는 핵심 어구 2~8자(화면에서 금색으로 강조됨). 조각 하나 전체가 아니어도 됨.
+  "안녕하세요", "오늘은 ~알아보겠습니다", "여러분 사주 보시나요", "오늘 알아볼 것은 오행입니다"로 시작 금지.
 - curiosity (2~7초): 훅의 이유를 바로 풀지 않고 궁금증을 더 키움. 2줄 배열, 공백 제외 34자 이내. 예) "그런데 단순히 성격 문제만은 아닐 수 있어요"
 - info (7~18초, VALUE): 사주 관점의 핵심. {"pre","emphasis","post","sub":[1~2개]} — pre+emphasis+post가 한 문장. 전문 용어는 바로 쉬운 말로 풀기.
   "pre+emphasis+post+sub" 전체 공백 제외 100자 이내(길면 영상이 40초를 넘습니다).
@@ -175,7 +182,8 @@ SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·
  "title": "짧은 제목(내부용)",
  "topic": "핵심 소재 한 문장(최근 콘텐츠와 비교용)",
  "keywords": ["키워드 3~5개"],
- "hook": ["조각","조각","조각"],
+ "hook": ["조각","조각"],
+ "hookAccent": "hook 안에 그대로 들어있는 강조 어구 2~8자",
  "curiosity": ["줄1","줄2"],
  "info": {"pre":"","emphasis":"","post":"","sub":[""]},
  "screenshotCaption": "",
@@ -280,7 +288,7 @@ def validate_item(item, recent_entries, batch_so_far=()):
                 problems.append(f"직전 릴스와 같은 형식({fmt}) — 연속 사용 금지")
         hook = item.get("hook")
         if not (isinstance(hook, list) and MAX_HOOK_FRAGMENTS[0] <= len(hook) <= MAX_HOOK_FRAGMENTS[1] and all(isinstance(h, str) and h.strip() for h in hook)):
-            problems.append("hook은 3~4개 문자열 조각이어야 함")
+            problems.append("hook은 2~3개 문자열 조각이어야 함")
         cur = item.get("curiosity")
         if not (isinstance(cur, list) and len(cur) == 2 and all(isinstance(c, str) and c.strip() for c in cur)):
             problems.append("curiosity는 2줄 배열이어야 함")
@@ -300,6 +308,14 @@ def validate_item(item, recent_entries, batch_so_far=()):
 
         if nospace_len("".join(hook)) > BUDGET["hook"] or any(len(h) > 16 for h in hook):
             problems.append(f"hook이 너무 김(공백 제외 {BUDGET['hook']}자 이내, 조각당 16자 이내)")
+        if nospace_len(hook[0]) > 12:
+            problems.append("hook 첫 조각은 10자 안팎으로 짧고 강해야 함")
+        accent = item.get("hookAccent")
+        if not (isinstance(accent, str) and 2 <= len(accent.strip()) <= 8 and any(accent.strip() in h for h in hook)):
+            problems.append("hookAccent는 hook 조각 안에 그대로 들어있는 2~8자 어구여야 함")
+        joined_hook = " ".join(hook)
+        if re.search(r"(이유가 있(어요|대요|습니다|더라고요)|알아볼게요|알려드릴게요|알아보겠습니다)\s*[.?!]?$", joined_hook) or re.search(r"(저는|제가) ", joined_hook):
+            problems.append("hook이 설명투로 끝나거나 제작자 시점임")
         if nospace_len("".join(cur)) > BUDGET["curiosity"]:
             problems.append(f"curiosity가 너무 김({BUDGET['curiosity']}자 이내)")
         info_len = nospace_len(info["pre"] + info["emphasis"] + info["post"] + "".join(info["sub"]))

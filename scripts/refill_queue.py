@@ -234,11 +234,12 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
             "topic": item["topic"],
             "keywords": item["keywords"],
             "hook": item["hook"],
+            "hookAccent": item["hookAccent"].strip(),
             "info": item["info"],
             "curiosity": item["curiosity"],
             "screenshotCaption": item["screenshotCaption"],
             "ctaType": cta_type,
-            "cta": {k: cta[k] for k in ("pre", "headline", "button", "narration")},
+            "cta": {k: cta[k] for k in ("pill", "pre", "headline", "button", "narration")},
             "pinnedComment": reel_rules.build_pinned_comment(item),
             "createdAt": created_at,
         }

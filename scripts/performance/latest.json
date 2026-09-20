@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-20T09:01:24",
+  "generated_at": "2026-09-20T10:18:38",
   "account": {
     "followers": 5,
     "media_count": 43,
@@ -21,7 +21,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 528.0,
+      "age_hours": 529.3,
       "metrics": {
         "reach": 147,
         "likes": 0,
@@ -47,7 +47,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 516.6,
+      "age_hours": 517.8,
       "metrics": {
         "reach": 6,
         "likes": 0,
@@ -73,7 +73,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 493.0,
+      "age_hours": 494.3,
       "metrics": {
         "reach": 123,
         "likes": 1,
@@ -99,7 +99,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 478.9,
+      "age_hours": 480.2,
       "metrics": {
         "reach": 105,
         "likes": 1,
@@ -125,7 +125,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 469.0,
+      "age_hours": 470.3,
       "metrics": {
         "reach": 19,
         "likes": 0,
@@ -151,7 +151,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 445.0,
+      "age_hours": 446.3,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -177,7 +177,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 421.0,
+      "age_hours": 422.3,
       "metrics": {
         "reach": 69,
         "likes": 1,
@@ -203,7 +203,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 420.5,
+      "age_hours": 421.8,
       "metrics": {
         "reach": 8,
         "likes": 0,
@@ -229,7 +229,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 420.0,
+      "age_hours": 421.3,
       "metrics": {
         "reach": 6,
         "likes": 1,
@@ -255,7 +255,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 397.0,
+      "age_hours": 398.3,
       "metrics": {
         "reach": 25,
         "likes": 0,
@@ -281,7 +281,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 386.2,
+      "age_hours": 387.4,
       "metrics": {
         "reach": 49,
         "likes": 0,
@@ -307,7 +307,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 333.9,
+      "age_hours": 335.2,
       "metrics": {
         "reach": 103,
         "likes": 0,
@@ -333,7 +333,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 202.9,
+      "age_hours": 204.2,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -359,7 +359,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 178.4,
+      "age_hours": 179.7,
       "metrics": {
         "reach": 128,
         "likes": 1,
@@ -385,7 +385,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 157.0,
+      "age_hours": 158.3,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -411,7 +411,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 61.4,
+      "age_hours": 62.7,
       "metrics": {
         "reach": 120,
         "likes": 2,
@@ -437,7 +437,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 51.1,
+      "age_hours": 52.4,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -463,7 +463,7 @@
       "ctaType": null,
       "durationSec": null,
       "keywords": null,
-      "age_hours": 13.0,
+      "age_hours": 14.3,
       "metrics": {
         "reach": 133,
         "likes": 0,
@@ -482,7 +482,7 @@
       "posted_at": "2026-08-29T00:16:04.944599+00:00",
       "title": "오행, 3분이면 완전히 이해돼요",
       "category": "사주상식",
-      "age_hours": 527.7,
+      "age_hours": 529.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -501,7 +501,7 @@
       "posted_at": "2026-08-29T02:01:09.683586+00:00",
       "title": "사주 용어, 헷갈리셨죠?",
       "category": "사주상식",
-      "age_hours": 526.0,
+      "age_hours": 527.3,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -520,7 +520,7 @@
       "posted_at": "2026-08-30T02:01:13.046674+00:00",
       "title": "재물운 좋은 사람들의 공통점",
       "category": "재물운",
-      "age_hours": 502.0,
+      "age_hours": 503.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -539,7 +539,7 @@
       "posted_at": "2026-08-31T01:05:08.024709+00:00",
       "title": "연애할 때 나는 어떤 스타일일까?",
       "category": "연애운",
-      "age_hours": 478.9,
+      "age_hours": 480.2,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -558,7 +558,7 @@
       "posted_at": "2026-08-31T02:00:51.461617+00:00",
       "title": "이직·승진 타이밍, 신호가 있대요",
       "category": "직업운",
-      "age_hours": 478.0,
+      "age_hours": 479.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -577,7 +577,7 @@
       "posted_at": "2026-09-01T02:01:01.149101+00:00",
       "title": "태어난 계절, 기운에 힌트를 준대요",
       "category": "생년월일",
-      "age_hours": 454.0,
+      "age_hours": 455.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -596,7 +596,7 @@
       "posted_at": "2026-09-02T02:01:00.318915+00:00",
       "title": "궁합 볼 때, 뭘 보는 건지 아세요?",
       "category": "연애운",
-      "age_hours": 430.0,
+      "age_hours": 431.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -615,7 +615,7 @@
       "posted_at": "2026-09-03T02:00:57.168752+00:00",
       "title": "재물 그릇이 크다는 사주, 신호래요",
       "category": "재물운",
-      "age_hours": 406.0,
+      "age_hours": 407.3,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -634,7 +634,7 @@
       "posted_at": "2026-09-03T02:30:43.436706+00:00",
       "title": "조직형 vs 자율형, 나는 어느 쪽?",
       "category": "직업운",
-      "age_hours": 405.5,
+      "age_hours": 406.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -653,7 +653,7 @@
       "posted_at": "2026-09-03T03:00:54.726566+00:00",
       "title": "사주가 자기이해 도구인 이유",
       "category": "사주상식",
-      "age_hours": 405.0,
+      "age_hours": 406.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -672,7 +672,7 @@
       "posted_at": "2026-09-03T21:41:56.973555+00:00",
       "title": "내 인생 귀인, 사주에 신호가 있대요",
       "category": "인간관계",
-      "age_hours": 386.3,
+      "age_hours": 387.6,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -691,7 +691,7 @@
       "posted_at": "2026-09-06T02:01:08.344084+00:00",
       "title": "삼재, 무섭게만 알고 계셨나요",
       "category": "사주상식",
-      "age_hours": 334.0,
+      "age_hours": 335.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -710,7 +710,7 @@
       "posted_at": "2026-09-06T02:04:44.404208+00:00",
       "title": "정재 vs 편재, 나는 어느 쪽?",
       "category": "재물운",
-      "age_hours": 333.9,
+      "age_hours": 335.2,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -729,7 +729,7 @@
       "posted_at": "2026-09-11T13:05:49.932135+00:00",
       "title": "짝사랑이 유독 긴 사람 특징",
       "category": "연애운",
-      "age_hours": 202.9,
+      "age_hours": 204.2,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -748,7 +748,7 @@
       "posted_at": "2026-09-12T02:01:14.803495+00:00",
       "title": "N잡·부업 체질, 신호가 있대요",
       "category": "직업운",
-      "age_hours": 190.0,
+      "age_hours": 191.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -767,7 +767,7 @@
       "posted_at": "2026-09-13T02:01:08.897567+00:00",
       "title": "맨날 나만 손해보는 관계, 신호 있나요",
       "category": "인간관계",
-      "age_hours": 166.0,
+      "age_hours": 167.3,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -786,7 +786,7 @@
       "posted_at": "2026-09-18T14:30:13.063930+00:00",
       "title": "이사 날짜, 아무 날이나 잡아도 될까",
       "category": "사주상식",
-      "age_hours": 33.5,
+      "age_hours": 34.8,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -805,7 +805,7 @@
       "posted_at": "2026-09-19T02:01:10.360966+00:00",
       "title": "십성이라는 말, 사실 어렵지 않아요",
       "category": "사주상식",
-      "age_hours": 22.0,
+      "age_hours": 23.3,
       "metrics": {
         "reach": 2,
         "likes": 1,

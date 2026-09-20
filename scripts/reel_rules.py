@@ -226,6 +226,7 @@ def load_performance_highlights(limit=3):
             "format": i.get("format"), "hook": i.get("hook_first"), "ctaType": i.get("ctaType"),
             "views": m.get("views"), "reach": m.get("reach"), "comments": m.get("comments"),
             "saved": m.get("saved"), "shares": m.get("shares"),
+            "avg_watch_sec": m.get("avg_watch_sec"), "watch_ratio": i.get("watch_ratio"),
         }
 
     return {"top": [brief(i) for i in items[:limit]], "bottom": [brief(i) for i in items[-limit:]]}

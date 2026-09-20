@@ -3,6 +3,7 @@ import glob
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import date, datetime, timezone
 
@@ -75,6 +76,33 @@ def fetch_media_insights(media_id, access_token):
         values = item.get("values", [])
         result[item["name"]] = values[0]["value"] if values else None
     return result
+
+
+def fetch_reel_watch(media_id, access_token):
+    """릴스 전용 지표: 평균 시청 시간(초). 카드뉴스는 지원하지 않아 릴스에만 호출한다."""
+    resp = requests.get(
+        f"https://graph.instagram.com/v21.0/{media_id}/insights",
+        params={"metric": "ig_reels_avg_watch_time", "access_token": access_token},
+        timeout=30,
+    )
+    if resp.status_code != 200:
+        return {}
+    for item in resp.json().get("data", []):
+        values = item.get("values", [])
+        if item.get("name") == "ig_reels_avg_watch_time" and values and values[0].get("value") is not None:
+            return {"avg_watch_sec": round(values[0]["value"] / 1000, 2)}
+    return {}
+
+
+def video_duration(rel_path):
+    try:
+        out = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", os.path.join(BASE_DIR, rel_path)],
+            capture_output=True, text=True, timeout=60,
+        ).stdout.strip()
+        return round(float(out), 1)
+    except (ValueError, subprocess.TimeoutExpired, OSError):
+        return None
 
 
 def load_content_meta():
@@ -186,11 +214,18 @@ def main():
     os.makedirs(ANALYTICS_DIR, exist_ok=True)
     os.makedirs(PERF_DIR, exist_ok=True)
     content_meta = load_content_meta()
+    try:
+        with open(os.path.join(SCRIPTS_DIR, "reel_manifest.json"), "r", encoding="utf-8") as f:
+            reel_videos = {m["day"]: m["video"] for m in json.load(f)}
+    except (OSError, json.JSONDecodeError):
+        reel_videos = {}
     now = datetime.now(timezone.utc)
     rows = []
     perf_items = []
     for entry in entries:
         insights = fetch_media_insights(entry["media_id"], access_token)
+        if entry["type_label"] == "릴스" and "error" not in insights:
+            insights.update(fetch_reel_watch(entry["media_id"], access_token))
         rows.append({
             "posted_at": entry.get("posted_at", ""),
             "type": entry["type_label"],
@@ -215,6 +250,12 @@ def main():
             item["error"] = insights["error"]
         else:
             item["metrics"] = insights
+            if insights.get("avg_watch_sec") is not None:
+                video_rel = reel_videos.get(entry.get("day"))
+                dur = item.get("durationSec") or (video_duration(video_rel) if video_rel else None)
+                if dur:
+                    item["durationSec"] = dur
+                    item["watch_ratio"] = round(insights["avg_watch_sec"] / dur, 3)
             reach = insights.get("reach") or 0
             if reach:
                 item["interaction_rate"] = round((insights.get("total_interactions") or 0) / reach, 4)

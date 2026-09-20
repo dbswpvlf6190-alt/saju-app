@@ -179,8 +179,8 @@ async function buildOne(entry) {
   const sceneStarts = [0, ...offsets];
 
   let videoFilter = buildVideoFilter(D, offsets);
-  // 상단 고정 CTA 자막(pill.png)을 전 구간에 덮는다. 입력 인덱스 24(나레이션 5개 바로 뒤).
-  if (pillPath) videoFilter = videoFilter.replace(/\[vout\]$/, "[vbase]") + ";[vbase][24:v]overlay=0:0:format=auto[vout]";
+  // 상단 고정 CTA 자막(pill.png)을 마지막 CTA 장면 직전까지 덮는다(CTA 장면에서는 같은 문구가 중복되므로 숨김). 입력 인덱스 24(나레이션 5개 바로 뒤).
+  if (pillPath) videoFilter = videoFilter.replace(/\[vout\]$/, "[vbase]") + `;[vbase][24:v]overlay=0:0:format=auto:enable='lt(t,${offsets[3].toFixed(2)})'[vout]`;
   const narrationFilter = buildNarrationFilter(sceneStarts);
   const audioFilter = buildAudioFilter(D, offsets, total);
   const filterComplex = `${videoFilter};${narrationFilter};${audioFilter}`;

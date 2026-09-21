@@ -46,3 +46,6 @@
 
 ## 2026-09-21 — media_host push "fetch first" 거부 방지
 `publish_instagram.py`/`publish_carousel.py`가 push 전에 `git pull --no-rebase`로 최신을 합치고, 거부되면 한 번 더 합쳐 재시도하도록 수정(노트북·데스크톱이 같은 saju-media-host를 번갈아 써서 생기는 non-fast-forward 대응, shorts_auto 노트북 38/39번 인스타 실패에서 발견). 같은 파일의 재시도는 커밋을 건너뛴다.
+
+## 2026-09-21 — 게시 결과 푸시 보고 (ntfy)
+`scripts/notify.py` + `credentials/ntfy.json`(git 제외, 컴퓨터마다 필요 — 데스크톱엔 사용자에게 토픽을 물어 `{"topic": "...", "server": "https://ntfy.sh"}`로 생성). `run_daily.py`/`run_daily_cardnews.py`가 게시 완료 시 ✅(고정댓글 문구 포함), 예외 시 ❌ 푸시를 보냄. 자세한 설명은 shorts_auto CLAUDE.md의 같은 날짜 섹션 참고.

@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import publish_carousel  # noqa: E402
 import git_sync  # noqa: E402
 import refill_queue  # noqa: E402
+import notify  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFEST_PATH = os.path.join(BASE_DIR, "scripts", "cardnews_manifest.json")
@@ -111,6 +112,13 @@ def main():
         media_id = publish_carousel.publish(dir_path, next_entry["caption"], next_entry["remote_prefix"])
         mark_posted(day, next_entry, media_id)
         print(f"카드뉴스 Day {day} 게시 완료 (media_id={media_id})")
+        pinned = next_entry.get("pinned_comment")
+        notify.notify(
+            f"✅ 사주랩 카드뉴스 게시 완료 · Day {day} ({next_entry['id']})",
+            f"{next_entry['caption'].splitlines()[0][:80]}\nmedia_id: {media_id}"
+            + (f"\n\n📌 고정댓글(인스타에서 직접 달고 고정):\n{pinned}" if pinned else ""),
+            tags=["white_check_mark"],
+        )
         if next_entry.get("pinned_comment"):
             print("---- 고정댓글(인스타에서 직접 댓글 달고 고정해주세요) ----")
             print(next_entry["pinned_comment"])
@@ -121,6 +129,13 @@ def main():
                     pf.write(f"카드뉴스 Day {day} ({next_entry['id']}) 고정댓글 — 인스타에서 이 문구로 댓글 달고 고정하세요\n\n{next_entry['pinned_comment']}\n")
             except OSError as e:
                 print(f"고정댓글 파일 저장 실패(무시): {e}")
+    except Exception as e:
+        notify.notify(
+            f"❌ 사주랩 카드뉴스 게시 실패 · Day {day} ({next_entry['id']})",
+            f"{str(e)[-300:]}\n(다음 스케줄에 자동 재시도, 오래 안 풀리면 OPS_NOTES.md 확인)",
+            priority=5, tags=["rotating_light"],
+        )
+        raise
     finally:
         git_sync.release_lock(BASE_DIR, lock_rel)
 

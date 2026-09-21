@@ -43,3 +43,6 @@
 - `scripts/reel-template/render-hook-wonseok.mjs` + `build-hook-wonseok.mjs`로 만든 20초 릴스(앱 카드형 입력 4컷, 단계 라벨, 효과음, CTA에 "편당 1,200자 사주 명리 분석 · 현직 사주 명리 지식 기반")를 @sajulab_official에 게시함(media_id 18450600577121724, 호스팅 파일 `saju_hook_wonseok_v3.mp4`, 매니페스트 밖 수동 게시라 posted_state 기록 없음).
 - **같은 주제의 이전 버전(v2)이 2026-09-19 08:22 KST에 이미 게시돼 있었음**(호스팅 `saju_hook_wonseok_v2.mp4`, 다른 세션이 올림). 인스타 API로는 삭제/교체가 안 돼서 사용자가 앱에서 v2 게시물을 직접 삭제하기로 함 — 새 세션에서 이 릴스를 또 올리지 말 것.
 - zoompan 함정: 그림 입력에 `-loop 1`/`-t`를 걸면 프레임이 곱연산으로 폭발함(20초가 31분/수백MB로 깨짐). 그림은 1프레임만 넣고 길이는 `d=`로만 정할 것.
+
+## 2026-09-21 — media_host push "fetch first" 거부 방지
+`publish_instagram.py`/`publish_carousel.py`가 push 전에 `git pull --no-rebase`로 최신을 합치고, 거부되면 한 번 더 합쳐 재시도하도록 수정(노트북·데스크톱이 같은 saju-media-host를 번갈아 써서 생기는 non-fast-forward 대응, shorts_auto 노트북 38/39번 인스타 실패에서 발견). 같은 파일의 재시도는 커밋을 건너뛴다.

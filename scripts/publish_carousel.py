@@ -35,6 +35,22 @@ def run(cmd, cwd):
     return result.stdout
 
 
+def commit_and_push(add_paths, message):
+    """같은 media_host를 노트북·데스크톱이 번갈아 쓰므로 push 전에 항상 최신을 받아 합친다
+    (안 그러면 다른 컴퓨터가 먼저 올린 날 push가 fetch first로 거부돼 인스타 게시가 실패함,
+    2026-09-21 노트북 38/39번 실제로 겪음). 이미 커밋된 같은 파일의 재시도는 커밋을 건너뛴다."""
+    run(["git", "pull", "--no-rebase", "--no-edit", "origin", "main"], MEDIA_HOST_DIR)
+    run(["git", "add", *add_paths], MEDIA_HOST_DIR)
+    staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=MEDIA_HOST_DIR).returncode != 0
+    if staged:
+        run(["git", "commit", "-m", message], MEDIA_HOST_DIR)
+    try:
+        run(["git", "push"], MEDIA_HOST_DIR)
+    except RuntimeError:
+        run(["git", "pull", "--no-rebase", "--no-edit", "origin", "main"], MEDIA_HOST_DIR)
+        run(["git", "push"], MEDIA_HOST_DIR)
+
+
 def to_jpg(png_path, out_dir):
     """Graph API 캐러셀 이미지는 JPEG를 요구하므로 PNG를 변환한다(ffmpeg는 릴스 파이프라인에서
     이미 쓰고 있어 별도 의존성 추가 없이 재사용)."""
@@ -62,9 +78,7 @@ def push_images(image_paths, remote_prefix):
         token = f.read().strip()
     remote_url = f"https://{token}@github.com/{GITHUB_REPO}.git"
     run(["git", "remote", "set-url", "origin", remote_url], MEDIA_HOST_DIR)
-    run(["git", "add", *remote_names], MEDIA_HOST_DIR)
-    run(["git", "commit", "-m", f"add {remote_prefix} ({len(remote_names)} slides)"], MEDIA_HOST_DIR)
-    run(["git", "push"], MEDIA_HOST_DIR)
+    commit_and_push(remote_names, f"add {remote_prefix} ({len(remote_names)} slides)")
 
     return urls
 

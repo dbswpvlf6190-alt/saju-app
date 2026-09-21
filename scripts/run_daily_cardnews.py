@@ -114,9 +114,8 @@ def main():
         print(f"카드뉴스 Day {day} 게시 완료 (media_id={media_id})")
         pinned = next_entry.get("pinned_comment")
         notify.notify(
-            f"✅ 사주랩 카드뉴스 게시 완료 · Day {day} ({next_entry['id']})",
-            f"{next_entry['caption'].splitlines()[0][:80]}\nmedia_id: {media_id}"
-            + (f"\n\n📌 고정댓글(인스타에서 직접 달고 고정):\n{pinned}" if pinned else ""),
+            "✅ 사주랩 카드뉴스 인스타 성공",
+            f"Day {day} ({next_entry['id']})" + (f"\n📌 고정댓글(직접 달고 고정):\n{pinned}" if pinned else ""),
             tags=["white_check_mark"],
         )
         if next_entry.get("pinned_comment"):
@@ -131,8 +130,7 @@ def main():
                 print(f"고정댓글 파일 저장 실패(무시): {e}")
     except Exception as e:
         notify.notify(
-            f"❌ 사주랩 카드뉴스 게시 실패 · Day {day} ({next_entry['id']})",
-            f"{str(e)[-300:]}\n(다음 스케줄에 자동 재시도, 오래 안 풀리면 OPS_NOTES.md 확인)",
+            "❌ 사주랩 카드뉴스 인스타 실패", f"Day {day} ({next_entry['id']})\n{notify.summarize_error(str(e))}",
             priority=5, tags=["rotating_light"],
         )
         raise

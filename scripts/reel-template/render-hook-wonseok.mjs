@@ -222,6 +222,13 @@ async function renderScene6(outPath) {
       text("🎟️ 무료 쿠폰 링크", { size: 64, color: GOLD }),
       text("DM으로 보내줌", { size: 52, color: IVORY, mt: 8 }),
     ]),
+    el("div", {
+      display: "flex", flexDirection: "column", alignItems: "center", marginTop: 34, padding: "24px 44px", borderRadius: 28,
+      background: "rgba(255,255,255,0.06)", border: "2px solid rgba(212,175,106,0.45)",
+    }, [
+      text("📜 편당 1,200자 사주 명리 분석", { size: 46, color: IVORY }),
+      text("현직 사주 명리 지식 기반", { size: 38, color: SOFT_GOLD, mt: 8, bold: false }),
+    ]),
   ]));
 }
 

@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "110px 80px",
+          padding: "230px 80px 300px",
           background: `radial-gradient(circle at 50% 28%, ${accent}33 0%, rgba(14,11,31,0) 55%), linear-gradient(160deg, #0e0b1f 0%, #171331 55%, #0e0b1f 100%)`,
           color: "#f3efe8",
         }}
@@ -103,6 +103,12 @@ export async function GET(req: NextRequest) {
             </div>
           ) : null}
 
+          {variant === "saju" ? (
+            <div style={{ display: "flex", fontSize: 46, fontWeight: 700, color: "#f3efe8", marginTop: 10 }}>
+              친구는 어떤 유형일까요?
+            </div>
+          ) : null}
+
           {variant === "saju" && wx ? (
             <div style={{ display: "flex", gap: 16 }}>
               {(Object.keys(WUXING_HEX) as WuXing[]).map((key) => (
@@ -122,24 +128,24 @@ export async function GET(req: NextRequest) {
           ) : null}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, width: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, width: "100%" }}>
+          <div style={{ display: "flex", fontSize: 34, color: "#b9b3d6" }}>내 유형은 프로필 링크에서 30초 무료로</div>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               width: "100%",
-              padding: "28px 0",
+              padding: "26px 0",
               borderRadius: 24,
-              background: "#d4af6a",
-              color: "#1a1430",
-              fontSize: 40,
+              border: "3px solid #d4af6a",
+              color: "#d4af6a",
+              fontSize: 54,
               fontWeight: 700,
             }}
           >
-            무료로 내 사주 확인하기
+            @sajulab_official
           </div>
-          <div style={{ display: "flex", fontSize: 28, color: "#b9b3d6" }}>사주랩</div>
         </div>
       </div>
     ),

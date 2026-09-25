@@ -64,6 +64,9 @@ export async function interpretCompatibilitySection(
   const message = await anthropic.messages.create({
     model: "claude-sonnet-5",
     max_tokens: 2600,
+    // 이 작업은 정해진 분량의 글을 쓰는 것뿐이라 사고 과정이 필요 없다. Sonnet 5는 기본적으로 적응형 사고가 켜져 있어서,
+    // 끄지 않으면 사고 토큰이 max_tokens 예산을 먼저 써버려 글이 중간에 잘리고(실패로 처리돼 "리포트 준비 중"으로 남음) 만다.
+    thinking: { type: "disabled" },
     system: SYSTEM_PROMPT,
     messages: [
       {

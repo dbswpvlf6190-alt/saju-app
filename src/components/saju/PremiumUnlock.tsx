@@ -331,6 +331,20 @@ export function PremiumUnlock({
           </>
         )}
 
+        {/* 계정 연결(선택). 게스트 결제는 쿠키 기반으로만 접근하기 때문에, 기기를 바꾸거나
+            쿠키를 지우면 본인도 다시 못 본다 — 로그인하면 /my에서 언제든 다시 찾을 수 있다.
+            이미 로그인한 상태였다면 서버가 결제 완료 시점에 이미 자동으로 연결해뒀으므로,
+            이 버튼을 눌러도(또는 안 눌러도) 결과는 같다 — 그래서 로그인 여부를 따로
+            확인하지 않고 항상 보여준다. */}
+        {activePaymentId && (
+          <a
+            href={`/api/auth/kakao/start?state=${encodeURIComponent(activePaymentId)}`}
+            className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
+          >
+            🔒 로그인하고 계정에 저장하기
+          </a>
+        )}
+
         {/* 시즌 한정 업셀(2027 신년운세). 방금 리포트를 받아 신뢰가 가장 높은 시점 바로
             아래에 배치한다 — 결제 정보(이름·이메일·휴대폰)는 방금 입력한 값을 그대로
             재사용해서, 다시 입력하는 마찰 없이 버튼 한 번으로 추가 결제가 끝나게 한다. */}

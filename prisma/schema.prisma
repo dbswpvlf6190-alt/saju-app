@@ -28,6 +28,13 @@ model Order {
   // 유료 궁합 주문의 상대방(제3자) 원본 생년월일시·성별을 보관기간 경과 후 파기한 시각.
   // null이면 아직 파기 대상이 아니거나(기간 미경과/생성 미완료) 궁합 상품이 아님을 뜻한다.
   partnerDataPurgedAt DateTime?
+  // 카카오 로그인으로 이 주문을 자기 계정에 연결한 경우에만 채워진다(선택 기능이라 대부분
+  // null — 게스트 결제는 그대로 쿠키 기반 접근만으로 동작한다). 연결하면 기기를 바꾸거나
+  // 쿠키를 지워도 /my에서 다시 리포트를 찾을 수 있다.
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 enum OrderStatus {
@@ -79,6 +86,17 @@ model PushSubscription {
   p256dh    String
   auth      String
   createdAt DateTime @default(now())
+}
+
+// 카카오 로그인으로 만들어지는 계정. 회원가입 폼이 없는 앱이라 비밀번호는 아예 없고,
+// 카카오 쪽 고유 사용자 ID만으로 식별한다 — 재접근(기기 변경 시 과거 구매 리포트 다시
+// 찾기) 용도로만 쓰며, 그 외 이메일·연락처 등은 저장하지 않는다.
+model User {
+  id        String   @id @default(cuid())
+  kakaoId   String   @unique
+  nickname  String?
+  createdAt DateTime @default(now())
+  orders    Order[]
 }
 
 // 전환 퍼널 분석용 이벤트 로그. 생년월일·생시·성별 등 사주 입력값은 절대 담지 않는다(meta는

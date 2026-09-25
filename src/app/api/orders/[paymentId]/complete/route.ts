@@ -5,6 +5,7 @@ import { finalizeOrderFromPortOnePayment } from "@/lib/payment/settle";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 import { warmReportCache } from "@/lib/reports/warm";
+import { getSessionUserId } from "@/lib/auth/session";
 
 /**
  * 클라이언트가 PortOne 결제창에서 성공 응답을 받은 뒤 호출한다.
@@ -63,6 +64,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
         { error: result.amountValid ? "결제가 완료되지 않았습니다." : "결제 금액이 일치하지 않습니다." },
         { status: 400 },
       );
+    }
+
+    // 이미 로그인한 상태로 결제한 경우, 버튼을 따로 누르지 않아도 바로 계정에 연결해둔다
+    // (로그아웃 상태로 결제한 게스트만 "로그인하고 저장하기" 버튼이 필요하다).
+    const sessionUserId = await getSessionUserId(req);
+    if (sessionUserId) {
+      await prisma.order.update({ where: { paymentId }, data: { userId: sessionUserId } });
     }
 
     // 응답은 즉시 내려주고, AI 리포트 생성은 응답 이후 백그라운드에서 미리 시작해둔다

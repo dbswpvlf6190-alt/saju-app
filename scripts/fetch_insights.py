@@ -196,7 +196,12 @@ def fetch_app_metrics():
         for r in rows:
             daily.setdefault(r["day"], {})[r["name"]] = r["n"]
         coupons = neon_query('select count(*)::int as issued, count("usedAt")::int as used from "Coupon"')[0]
-        return {"daily_events": daily, "coupons": coupons}
+        # 유입 표시(ref)별 방문 수 — ig_profile(프로필 링크), ig_reel(릴스 캡션 주소), share_*(앱 안 공유) 구분용
+        by_ref = neon_query(
+            "select coalesce(nullif(\"metaJson\"::json->>'ref',''), '(없음)') as ref, count(*)::int as n "
+            "from \"AnalyticsEvent\" where name = 'landing_view' and \"createdAt\" > now() - interval '30 days' group by 1 order by n desc"
+        )
+        return {"daily_events": daily, "coupons": coupons, "landing_by_ref_30d": {r["ref"]: r["n"] for r in by_ref}}
     except Exception as e:  # DB 조회 실패가 인스타 성과 기록 전체를 막으면 안 됨
         return {"error": str(e)[:300]}
 

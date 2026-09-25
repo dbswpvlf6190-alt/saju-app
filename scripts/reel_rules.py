@@ -368,8 +368,25 @@ def validate_item(item, recent_entries, batch_so_far=()):
     return problems
 
 
+# 캡션 속 주소는 인스타에서 눌러도 이동되지 않는 글자일 뿐이라(눌리는 건 프로필 링크뿐) 복사·검색해서 들어오는
+# 사람용이다. 끝의 ?ref=ig_reel이 앱의 landing_view 이벤트에 기록돼서 "캡션 주소로 온 방문"을 따로 셀 수 있다.
+SITE_LINK_LINE = "🔗 내 유형 확인: saju-app-three-dusky.vercel.app/type-test?ref=ig_reel"
+
+
+def add_link_line(caption):
+    """이미 링크가 있으면 그대로 두고, 없으면 해시태그 줄 바로 앞(없으면 맨 끝)에 링크 줄을 넣는다."""
+    if "saju-app-three-dusky.vercel.app" in caption:
+        return caption
+    parts = caption.rstrip().split("\n\n")
+    if parts and parts[-1].lstrip().startswith("#"):
+        parts.insert(len(parts) - 1, SITE_LINK_LINE)
+    else:
+        parts.append(SITE_LINK_LINE)
+    return "\n\n".join(parts)
+
+
 def build_caption(item, cta_type):
-    return f"{item['captionBody'].strip()}\n\n{CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}"
+    return add_link_line(f"{item['captionBody'].strip()}\n\n{CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}")
 
 
 def build_pinned_comment(item):

@@ -55,3 +55,4 @@
 - **훅 릴스(원석형) 구버전 인스타 게시물 아직 미삭제**: 2026-09-18에 다른 세션이 올린 media_id `18086839340682411`이 여전히 live — 9/21에 새 다듬은 버전(`18450600577121724`)을 올리면서 사용자가 구버전을 앱에서 직접 삭제하기로 했는데 아직 안 함. 데스크톱 세션에서 또 올리지 말고, 사용자에게 삭제를 상기시켜도 됨.
 - **유튜브 관련 아님**(saju-app은 유튜브 미사용) — shorts_auto CLAUDE.md의 같은 날짜 섹션은 무관.
 - 그 외 media_host push 충돌 방지, 릴스 훅 규칙 강화, 카드뉴스 실험 등은 이 파일 위쪽 섹션 참고.
+- **릴스 캡션에 사이트 주소 추가** (2026-09-26): `reel_rules.add_link_line`이 캡션의 CTA 뒤·해시태그 앞에 `🔗 내 유형 확인: saju-app-three-dusky.vercel.app/type-test?ref=ig_reel` 한 줄을 넣는다(자동 생성분은 `build_caption`이, 대기 중이던 R41~R45는 manifest를 직접 갱신). 인스타 캡션 속 주소는 눌러도 이동되지 않는 글자라 복사·검색해서 오는 사람용이고, `ref=ig_reel`이 `landing_view` 이벤트에 기록돼서 `performance/latest.json`의 `app.landing_by_ref_30d`(ig_profile=프로필 링크, ig_reel=캡션 주소, share_*=앱 안 공유)로 유입을 구분해 볼 수 있다. 카드뉴스 캡션은 아직 해당 없음.

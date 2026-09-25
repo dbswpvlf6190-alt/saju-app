@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-25T09:03:06",
+  "generated_at": "2026-09-26T08:52:19",
   "account": {
     "followers": 5,
-    "media_count": 50,
+    "media_count": 53,
     "followers_delta_7d": 0,
     "followers_delta_30d": 0
   },
@@ -21,7 +21,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 648.0,
+      "age_hours": 671.8,
       "metrics": {
         "reach": 147,
         "likes": 0,
@@ -49,7 +49,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 636.6,
+      "age_hours": 660.4,
       "metrics": {
         "reach": 6,
         "likes": 0,
@@ -77,7 +77,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 613.0,
+      "age_hours": 636.8,
       "metrics": {
         "reach": 123,
         "likes": 1,
@@ -105,7 +105,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 598.9,
+      "age_hours": 622.8,
       "metrics": {
         "reach": 105,
         "likes": 1,
@@ -133,7 +133,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 589.0,
+      "age_hours": 612.8,
       "metrics": {
         "reach": 19,
         "likes": 0,
@@ -161,7 +161,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 565.0,
+      "age_hours": 588.8,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -189,7 +189,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 541.0,
+      "age_hours": 564.8,
       "metrics": {
         "reach": 69,
         "likes": 1,
@@ -217,7 +217,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 540.5,
+      "age_hours": 564.3,
       "metrics": {
         "reach": 8,
         "likes": 0,
@@ -245,7 +245,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 540.0,
+      "age_hours": 563.8,
       "metrics": {
         "reach": 6,
         "likes": 1,
@@ -273,7 +273,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 517.0,
+      "age_hours": 540.8,
       "metrics": {
         "reach": 25,
         "likes": 0,
@@ -301,7 +301,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 506.2,
+      "age_hours": 530.0,
       "metrics": {
         "reach": 49,
         "likes": 0,
@@ -329,7 +329,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 453.9,
+      "age_hours": 477.8,
       "metrics": {
         "reach": 103,
         "likes": 0,
@@ -357,7 +357,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 322.9,
+      "age_hours": 346.7,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -385,7 +385,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 298.4,
+      "age_hours": 322.2,
       "metrics": {
         "reach": 128,
         "likes": 1,
@@ -413,7 +413,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 277.0,
+      "age_hours": 300.8,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -441,7 +441,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 181.4,
+      "age_hours": 205.2,
       "metrics": {
         "reach": 120,
         "likes": 2,
@@ -469,7 +469,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 171.1,
+      "age_hours": 194.9,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -497,7 +497,7 @@
       "ctaType": null,
       "durationSec": 32.3,
       "keywords": null,
-      "age_hours": 133.0,
+      "age_hours": 156.8,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -531,7 +531,7 @@
         "소비습관",
         "돈관리"
       ],
-      "age_hours": 109.0,
+      "age_hours": 132.8,
       "metrics": {
         "reach": 16,
         "likes": 0,
@@ -565,7 +565,7 @@
         "일간",
         "연애성향"
       ],
-      "age_hours": 85.0,
+      "age_hours": 108.8,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -573,7 +573,7 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 152,
+        "views": 153,
         "avg_watch_sec": 2.98
       },
       "watch_ratio": 0.109,
@@ -599,19 +599,19 @@
         "일간",
         "성향"
       ],
-      "age_hours": 61.0,
+      "age_hours": 84.8,
       "metrics": {
         "reach": 110,
-        "likes": 0,
+        "likes": 1,
         "comments": 0,
         "saved": 0,
         "shares": 0,
-        "total_interactions": 0,
-        "views": 123,
+        "total_interactions": 1,
+        "views": 124,
         "avg_watch_sec": 2.26
       },
       "watch_ratio": 0.106,
-      "interaction_rate": 0.0
+      "interaction_rate": 0.0091
     },
     {
       "type": "릴스",
@@ -633,19 +633,121 @@
         "연애",
         "성향차이"
       ],
-      "age_hours": 37.0,
+      "age_hours": 60.8,
       "metrics": {
         "reach": 141,
-        "likes": 0,
+        "likes": 1,
         "comments": 0,
         "saved": 0,
         "shares": 0,
-        "total_interactions": 0,
-        "views": 151,
-        "avg_watch_sec": 2.41
+        "total_interactions": 1,
+        "views": 152,
+        "avg_watch_sec": 2.4
       },
       "watch_ratio": 0.103,
-      "interaction_rate": 0.0
+      "interaction_rate": 0.0071
+    },
+    {
+      "type": "릴스",
+      "day": 24,
+      "id": "R39",
+      "posted_at": "2026-09-25T00:05:45.845393+00:00",
+      "title": "왜 유독 특정 사람 말에만 상처받을까",
+      "category": "사주상식",
+      "subcategory": "사주 사실",
+      "topic": "특정 상대의 말에만 유독 예민하게 반응하는 이유를 사주로 설명",
+      "format": "궁금증형",
+      "hook_first": "다른 사람 말은",
+      "ctaType": "B",
+      "durationSec": 24.3,
+      "keywords": [
+        "감정",
+        "관계",
+        "예민함",
+        "일간",
+        "사주해석"
+      ],
+      "age_hours": 23.7,
+      "metrics": {
+        "reach": 105,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 111,
+        "avg_watch_sec": 1.62
+      },
+      "watch_ratio": 0.067,
+      "interaction_rate": 0.0095
+    },
+    {
+      "type": "릴스",
+      "day": 25,
+      "id": "R40",
+      "posted_at": "2026-09-25T11:01:04.286677+00:00",
+      "title": "한쪽만 계속 맞춰주는 친구 사이",
+      "category": "인간관계",
+      "subcategory": "인간관계",
+      "topic": "친구 사이에서 유독 한 명만 배려하고 맞춰주는 관계 패턴",
+      "format": "관계형",
+      "hook_first": "약속 잡는 것도",
+      "ctaType": "C",
+      "durationSec": 23.3,
+      "keywords": [
+        "친구관계",
+        "인간관계",
+        "짝사랑친구",
+        "비겁",
+        "식상"
+      ],
+      "age_hours": 12.8,
+      "metrics": {
+        "reach": 136,
+        "likes": 1,
+        "comments": 1,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 146,
+        "avg_watch_sec": 1.78
+      },
+      "watch_ratio": 0.076,
+      "interaction_rate": 0.0147
+    },
+    {
+      "type": "릴스",
+      "day": 31,
+      "id": "R46",
+      "posted_at": "2026-09-25T10:26:26.922134+00:00",
+      "title": "추석 잔소리 반응 유형",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "추석 친척 잔소리에 유형별로 반응이 갈리는 모습",
+      "format": "비교형",
+      "hook_first": "추석 잔소리에",
+      "ctaType": "S",
+      "durationSec": 26.3,
+      "keywords": [
+        "추석",
+        "잔소리",
+        "유형",
+        "반응",
+        "사주"
+      ],
+      "age_hours": 13.4,
+      "metrics": {
+        "reach": 115,
+        "likes": 1,
+        "comments": 1,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 120,
+        "avg_watch_sec": 2.57
+      },
+      "watch_ratio": 0.098,
+      "interaction_rate": 0.0174
     },
     {
       "type": "카드뉴스",
@@ -659,7 +761,7 @@
       "format": null,
       "hook_first": "오행, 3분이면 완전히 이해돼요",
       "ctaType": null,
-      "age_hours": 647.7,
+      "age_hours": 671.6,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -683,7 +785,7 @@
       "format": null,
       "hook_first": "사주 용어, 헷갈리셨죠?",
       "ctaType": null,
-      "age_hours": 646.0,
+      "age_hours": 669.8,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -707,7 +809,7 @@
       "format": null,
       "hook_first": "재물운 좋은 사람들의 공통점",
       "ctaType": null,
-      "age_hours": 622.0,
+      "age_hours": 645.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -731,7 +833,7 @@
       "format": null,
       "hook_first": "연애할 때 나는 어떤 스타일일까?",
       "ctaType": null,
-      "age_hours": 598.9,
+      "age_hours": 622.7,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -755,7 +857,7 @@
       "format": null,
       "hook_first": "이직·승진 타이밍, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 598.0,
+      "age_hours": 621.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -779,7 +881,7 @@
       "format": null,
       "hook_first": "태어난 계절, 기운에 힌트를 준대요",
       "ctaType": null,
-      "age_hours": 574.0,
+      "age_hours": 597.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -803,7 +905,7 @@
       "format": null,
       "hook_first": "궁합 볼 때, 뭘 보는 건지 아세요?",
       "ctaType": null,
-      "age_hours": 550.0,
+      "age_hours": 573.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -811,7 +913,7 @@
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 3
+        "views": 4
       },
       "interaction_rate": 0.0
     },
@@ -827,7 +929,7 @@
       "format": null,
       "hook_first": "재물 그릇이 크다는 사주, 신호래요",
       "ctaType": null,
-      "age_hours": 526.0,
+      "age_hours": 549.8,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -851,7 +953,7 @@
       "format": null,
       "hook_first": "조직형 vs 자율형, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 525.5,
+      "age_hours": 549.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -875,7 +977,7 @@
       "format": null,
       "hook_first": "사주가 자기이해 도구인 이유",
       "ctaType": null,
-      "age_hours": 525.0,
+      "age_hours": 548.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -899,7 +1001,7 @@
       "format": null,
       "hook_first": "내 인생 귀인, 사주에 신호가 있대요",
       "ctaType": null,
-      "age_hours": 506.3,
+      "age_hours": 530.1,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -923,7 +1025,7 @@
       "format": null,
       "hook_first": "삼재, 무섭게만 알고 계셨나요",
       "ctaType": null,
-      "age_hours": 454.0,
+      "age_hours": 477.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -947,7 +1049,7 @@
       "format": null,
       "hook_first": "정재 vs 편재, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 453.9,
+      "age_hours": 477.7,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -971,7 +1073,7 @@
       "format": null,
       "hook_first": "짝사랑이 유독 긴 사람 특징",
       "ctaType": null,
-      "age_hours": 322.9,
+      "age_hours": 346.7,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -995,7 +1097,7 @@
       "format": null,
       "hook_first": "N잡·부업 체질, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 310.0,
+      "age_hours": 333.8,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1019,7 +1121,7 @@
       "format": null,
       "hook_first": "맨날 나만 손해보는 관계, 신호 있나요",
       "ctaType": null,
-      "age_hours": 286.0,
+      "age_hours": 309.8,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1043,7 +1145,7 @@
       "format": null,
       "hook_first": "이사 날짜, 아무 날이나 잡아도 될까",
       "ctaType": null,
-      "age_hours": 153.5,
+      "age_hours": 177.3,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1067,7 +1169,7 @@
       "format": null,
       "hook_first": "십성이라는 말, 사실 어렵지 않아요",
       "ctaType": null,
-      "age_hours": 142.0,
+      "age_hours": 165.8,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1091,7 +1193,7 @@
       "format": null,
       "hook_first": "태어난 시간, 왜 중요하다고 할까요",
       "ctaType": null,
-      "age_hours": 117.9,
+      "age_hours": 141.7,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1115,17 +1217,17 @@
       "format": "비교형",
       "hook_first": "거절 못하는 나, 거절 잘하는 쟤",
       "ctaType": "A",
-      "age_hours": 37.1,
+      "age_hours": 61.0,
       "metrics": {
         "reach": 2,
-        "likes": 0,
+        "likes": 1,
         "comments": 0,
         "saved": 0,
         "shares": 0,
-        "total_interactions": 0,
-        "views": 9
+        "total_interactions": 1,
+        "views": 10
       },
-      "interaction_rate": 0.0
+      "interaction_rate": 0.5
     }
   ],
   "app": {
@@ -1250,11 +1352,23 @@
         "landing_view": 4,
         "saju_complete": 2,
         "saju_start": 2
+      },
+      "2026-09-25": {
+        "coupon_redeemed": 1,
+        "free_result_view": 10,
+        "landing_view": 18,
+        "saju_complete": 8,
+        "saju_start": 8
       }
     },
     "coupons": {
       "issued": 10,
-      "used": 2
+      "used": 3
+    },
+    "landing_by_ref_30d": {
+      "(없음)": 272,
+      "ig_profile": 18,
+      "share_kakao": 2
     }
   }
 }

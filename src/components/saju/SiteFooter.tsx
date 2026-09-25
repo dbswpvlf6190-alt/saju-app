@@ -15,6 +15,9 @@ export function SiteFooter() {
         (결제 즉시 제공되는 디지털 콘텐츠)
       </p>
       <nav className="flex gap-4">
+        <Link href="/ilgan" className="underline underline-offset-4">
+          일간별 성격
+        </Link>
         <Link href="/my" className="underline underline-offset-4">
           내 구매내역
         </Link>

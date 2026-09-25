@@ -1,9 +1,22 @@
 import type { MetadataRoute } from "next";
+import { ILGAN_PAGES } from "@/lib/saju/ilganPages";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://saju-app-three-dusky.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
+    {
+      url: `${SITE_URL}/ilgan`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    ...ILGAN_PAGES.map((p) => ({
+      url: `${SITE_URL}/ilgan/${p.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
     {
       url: SITE_URL,
       lastModified: new Date(),

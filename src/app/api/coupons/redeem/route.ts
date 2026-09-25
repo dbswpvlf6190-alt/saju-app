@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { orderAccessCookieName, signOrderAccessToken } from "@/lib/payment/orderAccess";
 import { warmReportCache } from "@/lib/reports/warm";
+import { getSessionUserId } from "@/lib/auth/session";
 
 interface RedeemCouponBody {
   code?: string;
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     const paymentId = randomUUID();
+    const sessionUserId = await getSessionUserId(req);
     try {
       const order = await prisma.order.create({
         data: {
@@ -82,6 +84,8 @@ export async function POST(req: NextRequest) {
           birthInputJson: JSON.stringify(body.birthInput),
           status: "PAID",
           paidAt: now,
+          // 이미 로그인한 상태로 쿠폰을 쓴 경우 바로 계정에 연결해둔다(게스트는 null로 둔다).
+          userId: sessionUserId,
         },
       });
       await prisma.coupon.update({ where: { code }, data: { usedOrderId: order.id } });

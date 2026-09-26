@@ -62,3 +62,4 @@
 - **캡션 주소**: 시즌 편 릴스는 `…/exam-luck(/imyong)?ref=ig_reel`, 카드뉴스는 `?ref=ig_cardnews`. 고정댓글 끝에 "○○ 합격운 흐름은 프로필 링크에서…"가 붙으므로 **인스타 프로필 링크에 수능·임용 합격운 주소를 추가해둘 것**(`/exam-luck?ref=ig_profile`, `/exam-luck/imyong?ref=ig_profile`).
 - **시험 날짜는 두 곳**: 앱 `src/lib/exam/seasons.ts`와 `scripts/exam_season.py`. 중등 임용(11/28 예정)은 9/30 공고 뒤 둘 다 고칠 것.
 - **채널별 결제**: 첫 방문 `?ref=`를 브라우저에 30일 기억해서 결제 쪽 이벤트에 `src`로 싣는다(`src/lib/analytics/source.ts`). /admin "결제 완료 첫 유입 경로", `performance/latest.json`의 `app.payments_by_src_30d`에서 채널별 결제 수를 본다. 오픈채팅·커뮤니티 홍보 링크는 채널마다 ref를 다르게 붙일 것(kakao_open, suman, orbi, everytime, threads 등).
+- **홍보 원고**: 오픈채팅·수만휘·오르비·에브리타임·지인 카톡·Threads(첫 2주 12개) 원고와 채널별 추적 링크는 `docs/marketing/2026-exam-season-posts.md`. 원칙: '사주랩' 브랜드 공지 톤, 이용자인 척하는 후기 금지(표시광고법 뒷광고), 같은 날 같은 글 여러 방 금지.

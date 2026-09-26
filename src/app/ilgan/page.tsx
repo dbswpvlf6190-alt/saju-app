@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/og/defaults";
 import Link from "next/link";
 import { WuxingMascot } from "@/components/saju/WuxingMascot";
 import { SiteFooter } from "@/components/saju/SiteFooter";
@@ -14,8 +15,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/ilgan" },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: "/ilgan", type: "website" },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/ilgan", type: "website", images: [DEFAULT_OG_IMAGE] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [DEFAULT_OG_IMAGE] },
 };
 
 export default function IlganIndexPage() {

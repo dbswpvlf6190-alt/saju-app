@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/og/defaults";
 import Link from "next/link";
 import { SajuFlow } from "@/components/saju/SajuFlow";
 import { SiteFooter } from "@/components/saju/SiteFooter";
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/type-test" },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: "/type-test", type: "website" },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/type-test", type: "website", images: [DEFAULT_OG_IMAGE] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [DEFAULT_OG_IMAGE] },
 };
 
 // 홈(`/`)과 계산 로직·상품·결제 동선은 완전히 동일하다 — 진입 화면의 톤과 첫 결과

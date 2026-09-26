@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/og/defaults";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WuxingMascot } from "@/components/saju/WuxingMascot";
@@ -25,8 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description,
     alternates: { canonical: `/ilgan/${page.slug}` },
-    openGraph: { title, description, url: `/ilgan/${page.slug}`, type: "article" },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: { title, description, url: `/ilgan/${page.slug}`, type: "article", images: [DEFAULT_OG_IMAGE] },
+    twitter: { card: "summary_large_image", title, description, images: [DEFAULT_OG_IMAGE] },
   };
 }
 

@@ -21,7 +21,6 @@ export interface ExamSeason {
   /** 모든 시험일이 지난 뒤 "수고했어요" 문구를 이 날짜(포함)까지 보여주고, 그 뒤엔 숨긴다. */
   wrapUpUntil: string;
   audienceNote: string | null;
-  disclaimer: string;
 }
 
 export const EXAM_SEASONS: Record<ExamKind, ExamSeason> = {
@@ -34,8 +33,6 @@ export const EXAM_SEASONS: Record<ExamKind, ExamSeason> = {
     events: [{ label: "수능", date: "2026-11-19", confirmed: true }],
     wrapUpUntil: "2026-12-31",
     audienceNote: "👪 학부모님이라면 수험생 자녀의 생년월일시로도 볼 수 있어요.",
-    disclaimer:
-      "⚠️ 이 흐름은 노력의 방향과 마음가짐을 참고하는 콘텐츠예요. 특정 결과를 보장하지 않으니, 실제 준비와 전략은 선생님·전문가와 함께 판단해주세요.",
   },
   imyong: {
     kind: "imyong",
@@ -50,8 +47,6 @@ export const EXAM_SEASONS: Record<ExamKind, ExamSeason> = {
     ],
     wrapUpUntil: "2027-01-31",
     audienceNote: "유아·초등·중등·특수 어느 과정이든 볼 수 있어요.",
-    disclaimer:
-      "⚠️ 이 흐름은 노력의 방향과 마음가짐을 참고하는 콘텐츠예요. 특정 결과를 보장하지 않으니, 실제 준비와 전략은 스스로의 계획과 전문가 조언을 바탕으로 판단해주세요.",
   },
 };
 

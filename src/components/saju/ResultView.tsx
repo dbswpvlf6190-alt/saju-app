@@ -27,7 +27,7 @@ import { trackEvent } from "@/lib/analytics/track";
 
 // 홈 화면에서 "돈 문제/연애가 궁금해요"를 먼저 고르고 들어온 경우, 그 관심사를 잠금
 // 미리보기 맨 앞으로 올린다 — 같은 계산 결과를 다시 하는 게 아니라 보여주는 순서만 바꾸는 것이다.
-function orderByFocus(sections: PremiumSection[], focus?: "wealth" | "love"): PremiumSection[] {
+function orderByFocus(sections: PremiumSection[], focus?: "wealth" | "love" | "career"): PremiumSection[] {
   if (!focus) return sections;
   return [...sections.filter((s) => s.key === focus), ...sections.filter((s) => s.key !== focus)];
 }
@@ -59,10 +59,11 @@ export function ResultView({
   const [showPillars, setShowPillars] = useState(false);
   const free = generateFreeContent(result);
   const persona = WUXING_PERSONA[result.dayPillar.ganWuxing];
-  const premiumSections = orderByFocus(getPremiumSections(result), focus);
+  // 시험 페이지로 들어온 사람에게는 시험·진로와 가장 가까운 직업운을 맨 위에 둔다.
+  const premiumSections = orderByFocus(getPremiumSections(result), revealMode === "examLuck" ? "career" : focus);
   const daily = getDailyFortuneDetail(result);
   const type = revealMode === "typeTest" ? getTypeProfile(result.dayPillar.ganKor) : null;
-  const examLuck = revealMode === "examLuck" ? getExamLuckFlow(free.dominantWuxing) : null;
+  const examLuck = revealMode === "examLuck" ? getExamLuckFlow(free.dominantWuxing, examKind) : null;
 
   const freeShare: ComponentProps<typeof ShareButton> = {
     title: "사주랩",
@@ -94,7 +95,13 @@ export function ResultView({
       )}
 
       {examLuck && (
-        <ExamLuckCard name={name} dominantWuxing={free.dominantWuxing} flow={examLuck} examKind={examKind} />
+        <ExamLuckCard
+          name={name}
+          dominantWuxing={free.dominantWuxing}
+          flow={examLuck}
+          examKind={examKind}
+          lockedPreview={premiumSections[0]}
+        />
       )}
 
       {/* ① 나의 사주 핵심 결과 — 결과가 뜨는 순간을 "펼쳐지는" 느낌으로 주기 위해 헤드라인은
@@ -169,7 +176,9 @@ export function ResultView({
 
       {/* ⑦ 전환 유도 — 유료 미리보기(PremiumUnlock) 바로 앞에서 다음 단계를 안내한다.
           캐릭터 후킹 문구는 성격 카드 위로 옮겨 읽기 시작하는 시점에 먼저 궁금증을 건다. */}
-      <p className="px-2 text-center text-sm font-medium text-foreground">더 자세한 분석이 궁금하다면?</p>
+      <p id="premium-unlock" className="scroll-mt-6 px-2 text-center text-sm font-medium text-foreground">
+        더 자세한 분석이 궁금하다면?
+      </p>
 
       {/* ⑧~⑩ 상세 분석 미리보기 + 포함 내용 + 가격 (PremiumUnlock 내부) */}
       <PremiumUnlock

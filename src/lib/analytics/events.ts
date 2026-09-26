@@ -19,6 +19,7 @@ export const ANALYTICS_EVENT_NAMES = [
   "push_subscribe",
   "push_subscribe_denied",
   "coupon_redeemed",
+  "referral_reward_view",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

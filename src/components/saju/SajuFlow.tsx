@@ -6,6 +6,7 @@ import { BirthInfoForm, type BirthInfoFormValues } from "./BirthInfoForm";
 import { ResultView } from "./ResultView";
 import { loadLastBirthInfo, saveLastBirthInfo, type SavedBirthInfo } from "@/lib/revisit/localBirthInfo";
 import { trackEvent } from "@/lib/analytics/track";
+import { INVITE_PARAM, INVITE_STORAGE_KEY } from "@/lib/referral/shared";
 import type { ReviewItem } from "./ReviewList";
 
 const PENDING_KEY = "saju:pendingPurchase";
@@ -43,6 +44,25 @@ async function calculateSajuRemote(birthInput: SajuInput): Promise<SajuResult> {
   return data.result as SajuResult;
 }
 
+/** 초대 링크로 들어온 사람이 무료 결과까지 봤을 때 한 번만 기록한다. 실패해도 사용자 흐름에는
+ * 영향이 없어야 하므로 결과를 기다리지 않는다. */
+function recordInviteVisit(birthInput: SajuInput) {
+  let code: string | null = null;
+  try {
+    code = sessionStorage.getItem(INVITE_STORAGE_KEY);
+    sessionStorage.removeItem(INVITE_STORAGE_KEY);
+  } catch {
+    return;
+  }
+  if (!code) return;
+  fetch("/api/referrals/visit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, birthInput }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 export function SajuFlow({
   reviews,
   entryMode = "default",
@@ -63,6 +83,7 @@ export function SajuFlow({
   const [resumePaymentId, setResumePaymentId] = useState<string | null>(null);
   const [savedInfo, setSavedInfo] = useState<SavedBirthInfo | null>(null);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [invited, setInvited] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -77,8 +98,21 @@ export function SajuFlow({
   useEffect(() => {
     // 공유 링크(ShareButton이 붙이는 ?ref=share_kakao 등)로 들어온 방문인지, /type-test로
     // 들어온 방문인지 같이 기록해서 어느 진입점이 실제 결제까지 이어지는지 비교할 수 있게 한다.
-    const ref = new URLSearchParams(window.location.search).get("ref") ?? undefined;
-    trackEvent("landing_view", { ...(ref && { ref }), entry: entryMode });
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref") ?? undefined;
+    // 아래 effect가 곧바로 URL 쿼리를 지우므로, 초대 코드는 그 전에 따로 챙겨둔다.
+    // 홈에서 초대 링크로 들어온 뒤 /type-test 등으로 이동한 경우에도 같은 탭이면 이어서 센다.
+    const invite = params.get(INVITE_PARAM);
+    let hasInvite = Boolean(invite);
+    try {
+      if (invite) sessionStorage.setItem(INVITE_STORAGE_KEY, invite);
+      hasInvite = hasInvite || Boolean(sessionStorage.getItem(INVITE_STORAGE_KEY));
+    } catch {
+      // 저장이 막힌 브라우저면 초대 인원으로 세지 못할 뿐, 사주 보기는 그대로 된다.
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (hasInvite) setInvited(true);
+    trackEvent("landing_view", { ...(ref && { ref }), entry: entryMode, ...(invite && { invited: true }) });
   }, [entryMode]);
 
   // 모바일 결제창은 리디렉션 방식으로 돌아올 수 있어, 이때 URL의 paymentId와
@@ -122,6 +156,7 @@ export function SajuFlow({
       setResult(computed);
       saveLastBirthInfo({ name, birthInput });
       trackEvent("saju_complete", {});
+      recordInviteVisit(birthInput);
       requestAnimationFrame(() => {
         resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -178,6 +213,12 @@ export function SajuFlow({
           </div>
         ) : (
           <>
+            {!result && invited && (
+              <p className="w-full max-w-md rounded-2xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-foreground">
+                🎁 <strong className="text-emerald-300">친구가 보낸 링크로 왔어요.</strong> 30초면 무료로 내
+                사주를 볼 수 있어요.
+              </p>
+            )}
             {!result && savedInfo && (
               <div className="flex w-full max-w-md flex-col gap-2 rounded-2xl border border-accent-gold/30 bg-accent-gold/10 p-4 text-center">
                 <p className="text-sm text-foreground-muted">

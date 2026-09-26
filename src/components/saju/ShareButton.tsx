@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { trackEvent } from "@/lib/analytics/track";
 import { shareToKakao } from "@/lib/kakao/share";
 import type { WuXing } from "@/lib/saju/ganzhi";
+import { INVITE_PARAM } from "@/lib/referral/shared";
 
 /** 공유 카드 이미지에 넣을 결과 요약. 여기 들어가는 값도 공유 텍스트(text)에 이미
  * 노출되는 정도(일간 별명, 궁합 점수 등)로만 제한한다 — 이름·생년월일시는 절대 금지. */
@@ -22,6 +23,7 @@ export function ShareButton({
   shareLabel = "💬 카카오톡으로 공유하기",
   card,
   source,
+  inviteCode,
 }: {
   title: string;
   text: string;
@@ -34,6 +36,9 @@ export function ShareButton({
   /** share_click 이벤트에 같이 기록할 위치 식별자(예: "free_result"/"compat_free"/"premium_unlocked").
    * 어느 화면의 공유 버튼이 실제 유입을 만드는지 구분하기 위한 용도. */
   source?: string;
+  /** 친구 초대 보상용 코드. 있으면 공유 링크에 붙여서, 받은 친구가 무료 결과까지 보면
+   * 공유한 사람의 초대 인원으로 센다. */
+  inviteCode?: string;
 }) {
   const [copied, setCopied] = useState(false);
   const [storyStatus, setStoryStatus] = useState<"idle" | "preparing" | "error">("idle");
@@ -53,6 +58,7 @@ export function ShareButton({
     if (typeof window === "undefined") return "";
     const url = new URL(window.location.origin);
     url.searchParams.set("ref", `share_${method}`);
+    if (inviteCode) url.searchParams.set(INVITE_PARAM, inviteCode);
     return url.toString();
   }
 

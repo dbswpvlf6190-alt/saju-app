@@ -56,6 +56,37 @@ model Coupon {
   usedOrderId String?
 }
 
+// 친구 초대 보상. 무료 결과를 본 브라우저마다 하나씩 만들어지고, 공유 링크의 ?invite=<code>로
+// 들어온 친구가 무료 결과까지 보면 ReferralVisit이 1건 쌓인다. 3건이 되면 무료 리포트 쿠폰을
+// 발급해 couponCode에 연결한다. 생년월일시 원본은 저장하지 않고 서버 비밀키로 만든 해시만 둔다.
+model Referrer {
+  id         String          @id @default(cuid())
+  code       String          @unique
+  // 공유한 본인 생년월일시·성별의 HMAC. 본인이 자기 링크로 들어와 세는 걸 막는 용도.
+  birthKey   String
+  // 카카오 로그인 상태에서 만들었거나 나중에 로그인한 경우, 다른 기기에서도 진행 상황을 찾게 한다.
+  userId     String?
+  couponCode String?         @unique
+  createdAt  DateTime        @default(now())
+  visits     ReferralVisit[]
+
+  @@index([userId])
+}
+
+model ReferralVisit {
+  id         String   @id @default(cuid())
+  referrerId String
+  referrer   Referrer @relation(fields: [referrerId], references: [id], onDelete: Cascade)
+  // 친구 생년월일시·성별의 HMAC — 같은 친구를 두 번 세지 않기 위한 용도.
+  birthKey   String
+  // 요청 IP의 HMAC — 한 기기에서 생년월일만 바꿔가며 반복하는 걸 막기 위한 용도.
+  ipHash     String
+  createdAt  DateTime @default(now())
+
+  @@unique([referrerId, birthKey])
+  @@index([referrerId, ipHash])
+}
+
 // 결제 완료(PAID) 주문에 한해 남길 수 있는 후기. paymentId로 실제 구매를 증명하며,
 // 후기 작성자의 신원(이름/연락처 등)은 별도로 저장하지 않는다.
 model Review {

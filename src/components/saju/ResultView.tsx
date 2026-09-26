@@ -126,6 +126,18 @@ export function ResultView({
         )}
       </div>
 
+      {/* 캐릭터 후킹 — 성격을 읽기 시작하기 전에 페르소나가 먼저 말을 걸어 궁금증을
+          심어둔다. 결정적인 내용은 밝히지 않고 좋은 쪽/안 좋은 쪽만 모호하게 건다. */}
+      <div className="flex flex-col gap-2 rounded-2xl border border-accent-gold/25 bg-background-card/70 p-4">
+        <div className="flex items-center gap-2">
+          <WuxingMascot wuxing={result.dayPillar.ganWuxing} size={32} />
+          <span className="text-xs font-medium text-accent-gold-soft">
+            {persona.name} · {persona.role}
+          </span>
+        </div>
+        <p className="text-sm leading-relaxed text-foreground">{persona.hookLine}</p>
+      </div>
+
       {/* ② 기본 성향 — 성격 설명으로 공감을 쌓은 바로 다음 문장을 블러 처리해서 궁금증으로
           이어붙인다(free.personalityHook, content.ts). 상세 분석 잠금 미리보기(PremiumUnlock)와
           같은 방식이지만 여긴 오행(5종) 대신 일간(10종) 분기라 훨씬 구체적으로 느껴진다. */}
@@ -165,18 +177,8 @@ export function ResultView({
         ))}
       </div>
 
-      {/* ⑦ 전환 유도 — 중립적인 안내 문구 대신, 위에서부터 이 사주를 봐온 페르소나가
-          직접 건네는 후킹 문장으로 유료 미리보기(PremiumUnlock)로 이어붙인다. 결정적인
-          내용은 밝히지 않고 좋은 쪽/안 좋은 쪽만 모호하게 걸어 궁금증을 남긴다. */}
-      <div className="flex flex-col gap-2 rounded-2xl border border-accent-gold/25 bg-background-card/70 p-4">
-        <div className="flex items-center gap-2">
-          <WuxingMascot wuxing={result.dayPillar.ganWuxing} size={32} />
-          <span className="text-xs font-medium text-accent-gold-soft">
-            {persona.name} · {persona.role}
-          </span>
-        </div>
-        <p className="text-sm leading-relaxed text-foreground">{persona.hookLine}</p>
-      </div>
+      {/* ⑦ 전환 유도 — 유료 미리보기(PremiumUnlock) 바로 앞에서 다음 단계를 안내한다.
+          캐릭터 후킹 문구는 성격 카드 위로 옮겨 읽기 시작하는 시점에 먼저 궁금증을 건다. */}
       <p className="px-2 text-center text-sm font-medium text-foreground">더 자세한 분석이 궁금하다면?</p>
 
       {/* ⑧~⑩ 상세 분석 미리보기 + 포함 내용 + 가격 (PremiumUnlock 내부) */}

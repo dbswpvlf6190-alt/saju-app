@@ -6,6 +6,7 @@ import type { SajuResult } from "@/lib/saju";
 // 배럴(@/lib/saju)을 거치면 번들러가 engine.ts(lunar-typescript, 수백 KB)까지 딸려오는 걸
 // 완전히 트리쉐이킹하지 못해서, 클라이언트 컴포넌트에서는 실제로 쓰는 서브모듈을 직접 가져온다.
 import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
+import { WUXING_PERSONA } from "@/lib/saju/persona";
 import { getDailyFortuneDetail } from "@/lib/saju/dailyFortune";
 import { getTypeProfile } from "@/lib/saju/typeProfile";
 import { getExamLuckFlow } from "@/lib/saju/examLuck";
@@ -64,7 +65,9 @@ export function ResultView({
   focus?: "wealth" | "love";
 }) {
   const [isPaid, setIsPaid] = useState(false);
+  const [showPillars, setShowPillars] = useState(false);
   const free = generateFreeContent(result);
+  const persona = WUXING_PERSONA[result.dayPillar.ganWuxing];
   const premiumSections = getPremiumSections(result);
   const daily = getDailyFortuneDetail(result);
   const type = revealMode === "typeTest" ? getTypeProfile(result.dayPillar.ganKor) : null;
@@ -105,18 +108,34 @@ export function ResultView({
         <p className="mt-1 max-w-xs text-sm leading-relaxed text-foreground">{free.balanceNote}</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
-        <PillarCard label="년주" pillar={result.yearPillar} revealDelayMs={120} />
-        <PillarCard label="월주" pillar={result.monthPillar} revealDelayMs={220} />
-        <PillarCard label="일주" pillar={result.dayPillar} revealDelayMs={320} />
-        <PillarCard label="시주" pillar={result.timePillar} revealDelayMs={420} />
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => setShowPillars((v) => !v)}
+          className="flex items-center justify-center gap-1 text-xs text-foreground-muted underline underline-offset-4"
+        >
+          {showPillars ? "사주 원국 표 닫기 ▲" : "사주 원국 표로 보기 ▾"}
+        </button>
+        {showPillars && (
+          <div className="grid grid-cols-4 gap-2">
+            <PillarCard label="년주" pillar={result.yearPillar} revealDelayMs={80} />
+            <PillarCard label="월주" pillar={result.monthPillar} revealDelayMs={140} />
+            <PillarCard label="일주" pillar={result.dayPillar} revealDelayMs={200} />
+            <PillarCard label="시주" pillar={result.timePillar} revealDelayMs={260} />
+          </div>
+        )}
       </div>
 
       {/* ② 기본 성향 — 성격 설명으로 공감을 쌓은 바로 다음 문장을 블러 처리해서 궁금증으로
           이어붙인다(free.personalityHook, content.ts). 상세 분석 잠금 미리보기(PremiumUnlock)와
           같은 방식이지만 여긴 오행(5종) 대신 일간(10종) 분기라 훨씬 구체적으로 느껴진다. */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-        <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
+          <span className="text-xs font-medium text-accent-gold-soft">
+            🗣️ {persona.name} · {persona.role}
+          </span>
+        </div>
         <p className="leading-relaxed text-foreground">{free.personality}</p>
         <p className="leading-relaxed text-foreground">
           {free.personalityHook.visible}{" "}
@@ -146,14 +165,19 @@ export function ResultView({
         ))}
       </div>
 
-      {/* ⑦ 전환 유도 문구 (개인화) */}
-      <div className="flex flex-col items-center gap-1 px-2 text-center">
-        <p className="text-sm text-foreground-muted">
-          지금까지는 <strong className="text-foreground">{free.dominantWuxing}</strong> 기운을 기준으로 한
-          기본 방향이었어요.
-        </p>
-        <p className="text-sm font-medium text-foreground">더 자세한 분석이 궁금하다면?</p>
+      {/* ⑦ 전환 유도 — 중립적인 안내 문구 대신, 위에서부터 이 사주를 봐온 페르소나가
+          직접 건네는 후킹 문장으로 유료 미리보기(PremiumUnlock)로 이어붙인다. 결정적인
+          내용은 밝히지 않고 좋은 쪽/안 좋은 쪽만 모호하게 걸어 궁금증을 남긴다. */}
+      <div className="flex flex-col gap-2 rounded-2xl border border-accent-gold/25 bg-background-card/70 p-4">
+        <div className="flex items-center gap-2">
+          <WuxingMascot wuxing={result.dayPillar.ganWuxing} size={32} />
+          <span className="text-xs font-medium text-accent-gold-soft">
+            {persona.name} · {persona.role}
+          </span>
+        </div>
+        <p className="text-sm leading-relaxed text-foreground">{persona.hookLine}</p>
       </div>
+      <p className="px-2 text-center text-sm font-medium text-foreground">더 자세한 분석이 궁금하다면?</p>
 
       {/* ⑧~⑩ 상세 분석 미리보기 + 포함 내용 + 가격 (PremiumUnlock 내부) */}
       <PremiumUnlock

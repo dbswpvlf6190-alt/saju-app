@@ -17,7 +17,14 @@ const FOCUS_LABEL: Record<Focus, string> = {
  * 재미/수험생 선택은 이미 있는 전용 랜딩(/type-test, /exam-luck)으로 바로 이동하고,
  * 돈/연애 선택은 같은 무료 사주 결과에서 해당 항목을 맨 위로 올려서 보여준다 — 계산이나
  * 상품 구성은 그대로고, 노출 순서만 바뀐다(ResultView의 focus prop). */
-export function PersonaHome({ reviews }: { reviews: ReviewItem[] }) {
+export interface ExamBadge {
+  kind: string;
+  href: string;
+  label: string;
+  dday: string;
+}
+
+export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[]; examBadges?: ExamBadge[] }) {
   const [focus, setFocus] = useState<Focus | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +44,26 @@ export function PersonaHome({ reviews }: { reviews: ReviewItem[] }) {
 
         {focus === null ? (
           <>
+            {/* 시험 시즌에만 보이는 배너. 홈에서는 수능 페이지로만 가는 버튼이 있어서 임용 페이지로 가는
+                길이 없었다 — 시즌 동안은 두 시험을 맨 위에서 바로 고르게 한다. */}
+            {examBadges.length > 0 && (
+              <div className="flex w-full max-w-xs flex-col gap-2 rounded-2xl border border-sky-300/40 bg-sky-300/10 p-3">
+                <span className="text-xs font-medium text-sky-200">📚 시험 시즌 · 무료 합격운 흐름</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {examBadges.map((b) => (
+                    <Link
+                      key={b.kind}
+                      href={b.href}
+                      className="flex flex-col items-center gap-0.5 rounded-xl border border-sky-300/50 bg-background/40 px-2 py-2.5 transition-colors hover:border-sky-300"
+                    >
+                      <strong className="font-serif text-base tabular-nums text-sky-200">{b.dday}</strong>
+                      <span className="text-xs font-medium text-foreground">{b.label} →</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <h1 className="font-serif text-3xl leading-snug text-foreground">
               지금 가장
               <br />

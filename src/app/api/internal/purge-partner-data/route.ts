@@ -82,11 +82,16 @@ export async function GET(req: NextRequest) {
     purged++;
   }
 
+  // 궁합 링크(CompatInvite)는 두 사람의 생년월일시를 담고 있어서, 유효기간(입력 전 7일 / 입력 후
+  // 결과 확인용 7일)이 지나면 행을 통째로 지운다. 결제한 경우의 기록은 Order에 따로 남는다.
+  const expiredInvites = await prisma.compatInvite.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+
   return NextResponse.json({
     ok: true,
     checked: candidates.length,
     purged,
     skippedIncomplete,
     skippedCorrupt,
+    expiredInvitesDeleted: expiredInvites.count,
   });
 }

@@ -72,3 +72,7 @@
 | 중등 임용 공고 확인 후 `src/lib/exam/seasons.ts`와 `scripts/exam_season.py` 날짜 **둘 다** 수정 | Claude | 9/30 이후 |
 | /admin "결제 완료 첫 유입 경로"와 `app.payments_by_src_30d`로 채널별 방문·결제 비교 | Claude | 약 1주 뒤(10/3경) |
 | 다음 홍보 단계: SEO 페이지(`/ilgan` 11개는 9/26 배포 완료, 시험 소재 글은 미작성), 네이버 블로그 | Claude | 위 비교 후 |
+
+### Threads 운영 기록
+- 2026-09-26 개설(@sajulab_official, 데스크톱 크롬에서 인스타 사주랩 계정으로 로그인). 프로필: 소개 4줄, 링크 2개(`/?ref=threads`, `/exam-luck?ref=threads`), 관심사 사주·운세 사주·mbti·수능응원.
+- 9/26 게시: 소개 글(프로필 고정, 주제 "사주"), 원고 1번(주제 "수능응원") + 내 댓글에 C 설명·`/exam-luck?ref=threads` 링크(미리보기 카드 정상). 다음은 원고 2번부터, 하루 1~2개.

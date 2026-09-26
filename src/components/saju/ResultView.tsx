@@ -20,6 +20,7 @@ import { DailyFortuneCard } from "./DailyFortuneCard";
 import { PushOptIn } from "./PushOptIn";
 import { TypeRevealCard } from "./TypeRevealCard";
 import { ExamLuckCard } from "./ExamLuckCard";
+import type { ExamKind } from "@/lib/exam/seasons";
 import { WuxingMascot } from "./WuxingMascot";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
@@ -39,6 +40,7 @@ export function ResultView({
   reviews,
   revealMode,
   focus,
+  examKind = "suneung",
 }: {
   name: string;
   result: SajuResult;
@@ -51,6 +53,7 @@ export function ResultView({
   /** 홈 화면 페르소나 선택("돈 문제가 궁금해요"/"연애가 궁금해요")에서 넘어온 관심사.
    * 상세 분석 항목 노출 순서만 바꾸고, 계산이나 유료 상품 구성에는 영향 없다. */
   focus?: "wealth" | "love";
+  examKind?: ExamKind;
 }) {
   const [isPaid, setIsPaid] = useState(false);
   const [showPillars, setShowPillars] = useState(false);
@@ -91,7 +94,7 @@ export function ResultView({
       )}
 
       {examLuck && (
-        <ExamLuckCard name={name} dominantWuxing={free.dominantWuxing} flow={examLuck} />
+        <ExamLuckCard name={name} dominantWuxing={free.dominantWuxing} flow={examLuck} examKind={examKind} />
       )}
 
       {/* ① 나의 사주 핵심 결과 — 결과가 뜨는 순간을 "펼쳐지는" 느낌으로 주기 위해 헤드라인은

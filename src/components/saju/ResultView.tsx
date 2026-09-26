@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import type { SajuResult } from "@/lib/saju";
 // 배럴(@/lib/saju)을 거치면 번들러가 engine.ts(lunar-typescript, 수백 KB)까지 딸려오는 걸
@@ -15,6 +15,7 @@ import { WuxingBar } from "./WuxingBar";
 import { PremiumUnlock } from "./PremiumUnlock";
 import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
+import { ReferralCard } from "./ReferralCard";
 import { DailyFortuneCard } from "./DailyFortuneCard";
 import { PushOptIn } from "./PushOptIn";
 import { TypeRevealCard } from "./TypeRevealCard";
@@ -59,6 +60,20 @@ export function ResultView({
   const daily = getDailyFortuneDetail(result);
   const type = revealMode === "typeTest" ? getTypeProfile(result.dayPillar.ganKor) : null;
   const examLuck = revealMode === "examLuck" ? getExamLuckFlow(free.dominantWuxing) : null;
+
+  const freeShare: ComponentProps<typeof ShareButton> = {
+    title: "사주랩",
+    text: `나의 사주는 ${free.dayMasterLabel}래요. 근데 이게 무슨 뜻인지 알아? 🔮 (30초, 무료로 확인)`,
+    shareLabel: "💬 내 사주, 친구는 뭐라고 나올까?",
+    ctaLabel: "무료로 내 사주 확인하기",
+    card: {
+      variant: "saju",
+      label: free.dayMasterLabel,
+      sub: free.dayMasterMetaphor,
+      wuxing: free.dominantWuxing,
+    },
+    source: "free_result",
+  };
 
   useEffect(() => {
     trackEvent("free_result_view", { productType: "premium_report" });
@@ -182,19 +197,12 @@ export function ResultView({
       </Link>
 
       <div className="flex flex-col gap-2">
-        <ShareButton
-          title="사주랩"
-          text={`나의 사주는 ${free.dayMasterLabel}래요. 근데 이게 무슨 뜻인지 알아? 🔮 (30초, 무료로 확인)`}
-          shareLabel="💬 내 사주, 친구는 뭐라고 나올까?"
-          ctaLabel="무료로 내 사주 확인하기"
-          card={{
-            variant: "saju",
-            label: free.dayMasterLabel,
-            sub: free.dayMasterMetaphor,
-            wuxing: free.dominantWuxing,
-          }}
-          source="free_result"
-        />
+        {/* 결제한 사람에게는 보상(무료 상세 분석)이 의미가 없어 기존 공유 버튼만 둔다. */}
+        {isPaid ? (
+          <ShareButton {...freeShare} />
+        ) : (
+          <ReferralCard result={result} persona={persona} share={freeShare} />
+        )}
         <button
           type="button"
           onClick={onRestart}

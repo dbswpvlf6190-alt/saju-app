@@ -149,6 +149,9 @@ export function ResultView({
           같은 방식이지만 여긴 오행(5종) 대신 일간(10종) 분기라 훨씬 구체적으로 느껴진다. */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
         <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
+        <p className="font-serif text-sm text-accent-gold-soft">
+          {persona.name}: &ldquo;{persona.introLine}&rdquo;
+        </p>
         <p className="leading-relaxed text-foreground">{free.personality}</p>
         {/* 블러 문단은 궁금증만 걸면 되므로 3줄까지만 보여준다. 잠금 표시는 잘리지 않게 앞에 둔다. */}
         <p className="line-clamp-3 leading-relaxed text-foreground">
@@ -176,10 +179,8 @@ export function ResultView({
 
       {/* 실제 이용 후기 — 4,900원 가치·CTA를 막 확인한 시점 바로 다음에 사회적 증거를
           붙여서, 페이지 맨 아래(구매 판단이 끝난 뒤)에 있던 것보다 설득에 도움이 되게 한다. */}
-      <div className="flex flex-col gap-3">
-        <h3 className="px-1 text-sm font-medium text-foreground-muted">이용 후기</h3>
-        <ReviewList reviews={reviews} />
-      </div>
+      {/* 구매하지 않은 방문자에게 "첫 후기를 남겨주세요"는 할 수 없는 부탁이라, 후기가 없으면 통째로 숨긴다. */}
+      {reviews.length > 0 && <ReviewList reviews={reviews} />}
 
       {/* 여기서부터는 핵심 전환 목표(상세 분석 구매) 뒤에 오는 부가 기능들 — 유료 CTA보다
           눈에 띄지 않게 아래로 내려서 배치한다. */}

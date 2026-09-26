@@ -275,6 +275,7 @@ export function PremiumUnlock({
 
   if (sections) {
     const free = generateFreeContent(result);
+    const allSectionsLoaded = PREMIUM_SECTION_KEYS.every((key) => Boolean(sections[key]));
     return (
       <div className="flex flex-col gap-3">
         <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세</h3>
@@ -313,6 +314,10 @@ export function PremiumUnlock({
             </div>
           );
         })}
+
+        {/* 5개 항목을 다 받은 직후가 만족도가 가장 높은 순간이라 여기서 후기를 청한다 — 맨 아래
+            (업셀·공유 뒤)에 두면 대부분 거기까지 내려가지 않는다. */}
+        {activePaymentId && allSectionsLoaded && <ReviewForm paymentId={activePaymentId} />}
 
         {missingSections.length > 0 && (
           <>
@@ -366,7 +371,7 @@ export function PremiumUnlock({
           source="premium_unlocked"
         />
 
-        {activePaymentId && <ReviewForm paymentId={activePaymentId} />}
+        {activePaymentId && !allSectionsLoaded && <ReviewForm paymentId={activePaymentId} />}
       </div>
     );
   }

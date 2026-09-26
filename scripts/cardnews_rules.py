@@ -10,6 +10,7 @@ import json
 import re
 from datetime import datetime
 
+import exam_season
 import reel_rules as rr
 
 # 캐러셀에 잘 맞는 형식만 배정한다(스토리형처럼 이야기 전개가 필요한 것은 슬라이드 수가 부족해 제외).
@@ -55,10 +56,13 @@ SYSTEM_PROMPT_CARDNEWS = """당신은 인스타그램 사주 콘텐츠 계정 '�
 captionBody와 pinnedIntro에는 "댓글"이라는 말을 쓰지 마세요(댓글 유도는 코드가 붙이는 CTA가 따로 담당하므로 두 번 나오면 안 됩니다).
 captionBody에서 "무료"를 쓴다면 무료로 볼 수 있는 4가지(사주 여덟 글자, 오행 비율, 일간, 전반적 성향 해석)만 가리켜야 합니다. 십성 구성·삼재·택일·궁합 점수·대운 등은 무료 기능이 아닙니다.
 
+""" + exam_season.PROMPT_SECTION.replace("category는 직업운(jigeop) 또는 사주상식(sangsik)으로", "category는 직업운 또는 사주상식으로").replace("hook 또는 title", "title") + """
+
 [출력] 요청받은 개수만큼 JSON 배열로만 응답(코드블록·설명 금지). 각 항목:
 {
  "category": "연애운|재물운|직업운|인간관계|생년월일 운세|사주상식 중 하나",
- "subcategory": "연애|궁합|재물|직장|성격|결혼·인간관계|운세|사주 사실 중 하나",
+ "exam": "시험 시즌 배정값(suneung|imyong) 또는 null",
+ "subcategory": "연애|궁합|재물|직장|성격|결혼·인간관계|운세|사주 사실|시험 중 하나(시험은 시험 시즌 편만)",
  "format": "배정받은 형식 이름",
  "title": "표지 훅", "hookAccent": "title 안의 강조 어구", "coverSub": "표지 부제",
  "topic": "핵심 소재 한 문장(최근 카드뉴스와 비교용)", "keywords": ["키워드 3~5개"],
@@ -69,9 +73,9 @@ captionBody에서 "무료"를 쓴다면 무료로 볼 수 있는 4가지(사주 
 }"""
 
 
-def build_user_message(recent_sets, count, formats):
+def build_user_message(recent_sets, count, formats, exam_slots=None):
     recent = [
-        {"title": s.get("title"), "category": s.get("category"), "topic": s.get("topic"), "format": s.get("format")}
+        {"title": s.get("title"), "category": s.get("category"), "topic": s.get("topic"), "format": s.get("format"), "exam": s.get("exam")}
         for s in recent_sets[-40:]
     ]
     msg = {
@@ -80,6 +84,8 @@ def build_user_message(recent_sets, count, formats):
         "형식 배정(순서대로 이 형식으로 작성)": formats,
         "최근 카드뉴스(겹치면 안 됨, 오래된 순)": recent,
     }
+    if exam_slots and any(exam_slots):
+        msg["시험 시즌 배정(순서대로, null이면 일반 소재)"] = [exam_season.slot_brief(k) if k else None for k in exam_slots]
     return json.dumps(msg, ensure_ascii=False) + f"\n\n위 조건으로 새 카드뉴스 {count}개를 JSON 배열로 만들어줘."
 
 
@@ -87,7 +93,7 @@ def pick_formats(recent_sets, count):
     return rr.pick_formats(recent_sets, count, allowed=CARD_FORMATS)
 
 
-def validate_item(item, recent_sets, batch_so_far=()):
+def validate_item(item, recent_sets, batch_so_far=(), expected_exam=None):
     problems = []
     try:
         if item.get("category") not in CARD_CATEGORIES:
@@ -144,7 +150,9 @@ def validate_item(item, recent_sets, batch_so_far=()):
         for k in ("captionBody", "pinnedIntro"):
             if "댓글" in item[k]:
                 problems.append(f"{k}에 '댓글'이 들어 있음(댓글 유도는 CTA가 담당)")
-        if "무료" in item["captionBody"] and not any(t in item["captionBody"] for t in rr.FREE_OK_TERMS):
+        problems += exam_season.validate_exam_fields(item, expected_exam, text_all)
+        free_terms = rr.FREE_OK_TERMS + (["합격운"] if expected_exam else [])
+        if "무료" in item["captionBody"] and not any(t in item["captionBody"] for t in free_terms):
             problems.append("captionBody의 '무료'가 무료 제공 4가지를 가리키지 않음")
 
         pool = [{"title": s.get("title"), "topic": s.get("topic")} for s in list(recent_sets)[-60:] + list(batch_so_far)]
@@ -158,7 +166,9 @@ def validate_item(item, recent_sets, batch_so_far=()):
 
 
 def build_caption(item, cta_type):
-    return f"{item['captionBody'].strip()}\n\n{rr.CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}"
+    caption = f"{item['captionBody'].strip()}\n\n{rr.CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}"
+    # 시험 시즌 편만 합격운 페이지 주소를 넣는다(일반 카드뉴스 캡션엔 아직 주소 없음).
+    return rr.add_link_line(caption, exam_season.link_line(item["exam"], "ig_cardnews")) if item.get("exam") else caption
 
 
 def build_pinned_comment(item):

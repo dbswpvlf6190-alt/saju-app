@@ -113,7 +113,7 @@ def load_content_meta():
             for r in json.load(f):
                 meta[r["id"]] = {
                     "title": r.get("title"), "category": r.get("categoryLabel"), "subcategory": r.get("subcategory"),
-                    "topic": r.get("topic"), "format": r.get("format"), "hook_first": (r.get("hook") or [None])[0],
+                    "topic": r.get("topic"), "format": r.get("format"), "exam": r.get("exam"), "hook_first": (r.get("hook") or [None])[0],
                     "ctaType": r.get("ctaType"), "durationSec": r.get("durationSec"), "keywords": r.get("keywords"),
                 }
     except (OSError, json.JSONDecodeError):
@@ -121,7 +121,7 @@ def load_content_meta():
     try:
         with open(CARDSETS_JSON, "r", encoding="utf-8") as f:
             for c in json.load(f):
-                meta[c["id"]] = {"title": c.get("title"), "category": c.get("category"), "subcategory": c.get("subcategory"), "topic": c.get("topic"), "format": c.get("format"), "hook_first": c.get("title"), "ctaType": c.get("ctaType")}
+                meta[c["id"]] = {"title": c.get("title"), "category": c.get("category"), "subcategory": c.get("subcategory"), "topic": c.get("topic"), "format": c.get("format"), "exam": c.get("exam"), "hook_first": c.get("title"), "ctaType": c.get("ctaType")}
     except (OSError, json.JSONDecodeError):
         pass
     return meta
@@ -201,7 +201,16 @@ def fetch_app_metrics():
             "select coalesce(nullif(\"metaJson\"::json->>'ref',''), '(없음)') as ref, count(*)::int as n "
             "from \"AnalyticsEvent\" where name = 'landing_view' and \"createdAt\" > now() - interval '30 days' group by 1 order by n desc"
         )
-        return {"daily_events": daily, "coupons": coupons, "landing_by_ref_30d": {r["ref"]: r["n"] for r in by_ref}}
+        # 결제 완료의 첫 유입 경로(src) — 2026-09-26부터 기록(그 전 결제는 '(없음)')
+        pay_by_src = neon_query(
+            "select coalesce(nullif(\"metaJson\"::json->>'src',''), '(없음)') as src, count(*)::int as n "
+            "from \"AnalyticsEvent\" where name = 'payment_success' and \"createdAt\" > now() - interval '30 days' group by 1 order by n desc"
+        )
+        return {
+            "daily_events": daily, "coupons": coupons,
+            "landing_by_ref_30d": {r["ref"]: r["n"] for r in by_ref},
+            "payments_by_src_30d": {r["src"]: r["n"] for r in pay_by_src},
+        }
     except Exception as e:  # DB 조회 실패가 인스타 성과 기록 전체를 막으면 안 됨
         return {"error": str(e)[:300]}
 

@@ -114,13 +114,16 @@ function buildNarrationFilter(sceneStarts) {
   ].join(";");
 }
 
-function buildAudioFilter(D, offsets, total) {
+function buildAudioFilter(D, offsets, total, short = false) {
   const [, , o3, o4] = offsets;
   // 브랜드 배경음(코드 전환 타이밍)은 총 길이가 장면별로 달라지므로 INFO→CURIOSITY 전환(o2)에 맞춘다.
   const chordFadeStart = Math.max(1, offsets[1] - 1);
   const chordFadeDur = Math.min(3, Math.max(0.8, total - chordFadeStart - 1));
   const ctaDingAt = o4 + Math.min(1.3, D[4] * 0.4);
-  const finalFadeOutStart = Math.max(0, total - 2.0);
+  // 짧은 릴스는 총 길이가 12초대라 2초 페이드아웃이 마지막 말(CTA 나레이션)을 덮어 끊기게 들린다 — 페이드를 짧게 한다.
+  const fadeOutLen = short ? 0.5 : 2.0;
+  const fadeInLen = short ? 0.1 : 1.0;
+  const finalFadeOutStart = Math.max(0, total - fadeOutLen);
   const whooshMs1 = Math.round(o3 * 1000);
   const whooshMs2 = Math.round(o4 * 1000);
   const dingMs1 = Math.round(ctaDingAt * 1000);
@@ -152,7 +155,7 @@ function buildAudioFilter(D, offsets, total) {
     `[bedecho]pan=stereo|c0=c0|c1=c0[bedstereo]`,
     `[bedstereo]haas[bedhaas]`,
     `[bedhaas][narrstereo]amix=inputs=2:duration=longest:normalize=0[premaster]`,
-    `[premaster]afade=t=in:st=0:d=1.0,afade=t=out:st=${finalFadeOutStart.toFixed(2)}:d=2.0,alimiter=limit=0.8[aout]`,
+    `[premaster]afade=t=in:st=0:d=${fadeInLen},afade=t=out:st=${finalFadeOutStart.toFixed(2)}:d=${fadeOutLen},alimiter=limit=0.8[aout]`,
   ].join(";");
 }
 
@@ -177,6 +180,7 @@ async function buildOne(entry) {
   const minScene = entry.short ? 1.1 : MIN_SCENE;
   const scenePad = entry.short ? 0.1 : SCENE_PAD;
   const D = narrationPaths.map((p) => Math.max(minScene, probeDuration(p) + scenePad));
+  if (entry.short) D[4] += 0.5; // 마지막 CTA 말이 끝난 뒤 여유(페이드아웃 전에 말이 다 끝나도록)
 
   const { offsets, total } = cumulativeOffsets(D, FADE);
   const sceneStarts = [0, ...offsets];
@@ -185,7 +189,7 @@ async function buildOne(entry) {
   // 상단 고정 CTA 자막(pill.png)을 마지막 CTA 장면 직전까지 덮는다(CTA 장면에서는 같은 문구가 중복되므로 숨김). 입력 인덱스 24(나레이션 5개 바로 뒤).
   if (pillPath) videoFilter = videoFilter.replace(/\[vout\]$/, "[vbase]") + `;[vbase][24:v]overlay=0:0:format=auto:enable='lt(t,${offsets[3].toFixed(2)})'[vout]`;
   const narrationFilter = buildNarrationFilter(sceneStarts);
-  const audioFilter = buildAudioFilter(D, offsets, total);
+  const audioFilter = buildAudioFilter(D, offsets, total, !!entry.short);
   const filterComplex = `${videoFilter};${narrationFilter};${audioFilter}`;
 
   const bedDur = Math.ceil(total) + 1;

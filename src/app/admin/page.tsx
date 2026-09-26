@@ -39,6 +39,7 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   push_subscribe_denied: "푸시 알림 거부",
   coupon_redeemed: "쿠폰 사용",
   referral_reward_view: "초대 보상 쿠폰 확인",
+  exam_promo_click: "합격운 카드 → 상세 분석 클릭",
   compat_invite_create: "궁합 링크 생성",
   compat_invite_open: "궁합 링크 열람(받은 사람)",
   compat_invite_complete: "궁합 링크 완성",

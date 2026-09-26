@@ -7,6 +7,7 @@ import { ResultView } from "./ResultView";
 import { loadLastBirthInfo, saveLastBirthInfo, type SavedBirthInfo } from "@/lib/revisit/localBirthInfo";
 import { trackEvent } from "@/lib/analytics/track";
 import { INVITE_PARAM, INVITE_STORAGE_KEY } from "@/lib/referral/shared";
+import type { ExamKind } from "@/lib/exam/seasons";
 import type { ReviewItem } from "./ReviewList";
 
 const PENDING_KEY = "saju:pendingPurchase";
@@ -67,6 +68,7 @@ export function SajuFlow({
   reviews,
   entryMode = "default",
   focus,
+  examKind,
 }: {
   reviews: ReviewItem[];
   /** "typeTest"/"examLuck"이면 각각 /type-test, /exam-luck 진입으로 기록하고, 결과
@@ -75,6 +77,8 @@ export function SajuFlow({
   /** 홈 화면 페르소나 선택("돈 문제가 궁금해요"/"연애가 궁금해요")에서 넘어온 관심사.
    * ResultView로 그대로 전달해 무료 요약 노출 순서만 바꾼다. */
   focus?: "wealth" | "love";
+  /** entryMode가 "examLuck"일 때 어떤 시험 시즌 페이지인지(수능/임용). 결과 카드의 응원 보내기에 쓴다. */
+  examKind?: ExamKind;
 }) {
   const [result, setResult] = useState<SajuResult | null>(null);
   const [name, setName] = useState("");
@@ -112,8 +116,14 @@ export function SajuFlow({
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (hasInvite) setInvited(true);
-    trackEvent("landing_view", { ...(ref && { ref }), entry: entryMode, ...(invite && { invited: true }) });
-  }, [entryMode]);
+    trackEvent("landing_view", {
+      ...(ref && { ref }),
+      entry: entryMode,
+      ...(invite && { invited: true }),
+      ...(examKind && { exam: examKind }),
+      ...(params.has("cheer") && { cheered: true }),
+    });
+  }, [entryMode, examKind]);
 
   // 모바일 결제창은 리디렉션 방식으로 돌아올 수 있어, 이때 URL의 paymentId와
   // 결제 시작 전 저장해둔 생년월일 정보(sessionStorage)로 결과 화면을 복원한다.
@@ -249,6 +259,7 @@ export function SajuFlow({
             resumePaymentId={resumePaymentId}
             reviews={reviews}
             revealMode={entryMode === "default" ? undefined : entryMode}
+            examKind={examKind}
             focus={focus}
           />
         </div>

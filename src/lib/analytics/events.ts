@@ -24,6 +24,7 @@ export const ANALYTICS_EVENT_NAMES = [
   "compat_invite_open",
   "compat_invite_complete",
   "compat_invite_notify",
+  "exam_promo_click",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

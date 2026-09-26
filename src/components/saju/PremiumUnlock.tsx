@@ -17,7 +17,6 @@ import {
   PREMIUM_PREVIEW_VALUE_LINE,
   PREMIUM_SECTION_INTRO,
   PREMIUM_TRUST_ITEMS,
-  PREMIUM_VALUE_CHECKLIST,
   PREMIUM_VALUE_DETAIL,
   PREMIUM_VALUE_HEADLINE,
   PREMIUM_VALUE_SUBHEAD,
@@ -388,6 +387,8 @@ export function PremiumUnlock({
           <div key={section.key} className="flex items-center gap-3 px-4 py-3">
             <div className="min-w-0 flex-1">
               <span className="text-sm font-medium text-foreground">{section.title}</span>
+              {/* 무료로 공개하는 방향 한 줄 + 그 뒤를 잇는 잠긴 상세 미리보기 */}
+              <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{section.teaser}</p>
               <p className="mt-0.5 truncate select-none text-xs leading-relaxed text-foreground-muted/40 blur-[2.5px]">
                 {section.previewSnippet}
               </p>
@@ -400,12 +401,8 @@ export function PremiumUnlock({
       <div className="flex flex-col gap-1.5 rounded-2xl border border-accent-gold/40 bg-accent-gold/10 p-4 text-center">
         <h4 className="font-serif text-lg text-accent-gold-soft">{PREMIUM_VALUE_HEADLINE}</h4>
         <p className="text-sm text-foreground-muted">{PREMIUM_VALUE_SUBHEAD}</p>
-        <ul className="mt-2 flex flex-col gap-1 text-left text-sm text-foreground">
-          {PREMIUM_VALUE_CHECKLIST.map((item) => (
-            <li key={item}>✓ {item}</li>
-          ))}
-        </ul>
-        <p className="text-xs text-foreground-muted">{PREMIUM_VALUE_DETAIL}</p>
+        {/* 5개 항목은 바로 위 잠금 미리보기 목록에 이미 나열돼 있어 체크리스트로 반복하지 않는다. */}
+        <p className="mt-1 text-xs text-foreground-muted">{PREMIUM_VALUE_DETAIL}</p>
         <p className="mt-3 text-2xl font-semibold text-accent-gold-soft">
           {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원
         </p>

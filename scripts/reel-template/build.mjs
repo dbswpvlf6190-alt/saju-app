@@ -69,6 +69,15 @@ function synthesize(text, outBase, speed = VOICE_SPEED) {
   return mp3Path;
 }
 
+// 나레이션 앞뒤 무음을 잘라낸다(짧은 릴스용). 앞에 0.08초만 남겨 첫 소리가 어색하게 잘리지 않게 하고,
+// 뒤는 거의 남기지 않아서 장면 사이 간격이 무음 길이에 따라 들쭉날쭉해지는 걸 막는다.
+function trimSilence(path) {
+  const out = path.replace(/\.(wav|mp3)$/, "_trim.wav");
+  const cut = "silenceremove=start_periods=1:start_threshold=-42dB:start_silence=0.08";
+  execFileSync("ffmpeg", ["-y", "-i", path, "-af", `${cut},areverse,silenceremove=start_periods=1:start_threshold=-42dB:start_silence=0.04,areverse`, out], { stdio: ["ignore", "ignore", "ignore"] });
+  return out;
+}
+
 function probeDuration(path) {
   const out = execFileSync("ffprobe", [
     "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path,
@@ -175,10 +184,13 @@ async function buildOne(entry) {
   const pngFor = { hook: "1-hook.png", info: "2-info.png", curiosity: "3-curiosity.png", screenshot: "4-screenshot.png", cta: "5-cta.png" };
   const scenePngs = order.map((k) => `${sceneDirPath}/${pngFor[k]}`);
   const pillPath = entry.cta?.pill ? `${sceneDirPath}/pill.png` : null;
-  const narrationPaths = order.map((k) => synthesize(texts[k], `${sceneDirPath}/${k}`, entry.short ? 1.4 : VOICE_SPEED));
+  const narrationPaths = order.map((k) => {
+    const raw = synthesize(texts[k], `${sceneDirPath}/${k}`, entry.short ? 1.25 : VOICE_SPEED);
+    return entry.short ? trimSilence(raw) : raw;
+  });
   // 짧은 릴스 실험(entry.short): 장면 여유를 줄여 전체를 10~12초대로 맞춘다(평균 시청이 2~3초라 완주율을 올리려는 목적).
   const minScene = entry.short ? 1.1 : MIN_SCENE;
-  const scenePad = entry.short ? 0.1 : SCENE_PAD;
+  const scenePad = entry.short ? 0.4 : SCENE_PAD;
   const D = narrationPaths.map((p) => Math.max(minScene, probeDuration(p) + scenePad));
   if (entry.short) D[4] += 0.5; // 마지막 CTA 말이 끝난 뒤 여유(페이드아웃 전에 말이 다 끝나도록)
 

@@ -138,6 +138,7 @@ export default async function AdminPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <BreakdownTable title="랜딩 유입 경로 (ref)" rows={funnel.landingRefBreakdown} />
         <BreakdownTable title="공유 버튼 위치 (source)" rows={funnel.shareSourceBreakdown} />
+        <BreakdownTable title="결제 완료 첫 유입 경로 (src)" rows={funnel.paymentSourceBreakdown} />
       </div>
 
       <h2 className="font-serif text-xl text-accent-gold-soft">후기 관리</h2>

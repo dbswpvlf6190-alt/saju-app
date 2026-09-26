@@ -6,6 +6,7 @@ import { BirthInfoForm, type BirthInfoFormValues } from "./BirthInfoForm";
 import { ResultView } from "./ResultView";
 import { loadLastBirthInfo, saveLastBirthInfo, type SavedBirthInfo } from "@/lib/revisit/localBirthInfo";
 import { trackEvent } from "@/lib/analytics/track";
+import { rememberSource } from "@/lib/analytics/source";
 import { INVITE_PARAM, INVITE_STORAGE_KEY } from "@/lib/referral/shared";
 import type { ExamKind } from "@/lib/exam/seasons";
 import type { ReviewItem } from "./ReviewList";
@@ -104,6 +105,7 @@ export function SajuFlow({
     // 들어온 방문인지 같이 기록해서 어느 진입점이 실제 결제까지 이어지는지 비교할 수 있게 한다.
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref") ?? undefined;
+    rememberSource(ref);
     // 아래 effect가 곧바로 URL 쿼리를 지우므로, 초대 코드는 그 전에 따로 챙겨둔다.
     // 홈에서 초대 링크로 들어온 뒤 /type-test 등으로 이동한 경우에도 같은 탭이면 이어서 센다.
     const invite = params.get(INVITE_PARAM);

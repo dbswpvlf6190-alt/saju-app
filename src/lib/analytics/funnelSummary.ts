@@ -6,6 +6,8 @@ export interface FunnelSummary {
   counts: Record<AnalyticsEventName, number>;
   landingRefBreakdown: { key: string; count: number }[];
   shareSourceBreakdown: { key: string; count: number }[];
+  /** 결제 완료를 첫 유입 경로(src)별로 센 것 — 어느 채널이 실제 매출로 이어졌는지 */
+  paymentSourceBreakdown: { key: string; count: number }[];
 }
 
 /**
@@ -16,7 +18,7 @@ export interface FunnelSummary {
 export async function getFunnelSummary(windowDays = 7): Promise<FunnelSummary> {
   const cutoff = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000);
 
-  const [grouped, landingEvents, shareEvents] = await Promise.all([
+  const [grouped, landingEvents, shareEvents, paymentEvents] = await Promise.all([
     prisma.analyticsEvent.groupBy({
       by: ["name"],
       where: { createdAt: { gte: cutoff } },
@@ -28,6 +30,10 @@ export async function getFunnelSummary(windowDays = 7): Promise<FunnelSummary> {
     }),
     prisma.analyticsEvent.findMany({
       where: { name: "share_click", createdAt: { gte: cutoff } },
+      select: { metaJson: true },
+    }),
+    prisma.analyticsEvent.findMany({
+      where: { name: "payment_success", createdAt: { gte: cutoff } },
       select: { metaJson: true },
     }),
   ]);
@@ -49,6 +55,7 @@ export async function getFunnelSummary(windowDays = 7): Promise<FunnelSummary> {
     landingRefBreakdown: tallyMetaField(landingEvents, "ref"),
     // share_click의 source(공유 버튼이 놓인 화면: free_result/compat_free/premium_unlocked)별 집계
     shareSourceBreakdown: tallyMetaField(shareEvents, "source"),
+    paymentSourceBreakdown: tallyMetaField(paymentEvents, "src"),
   };
 }
 

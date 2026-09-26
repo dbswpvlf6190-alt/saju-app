@@ -56,3 +56,10 @@
 - **유튜브 관련 아님**(saju-app은 유튜브 미사용) — shorts_auto CLAUDE.md의 같은 날짜 섹션은 무관.
 - 그 외 media_host push 충돌 방지, 릴스 훅 규칙 강화, 카드뉴스 실험 등은 이 파일 위쪽 섹션 참고.
 - **릴스 캡션에 사이트 주소 추가** (2026-09-26): `reel_rules.add_link_line`이 캡션의 CTA 뒤·해시태그 앞에 `🔗 내 유형 확인: saju-app-three-dusky.vercel.app/type-test?ref=ig_reel` 한 줄을 넣는다(자동 생성분은 `build_caption`이, 대기 중이던 R41~R45는 manifest를 직접 갱신). 인스타 캡션 속 주소는 눌러도 이동되지 않는 글자라 복사·검색해서 오는 사람용이고, `ref=ig_reel`이 `landing_view` 이벤트에 기록돼서 `performance/latest.json`의 `app.landing_by_ref_30d`(ig_profile=프로필 링크, ig_reel=캡션 주소, share_*=앱 안 공유)로 유입을 구분해 볼 수 있다. 카드뉴스 캡션은 아직 해당 없음.
+
+## 2026-09-26 — 시험 시즌 콘텐츠(수능·임용) + 채널별 결제 추적
+- **3편 중 1편 수험생 소재**: `scripts/exam_season.py`가 릴스·카드뉴스 자동 생성 때 시즌 슬롯을 배정한다(시험 60일 전부터, 시험 8일 전까지만 새로 만듦 — 대기열이 시험 뒤에 게시되지 않게). 수능·임용을 번갈아 쓰고, 항목마다 `exam`(suneung/imyong/null)이 `reels.json`·`cardsets.json`·`performance/latest.json`에 남아 시즌 편 성과를 따로 볼 수 있다. 검증에서 합격 보장·불합격 공포·확률·"D-N" 표기를 탈락시킨다.
+- **캡션 주소**: 시즌 편 릴스는 `…/exam-luck(/imyong)?ref=ig_reel`, 카드뉴스는 `?ref=ig_cardnews`. 고정댓글 끝에 "○○ 합격운 흐름은 프로필 링크에서…"가 붙으므로 **인스타 프로필 링크에 수능·임용 합격운 주소를 추가해둘 것**(`/exam-luck?ref=ig_profile`, `/exam-luck/imyong?ref=ig_profile`).
+- **시험 날짜는 두 곳**: 앱 `src/lib/exam/seasons.ts`와 `scripts/exam_season.py`. 중등 임용(11/28 예정)은 9/30 공고 뒤 둘 다 고칠 것.
+- **채널별 결제**: 첫 방문 `?ref=`를 브라우저에 30일 기억해서 결제 쪽 이벤트에 `src`로 싣는다(`src/lib/analytics/source.ts`). /admin "결제 완료 첫 유입 경로", `performance/latest.json`의 `app.payments_by_src_30d`에서 채널별 결제 수를 본다. 오픈채팅·커뮤니티 홍보 링크는 채널마다 ref를 다르게 붙일 것(kakao_open, suman, orbi, everytime, threads 등).
+- **홍보 원고**: 오픈채팅·수만휘·오르비·에브리타임·지인 카톡·Threads(첫 2주 12개) 원고와 채널별 추적 링크는 `docs/marketing/2026-exam-season-posts.md`. 원칙: '사주랩' 브랜드 공지 톤, 이용자인 척하는 후기 금지(표시광고법 뒷광고), 같은 날 같은 글 여러 방 금지.

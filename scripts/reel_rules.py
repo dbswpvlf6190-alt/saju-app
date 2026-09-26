@@ -12,6 +12,8 @@ import re
 from datetime import datetime
 from difflib import SequenceMatcher
 
+import exam_season
+
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 PERFORMANCE_JSON = os.path.join(SCRIPTS_DIR, "performance", "latest.json")
 
@@ -24,7 +26,7 @@ CATEGORY_MAP = {
     "saengnyeon": "생년월일 운세",  # 올해/월별 운세(시점 명시 필수)
     "sangsik": "사주상식",   # 오행·십신·일간 등 — 반드시 일상 상황과 연결
 }
-SUBCATEGORIES = ["연애", "궁합", "재물", "직장", "성격", "결혼·인간관계", "운세", "사주 사실"]
+SUBCATEGORIES = ["연애", "궁합", "재물", "직장", "성격", "결혼·인간관계", "운세", "사주 사실", "시험"]
 
 # 무료 쿠폰은 실제로 "팔로우 + 댓글"이 조건이라, 쿠폰을 언급하는 CTA는 팔로우 조건을 반드시 표시한다.
 CTAS = {
@@ -176,11 +178,14 @@ SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·
 질병·사망·임신·사고·범죄·정신질환 같은 민감한 소재로 공포를 조장하지 마세요. 클릭베이트는 호기심만 유발하고 거짓말은 금지입니다
 (좋은 예: "전남친이 다시 연락할까?", "돈이 들어와도 금방 없어지는 사람" / 나쁜 예: "이 사주면 무조건 10억 법니다").
 
+""" + exam_season.PROMPT_SECTION + """
+
 [출력 형식] 요청받은 개수만큼 JSON 배열로만 응답(코드블록·설명 금지). 각 항목:
 {
  "category": "yeonae|jaemul|jigeop|ingan|saengnyeon|sangsik 중 하나",
  "format": "배정받은 형식 이름(위 10가지 중 하나)",
- "subcategory": "연애|궁합|재물|직장|성격|결혼·인간관계|운세|사주 사실 중 하나",
+ "exam": "시험 시즌 배정값(suneung|imyong) 또는 null",
+ "subcategory": "연애|궁합|재물|직장|성격|결혼·인간관계|운세|사주 사실|시험 중 하나(시험은 시험 시즌 편만)",
  "title": "짧은 제목(내부용)",
  "topic": "핵심 소재 한 문장(최근 콘텐츠와 비교용)",
  "keywords": ["키워드 3~5개"],
@@ -242,12 +247,12 @@ def load_performance_highlights(limit=3):
     return {"top": [brief(i) for i in items[:limit]], "bottom": [brief(i) for i in items[-limit:]]}
 
 
-def build_user_message(recent_entries, count, formats):
+def build_user_message(recent_entries, count, formats, exam_slots=None):
     recent = [
         {
             "title": e.get("title"), "category": e.get("categoryLabel"), "subcategory": e.get("subcategory"),
             "topic": e.get("topic"), "format": e.get("format"), "hook_first": (e.get("hook") or [""])[0],
-            "info_opening": ((e.get("info") or {}).get("pre") or "")[:14], "ctaType": e.get("ctaType"),
+            "info_opening": ((e.get("info") or {}).get("pre") or "")[:14], "ctaType": e.get("ctaType"), "exam": e.get("exam"),
         }
         for e in recent_entries[-40:]
     ]
@@ -257,6 +262,8 @@ def build_user_message(recent_entries, count, formats):
         "형식 배정(순서대로 이 형식으로 작성)": formats,
         "최근 콘텐츠(겹치면 안 됨, 오래된 순)": recent,
     }
+    if exam_slots and any(exam_slots):
+        msg["시험 시즌 배정(순서대로, null이면 일반 소재)"] = [exam_season.slot_brief(k) if k else None for k in exam_slots]
     perf = load_performance_highlights()
     if perf:
         msg["성과 참고(조회수 상위/하위 — 경향 파악용)"] = perf
@@ -275,8 +282,8 @@ def _ratio(a, b):
     return SequenceMatcher(None, a or "", b or "").ratio()
 
 
-def validate_item(item, recent_entries, batch_so_far=()):
-    """문제가 있으면 사유 문자열 목록을, 통과하면 빈 목록을 돌려준다."""
+def validate_item(item, recent_entries, batch_so_far=(), expected_exam=None):
+    """문제가 있으면 사유 문자열 목록을, 통과하면 빈 목록을 돌려준다. expected_exam은 시험 시즌 배정값(없으면 None)."""
     problems = []
     try:
         if item.get("category") not in CATEGORY_MAP:
@@ -348,8 +355,10 @@ def validate_item(item, recent_entries, batch_so_far=()):
         shot_hits = [w for w in SHOT_FORBIDDEN if w in item["screenshotCaption"]]
         if shot_hits:
             problems.append(f"screenshotCaption이 화면에 없는 기능을 언급함: {shot_hits} (화면은 한 사람의 무료 결과)")
+        problems += exam_season.validate_exam_fields(item, expected_exam, text_all)
+        free_terms = FREE_OK_TERMS + (["합격운"] if expected_exam else [])
         for k in ("screenshotCaption", "captionBody"):
-            if "무료" in item[k] and not any(t in item[k] for t in FREE_OK_TERMS):
+            if "무료" in item[k] and not any(t in item[k] for t in free_terms):
                 problems.append(f"{k}에서 '무료'가 무료 제공 4가지(여덟 글자·오행 비율·일간·성향 해석)를 가리키지 않음")
 
         pool = [
@@ -373,22 +382,25 @@ def validate_item(item, recent_entries, batch_so_far=()):
 SITE_LINK_LINE = "🔗 내 유형 확인: saju-app-three-dusky.vercel.app/type-test?ref=ig_reel"
 
 
-def add_link_line(caption):
+def add_link_line(caption, line=SITE_LINK_LINE):
     """이미 링크가 있으면 그대로 두고, 없으면 해시태그 줄 바로 앞(없으면 맨 끝)에 링크 줄을 넣는다."""
     if "saju-app-three-dusky.vercel.app" in caption:
         return caption
     parts = caption.rstrip().split("\n\n")
     if parts and parts[-1].lstrip().startswith("#"):
-        parts.insert(len(parts) - 1, SITE_LINK_LINE)
+        parts.insert(len(parts) - 1, line)
     else:
-        parts.append(SITE_LINK_LINE)
+        parts.append(line)
     return "\n\n".join(parts)
 
 
 def build_caption(item, cta_type):
-    return add_link_line(f"{item['captionBody'].strip()}\n\n{CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}")
+    # 시험 시즌 편은 유형 테스트 대신 해당 시험의 합격운 페이지로 보낸다.
+    line = exam_season.link_line(item["exam"], "ig_reel") if item.get("exam") else SITE_LINK_LINE
+    return add_link_line(f"{item['captionBody'].strip()}\n\n{CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}", line)
 
 
 def build_pinned_comment(item):
     intro = item["pinnedIntro"].strip().lstrip("🔮").strip()
-    return f"🔮 {intro}\n댓글에 '사주' 남겨주세요.\n팔로우 확인 후 무료 쿠폰을 보내드려요."
+    tail = f"\n{exam_season.pinned_tail(item['exam'])}" if item.get("exam") else ""
+    return f"🔮 {intro}\n댓글에 '사주' 남겨주세요.\n팔로우 확인 후 무료 쿠폰을 보내드려요.{tail}"

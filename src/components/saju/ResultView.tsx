@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { SajuResult } from "@/lib/saju";
 // 배럴(@/lib/saju)을 거치면 번들러가 engine.ts(lunar-typescript, 수백 KB)까지 딸려오는 걸
 // 완전히 트리쉐이킹하지 못해서, 클라이언트 컴포넌트에서는 실제로 쓰는 서브모듈을 직접 가져온다.
-import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
+import { generateFreeContent, getPremiumSections, type PremiumSection } from "@/lib/saju/content";
 import { WUXING_PERSONA } from "@/lib/saju/persona";
 import { getDailyFortuneDetail } from "@/lib/saju/dailyFortune";
 import { getTypeProfile } from "@/lib/saju/typeProfile";
@@ -23,24 +23,11 @@ import { WuxingMascot } from "./WuxingMascot";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
 
-// 무료로 공개하는 3개 카테고리 + 기본 노출 순서. relationship/yearly는 유료 상세 분석에서만
-// 제공한다(기존 상품 구성 그대로 유지 — 여기서 새 카테고리를 만들지 않는다).
-// PremiumUnlock의 잠긴 미리보기 목록(연애·재물·직업·인간관계·올해의 흐름 순)과 앞 3개
-// 순서를 맞춰서, 방금 본 무료 요약이 바로 아래 유료 미리보기로 자연스럽게 이어지게 한다.
-const DEFAULT_FREE_PREVIEW_ORDER = ["love", "wealth", "career"] as const;
-type FreePreviewKey = (typeof DEFAULT_FREE_PREVIEW_ORDER)[number];
-const FREE_PREVIEW_EMOJI: Record<FreePreviewKey, string> = {
-  wealth: "💰",
-  love: "❤️",
-  career: "💼",
-};
-
-// 홈 화면에서 "돈 문제/연애가 궁금해요"를 먼저 고르고 들어온 경우, 그 관심사를 무료 요약
-// 맨 앞으로 올린다 — 같은 계산 결과를 다시 하는 게 아니라 보여주는 순서만 바꾸는 것이다.
-function buildFreePreviewOrder(focus?: "wealth" | "love"): FreePreviewKey[] {
-  if (!focus) return [...DEFAULT_FREE_PREVIEW_ORDER];
-  const rest = DEFAULT_FREE_PREVIEW_ORDER.filter((key) => key !== focus);
-  return [focus, ...rest];
+// 홈 화면에서 "돈 문제/연애가 궁금해요"를 먼저 고르고 들어온 경우, 그 관심사를 잠금
+// 미리보기 맨 앞으로 올린다 — 같은 계산 결과를 다시 하는 게 아니라 보여주는 순서만 바꾸는 것이다.
+function orderByFocus(sections: PremiumSection[], focus?: "wealth" | "love"): PremiumSection[] {
+  if (!focus) return sections;
+  return [...sections.filter((s) => s.key === focus), ...sections.filter((s) => s.key !== focus)];
 }
 
 export function ResultView({
@@ -61,21 +48,17 @@ export function ResultView({
    * 그 랜딩에 맞는 카드로 먼저 보여준 뒤, 아래는 기존 정식 사주 결과 동선을 그대로 이어간다. */
   revealMode?: "typeTest" | "examLuck";
   /** 홈 화면 페르소나 선택("돈 문제가 궁금해요"/"연애가 궁금해요")에서 넘어온 관심사.
-   * 무료 요약 노출 순서만 바꾸고, 계산이나 유료 상품 구성에는 영향 없다. */
+   * 상세 분석 항목 노출 순서만 바꾸고, 계산이나 유료 상품 구성에는 영향 없다. */
   focus?: "wealth" | "love";
 }) {
   const [isPaid, setIsPaid] = useState(false);
   const [showPillars, setShowPillars] = useState(false);
   const free = generateFreeContent(result);
   const persona = WUXING_PERSONA[result.dayPillar.ganWuxing];
-  const premiumSections = getPremiumSections(result);
+  const premiumSections = orderByFocus(getPremiumSections(result), focus);
   const daily = getDailyFortuneDetail(result);
   const type = revealMode === "typeTest" ? getTypeProfile(result.dayPillar.ganKor) : null;
   const examLuck = revealMode === "examLuck" ? getExamLuckFlow(free.dominantWuxing) : null;
-
-  const freePreviewSections = buildFreePreviewOrder(focus).map(
-    (key) => premiumSections.find((s) => s.key === key)!,
-  );
 
   useEffect(() => {
     trackEvent("free_result_view", { productType: "premium_report" });
@@ -102,9 +85,12 @@ export function ResultView({
         <span className="text-sm text-foreground-muted">
           {name ? `${name}님의 사주` : "나의 사주"}
         </span>
-        <WuxingMascot wuxing={result.dayPillar.ganWuxing} size={104} />
+        {/* 유형/합격운 카드가 위에서 이미 마스코트와 비유를 크게 보여줬다면 반복하지 않는다. */}
+        {!revealMode && <WuxingMascot wuxing={result.dayPillar.ganWuxing} size={104} />}
         <h2 className="font-serif text-2xl text-accent-gold-soft">{free.dayMasterLabel}</h2>
-        <p className="text-sm text-foreground-muted">{free.dayMasterMetaphor}</p>
+        {revealMode !== "typeTest" && (
+          <p className="text-sm text-foreground-muted">{free.dayMasterMetaphor}</p>
+        )}
         <p className="mt-1 max-w-xs text-sm leading-relaxed text-foreground">{free.balanceNote}</p>
       </div>
 
@@ -114,15 +100,20 @@ export function ResultView({
           onClick={() => setShowPillars((v) => !v)}
           className="flex items-center justify-center gap-1 text-xs text-foreground-muted underline underline-offset-4"
         >
-          {showPillars ? "사주 원국 표 닫기 ▲" : "사주 원국 표로 보기 ▾"}
+          {showPillars ? "사주 원국·오행 분포 닫기 ▲" : "사주 원국·오행 분포 보기 ▾"}
         </button>
         {showPillars && (
-          <div className="grid grid-cols-4 gap-2">
-            <PillarCard label="년주" pillar={result.yearPillar} revealDelayMs={80} />
-            <PillarCard label="월주" pillar={result.monthPillar} revealDelayMs={140} />
-            <PillarCard label="일주" pillar={result.dayPillar} revealDelayMs={200} />
-            <PillarCard label="시주" pillar={result.timePillar} revealDelayMs={260} />
-          </div>
+          <>
+            <div className="grid grid-cols-4 gap-2">
+              <PillarCard label="년주" pillar={result.yearPillar} revealDelayMs={80} />
+              <PillarCard label="월주" pillar={result.monthPillar} revealDelayMs={140} />
+              <PillarCard label="일주" pillar={result.dayPillar} revealDelayMs={200} />
+              <PillarCard label="시주" pillar={result.timePillar} revealDelayMs={260} />
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-background-card/70 p-4">
+              <WuxingBar percent={result.wuxingPercent} />
+            </div>
+          </>
         )}
       </div>
 
@@ -142,40 +133,18 @@ export function ResultView({
           이어붙인다(free.personalityHook, content.ts). 상세 분석 잠금 미리보기(PremiumUnlock)와
           같은 방식이지만 여긴 오행(5종) 대신 일간(10종) 분기라 훨씬 구체적으로 느껴진다. */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
-          <span className="text-xs font-medium text-accent-gold-soft">
-            🗣️ {persona.name} · {persona.role}
-          </span>
-        </div>
+        <h3 className="text-sm font-medium text-foreground-muted">타고난 성격</h3>
         <p className="leading-relaxed text-foreground">{free.personality}</p>
-        <p className="leading-relaxed text-foreground">
+        {/* 블러 문단은 궁금증만 걸면 되므로 3줄까지만 보여준다. 잠금 표시는 잘리지 않게 앞에 둔다. */}
+        <p className="line-clamp-3 leading-relaxed text-foreground">
           {free.personalityHook.visible}{" "}
+          <span className="text-xs text-accent-gold-soft">🔒</span>{" "}
           <span className="select-none text-foreground-muted/40 blur-[3px]">
             {free.personalityHook.blind}
-          </span>{" "}
-          <span className="text-xs text-accent-gold-soft">🔒</span>
+          </span>
         </p>
       </div>
 
-      {/* ③ 오행 분석 */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-        <h3 className="text-sm font-medium text-foreground-muted">오행 분포</h3>
-        <WuxingBar percent={result.wuxingPercent} />
-      </div>
-
-      {/* ④⑤⑥ 무료 재물운·연애운·직업운 — 방향만 짧게, 상세는 유료에서 */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-        <h3 className="text-sm font-medium text-foreground-muted">무료 운세 요약</h3>
-        {freePreviewSections.map((section) => (
-          <div key={section.key}>
-            <span className="text-sm font-medium text-foreground">
-              {FREE_PREVIEW_EMOJI[section.key as FreePreviewKey]} {section.title}
-            </span>
-            <p className="text-sm leading-relaxed text-foreground-muted">{section.teaser}</p>
-          </div>
-        ))}
-      </div>
 
       {/* ⑦ 전환 유도 — 유료 미리보기(PremiumUnlock) 바로 앞에서 다음 단계를 안내한다.
           캐릭터 후킹 문구는 성격 카드 위로 옮겨 읽기 시작하는 시점에 먼저 궁금증을 건다. */}

@@ -140,3 +140,29 @@ model AnalyticsEvent {
 
   @@index([name, createdAt])
 }
+
+// 궁합 "상대에게 링크 보내기". 보낸 사람이 자기 정보만 넣고 링크를 보내면, 받은 사람이 자기 정보를
+// 넣는 순간 두 사람 모두 같은 결과를 본다. 받은 사람이 넣기 전에는 링크가 7일 유효하고, 넣은 뒤에는
+// 결과를 다시 보도록 7일 더 보관한다. expiresAt이 지나면 매일 도는 크론이 행을 통째로 지운다.
+model CompatInvite {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  // 보낸 사람 브라우저의 무작위 키. 서명 쿠키와 대조해서 보낸 사람만 대기·결과 화면을 본다.
+  inviterKey       String
+  inviterName      String?
+  inviterInputJson String
+  partnerKey       String?
+  partnerName      String?
+  partnerInputJson String?
+  completedAt      DateTime?
+  expiresAt        DateTime
+  // "결과 나오면 알림 받기"를 누른 경우의 웹 푸시 구독. 매일 운세 알림 구독과 섞이지 않게 여기에만
+  // 두고, 결과 알림을 한 번 보내면 지운다.
+  pushEndpoint     String?
+  pushP256dh       String?
+  pushAuth         String?
+  createdAt        DateTime  @default(now())
+
+  @@index([inviterKey])
+  @@index([expiresAt])
+}

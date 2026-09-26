@@ -24,6 +24,8 @@ export function ShareButton({
   card,
   source,
   inviteCode,
+  sharePath = "/",
+  shareParams,
 }: {
   title: string;
   text: string;
@@ -39,6 +41,10 @@ export function ShareButton({
   /** 친구 초대 보상용 코드. 있으면 공유 링크에 붙여서, 받은 친구가 무료 결과까지 보면
    * 공유한 사람의 초대 인원으로 센다. */
   inviteCode?: string;
+  /** 공유 링크가 가리킬 페이지(기본은 홈). 궁합 링크처럼 특정 화면으로 보내야 할 때 쓴다. */
+  sharePath?: string;
+  /** 공유 링크에 추가로 붙일 쿼리. */
+  shareParams?: Record<string, string>;
 }) {
   const [copied, setCopied] = useState(false);
   const [storyStatus, setStoryStatus] = useState<"idle" | "preparing" | "error">("idle");
@@ -56,9 +62,10 @@ export function ShareButton({
   // 들어왔는지 구분할 수 있게 한다(공유 기능이 실제 유입을 만드는지 확인하는 용도).
   function buildShareUrl(method: "kakao" | "native" | "copy") {
     if (typeof window === "undefined") return "";
-    const url = new URL(window.location.origin);
+    const url = new URL(sharePath, window.location.origin);
     url.searchParams.set("ref", `share_${method}`);
     if (inviteCode) url.searchParams.set(INVITE_PARAM, inviteCode);
+    for (const [key, value] of Object.entries(shareParams ?? {})) url.searchParams.set(key, value);
     return url.toString();
   }
 

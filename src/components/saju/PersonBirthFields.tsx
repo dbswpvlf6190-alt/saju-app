@@ -54,17 +54,20 @@ const inputClass =
   "w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold";
 
 /** 궁합 입력용 1인분 생년월일시/성별 필드. 본인/상대방 두 번 재사용된다.
- * 이름은 화면 표시용일 뿐 서버로 전송·저장하지 않는다(개인정보 최소 수집 원칙). */
+ * 이름은 화면 표시용이다 — 직접 입력 궁합에서는 서버로 보내지 않고, 궁합 링크에서만 상대에게
+ * 보여주기 위해 링크 유효기간 동안 저장한다(namePlaceholder로 그 사실을 안내한다). */
 export function PersonBirthFields({
   idPrefix,
   title,
   nameOptionalLabel,
+  namePlaceholder = "결과 화면에만 표시돼요",
   value,
   onChange,
 }: {
   idPrefix: string;
   title: string;
   nameOptionalLabel: string;
+  namePlaceholder?: string;
   value: PersonFormValues;
   onChange: (next: PersonFormValues) => void;
 }) {
@@ -89,7 +92,7 @@ export function PersonBirthFields({
           id={`${idPrefix}-name`}
           value={value.name}
           onChange={(e) => patch({ name: e.target.value })}
-          placeholder="결과 화면에만 표시돼요"
+          placeholder={namePlaceholder}
           maxLength={20}
           className={inputClass}
         />

@@ -20,6 +20,10 @@ export const ANALYTICS_EVENT_NAMES = [
   "push_subscribe_denied",
   "coupon_redeemed",
   "referral_reward_view",
+  "compat_invite_create",
+  "compat_invite_open",
+  "compat_invite_complete",
+  "compat_invite_notify",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

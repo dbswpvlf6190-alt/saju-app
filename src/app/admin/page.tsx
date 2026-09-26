@@ -39,6 +39,10 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   push_subscribe_denied: "푸시 알림 거부",
   coupon_redeemed: "쿠폰 사용",
   referral_reward_view: "초대 보상 쿠폰 확인",
+  compat_invite_create: "궁합 링크 생성",
+  compat_invite_open: "궁합 링크 열람(받은 사람)",
+  compat_invite_complete: "궁합 링크 완성",
+  compat_invite_notify: "궁합 결과 알림 신청",
 };
 
 function pct(numerator: number, denominator: number): string {

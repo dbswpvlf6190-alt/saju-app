@@ -63,3 +63,12 @@
 - **시험 날짜는 두 곳**: 앱 `src/lib/exam/seasons.ts`와 `scripts/exam_season.py`. 중등 임용(11/28 예정)은 9/30 공고 뒤 둘 다 고칠 것.
 - **채널별 결제**: 첫 방문 `?ref=`를 브라우저에 30일 기억해서 결제 쪽 이벤트에 `src`로 싣는다(`src/lib/analytics/source.ts`). /admin "결제 완료 첫 유입 경로", `performance/latest.json`의 `app.payments_by_src_30d`에서 채널별 결제 수를 본다. 오픈채팅·커뮤니티 홍보 링크는 채널마다 ref를 다르게 붙일 것(kakao_open, suman, orbi, everytime, threads 등).
 - **홍보 원고**: 오픈채팅·수만휘·오르비·에브리타임·지인 카톡·Threads(첫 2주 12개) 원고와 채널별 추적 링크는 `docs/marketing/2026-exam-season-posts.md`. 원칙: '사주랩' 브랜드 공지 톤, 이용자인 척하는 후기 금지(표시광고법 뒷광고), 같은 날 같은 글 여러 방 금지.
+
+### 남은 할 일 (2026-09-26 기준)
+| 할 일 | 누가 | 시점 |
+|---|---|---|
+| 인스타 프로필 링크에 `/exam-luck?ref=ig_profile`, `/exam-luck/imyong?ref=ig_profile` 추가 | 사람 | 지금 |
+| Threads 계정 만들고 `docs/marketing/2026-exam-season-posts.md` 원고 12개를 하루 1개씩 게시 | 사람 | 지금~2주 |
+| 중등 임용 공고 확인 후 `src/lib/exam/seasons.ts`와 `scripts/exam_season.py` 날짜 **둘 다** 수정 | Claude | 9/30 이후 |
+| /admin "결제 완료 첫 유입 경로"와 `app.payments_by_src_30d`로 채널별 방문·결제 비교 | Claude | 약 1주 뒤(10/3경) |
+| 다음 홍보 단계: SEO 페이지(`/ilgan` 11개는 9/26 배포 완료, 시험 소재 글은 미작성), 네이버 블로그 | Claude | 위 비교 후 |

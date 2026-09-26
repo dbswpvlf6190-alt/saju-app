@@ -44,7 +44,7 @@ function cumulativeOffsets(durations, fade) {
 }
 
 // outBase 확장자 없이 받아서, 실제로 만든 파일 경로(.wav 또는 대체 시 .mp3)를 돌려준다.
-function synthesize(text, outBase) {
+function synthesize(text, outBase, speed = VOICE_SPEED) {
   const python = `${SUPERTONIC_DIR}\\venv\\Scripts\\python.exe`;
   const narrate = `${SUPERTONIC_DIR}\\narrate.py`;
   if (existsSync(python) && existsSync(narrate) && existsSync(SUPERTONIC_STYLE)) {
@@ -54,7 +54,7 @@ function synthesize(text, outBase) {
     writeFileSync(textFile, text, "utf-8");
     execFileSync(
       python,
-      [narrate, "--text-file", textFile, "--style", SUPERTONIC_STYLE, "--speed", String(VOICE_SPEED), "--out-audio", wavPath, "--out-timing", timingFile],
+      [narrate, "--text-file", textFile, "--style", SUPERTONIC_STYLE, "--speed", String(speed), "--out-audio", wavPath, "--out-timing", timingFile],
       { stdio: ["ignore", "ignore", "inherit"], env: { ...process.env, PYTHONIOENCODING: "utf-8" } },
     );
     return wavPath;
@@ -172,8 +172,11 @@ async function buildOne(entry) {
   const pngFor = { hook: "1-hook.png", info: "2-info.png", curiosity: "3-curiosity.png", screenshot: "4-screenshot.png", cta: "5-cta.png" };
   const scenePngs = order.map((k) => `${sceneDirPath}/${pngFor[k]}`);
   const pillPath = entry.cta?.pill ? `${sceneDirPath}/pill.png` : null;
-  const narrationPaths = order.map((k) => synthesize(texts[k], `${sceneDirPath}/${k}`));
-  const D = narrationPaths.map((p) => Math.max(MIN_SCENE, probeDuration(p) + SCENE_PAD));
+  const narrationPaths = order.map((k) => synthesize(texts[k], `${sceneDirPath}/${k}`, entry.short ? 1.4 : VOICE_SPEED));
+  // 짧은 릴스 실험(entry.short): 장면 여유를 줄여 전체를 10~12초대로 맞춘다(평균 시청이 2~3초라 완주율을 올리려는 목적).
+  const minScene = entry.short ? 1.1 : MIN_SCENE;
+  const scenePad = entry.short ? 0.1 : SCENE_PAD;
+  const D = narrationPaths.map((p) => Math.max(minScene, probeDuration(p) + scenePad));
 
   const { offsets, total } = cumulativeOffsets(D, FADE);
   const sceneStarts = [0, ...offsets];
@@ -216,6 +219,7 @@ async function buildOne(entry) {
     "-filter_complex", filterComplex,
     "-map", "[vout]", "-map", "[aout]",
     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-ar", "44100",
+    ...(entry.short ? ["-t", total.toFixed(2)] : []),
     "-shortest", "-movflags", "+faststart",
     fileURLToPath(new URL(fileName, OUT_DIR)),
   ];

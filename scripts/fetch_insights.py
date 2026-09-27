@@ -215,6 +215,34 @@ def fetch_app_metrics():
         return {"error": str(e)[:300]}
 
 
+def fetch_threads():
+    """Threads(@sajulab_official) 계정 팔로워 + 자동 게시 글별 조회·좋아요·답글·리포스트·공유.
+    토큰이 없거나 API가 실패해도 인스타 지표 수집은 계속되도록 오류만 담아 돌려준다."""
+    try:
+        import threads_api
+        account = threads_api.get_account()
+    except BaseException as e:  # get_token()이 토큰 없을 때 SystemExit를 던진다
+        return {"error": str(e)[:300]}
+    items = []
+    posted_dir = os.path.join(BASE_DIR, "scripts", "posted_state", "threads")
+    for path in sorted(glob.glob(os.path.join(posted_dir, "*.json"))):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                rec = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        item = {k: rec.get(k) for k in ("id", "posted_at", "topic", "exam")}
+        if not str(rec.get("media_id", "")).isdigit():
+            item["error"] = "media_id가 API id가 아님(수동 게시분)"
+        else:
+            try:
+                item["metrics"] = threads_api.get_insights(rec["media_id"])
+            except Exception as e:
+                item["error"] = str(e)[:200]
+        items.append(item)
+    return {"account": account, "items": items}
+
+
 def main():
     # 게시 기록(posted_state)을 최신으로 받은 뒤 읽는다 — 파일을 쓰고 나서 pull --rebase를 하면 변경사항 때문에 실패한다.
     git_sync.git_pull(BASE_DIR)
@@ -313,6 +341,7 @@ def main():
         "account": {**stats, "followers_delta_7d": followers_delta(log, 7), "followers_delta_30d": followers_delta(log, 30)},
         "items": perf_items,
         "app": fetch_app_metrics(),
+        "threads": fetch_threads(),
     }
     with open(PERF_LATEST, "w", encoding="utf-8") as f:
         json.dump(latest, f, ensure_ascii=False, indent=2)

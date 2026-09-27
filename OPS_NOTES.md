@@ -89,3 +89,8 @@
 - **무엇**: `PremiumOffer.tsx`(맨 위 항목 한 문단 흐림 없이 공개, "전체 5가지 4,900원(항목당 980원, 추천)" vs "궁금한 1가지만 1,900원" 선택, 하단 고정 바 `StickyPremiumBar`), 상품 `single_section`(1,900원, `Order.sectionKey`)·`section_upgrade`(3,000원, `Order.parentPaymentId` — 원래 주문의 생년월일·이미 만든 해석을 이어받아 나머지 4개만 생성), 결제 후 `SectionUpgradeCard`. 서버는 1가지 주문이면 산 항목만 생성·열람(`/api/orders/[id]`).
 - **측정**: 새 이벤트 `premium_offer_seen`(가격 영역이 실제로 화면에 60% 이상 보였을 때만 — 예전 `premium_preview_view`는 결과 화면 열리자마자 찍혀 과대집계), `premium_sticky_click`. `fetch_insights.py`가 퍼널 이벤트를 `app.daily_events`에 같이 남김. **10/4경 offer_seen → cta_click → payment_success 비율을 이전(7%)과 비교할 것.** `premium_cta_click` meta의 productType(single_section/premium_report)으로 어떤 선택지가 눌리는지도 볼 수 있음.
 - **테스트**: 로컬 API 13항목 + PortOne 테스트 채널(KG이니시스 INIpayTest)로 1,900원 실결제 흐름 확인(9/27). 차액 3,000원은 결제창 실테스트는 생략(API로만 확인) → 첫 실제 차액 결제가 들어오면 주문 기록 확인할 것. 로컬 `.env.development.local`에 테스트 채널 키가 있어 `next dev`에선 결제가 청구되지 않음(운영·미리보기는 Vercel 환경변수의 실채널).
+
+## 2026-09-27 — Threads 집중 운영(자동)
+- 게시: `SajuThreadsDaily` 12:30·21:00 하루 2개. 대기열(안 올린 글)이 5개 미만이면 `threads_refill.py`가 Claude로 6개 생성(반말·질문으로 끝남·본문 링크 금지·단정/뒷광고 문구 금지 검사, 성과 상위 글을 예시로). 무료 풀이 글(RD0x)은 3일에 한 번 저녁 슬롯에만.
+- 풀이 답글: `SajuThreadsReplyDraft` 10:00·23:30 → 새 답글 초안 → **검사 통과분은 자동 게시**(사용자가 첫 46개 품질 확인 후 9/27 전환). 검사에 걸린 초안만 ntfy 알림 → "Threads 답글 확인해"로 사람이 처리. 임신·질병 등 건강 질문은 시기·결과 언급 금지(검사어 포함 시 수동 확인으로 빠짐).
+- 사람 할 일: 인스타 프로필 링크에 `/exam-luck?ref=ig_profile` 추가(미완), 반응 좋은 Threads 글을 인스타 스토리에 공유(선택).

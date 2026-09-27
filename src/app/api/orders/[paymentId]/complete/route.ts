@@ -44,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
 
     // 이미 처리된 주문이면 중복 결제 검증/처리 없이 현재 상태를 그대로 반환한다(멱등 처리).
     if (order.status !== "PENDING") {
-      return NextResponse.json({ status: order.status });
+      return NextResponse.json({ status: order.status, productType: order.productType, sectionKey: order.sectionKey });
     }
 
     let payment;
@@ -78,7 +78,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
     // 사용자가 실제로 리포트 화면을 열었을 때 체감 대기시간이 크게 줄어든다.
     after(() => warmReportCache(order));
 
-    return NextResponse.json({ status: result.status });
+    // 모바일 결제창 리디렉션으로 돌아온 경우 클라이언트는 무슨 상품이었는지 모를 수 있어서, 서버 기준 값을 같이 준다.
+    return NextResponse.json({ status: result.status, productType: order.productType, sectionKey: order.sectionKey });
   } catch (e) {
     console.error(`결제 완료 처리 중 예상하지 못한 오류 (paymentId=${paymentId}):`, e);
     return NextResponse.json({ error: "결제 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });

@@ -12,19 +12,14 @@ import { ShareButton } from "./ShareButton";
 import { SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
 import {
   PREMIUM_CTA_LABEL,
-  PREMIUM_DELIVERY_NOTE,
   PREMIUM_DETAILS_STEP_INTRO,
-  PREMIUM_PREVIEW_VALUE_LINE,
-  PREMIUM_SECTION_INTRO,
   PREMIUM_TRUST_ITEMS,
-  PREMIUM_VALUE_DETAIL,
-  PREMIUM_VALUE_HEADLINE,
-  PREMIUM_VALUE_SUBHEAD,
 } from "@/lib/payment/ctaCopy";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 import { NewYearUpsellCard } from "./NewYearUpsellCard";
 import { PremiumOffer, type OfferChoice } from "./PremiumOffer";
+import { SectionUpgradeCard } from "./SectionUpgradeCard";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -66,6 +61,8 @@ export function PremiumUnlock({
     resumePaymentId ? "details" : "intro",
   );
   const [offer, setOffer] = useState<OfferChoice>({ kind: "full" });
+  // 결제 완료 후 실제로 열린 항목들. 1가지 상품이면 그 항목 하나, 전체/차액이면 5개.
+  const [ownedKeys, setOwnedKeys] = useState<PremiumSectionKey[]>(PREMIUM_SECTION_KEYS);
 
   useEffect(() => {
     // 결제 복귀(resumePaymentId)로 바로 처리 상태에 들어가는 경우가 아니라면, 잠금
@@ -90,7 +87,7 @@ export function PremiumUnlock({
   }, []);
 
   const fetchReport = useCallback(
-    async (paymentId: string) => {
+    async (paymentId: string, keys: PremiumSectionKey[] = PREMIUM_SECTION_KEYS) => {
       // 5개 요청이 다 끝나길 기다리지 않고, 첫 요청을 보내는 즉시 언락 화면으로 전환한다.
       // 각 항목은 도착하는 대로 위 fetchSection이 sections에 채워 넣고, 아직 안 끝난
       // 항목은 missingSections와 동일한 방식(불러오는 중 표시)으로 자연스럽게 보인다.
@@ -103,10 +100,8 @@ export function PremiumUnlock({
       setErrorMessage(null);
       onUnlockedChange?.(true);
 
-      const settled = await Promise.allSettled(
-        PREMIUM_SECTION_KEYS.map((key) => fetchSection(paymentId, key)),
-      );
-      const failedKeys = PREMIUM_SECTION_KEYS.filter((_, i) => settled[i].status === "rejected");
+      const settled = await Promise.allSettled(keys.map((key) => fetchSection(paymentId, key)));
+      const failedKeys = keys.filter((_, i) => settled[i].status === "rejected");
       setMissingSections(failedKeys);
       if (failedKeys.length > 0) {
         const firstFailure = settled.find((o) => o.status === "rejected") as PromiseRejectedResult | undefined;
@@ -132,16 +127,23 @@ export function PremiumUnlock({
         if (!completeRes.ok) {
           throw new Error(completeData.error ?? "결제 확인에 실패했습니다.");
         }
-        trackEvent("payment_success", { productType: "premium_report" });
+        const productType: string = completeData.productType ?? "premium_report";
+        trackEvent("payment_success", { productType });
 
-        await fetchReport(paymentId);
+        // 1가지 상품이면 산 항목만 연다(모바일 리디렉션 복귀여도 서버가 알려준 값 기준).
+        if (productType === "single_section" && PREMIUM_SECTION_KEYS.includes(completeData.sectionKey)) {
+          setOwnedKeys([completeData.sectionKey]);
+          await fetchReport(paymentId, [completeData.sectionKey]);
+        } else {
+          await fetchReport(paymentId);
+        }
       } catch (e) {
         setStatus("error");
         setErrorMessage(e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.");
-        trackEvent("payment_fail", { productType: "premium_report" });
+        trackEvent("payment_fail", { productType: offer.kind === "single" ? "single_section" : "premium_report" });
       }
     },
-    [fetchReport],
+    [fetchReport, offer.kind],
   );
 
   async function handleRetryMissing() {
@@ -207,13 +209,8 @@ export function PremiumUnlock({
   }
 
   async function handlePurchase() {
-    if (offer.kind === "single") {
-      // 시제품: 1가지 상품은 아직 주문·결제 API에 연결하지 않았다(컨펌 후 구현).
-      setStatus("error");
-      setErrorMessage("시제품 화면이에요 — '1가지만' 결제는 컨펌 후 연결됩니다.");
-      return;
-    }
-    trackEvent("checkout_start", { productType: "premium_report" });
+    const productType = offer.kind === "single" ? "single_section" : "premium_report";
+    trackEvent("checkout_start", { productType });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
     if (!storeId || !channelKey) {
@@ -249,7 +246,11 @@ export function PremiumUnlock({
       const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ birthInput: resultToInput(result) }),
+        body: JSON.stringify({
+          productType,
+          birthInput: resultToInput(result),
+          ...(offer.kind === "single" ? { sectionKey: offer.section } : {}),
+        }),
       });
       const order = await orderRes.json();
       if (!orderRes.ok) {
@@ -283,7 +284,8 @@ export function PremiumUnlock({
 
   if (sections) {
     const free = generateFreeContent(result);
-    const allSectionsLoaded = PREMIUM_SECTION_KEYS.every((key) => Boolean(sections[key]));
+    const ownsAll = PREMIUM_SECTION_KEYS.every((key) => ownedKeys.includes(key));
+    const allSectionsLoaded = ownedKeys.every((key) => Boolean(sections[key]));
     return (
       <div className="flex flex-col gap-3">
         <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세</h3>
@@ -306,7 +308,7 @@ export function PremiumUnlock({
           <WuxingBar percent={result.wuxingPercent} />
         </div>
 
-        {premiumSections.map((section) => {
+        {premiumSections.filter((section) => ownedKeys.includes(section.key)).map((section) => {
           const text = sections[section.key];
           const isMissing = missingSections.includes(section.key);
           return (
@@ -322,6 +324,26 @@ export function PremiumUnlock({
             </div>
           );
         })}
+
+        {/* 1가지만 산 경우: 나머지 4가지를 차액(3,000원)으로 바로 여는 카드. 방금 받은 1가지를 읽은
+            직후라 가장 설득력이 높은 자리다. 결제 정보는 방금 입력한 값을 그대로 재사용한다. */}
+        {!ownsAll && activePaymentId && allSectionsLoaded && (
+          <SectionUpgradeCard
+            parentPaymentId={activePaymentId}
+            lockedSections={premiumSections.filter((section) => !ownedKeys.includes(section.key))}
+            fullName={fullName}
+            email={email}
+            phoneNumber={phoneNumber}
+            onPaid={async (upgradePaymentId) => {
+              const rest = PREMIUM_SECTION_KEYS.filter((key) => !ownedKeys.includes(key));
+              await fetchReport(upgradePaymentId, rest);
+              setOwnedKeys(PREMIUM_SECTION_KEYS);
+            }}
+            beforePay={() =>
+              sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name, birthInput: resultToInput(result) }))
+            }
+          />
+        )}
 
         {/* 5개 항목을 다 받은 직후가 만족도가 가장 높은 순간이라 여기서 후기를 청한다 — 맨 아래
             (업셀·공유 뒤)에 두면 대부분 거기까지 내려가지 않는다. */}

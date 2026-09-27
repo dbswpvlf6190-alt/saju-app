@@ -58,9 +58,15 @@ export default async function MyReportPage({ params }: { params: Promise<{ payme
     );
   }
 
-  // premium_report
-  const premiumSections = getPremiumSections(result);
-  const res = await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+  // premium_report / section_upgrade(차액으로 5가지 전체) / single_section(산 1가지만)
+  const isSingle = order.productType === "single_section";
+  const premiumSections = getPremiumSections(result).filter((s) => !isSingle || s.key === order.sectionKey);
+  const res = await getPremiumReport(
+    order.paymentId,
+    order.birthInputJson,
+    order.aiResultJson,
+    premiumSections.map((s) => s.key),
+  );
   const data = await res.json();
   const sections: Record<string, string> = data.sections ?? {};
 

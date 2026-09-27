@@ -47,7 +47,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ paym
     // 5개 항목을 한 번에 묶어 요청하면 제일 늦게 끝나는 항목만큼 화면이 계속 비어 있으므로,
     // 화면을 5개로 나눠 병렬 요청하고 먼저 끝난 항목부터 바로 보여주기 위함이다(PremiumUnlock.tsx).
     // section을 생략하면 기존처럼 5개 전체를 한 번에 처리한다(웜업 호출 등 내부 용도).
+    // single_section(1,900원)은 산 항목 하나만 열람할 수 있다. section_upgrade(차액)는 5가지 전체.
     const sectionParam = req.nextUrl.searchParams.get("section");
+    if (order.productType === "single_section") {
+      if (!isPremiumSectionKey(order.sectionKey)) {
+        return NextResponse.json({ status: "PAID", error: "주문 정보가 올바르지 않습니다." }, { status: 500 });
+      }
+      if (sectionParam && sectionParam !== order.sectionKey) {
+        return NextResponse.json({ status: "PAID", error: "구매하지 않은 항목입니다." }, { status: 403 });
+      }
+      return await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, [order.sectionKey]);
+    }
     const sectionKeys: PremiumSectionKey[] = isPremiumSectionKey(sectionParam)
       ? [sectionParam]
       : PREMIUM_SECTION_KEYS;

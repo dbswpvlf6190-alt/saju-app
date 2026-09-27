@@ -11,6 +11,8 @@ export interface ReviewItem {
 
 const PRODUCT_LABEL: Record<string, string> = {
   premium_report: "사주 상세 분석",
+  single_section: "사주 상세 분석(1가지)",
+  section_upgrade: "사주 상세 분석",
   compatibility_report: "궁합 상세 분석",
 };
 

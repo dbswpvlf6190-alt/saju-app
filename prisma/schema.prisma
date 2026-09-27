@@ -28,6 +28,10 @@ model Order {
   // 유료 궁합 주문의 상대방(제3자) 원본 생년월일시·성별을 보관기간 경과 후 파기한 시각.
   // null이면 아직 파기 대상이 아니거나(기간 미경과/생성 미완료) 궁합 상품이 아님을 뜻한다.
   partnerDataPurgedAt DateTime?
+  // single_section(1,900원) 주문이 산 항목(love/wealth/career/relationship/yearly). 그 외 상품은 null.
+  sectionKey  String?
+  // section_upgrade(차액 3,000원) 주문이 이어받은 원래 single_section 주문의 paymentId.
+  parentPaymentId String?
   // 카카오 로그인으로 이 주문을 자기 계정에 연결한 경우에만 채워진다(선택 기능이라 대부분
   // null — 게스트 결제는 그대로 쿠키 기반 접근만으로 동작한다). 연결하면 기기를 바꾸거나
   // 쿠키를 지워도 /my에서 다시 리포트를 찾을 수 있다.

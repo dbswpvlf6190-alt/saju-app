@@ -9,21 +9,17 @@ import { generateFreeContent } from "@/lib/saju/content";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { ShareButton } from "./ShareButton";
-import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import { SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
 import {
   PREMIUM_CTA_LABEL,
-  PREMIUM_DELIVERY_NOTE,
   PREMIUM_DETAILS_STEP_INTRO,
-  PREMIUM_PREVIEW_VALUE_LINE,
-  PREMIUM_SECTION_INTRO,
   PREMIUM_TRUST_ITEMS,
-  PREMIUM_VALUE_DETAIL,
-  PREMIUM_VALUE_HEADLINE,
-  PREMIUM_VALUE_SUBHEAD,
 } from "@/lib/payment/ctaCopy";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 import { NewYearUpsellCard } from "./NewYearUpsellCard";
+import { PremiumOffer, type OfferChoice } from "./PremiumOffer";
+import { SectionUpgradeCard } from "./SectionUpgradeCard";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -64,6 +60,9 @@ export function PremiumUnlock({
   const [formStep, setFormStep] = useState<"intro" | "details">(() =>
     resumePaymentId ? "details" : "intro",
   );
+  const [offer, setOffer] = useState<OfferChoice>({ kind: "full" });
+  // 결제 완료 후 실제로 열린 항목들. 1가지 상품이면 그 항목 하나, 전체/차액이면 5개.
+  const [ownedKeys, setOwnedKeys] = useState<PremiumSectionKey[]>(PREMIUM_SECTION_KEYS);
 
   useEffect(() => {
     // 결제 복귀(resumePaymentId)로 바로 처리 상태에 들어가는 경우가 아니라면, 잠금
@@ -88,7 +87,7 @@ export function PremiumUnlock({
   }, []);
 
   const fetchReport = useCallback(
-    async (paymentId: string) => {
+    async (paymentId: string, keys: PremiumSectionKey[] = PREMIUM_SECTION_KEYS) => {
       // 5개 요청이 다 끝나길 기다리지 않고, 첫 요청을 보내는 즉시 언락 화면으로 전환한다.
       // 각 항목은 도착하는 대로 위 fetchSection이 sections에 채워 넣고, 아직 안 끝난
       // 항목은 missingSections와 동일한 방식(불러오는 중 표시)으로 자연스럽게 보인다.
@@ -101,10 +100,8 @@ export function PremiumUnlock({
       setErrorMessage(null);
       onUnlockedChange?.(true);
 
-      const settled = await Promise.allSettled(
-        PREMIUM_SECTION_KEYS.map((key) => fetchSection(paymentId, key)),
-      );
-      const failedKeys = PREMIUM_SECTION_KEYS.filter((_, i) => settled[i].status === "rejected");
+      const settled = await Promise.allSettled(keys.map((key) => fetchSection(paymentId, key)));
+      const failedKeys = keys.filter((_, i) => settled[i].status === "rejected");
       setMissingSections(failedKeys);
       if (failedKeys.length > 0) {
         const firstFailure = settled.find((o) => o.status === "rejected") as PromiseRejectedResult | undefined;
@@ -130,16 +127,23 @@ export function PremiumUnlock({
         if (!completeRes.ok) {
           throw new Error(completeData.error ?? "결제 확인에 실패했습니다.");
         }
-        trackEvent("payment_success", { productType: "premium_report" });
+        const productType: string = completeData.productType ?? "premium_report";
+        trackEvent("payment_success", { productType });
 
-        await fetchReport(paymentId);
+        // 1가지 상품이면 산 항목만 연다(모바일 리디렉션 복귀여도 서버가 알려준 값 기준).
+        if (productType === "single_section" && PREMIUM_SECTION_KEYS.includes(completeData.sectionKey)) {
+          setOwnedKeys([completeData.sectionKey]);
+          await fetchReport(paymentId, [completeData.sectionKey]);
+        } else {
+          await fetchReport(paymentId);
+        }
       } catch (e) {
         setStatus("error");
         setErrorMessage(e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.");
-        trackEvent("payment_fail", { productType: "premium_report" });
+        trackEvent("payment_fail", { productType: offer.kind === "single" ? "single_section" : "premium_report" });
       }
     },
-    [fetchReport],
+    [fetchReport, offer.kind],
   );
 
   async function handleRetryMissing() {
@@ -205,7 +209,8 @@ export function PremiumUnlock({
   }
 
   async function handlePurchase() {
-    trackEvent("checkout_start", { productType: "premium_report" });
+    const productType = offer.kind === "single" ? "single_section" : "premium_report";
+    trackEvent("checkout_start", { productType });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
     if (!storeId || !channelKey) {
@@ -241,7 +246,11 @@ export function PremiumUnlock({
       const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ birthInput: resultToInput(result) }),
+        body: JSON.stringify({
+          productType,
+          birthInput: resultToInput(result),
+          ...(offer.kind === "single" ? { sectionKey: offer.section } : {}),
+        }),
       });
       const order = await orderRes.json();
       if (!orderRes.ok) {
@@ -275,7 +284,8 @@ export function PremiumUnlock({
 
   if (sections) {
     const free = generateFreeContent(result);
-    const allSectionsLoaded = PREMIUM_SECTION_KEYS.every((key) => Boolean(sections[key]));
+    const ownsAll = PREMIUM_SECTION_KEYS.every((key) => ownedKeys.includes(key));
+    const allSectionsLoaded = ownedKeys.every((key) => Boolean(sections[key]));
     return (
       <div className="flex flex-col gap-3">
         <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세</h3>
@@ -298,7 +308,7 @@ export function PremiumUnlock({
           <WuxingBar percent={result.wuxingPercent} />
         </div>
 
-        {premiumSections.map((section) => {
+        {premiumSections.filter((section) => ownedKeys.includes(section.key)).map((section) => {
           const text = sections[section.key];
           const isMissing = missingSections.includes(section.key);
           return (
@@ -314,6 +324,26 @@ export function PremiumUnlock({
             </div>
           );
         })}
+
+        {/* 1가지만 산 경우: 나머지 4가지를 차액(3,000원)으로 바로 여는 카드. 방금 받은 1가지를 읽은
+            직후라 가장 설득력이 높은 자리다. 결제 정보는 방금 입력한 값을 그대로 재사용한다. */}
+        {!ownsAll && activePaymentId && allSectionsLoaded && (
+          <SectionUpgradeCard
+            parentPaymentId={activePaymentId}
+            lockedSections={premiumSections.filter((section) => !ownedKeys.includes(section.key))}
+            fullName={fullName}
+            email={email}
+            phoneNumber={phoneNumber}
+            onPaid={async (upgradePaymentId) => {
+              const rest = PREMIUM_SECTION_KEYS.filter((key) => !ownedKeys.includes(key));
+              await fetchReport(upgradePaymentId, rest);
+              setOwnedKeys(PREMIUM_SECTION_KEYS);
+            }}
+            beforePay={() =>
+              sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name, birthInput: resultToInput(result) }))
+            }
+          />
+        )}
 
         {/* 5개 항목을 다 받은 직후가 만족도가 가장 높은 순간이라 여기서 후기를 청한다 — 맨 아래
             (업셀·공유 뒤)에 두면 대부분 거기까지 내려가지 않는다. */}
@@ -378,56 +408,19 @@ export function PremiumUnlock({
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="px-1 text-sm font-medium text-foreground-muted">🔒 상세 분석 미리보기</h3>
-      <p className="px-1 text-xs text-foreground-muted">{PREMIUM_SECTION_INTRO}</p>
-      {/* 제목만 나열하면 실제로 뭘 얼마나 받는지 와닿지 않는다는 지적에 따라, 카드 목록
-          위에 구체적인 항목·분량을 먼저 보여준다(과장 없이 실제 생성 규격 그대로). */}
-      <p className="px-1 text-xs font-medium text-accent-gold-soft">{PREMIUM_PREVIEW_VALUE_LINE}</p>
-
-      {/* 카드 하나당 제목 + 블러 처리된 한 줄 미리보기만 보여주는 압축 리스트.
-          예전엔 카드마다 티저 문단 + 블러 문단 + "계속 확인" 문구가 반복돼 5개를 다 보려면
-          스크롤이 상당히 길었다 — 같은 안내 문구를 위 한 줄로 합치고 카드 자체를 줄였다. */}
-      <div className="flex flex-col divide-y divide-border-subtle overflow-hidden rounded-2xl border border-border-subtle bg-background-card/70">
-        {premiumSections.map((section) => (
-          <div key={section.key} className="flex items-center gap-3 px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <span className="text-sm font-medium text-foreground">{section.title}</span>
-              {/* 무료로 공개하는 방향 한 줄 + 그 뒤를 잇는 잠긴 상세 미리보기 */}
-              <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{section.teaser}</p>
-              <p className="mt-0.5 truncate select-none text-xs leading-relaxed text-foreground-muted/40 blur-[2.5px]">
-                {section.previewSnippet}
-              </p>
-            </div>
-            <span className="shrink-0 text-xs font-medium text-accent-gold-soft">🔒</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-1.5 rounded-2xl border border-accent-gold/40 bg-accent-gold/10 p-4 text-center">
-        <h4 className="font-serif text-lg text-accent-gold-soft">{PREMIUM_VALUE_HEADLINE}</h4>
-        <p className="text-sm text-foreground-muted">{PREMIUM_VALUE_SUBHEAD}</p>
-        {/* 5개 항목은 바로 위 잠금 미리보기 목록에 이미 나열돼 있어 체크리스트로 반복하지 않는다. */}
-        <p className="mt-1 text-xs text-foreground-muted">{PREMIUM_VALUE_DETAIL}</p>
-        <p className="mt-3 text-2xl font-semibold text-accent-gold-soft">
-          {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원
-        </p>
-        <p className="text-xs text-foreground-muted">{PREMIUM_DELIVERY_NOTE}</p>
-      </div>
-
       {formStep === "intro" ? (
         // 1단계: 가치 제안 + CTA만 먼저 보여준다. 구매 의사를 밝히기 전에는
         // 이름·이메일·휴대폰 입력란을 아예 노출하지 않는다.
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("premium_cta_click", { productType: "premium_report" });
+          <PremiumOffer
+            name={name}
+            dayMasterLabel={generateFreeContent(result).dayMasterLabel}
+            premiumSections={premiumSections}
+            onChoose={(choice) => {
+              setOffer(choice);
               setFormStep("details");
             }}
-            className="min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
-          >
-            {PREMIUM_CTA_LABEL}
-          </button>
+          />
           <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">
             <p>{PREMIUM_TRUST_ITEMS.map((item) => `✓ ${item}`).join("  ·  ")}</p>
             <Link href="/refund" className="underline underline-offset-4 hover:text-accent-gold-soft">
@@ -476,7 +469,11 @@ export function PremiumUnlock({
         // 2단계: CTA를 눌러 구매 의사를 밝힌 뒤에만 결제 정보 입력란이 나타난다.
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <span className="text-sm text-foreground-muted">{PREMIUM_DETAILS_STEP_INTRO}</span>
+            <span className="text-sm text-foreground-muted">
+              {offer.kind === "full"
+                ? PREMIUM_DETAILS_STEP_INTRO
+                : `${premiumSections.find((x) => x.key === offer.section)?.title} 1가지 · ${SINGLE_SECTION_PRICE_KRW.toLocaleString()}원`}
+            </span>
             <button
               type="button"
               onClick={() => setFormStep("intro")}
@@ -564,7 +561,11 @@ export function PremiumUnlock({
             disabled={status === "processing"}
             className="mt-1 min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {status === "processing" ? "처리 중..." : PREMIUM_CTA_LABEL}
+            {status === "processing"
+              ? "처리 중..."
+              : offer.kind === "full"
+                ? PREMIUM_CTA_LABEL
+                : `${SINGLE_SECTION_PRICE_KRW.toLocaleString()}원 결제하기`}
           </button>
 
           <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">

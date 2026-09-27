@@ -5,6 +5,7 @@ import { finalizeOrderFromPortOnePayment } from "@/lib/payment/settle";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 import { warmReportCache } from "@/lib/reports/warm";
+import { getSessionUserId } from "@/lib/auth/session";
 
 /**
  * 클라이언트가 PortOne 결제창에서 성공 응답을 받은 뒤 호출한다.
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
 
     // 이미 처리된 주문이면 중복 결제 검증/처리 없이 현재 상태를 그대로 반환한다(멱등 처리).
     if (order.status !== "PENDING") {
-      return NextResponse.json({ status: order.status });
+      return NextResponse.json({ status: order.status, productType: order.productType, sectionKey: order.sectionKey });
     }
 
     let payment;
@@ -65,12 +66,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pay
       );
     }
 
+    // 이미 로그인한 상태로 결제한 경우, 버튼을 따로 누르지 않아도 바로 계정에 연결해둔다
+    // (로그아웃 상태로 결제한 게스트만 "로그인하고 저장하기" 버튼이 필요하다).
+    const sessionUserId = await getSessionUserId(req);
+    if (sessionUserId) {
+      await prisma.order.update({ where: { paymentId }, data: { userId: sessionUserId } });
+    }
+
     // 응답은 즉시 내려주고, AI 리포트 생성은 응답 이후 백그라운드에서 미리 시작해둔다
     // (warmReportCache.ts) — 결제창이 닫히고 화면이 전환되는 그 몇 초 사이에 미리 만들어두면
     // 사용자가 실제로 리포트 화면을 열었을 때 체감 대기시간이 크게 줄어든다.
     after(() => warmReportCache(order));
 
-    return NextResponse.json({ status: result.status });
+    // 모바일 결제창 리디렉션으로 돌아온 경우 클라이언트는 무슨 상품이었는지 모를 수 있어서, 서버 기준 값을 같이 준다.
+    return NextResponse.json({ status: result.status, productType: order.productType, sectionKey: order.sectionKey });
   } catch (e) {
     console.error(`결제 완료 처리 중 예상하지 못한 오류 (paymentId=${paymentId}):`, e);
     return NextResponse.json({ error: "결제 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { trackEvent } from "@/lib/analytics/track";
 import { shareToKakao } from "@/lib/kakao/share";
 import type { WuXing } from "@/lib/saju/ganzhi";
+import { INVITE_PARAM } from "@/lib/referral/shared";
 
 /** 공유 카드 이미지에 넣을 결과 요약. 여기 들어가는 값도 공유 텍스트(text)에 이미
  * 노출되는 정도(일간 별명, 궁합 점수 등)로만 제한한다 — 이름·생년월일시는 절대 금지. */
@@ -21,6 +23,9 @@ export function ShareButton({
   shareLabel = "💬 카카오톡으로 공유하기",
   card,
   source,
+  inviteCode,
+  sharePath = "/",
+  shareParams,
 }: {
   title: string;
   text: string;
@@ -33,16 +38,34 @@ export function ShareButton({
   /** share_click 이벤트에 같이 기록할 위치 식별자(예: "free_result"/"compat_free"/"premium_unlocked").
    * 어느 화면의 공유 버튼이 실제 유입을 만드는지 구분하기 위한 용도. */
   source?: string;
+  /** 친구 초대 보상용 코드. 있으면 공유 링크에 붙여서, 받은 친구가 무료 결과까지 보면
+   * 공유한 사람의 초대 인원으로 센다. */
+  inviteCode?: string;
+  /** 공유 링크가 가리킬 페이지(기본은 홈). 궁합 링크처럼 특정 화면으로 보내야 할 때 쓴다. */
+  sharePath?: string;
+  /** 공유 링크에 추가로 붙일 쿼리. */
+  shareParams?: Record<string, string>;
 }) {
   const [copied, setCopied] = useState(false);
   const [storyStatus, setStoryStatus] = useState<"idle" | "preparing" | "error">("idle");
+  // 이미지 파일 공유를 지원하지 않는 환경(인스타·카카오톡 안 브라우저, PC 등)에서는 이미지를
+  // 화면 안에 띄워서 저장 후 직접 올리게 안내한다(빈 새 탭을 열던 예전 방식은 앱 안
+  // 브라우저에서 막히거나 사용자가 뭘 해야 할지 알 수 없었다).
+  const [storyPreviewUrl, setStoryPreviewUrl] = useState<string | null>(null);
+
+  function closeStoryPreview() {
+    if (storyPreviewUrl) URL.revokeObjectURL(storyPreviewUrl);
+    setStoryPreviewUrl(null);
+  }
 
   // 공유 링크에 방법별 ref를 붙여서, 랜딩 페이지에서 어떤 공유 경로로 새 방문자가
   // 들어왔는지 구분할 수 있게 한다(공유 기능이 실제 유입을 만드는지 확인하는 용도).
   function buildShareUrl(method: "kakao" | "native" | "copy") {
     if (typeof window === "undefined") return "";
-    const url = new URL(window.location.origin);
+    const url = new URL(sharePath, window.location.origin);
     url.searchParams.set("ref", `share_${method}`);
+    if (inviteCode) url.searchParams.set(INVITE_PARAM, inviteCode);
+    for (const [key, value] of Object.entries(shareParams ?? {})) url.searchParams.set(key, value);
     return url.toString();
   }
 
@@ -78,12 +101,6 @@ export function ShareButton({
     const imageUrl = buildStoryImageUrl();
     if (!imageUrl) return;
 
-    // 브라우저는 클릭 이벤트 안에서 "동기적으로" 연 창만 정상 팝업으로 인정한다.
-    // 아래 fetch가 끝난 뒤에 window.open을 부르면 사용자 제스처 유효 시간이 지나있어서
-    // 에러 없이 조용히 팝업이 차단된다(데스크톱에서 실제로 겪은 버그). 그래서 빈 탭을
-    // 클릭 즉시 먼저 열어두고, 이미지가 준비되면 그 탭 주소만 바꿔치기한다.
-    const preOpenedTab = window.open("", "_blank");
-
     setStoryStatus("preparing");
     try {
       const res = await fetch(imageUrl);
@@ -91,27 +108,25 @@ export function ShareButton({
       const blob = await res.blob();
       const file = new File([blob], "saju-lab.png", { type: "image/png" });
 
-      // 모바일에서는 파일 첨부 공유 시트를 띄워 인스타그램 스토리로 바로 보낼 수 있게 한다.
+      // 모바일 일반 브라우저에서는 파일 첨부 공유 시트를 띄워 인스타그램으로 바로 보낼 수 있게 한다.
       if (navigator.canShare?.({ files: [file] })) {
-        preOpenedTab?.close(); // 이 경로는 새 탭이 필요 없으니 미리 열어둔 빈 탭은 정리한다.
-        await navigator.share({ files: [file], title, text });
-        setStoryStatus("idle");
-        return;
+        try {
+          await navigator.share({ files: [file], title, text });
+          setStoryStatus("idle");
+          return;
+        } catch (e) {
+          // 사용자가 공유창을 닫은 것(AbortError)은 정상 취소다. 그 외 실패는 아래 저장 안내로 넘긴다.
+          if (e instanceof DOMException && e.name === "AbortError") {
+            setStoryStatus("idle");
+            return;
+          }
+        }
       }
 
-      // 데스크톱 등 파일 공유를 지원하지 않는 환경은 새 탭에 이미지를 열어 저장 후 직접
-      // 업로드하게 한다.
-      const objectUrl = URL.createObjectURL(blob);
-      if (preOpenedTab) {
-        preOpenedTab.location.href = objectUrl;
-      } else {
-        // 팝업 차단 설정 등으로 미리 열기 자체가 실패했을 때의 마지막 시도.
-        window.open(objectUrl, "_blank");
-      }
+      // 공유를 지원하지 않는 환경: 화면 안에서 이미지를 보여주고 저장 방법을 안내한다.
+      setStoryPreviewUrl(URL.createObjectURL(blob));
       setStoryStatus("idle");
     } catch {
-      preOpenedTab?.close();
-      // 사용자가 공유를 취소한 경우도 이 경로로 들어오므로 에러 문구를 오래 띄우지 않는다.
       setStoryStatus("error");
       setTimeout(() => setStoryStatus("idle"), 2000);
     }
@@ -178,6 +193,43 @@ export function ShareButton({
               ? "공유에 실패했어요"
               : "📱 인스타 스토리에 공유하기"}
         </button>
+      )}
+
+      {storyPreviewUrl && typeof document !== "undefined" && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="스토리용 이미지 저장 안내"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+        >
+          <div className="flex max-h-full w-full max-w-sm flex-col items-center gap-2.5 overflow-y-auto rounded-2xl bg-background-card p-4 text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={storyPreviewUrl} alt="인스타 스토리용 결과 이미지" className="max-h-[34vh] w-auto rounded-xl" />
+            <p className="text-sm font-medium text-foreground">이미지를 꾹 눌러 저장한 뒤 스토리에 올려주세요</p>
+            <div className="flex w-full gap-2">
+              <a
+                href={storyPreviewUrl}
+                download="saju-lab.png"
+                className="flex-1 rounded-xl bg-accent-gold px-4 py-2.5 text-sm font-semibold text-[#1a1430]"
+              >
+                이미지 저장
+              </a>
+              <button
+                type="button"
+                onClick={closeStoryPreview}
+                className="flex-1 rounded-xl border border-border-subtle px-4 py-2.5 text-sm text-foreground-muted"
+              >
+                닫기
+              </button>
+            </div>
+            <ol className="flex list-decimal flex-col gap-1 pl-5 text-left text-xs leading-relaxed text-foreground-muted">
+              <li>위 이미지를 꾹 눌러 <strong>저장</strong>해요.</li>
+              <li>인스타그램 스토리에서 방금 저장한 이미지를 올려요.</li>
+              <li><strong>@sajulab_official</strong>을 태그하면 친구가 바로 들어올 수 있어요.</li>
+            </ol>
+          </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

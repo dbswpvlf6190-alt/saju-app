@@ -6,6 +6,8 @@ export const ANALYTICS_EVENT_NAMES = [
   "free_result_view",
   "premium_preview_view",
   "premium_cta_click",
+  "premium_offer_seen",
+  "premium_sticky_click",
   "checkout_start",
   "payment_success",
   "payment_fail",
@@ -19,6 +21,12 @@ export const ANALYTICS_EVENT_NAMES = [
   "push_subscribe",
   "push_subscribe_denied",
   "coupon_redeemed",
+  "referral_reward_view",
+  "compat_invite_create",
+  "compat_invite_open",
+  "compat_invite_complete",
+  "compat_invite_notify",
+  "exam_promo_click",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

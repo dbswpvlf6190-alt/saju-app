@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reel_rules  # noqa: E402
 import cardnews_rules  # noqa: E402
+import exam_season  # noqa: E402
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -149,13 +150,16 @@ def generate_reel_items(reels, need):
         # 넉넉히 요청해서 일부가 탈락해도 목표 개수에 도달하기 쉽게 한다
         request_count = want if attempt > 1 else want + 1
         formats = reel_rules.pick_formats(reels + accepted, request_count)
-        user_msg = reel_rules.build_user_message(reels + accepted, request_count, formats) + feedback
+        # 시험 시즌이면 3편 중 1편을 수험생 소재로 배정(exam_season.py). 후보 i번째는 배정 i번째와 짝이다.
+        exam_slots = exam_season.assign_slots(reels + accepted, request_count)
+        user_msg = reel_rules.build_user_message(reels + accepted, request_count, formats, exam_slots) + feedback
         candidates = call_claude_raw(reel_rules.SYSTEM_PROMPT_REELS, user_msg)
         rejected = []
-        for item in candidates:
+        for i, item in enumerate(candidates):
             if len(accepted) >= need:
                 break
-            problems = reel_rules.validate_item(item, reels, accepted)
+            expected = exam_slots[i] if i < len(exam_slots) else None
+            problems = reel_rules.validate_item(item, reels, accepted, expected)
             if problems:
                 rejected.append((item.get("title", "?"), problems))
             else:
@@ -205,6 +209,7 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
             "categoryLabel": reel_rules.CATEGORY_MAP[item["category"]],
             "subcategory": item["subcategory"],
             "format": item["format"],
+            "exam": item.get("exam") or None,
             "title": item["title"],
             "topic": item["topic"],
             "keywords": item["keywords"],
@@ -265,13 +270,15 @@ def generate_card_items(cardsets, need):
             break
         request_count = want if attempt > 1 else want + 1
         formats = cardnews_rules.pick_formats(cardsets + accepted, request_count)
-        user_msg = cardnews_rules.build_user_message(cardsets + accepted, request_count, formats) + feedback
+        exam_slots = exam_season.assign_slots(cardsets + accepted, request_count)
+        user_msg = cardnews_rules.build_user_message(cardsets + accepted, request_count, formats, exam_slots) + feedback
         candidates = call_claude_raw(cardnews_rules.SYSTEM_PROMPT_CARDNEWS, user_msg)
         rejected = []
-        for item in candidates:
+        for i, item in enumerate(candidates):
             if len(accepted) >= need:
                 break
-            problems = cardnews_rules.validate_item(item, cardsets, accepted)
+            expected = exam_slots[i] if i < len(exam_slots) else None
+            problems = cardnews_rules.validate_item(item, cardsets, accepted, expected)
             if problems:
                 rejected.append((item.get("title", "?"), problems))
             else:
@@ -319,6 +326,7 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
             "category": item["category"],
             "subcategory": item["subcategory"],
             "format": item["format"],
+            "exam": item.get("exam") or None,
             "title": item["title"],
             "hookAccent": item["hookAccent"].strip(),
             "coverSub": item["coverSub"],

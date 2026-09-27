@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/og/defaults";
 import { CompatibilityFlow } from "@/components/saju/CompatibilityFlow";
 import { SiteFooter } from "@/components/saju/SiteFooter";
 
@@ -9,8 +10,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/compatibility" },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: "/compatibility", type: "website" },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/compatibility", type: "website", images: [DEFAULT_OG_IMAGE] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [DEFAULT_OG_IMAGE] },
 };
 
 export default function CompatibilityPage() {

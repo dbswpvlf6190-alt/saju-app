@@ -23,6 +23,24 @@ function isGoneStatus(err: unknown): boolean {
   return statusCode === 404 || statusCode === 410;
 }
 
+/** 구독 하나에 알림 한 건을 보낸다. 실패해도 호출한 흐름을 막지 않도록 결과만 돌려준다. */
+export async function sendPushTo(
+  subscription: { endpoint: string; p256dh: string; auth: string },
+  payload: { title: string; body: string; url: string },
+): Promise<boolean> {
+  try {
+    ensureConfigured();
+    await webpush.sendNotification(
+      { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
+      JSON.stringify(payload),
+    );
+    return true;
+  } catch (err) {
+    console.error("푸시 알림 발송 실패:", err);
+    return false;
+  }
+}
+
 export async function sendDailyFortunePush(): Promise<{ sent: number; failed: number; removed: number }> {
   ensureConfigured();
 

@@ -55,3 +55,51 @@
 - **훅 릴스(원석형) 구버전 인스타 게시물 아직 미삭제**: 2026-09-18에 다른 세션이 올린 media_id `18086839340682411`이 여전히 live — 9/21에 새 다듬은 버전(`18450600577121724`)을 올리면서 사용자가 구버전을 앱에서 직접 삭제하기로 했는데 아직 안 함. 데스크톱 세션에서 또 올리지 말고, 사용자에게 삭제를 상기시켜도 됨.
 - **유튜브 관련 아님**(saju-app은 유튜브 미사용) — shorts_auto CLAUDE.md의 같은 날짜 섹션은 무관.
 - 그 외 media_host push 충돌 방지, 릴스 훅 규칙 강화, 카드뉴스 실험 등은 이 파일 위쪽 섹션 참고.
+- **릴스 캡션에 사이트 주소 추가** (2026-09-26): `reel_rules.add_link_line`이 캡션의 CTA 뒤·해시태그 앞에 `🔗 내 유형 확인: saju-app-three-dusky.vercel.app/type-test?ref=ig_reel` 한 줄을 넣는다(자동 생성분은 `build_caption`이, 대기 중이던 R41~R45는 manifest를 직접 갱신). 인스타 캡션 속 주소는 눌러도 이동되지 않는 글자라 복사·검색해서 오는 사람용이고, `ref=ig_reel`이 `landing_view` 이벤트에 기록돼서 `performance/latest.json`의 `app.landing_by_ref_30d`(ig_profile=프로필 링크, ig_reel=캡션 주소, share_*=앱 안 공유)로 유입을 구분해 볼 수 있다. 카드뉴스 캡션은 아직 해당 없음.
+
+## 2026-09-26 — 시험 시즌 콘텐츠(수능·임용) + 채널별 결제 추적
+- **3편 중 1편 수험생 소재**: `scripts/exam_season.py`가 릴스·카드뉴스 자동 생성 때 시즌 슬롯을 배정한다(시험 60일 전부터, 시험 8일 전까지만 새로 만듦 — 대기열이 시험 뒤에 게시되지 않게). 수능·임용을 번갈아 쓰고, 항목마다 `exam`(suneung/imyong/null)이 `reels.json`·`cardsets.json`·`performance/latest.json`에 남아 시즌 편 성과를 따로 볼 수 있다. 검증에서 합격 보장·불합격 공포·확률·"D-N" 표기를 탈락시킨다.
+- **캡션 주소**: 시즌 편 릴스는 `…/exam-luck(/imyong)?ref=ig_reel`, 카드뉴스는 `?ref=ig_cardnews`. 고정댓글 끝에 "○○ 합격운 흐름은 프로필 링크에서…"가 붙으므로 **인스타 프로필 링크에 수능·임용 합격운 주소를 추가해둘 것**(`/exam-luck?ref=ig_profile`, `/exam-luck/imyong?ref=ig_profile`).
+- **시험 날짜는 두 곳**: 앱 `src/lib/exam/seasons.ts`와 `scripts/exam_season.py`. 중등 임용(11/28 예정)은 9/30 공고 뒤 둘 다 고칠 것.
+- **채널별 결제**: 첫 방문 `?ref=`를 브라우저에 30일 기억해서 결제 쪽 이벤트에 `src`로 싣는다(`src/lib/analytics/source.ts`). /admin "결제 완료 첫 유입 경로", `performance/latest.json`의 `app.payments_by_src_30d`에서 채널별 결제 수를 본다. 오픈채팅·커뮤니티 홍보 링크는 채널마다 ref를 다르게 붙일 것(kakao_open, suman, orbi, everytime, threads 등).
+- **홍보 원고**: 오픈채팅·수만휘·오르비·에브리타임·지인 카톡·Threads(첫 2주 12개) 원고와 채널별 추적 링크는 `docs/marketing/2026-exam-season-posts.md`. 원칙: '사주랩' 브랜드 공지 톤, 이용자인 척하는 후기 금지(표시광고법 뒷광고), 같은 날 같은 글 여러 방 금지.
+
+### 남은 할 일 (2026-09-26 기준)
+| 할 일 | 누가 | 시점 |
+|---|---|---|
+| 인스타 프로필 링크에 `/exam-luck?ref=ig_profile`, `/exam-luck/imyong?ref=ig_profile` 추가 | 사람 | 지금 |
+| Threads 계정 만들고 `docs/marketing/2026-exam-season-posts.md` 원고 12개를 하루 1개씩 게시 | 사람 | 지금~2주 |
+| 중등 임용 공고 확인 후 `src/lib/exam/seasons.ts`와 `scripts/exam_season.py` 날짜 **둘 다** 수정 | Claude | 9/30 이후 |
+| /admin "결제 완료 첫 유입 경로"와 `app.payments_by_src_30d`로 채널별 방문·결제 비교 | Claude | 약 1주 뒤(10/3경) |
+| 다음 홍보 단계: SEO 페이지(`/ilgan` 11개는 9/26 배포 완료, 시험 소재 글은 미작성), 네이버 블로그 | Claude | 위 비교 후 |
+
+### Threads 운영 기록
+- 2026-09-26 개설(@sajulab_official, 데스크톱 크롬에서 인스타 사주랩 계정으로 로그인). 프로필: 소개 4줄, 링크 2개(`/?ref=threads`, `/exam-luck?ref=threads`), 관심사 사주·운세 사주·mbti·수능응원.
+- 9/26 게시: 소개 글(프로필 고정, 주제 "사주"), 원고 1번(주제 "수능응원") + 내 댓글에 C 설명·`/exam-luck?ref=threads` 링크(미리보기 카드 정상). 다음은 원고 2번부터, 하루 1~2개.
+- 9/26 21:00 예약: "생일만 적어주면 내 사주 타입 무료로 알려줄게" 글(주제 "사주"). Threads 사주 인기글이 대부분 이 형식(생일+고민 답글 → 풀이 답글)이라 도입. **약속대로 그날 달린 답글엔 전부 답할 것.** 답글 풀이는 `node scripts/threads_ilgan.mjs YYYY-MM-DD [lunar]`로 일간·유형을 구하고 `src/lib/saju/ilganPages.ts`의 해당 일간 내용(물어본 주제: 성격/연애/일/돈)으로 2~3문장 + "자세한 풀이는 프로필 링크에서 30초 무료"로 쓴다(답글마다 링크를 붙이면 스팸으로 보일 수 있어 프로필 링크로 유도). 올리기 전에 사용자 승인.
+- **9/27 Threads 자동화 가동**: Meta 앱 "sajulab threads"(앱 ID 1454906166696302, Threads 앱 ID 1017511271343753, 이용 사례 Threads API, 권한 basic/content_publish/manage_insights/manage_replies/read_replies, @sajulab_official = Threads 테스터). 토큰은 `credentials/threads_token.json`(60일, 50일 지나면 `threads_api.get_token()`이 자동 갱신) — **노트북에서도 돌리려면 이 파일을 복사해 둘 것**(git 제외). 새로 받을 땐 앱 > 이용 사례 > 맞춤 설정 > 설정 > 사용자 토큰 생성기 → `credentials/threads_token.txt`에 붙여넣고 `python scripts/threads_api.py --import-token`.
+  - 게시: 작업 스케줄러 `SajuThreadsDaily` 매일 21:00 → `run_daily_threads.py`가 `threads_queue.json`의 다음 글 + 링크 댓글. 18시간 간격·직접 올린 글 8시간 이내면 건너뜀. 남은 글 3개 미만이면 ntfy 경고 → 새 글 추가 필요(아직 자동 생성 없음).
+  - 성과: `fetch_insights.py`가 `performance/latest.json`의 `threads`에 팔로워·글별 views/likes/replies/reposts를 남김.
+  - 무료 풀이 글(9/26 21:00, media 17896512387604733): 하룻밤 조회 1,988·좋아요 33·답글 46 — 설명형 원고(조회 64~344)보다 압도적. 답글은 `python scripts/threads_replies.py draft|show|send MEDIA_ID`(생일 파싱·풀이 문장은 Claude, 일간 계산은 앱과 같은 lunar-typescript). 초안은 로컬 `~/SajuAutoRender/threads_drafts/`(남의 생일 포함이라 git 제외), 답한 id만 `posted_state/threads_replies/`. send는 40~75초 간격(몰아 올리면 스팸 판정 위험). **사용자 승인 후에만 send.**
+  - **9/27 무료 풀이 글 정기화**: `run_daily_threads.py`가 마지막 무료 풀이 글 후 약 3일(66시간+)이 지나면 그날은 대기열 대신 `threads_reading_posts.json`의 다음 변형(RD01~RD04 순환, 기록 파일 `RD0x-YYYYMMDD.json`, kind=reading)을 올린다. `SajuThreadsReplyDraft` 매일 10:00이 최근 4일 풀이 글의 새 답글 초안을 만들고 ntfy로 알림 → 사용자가 "올려"라고 하면 `threads_replies.py send MEDIA_ID`. 첫 풀이 글 답글 46개는 9/27 승인 후 게시.
+  - 프로필 링크 주의: 웹에서 프로필 편집 창의 맨 아래 "완료"를 누르면 링크가 지워진 적 있음(9/27 재등록). 링크는 링크 하위 창에서 저장되자마자 반영되니, 링크 수정 후엔 "완료" 대신 Esc로 닫을 것.
+
+## 2026-09-27 — 유료 전환 개편(1가지 1,900원 + 차액 3,000원)
+- **왜**: 30일 퍼널이 유료 안내 노출 145 → 결제 버튼 10(7%) → 결제창 7 → 결제 5. 결제 과정이 아니라 "안내를 보고도 안 누름"이 병목.
+- **무엇**: `PremiumOffer.tsx`(맨 위 항목 한 문단 흐림 없이 공개, "전체 5가지 4,900원(항목당 980원, 추천)" vs "궁금한 1가지만 1,900원" 선택, 하단 고정 바 `StickyPremiumBar`), 상품 `single_section`(1,900원, `Order.sectionKey`)·`section_upgrade`(3,000원, `Order.parentPaymentId` — 원래 주문의 생년월일·이미 만든 해석을 이어받아 나머지 4개만 생성), 결제 후 `SectionUpgradeCard`. 서버는 1가지 주문이면 산 항목만 생성·열람(`/api/orders/[id]`).
+- **측정**: 새 이벤트 `premium_offer_seen`(가격 영역이 실제로 화면에 60% 이상 보였을 때만 — 예전 `premium_preview_view`는 결과 화면 열리자마자 찍혀 과대집계), `premium_sticky_click`. `fetch_insights.py`가 퍼널 이벤트를 `app.daily_events`에 같이 남김. **10/4경 offer_seen → cta_click → payment_success 비율을 이전(7%)과 비교할 것.** `premium_cta_click` meta의 productType(single_section/premium_report)으로 어떤 선택지가 눌리는지도 볼 수 있음.
+- **테스트**: 로컬 API 13항목 + PortOne 테스트 채널(KG이니시스 INIpayTest)로 1,900원 실결제 흐름 확인(9/27). 차액 3,000원은 결제창 실테스트는 생략(API로만 확인) → 첫 실제 차액 결제가 들어오면 주문 기록 확인할 것. 로컬 `.env.development.local`에 테스트 채널 키가 있어 `next dev`에선 결제가 청구되지 않음(운영·미리보기는 Vercel 환경변수의 실채널).
+
+## 2026-09-27 — Threads 집중 운영(자동)
+- 게시: `SajuThreadsDaily` 12:30·21:00 하루 2개. 대기열(안 올린 글)이 5개 미만이면 `threads_refill.py`가 Claude로 6개 생성(반말·질문으로 끝남·본문 링크 금지·단정/뒷광고 문구 금지 검사, 성과 상위 글을 예시로). 무료 풀이 글(RD0x)은 3일에 한 번 저녁 슬롯에만.
+- 풀이 답글: `SajuThreadsReplyDraft` 10:00·23:30 → 새 답글 초안 → **검사 통과분은 자동 게시**(사용자가 첫 46개 품질 확인 후 9/27 전환). 검사에 걸린 초안만 ntfy 알림 → "Threads 답글 확인해"로 사람이 처리. 임신·질병 등 건강 질문은 시기·결과 언급 금지(검사어 포함 시 수동 확인으로 빠짐).
+- 사람 할 일: 인스타 프로필 링크에 `/exam-luck?ref=ig_profile` 추가(미완), 반응 좋은 Threads 글을 인스타 스토리에 공유(선택).
+
+## 2026-09-27 — 노트북 인수인계 (내일 노트북 작업용)
+- **먼저**: 노트북 저장소에서 `git pull origin main` (오늘 작업은 전부 main에 있음: Threads 자동화, 1가지 1,900원·차액 3,000원 결제, 유료 안내 개편, 퍼널 이벤트).
+- **데스크톱에만 있는 것(git 제외)** — 노트북에서 Threads 스크립트를 돌리려면 필요:
+  - `credentials/threads_token.json` (Threads 60일 토큰). 옮기는 법: USB 등으로 파일 복사, **또는** 노트북에서 새로 발급 — Meta 개발자 > 앱 "sajulab threads" > 이용 사례 > 맞춤 설정 > 설정 > 사용자 토큰 생성기 > sajulab_official "액세스 토큰 생성하기" → `credentials/threads_token.txt`에 붙여넣고 `python scripts/threads_api.py --import-token` → `--check`로 확인. 채팅·git에 토큰 붙이지 말 것.
+  - `.env.development.local` (로컬 `next dev` 전용 PortOne 테스트 채널 키 — 노트북에서 결제 테스트할 때만 필요, 없어도 됨. 키는 PortOne 콘솔 > 결제 연동 > 채널 관리 > 테스트 탭).
+- **자동 작업은 데스크톱 작업 스케줄러에서만 돈다**: SajuThreadsDaily(12:30·21:00), SajuThreadsReplyDraft(10:00·23:30), 기존 릴스(20:00)·카드뉴스(11:00)·인사이트(09:00). 데스크톱이 꺼져 있으면 그 시간 게시는 건너뛰고 켜질 때 StartWhenAvailable로 한 번 실행됨. 노트북에 같은 작업을 새로 등록하지 말 것(중복 게시 위험 — 게시 기록은 git 락으로 막지만 굳이 늘릴 이유 없음).
+- **진행 중·확인할 것**: 9/29 21:00 무료 풀이 글 RD02 자동 게시 예정 / 첫 실제 차액(3,000원) 결제 들어오면 Order 기록 확인 / 10/4경 Threads·결제 퍼널 주간 보고 / 인스타 프로필 링크 `/exam-luck?ref=ig_profile` 추가(사람) / 9/30 중등 임용 공고 뒤 `src/lib/exam/seasons.ts`·`scripts/exam_season.py`·`scripts/threads_refill.py`(EXAMS) 날짜 수정.
+- **풀이 답글 시기 짚기(9/27 사용자 요청)**: 임신·재회·취업 등 "언제" 질문은 `threads_ilgan.mjs`가 계산한 앞으로 5년·12개월의 십성 계열(식상/재성/관성/인성/비겁) 안에서만 시기를 짚는다(AI가 날짜를 지어내지 않게). 질병·완치 같은 의료 판단은 계속 금지.

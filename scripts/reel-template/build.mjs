@@ -44,7 +44,7 @@ function cumulativeOffsets(durations, fade) {
 }
 
 // outBase 확장자 없이 받아서, 실제로 만든 파일 경로(.wav 또는 대체 시 .mp3)를 돌려준다.
-function synthesize(text, outBase) {
+function synthesize(text, outBase, speed = VOICE_SPEED) {
   const python = `${SUPERTONIC_DIR}\\venv\\Scripts\\python.exe`;
   const narrate = `${SUPERTONIC_DIR}\\narrate.py`;
   if (existsSync(python) && existsSync(narrate) && existsSync(SUPERTONIC_STYLE)) {
@@ -54,7 +54,7 @@ function synthesize(text, outBase) {
     writeFileSync(textFile, text, "utf-8");
     execFileSync(
       python,
-      [narrate, "--text-file", textFile, "--style", SUPERTONIC_STYLE, "--speed", String(VOICE_SPEED), "--out-audio", wavPath, "--out-timing", timingFile],
+      [narrate, "--text-file", textFile, "--style", SUPERTONIC_STYLE, "--speed", String(speed), "--out-audio", wavPath, "--out-timing", timingFile],
       { stdio: ["ignore", "ignore", "inherit"], env: { ...process.env, PYTHONIOENCODING: "utf-8" } },
     );
     return wavPath;
@@ -67,6 +67,15 @@ function synthesize(text, outBase) {
     { stdio: ["ignore", "ignore", "ignore"] },
   );
   return mp3Path;
+}
+
+// 나레이션 앞뒤 무음을 잘라낸다(짧은 릴스용). 앞에 0.08초만 남겨 첫 소리가 어색하게 잘리지 않게 하고,
+// 뒤는 거의 남기지 않아서 장면 사이 간격이 무음 길이에 따라 들쭉날쭉해지는 걸 막는다.
+function trimSilence(path) {
+  const out = path.replace(/\.(wav|mp3)$/, "_trim.wav");
+  const cut = "silenceremove=start_periods=1:start_threshold=-42dB:start_silence=0.08";
+  execFileSync("ffmpeg", ["-y", "-i", path, "-af", `${cut},areverse,silenceremove=start_periods=1:start_threshold=-42dB:start_silence=0.04,areverse`, out], { stdio: ["ignore", "ignore", "ignore"] });
+  return out;
 }
 
 function probeDuration(path) {
@@ -114,13 +123,16 @@ function buildNarrationFilter(sceneStarts) {
   ].join(";");
 }
 
-function buildAudioFilter(D, offsets, total) {
+function buildAudioFilter(D, offsets, total, short = false) {
   const [, , o3, o4] = offsets;
   // 브랜드 배경음(코드 전환 타이밍)은 총 길이가 장면별로 달라지므로 INFO→CURIOSITY 전환(o2)에 맞춘다.
   const chordFadeStart = Math.max(1, offsets[1] - 1);
   const chordFadeDur = Math.min(3, Math.max(0.8, total - chordFadeStart - 1));
   const ctaDingAt = o4 + Math.min(1.3, D[4] * 0.4);
-  const finalFadeOutStart = Math.max(0, total - 2.0);
+  // 짧은 릴스는 총 길이가 12초대라 2초 페이드아웃이 마지막 말(CTA 나레이션)을 덮어 끊기게 들린다 — 페이드를 짧게 한다.
+  const fadeOutLen = short ? 0.5 : 2.0;
+  const fadeInLen = short ? 0.1 : 1.0;
+  const finalFadeOutStart = Math.max(0, total - fadeOutLen);
   const whooshMs1 = Math.round(o3 * 1000);
   const whooshMs2 = Math.round(o4 * 1000);
   const dingMs1 = Math.round(ctaDingAt * 1000);
@@ -152,7 +164,7 @@ function buildAudioFilter(D, offsets, total) {
     `[bedecho]pan=stereo|c0=c0|c1=c0[bedstereo]`,
     `[bedstereo]haas[bedhaas]`,
     `[bedhaas][narrstereo]amix=inputs=2:duration=longest:normalize=0[premaster]`,
-    `[premaster]afade=t=in:st=0:d=1.0,afade=t=out:st=${finalFadeOutStart.toFixed(2)}:d=2.0,alimiter=limit=0.8[aout]`,
+    `[premaster]afade=t=in:st=0:d=${fadeInLen},afade=t=out:st=${finalFadeOutStart.toFixed(2)}:d=${fadeOutLen},alimiter=limit=0.8[aout]`,
   ].join(";");
 }
 
@@ -172,8 +184,15 @@ async function buildOne(entry) {
   const pngFor = { hook: "1-hook.png", info: "2-info.png", curiosity: "3-curiosity.png", screenshot: "4-screenshot.png", cta: "5-cta.png" };
   const scenePngs = order.map((k) => `${sceneDirPath}/${pngFor[k]}`);
   const pillPath = entry.cta?.pill ? `${sceneDirPath}/pill.png` : null;
-  const narrationPaths = order.map((k) => synthesize(texts[k], `${sceneDirPath}/${k}`));
-  const D = narrationPaths.map((p) => Math.max(MIN_SCENE, probeDuration(p) + SCENE_PAD));
+  const narrationPaths = order.map((k) => {
+    const raw = synthesize(texts[k], `${sceneDirPath}/${k}`, entry.short ? 1.25 : VOICE_SPEED);
+    return entry.short ? trimSilence(raw) : raw;
+  });
+  // 짧은 릴스 실험(entry.short): 장면 여유를 줄여 전체를 10~12초대로 맞춘다(평균 시청이 2~3초라 완주율을 올리려는 목적).
+  const minScene = entry.short ? 1.1 : MIN_SCENE;
+  const scenePad = entry.short ? 0.4 : SCENE_PAD;
+  const D = narrationPaths.map((p) => Math.max(minScene, probeDuration(p) + scenePad));
+  if (entry.short) D[4] += 0.5; // 마지막 CTA 말이 끝난 뒤 여유(페이드아웃 전에 말이 다 끝나도록)
 
   const { offsets, total } = cumulativeOffsets(D, FADE);
   const sceneStarts = [0, ...offsets];
@@ -182,7 +201,7 @@ async function buildOne(entry) {
   // 상단 고정 CTA 자막(pill.png)을 마지막 CTA 장면 직전까지 덮는다(CTA 장면에서는 같은 문구가 중복되므로 숨김). 입력 인덱스 24(나레이션 5개 바로 뒤).
   if (pillPath) videoFilter = videoFilter.replace(/\[vout\]$/, "[vbase]") + `;[vbase][24:v]overlay=0:0:format=auto:enable='lt(t,${offsets[3].toFixed(2)})'[vout]`;
   const narrationFilter = buildNarrationFilter(sceneStarts);
-  const audioFilter = buildAudioFilter(D, offsets, total);
+  const audioFilter = buildAudioFilter(D, offsets, total, !!entry.short);
   const filterComplex = `${videoFilter};${narrationFilter};${audioFilter}`;
 
   const bedDur = Math.ceil(total) + 1;
@@ -216,6 +235,7 @@ async function buildOne(entry) {
     "-filter_complex", filterComplex,
     "-map", "[vout]", "-map", "[aout]",
     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-ar", "44100",
+    ...(entry.short ? ["-t", total.toFixed(2)] : []),
     "-shortest", "-movflags", "+faststart",
     fileURLToPath(new URL(fileName, OUT_DIR)),
   ];

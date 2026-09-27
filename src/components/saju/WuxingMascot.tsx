@@ -28,13 +28,18 @@ export function WuxingMascot({ wuxing, size = 96 }: { wuxing: WuXing; size?: num
           <circle cx="80" cy="66" r="52" fill={`url(#${gradId})`} />
           <path d="M80 10 Q86 22 78 30 Q90 26 92 14" fill="#6fc98c" />
           <ellipse cx="55" cy="60" rx="10" ry="13" fill="#fff" opacity="0.16" />
+          <path d="M55 55 Q63 49 71 55" fill="none" stroke="#17301f" strokeWidth="3" strokeLinecap="round" />
+          <path d="M89 55 Q97 49 105 55" fill="none" stroke="#17301f" strokeWidth="3" strokeLinecap="round" />
           <circle cx="63" cy="64" r="6" fill="#17301f" />
           <circle cx="97" cy="64" r="6" fill="#17301f" />
           <circle cx="65.5" cy="61.5" r="1.8" fill="#fff" />
           <circle cx="99.5" cy="61.5" r="1.8" fill="#fff" />
           <ellipse cx="58" cy="78" rx="7" ry="4" fill="#e88a8a" opacity="0.55" />
           <ellipse cx="102" cy="78" rx="7" ry="4" fill="#e88a8a" opacity="0.55" />
-          <path d="M64 82 Q80 94 96 82" fill="none" stroke="#17301f" strokeWidth="4" strokeLinecap="round" />
+          <ellipse cx="80" cy="85" rx="7.5" ry="6" fill="#0f2216" />
+          <ellipse cx="80" cy="82.5" rx="5.5" ry="1.8" fill="#3a5b41" opacity="0.6" />
+          <line x1="97" y1="78" x2="105" y2="73" stroke="#8fd6a8" strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
+          <line x1="99" y1="86" x2="108" y2="84" stroke="#8fd6a8" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
         </>
       )}
 
@@ -57,13 +62,19 @@ export function WuxingMascot({ wuxing, size = 96 }: { wuxing: WuXing; size?: num
             fill="#ffe1a8"
             opacity="0.55"
           />
+          <path d="M58 76 Q66 68 74 76" fill="none" stroke="#4a1810" strokeWidth="3" strokeLinecap="round" />
+          <path d="M86 76 Q94 68 102 76" fill="none" stroke="#4a1810" strokeWidth="3" strokeLinecap="round" />
           <circle cx="66" cy="86" r="6" fill="#4a1810" />
           <circle cx="94" cy="86" r="6" fill="#4a1810" />
           <circle cx="68.5" cy="83.5" r="1.8" fill="#fff" />
           <circle cx="96.5" cy="83.5" r="1.8" fill="#fff" />
           <ellipse cx="61" cy="99" rx="7" ry="4" fill="#ffd27a" opacity="0.7" />
           <ellipse cx="99" cy="99" rx="7" ry="4" fill="#ffd27a" opacity="0.7" />
-          <path d="M67 104 Q80 116 93 104" fill="none" stroke="#4a1810" strokeWidth="4" strokeLinecap="round" />
+          <ellipse cx="80" cy="108" rx="9" ry="7.5" fill="#2e0f08" />
+          <ellipse cx="80" cy="105" rx="6.5" ry="2.2" fill="#7a3626" opacity="0.6" />
+          <line x1="98" y1="100" x2="108" y2="95" stroke="#ffce8a" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
+          <line x1="100" y1="109" x2="111" y2="107" stroke="#ffce8a" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
+          <line x1="97" y1="117" x2="106" y2="122" stroke="#ffce8a" strokeWidth="2.5" strokeLinecap="round" opacity="0.45" />
         </>
       )}
 
@@ -84,13 +95,18 @@ export function WuxingMascot({ wuxing, size = 96 }: { wuxing: WuXing; size?: num
             fill={`url(#${gradId})`}
           />
           <path d="M46 60 C54 44 66 34 80 32 C70 40 60 52 56 68 Z" fill="#f4e0ae" opacity="0.5" />
+          <path d="M52 74 Q62 70 72 74" fill="none" stroke="#5a3f18" strokeWidth="3" strokeLinecap="round" />
+          <path d="M88 74 Q98 70 108 74" fill="none" stroke="#5a3f18" strokeWidth="3" strokeLinecap="round" />
           <circle cx="62" cy="84" r="6.5" fill="#5a3f18" />
           <circle cx="98" cy="84" r="6.5" fill="#5a3f18" />
           <circle cx="64.5" cy="81.5" r="1.8" fill="#fff" />
           <circle cx="100.5" cy="81.5" r="1.8" fill="#fff" />
           <ellipse cx="56" cy="98" rx="7.5" ry="4.5" fill="#e79a6a" opacity="0.5" />
           <ellipse cx="104" cy="98" rx="7.5" ry="4.5" fill="#e79a6a" opacity="0.5" />
-          <path d="M64 102 Q80 112 96 102" fill="none" stroke="#5a3f18" strokeWidth="4.5" strokeLinecap="round" />
+          <ellipse cx="80" cy="104" rx="7.5" ry="6" fill="#3a2810" />
+          <ellipse cx="80" cy="101.5" rx="5.5" ry="2" fill="#7a5a2c" opacity="0.6" />
+          <line x1="98" y1="96" x2="107" y2="91" stroke="#eccd8f" strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
+          <line x1="100" y1="104" x2="109" y2="102" stroke="#eccd8f" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
         </>
       )}
 
@@ -109,13 +125,19 @@ export function WuxingMascot({ wuxing, size = 96 }: { wuxing: WuXing; size?: num
           <line x1="80" y1="16" x2="80" y2="138" stroke="#8f8a78" strokeWidth="1.5" opacity="0.4" />
           <line x1="38" y1="48" x2="122" y2="48" stroke="#8f8a78" strokeWidth="1.5" opacity="0.4" />
           <path d="M96 26 L102 34 L96 42 L90 34 Z" fill="#fff" opacity="0.85" />
+          <path d="M57 71 Q66 64 75 71" fill="none" stroke="#3f3c33" strokeWidth="3" strokeLinecap="round" />
+          <path d="M85 71 Q94 64 103 71" fill="none" stroke="#3f3c33" strokeWidth="3" strokeLinecap="round" />
           <circle cx="66" cy="80" r="6" fill="#3f3c33" />
           <circle cx="94" cy="80" r="6" fill="#3f3c33" />
           <circle cx="68.5" cy="77.5" r="1.8" fill="#fff" />
           <circle cx="96.5" cy="77.5" r="1.8" fill="#fff" />
           <ellipse cx="60" cy="94" rx="7" ry="4" fill="#e0a8a8" opacity="0.5" />
           <ellipse cx="100" cy="94" rx="7" ry="4" fill="#e0a8a8" opacity="0.5" />
-          <path d="M69 98 Q80 106 91 98" fill="none" stroke="#3f3c33" strokeWidth="4" strokeLinecap="round" />
+          <ellipse cx="80" cy="100" rx="8" ry="6.5" fill="#2a2820" />
+          <ellipse cx="80" cy="97" rx="6" ry="2" fill="#5a564a" opacity="0.6" />
+          <line x1="98" y1="92" x2="107" y2="87" stroke="#cbb98a" strokeWidth="2.5" strokeLinecap="round" opacity="0.75" />
+          <line x1="100" y1="100" x2="110" y2="98" stroke="#cbb98a" strokeWidth="2.5" strokeLinecap="round" opacity="0.55" />
+          <line x1="98" y1="108" x2="106" y2="112" stroke="#cbb98a" strokeWidth="2.5" strokeLinecap="round" opacity="0.4" />
         </>
       )}
 
@@ -136,13 +158,18 @@ export function WuxingMascot({ wuxing, size = 96 }: { wuxing: WuXing; size?: num
             fill={`url(#${gradId})`}
           />
           <ellipse cx="60" cy="70" rx="12" ry="18" fill="#fff" opacity="0.32" />
+          <path d="M57 82 Q65 77 73 82" fill="none" stroke="#182a52" strokeWidth="3" strokeLinecap="round" />
+          <path d="M87 82 Q95 77 103 82" fill="none" stroke="#182a52" strokeWidth="3" strokeLinecap="round" />
           <circle cx="65" cy="92" r="6" fill="#182a52" />
           <circle cx="95" cy="92" r="6" fill="#182a52" />
           <circle cx="67.5" cy="89.5" r="1.8" fill="#fff" />
           <circle cx="97.5" cy="89.5" r="1.8" fill="#fff" />
           <ellipse cx="60" cy="106" rx="7" ry="4" fill="#ffb8c6" opacity="0.5" />
           <ellipse cx="100" cy="106" rx="7" ry="4" fill="#ffb8c6" opacity="0.5" />
-          <path d="M68 110 Q80 120 92 110" fill="none" stroke="#182a52" strokeWidth="4" strokeLinecap="round" />
+          <ellipse cx="80" cy="112" rx="7" ry="5.5" fill="#0d1a38" />
+          <ellipse cx="80" cy="109.5" rx="5" ry="1.8" fill="#3a568c" opacity="0.6" />
+          <line x1="98" y1="104" x2="107" y2="99" stroke="#a9c3f2" strokeWidth="2.5" strokeLinecap="round" opacity="0.75" />
+          <line x1="100" y1="112" x2="110" y2="110" stroke="#a9c3f2" strokeWidth="2.5" strokeLinecap="round" opacity="0.55" />
         </>
       )}
     </svg>

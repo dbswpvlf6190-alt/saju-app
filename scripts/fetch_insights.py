@@ -44,7 +44,7 @@ CARDSETS_JSON = os.path.join(SCRIPTS_DIR, "cardnews-template", "cardsets.json")
 # 두 타입 모두에서 공통으로 조회 가능한 지표만 요청한다.
 METRICS = "reach,likes,comments,saved,shares,total_interactions,views"
 
-APP_EVENTS = ["landing_view", "saju_start", "saju_complete", "free_result_view", "payment_success", "coupon_redeemed"]
+APP_EVENTS = ["landing_view", "saju_start", "saju_complete", "free_result_view", "premium_offer_seen", "premium_cta_click", "premium_sticky_click", "checkout_start", "payment_success", "coupon_redeemed"]
 
 
 def load_token_data():
@@ -113,7 +113,7 @@ def load_content_meta():
             for r in json.load(f):
                 meta[r["id"]] = {
                     "title": r.get("title"), "category": r.get("categoryLabel"), "subcategory": r.get("subcategory"),
-                    "topic": r.get("topic"), "format": r.get("format"), "hook_first": (r.get("hook") or [None])[0],
+                    "topic": r.get("topic"), "format": r.get("format"), "exam": r.get("exam"), "hook_first": (r.get("hook") or [None])[0],
                     "ctaType": r.get("ctaType"), "durationSec": r.get("durationSec"), "keywords": r.get("keywords"),
                 }
     except (OSError, json.JSONDecodeError):
@@ -121,7 +121,7 @@ def load_content_meta():
     try:
         with open(CARDSETS_JSON, "r", encoding="utf-8") as f:
             for c in json.load(f):
-                meta[c["id"]] = {"title": c.get("title"), "category": c.get("category"), "subcategory": c.get("subcategory"), "topic": c.get("topic"), "format": c.get("format"), "hook_first": c.get("title"), "ctaType": c.get("ctaType")}
+                meta[c["id"]] = {"title": c.get("title"), "category": c.get("category"), "subcategory": c.get("subcategory"), "topic": c.get("topic"), "format": c.get("format"), "exam": c.get("exam"), "hook_first": c.get("title"), "ctaType": c.get("ctaType")}
     except (OSError, json.JSONDecodeError):
         pass
     return meta
@@ -196,9 +196,51 @@ def fetch_app_metrics():
         for r in rows:
             daily.setdefault(r["day"], {})[r["name"]] = r["n"]
         coupons = neon_query('select count(*)::int as issued, count("usedAt")::int as used from "Coupon"')[0]
-        return {"daily_events": daily, "coupons": coupons}
+        # 유입 표시(ref)별 방문 수 — ig_profile(프로필 링크), ig_reel(릴스 캡션 주소), share_*(앱 안 공유) 구분용
+        by_ref = neon_query(
+            "select coalesce(nullif(\"metaJson\"::json->>'ref',''), '(없음)') as ref, count(*)::int as n "
+            "from \"AnalyticsEvent\" where name = 'landing_view' and \"createdAt\" > now() - interval '30 days' group by 1 order by n desc"
+        )
+        # 결제 완료의 첫 유입 경로(src) — 2026-09-26부터 기록(그 전 결제는 '(없음)')
+        pay_by_src = neon_query(
+            "select coalesce(nullif(\"metaJson\"::json->>'src',''), '(없음)') as src, count(*)::int as n "
+            "from \"AnalyticsEvent\" where name = 'payment_success' and \"createdAt\" > now() - interval '30 days' group by 1 order by n desc"
+        )
+        return {
+            "daily_events": daily, "coupons": coupons,
+            "landing_by_ref_30d": {r["ref"]: r["n"] for r in by_ref},
+            "payments_by_src_30d": {r["src"]: r["n"] for r in pay_by_src},
+        }
     except Exception as e:  # DB 조회 실패가 인스타 성과 기록 전체를 막으면 안 됨
         return {"error": str(e)[:300]}
+
+
+def fetch_threads():
+    """Threads(@sajulab_official) 계정 팔로워 + 자동 게시 글별 조회·좋아요·답글·리포스트·공유.
+    토큰이 없거나 API가 실패해도 인스타 지표 수집은 계속되도록 오류만 담아 돌려준다."""
+    try:
+        import threads_api
+        account = threads_api.get_account()
+    except BaseException as e:  # get_token()이 토큰 없을 때 SystemExit를 던진다
+        return {"error": str(e)[:300]}
+    items = []
+    posted_dir = os.path.join(BASE_DIR, "scripts", "posted_state", "threads")
+    for path in sorted(glob.glob(os.path.join(posted_dir, "*.json"))):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                rec = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        item = {k: rec.get(k) for k in ("id", "posted_at", "topic", "exam")}
+        if not str(rec.get("media_id", "")).isdigit():
+            item["error"] = "media_id가 API id가 아님(수동 게시분)"
+        else:
+            try:
+                item["metrics"] = threads_api.get_insights(rec["media_id"])
+            except Exception as e:
+                item["error"] = str(e)[:200]
+        items.append(item)
+    return {"account": account, "items": items}
 
 
 def main():
@@ -299,6 +341,7 @@ def main():
         "account": {**stats, "followers_delta_7d": followers_delta(log, 7), "followers_delta_30d": followers_delta(log, 30)},
         "items": perf_items,
         "app": fetch_app_metrics(),
+        "threads": fetch_threads(),
     }
     with open(PERF_LATEST, "w", encoding="utf-8") as f:
         json.dump(latest, f, ensure_ascii=False, indent=2)

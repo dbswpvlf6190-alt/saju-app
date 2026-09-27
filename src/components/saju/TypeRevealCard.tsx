@@ -25,7 +25,7 @@ export function TypeRevealCard({
       </span>
       <WuxingMascot wuxing={wuxing} size={110} />
       <h2 className="font-serif text-3xl text-accent-gold-soft">
-        {name ? `${name}님은 ` : "나는"}
+        {name ? `${name}님은 ` : "나는 "}
         {type.typeName}
       </h2>
       <p className="text-sm text-foreground-muted">{dayMasterMetaphor}</p>

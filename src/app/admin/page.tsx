@@ -25,6 +25,8 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   free_result_view: "무료 결과 조회",
   premium_preview_view: "상세분석 미리보기 노출",
   premium_cta_click: "상세분석 CTA 클릭",
+  premium_offer_seen: "가격·상품 선택 영역 실제로 봄",
+  premium_sticky_click: "하단 고정 바 클릭",
   checkout_start: "결제 시작",
   payment_success: "결제 성공",
   payment_fail: "결제 실패",
@@ -38,6 +40,12 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   push_subscribe: "푸시 알림 구독",
   push_subscribe_denied: "푸시 알림 거부",
   coupon_redeemed: "쿠폰 사용",
+  referral_reward_view: "초대 보상 쿠폰 확인",
+  exam_promo_click: "합격운 카드 → 상세 분석 클릭",
+  compat_invite_create: "궁합 링크 생성",
+  compat_invite_open: "궁합 링크 열람(받은 사람)",
+  compat_invite_complete: "궁합 링크 완성",
+  compat_invite_notify: "궁합 결과 알림 신청",
 };
 
 function pct(numerator: number, denominator: number): string {
@@ -132,6 +140,7 @@ export default async function AdminPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <BreakdownTable title="랜딩 유입 경로 (ref)" rows={funnel.landingRefBreakdown} />
         <BreakdownTable title="공유 버튼 위치 (source)" rows={funnel.shareSourceBreakdown} />
+        <BreakdownTable title="결제 완료 첫 유입 경로 (src)" rows={funnel.paymentSourceBreakdown} />
       </div>
 
       <h2 className="font-serif text-xl text-accent-gold-soft">후기 관리</h2>

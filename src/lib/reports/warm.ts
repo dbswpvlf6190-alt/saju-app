@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
-import { getCompatibilityReport, getNewYearReport, getPremiumReport } from "./generate";
+import type { PremiumSectionKey } from "@/lib/saju";
+import { PREMIUM_SECTION_KEYS, getCompatibilityReport, getNewYearReport, getPremiumReport } from "./generate";
 
 type OrderRow = NonNullable<Awaited<ReturnType<typeof prisma.order.findUnique>>>;
 
@@ -20,6 +21,11 @@ export async function warmReportCache(order: OrderRow): Promise<void> {
       await getCompatibilityReport(order.paymentId, order.birthInputJson, order.aiResultJson);
     } else if (order.productType === "new_year_report") {
       await getNewYearReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+    } else if (order.productType === "single_section") {
+      // 산 항목 하나만 미리 만든다(나머지를 만들면 AI 비용만 들고 보여줄 수 없음).
+      if ((PREMIUM_SECTION_KEYS as string[]).includes(order.sectionKey ?? "")) {
+        await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, [order.sectionKey as PremiumSectionKey]);
+      }
     } else {
       await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson);
     }

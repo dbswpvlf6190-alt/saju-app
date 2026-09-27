@@ -28,6 +28,17 @@ model Order {
   // 유료 궁합 주문의 상대방(제3자) 원본 생년월일시·성별을 보관기간 경과 후 파기한 시각.
   // null이면 아직 파기 대상이 아니거나(기간 미경과/생성 미완료) 궁합 상품이 아님을 뜻한다.
   partnerDataPurgedAt DateTime?
+  // single_section(1,900원) 주문이 산 항목(love/wealth/career/relationship/yearly). 그 외 상품은 null.
+  sectionKey  String?
+  // section_upgrade(차액 3,000원) 주문이 이어받은 원래 single_section 주문의 paymentId.
+  parentPaymentId String?
+  // 카카오 로그인으로 이 주문을 자기 계정에 연결한 경우에만 채워진다(선택 기능이라 대부분
+  // null — 게스트 결제는 그대로 쿠키 기반 접근만으로 동작한다). 연결하면 기기를 바꾸거나
+  // 쿠키를 지워도 /my에서 다시 리포트를 찾을 수 있다.
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 enum OrderStatus {
@@ -47,6 +58,37 @@ model Coupon {
   expiresAt   DateTime
   usedAt      DateTime?
   usedOrderId String?
+}
+
+// 친구 초대 보상. 무료 결과를 본 브라우저마다 하나씩 만들어지고, 공유 링크의 ?invite=<code>로
+// 들어온 친구가 무료 결과까지 보면 ReferralVisit이 1건 쌓인다. 3건이 되면 무료 리포트 쿠폰을
+// 발급해 couponCode에 연결한다. 생년월일시 원본은 저장하지 않고 서버 비밀키로 만든 해시만 둔다.
+model Referrer {
+  id         String          @id @default(cuid())
+  code       String          @unique
+  // 공유한 본인 생년월일시·성별의 HMAC. 본인이 자기 링크로 들어와 세는 걸 막는 용도.
+  birthKey   String
+  // 카카오 로그인 상태에서 만들었거나 나중에 로그인한 경우, 다른 기기에서도 진행 상황을 찾게 한다.
+  userId     String?
+  couponCode String?         @unique
+  createdAt  DateTime        @default(now())
+  visits     ReferralVisit[]
+
+  @@index([userId])
+}
+
+model ReferralVisit {
+  id         String   @id @default(cuid())
+  referrerId String
+  referrer   Referrer @relation(fields: [referrerId], references: [id], onDelete: Cascade)
+  // 친구 생년월일시·성별의 HMAC — 같은 친구를 두 번 세지 않기 위한 용도.
+  birthKey   String
+  // 요청 IP의 HMAC — 한 기기에서 생년월일만 바꿔가며 반복하는 걸 막기 위한 용도.
+  ipHash     String
+  createdAt  DateTime @default(now())
+
+  @@unique([referrerId, birthKey])
+  @@index([referrerId, ipHash])
 }
 
 // 결제 완료(PAID) 주문에 한해 남길 수 있는 후기. paymentId로 실제 구매를 증명하며,
@@ -81,6 +123,17 @@ model PushSubscription {
   createdAt DateTime @default(now())
 }
 
+// 카카오 로그인으로 만들어지는 계정. 회원가입 폼이 없는 앱이라 비밀번호는 아예 없고,
+// 카카오 쪽 고유 사용자 ID만으로 식별한다 — 재접근(기기 변경 시 과거 구매 리포트 다시
+// 찾기) 용도로만 쓰며, 그 외 이메일·연락처 등은 저장하지 않는다.
+model User {
+  id        String   @id @default(cuid())
+  kakaoId   String   @unique
+  nickname  String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
 // 전환 퍼널 분석용 이벤트 로그. 생년월일·생시·성별 등 사주 입력값은 절대 담지 않는다(meta는
 // productType/section 개수 같은 비민감 구조 정보만 담는 JSON 문자열).
 model AnalyticsEvent {
@@ -90,4 +143,30 @@ model AnalyticsEvent {
   createdAt DateTime @default(now())
 
   @@index([name, createdAt])
+}
+
+// 궁합 "상대에게 링크 보내기". 보낸 사람이 자기 정보만 넣고 링크를 보내면, 받은 사람이 자기 정보를
+// 넣는 순간 두 사람 모두 같은 결과를 본다. 받은 사람이 넣기 전에는 링크가 7일 유효하고, 넣은 뒤에는
+// 결과를 다시 보도록 7일 더 보관한다. expiresAt이 지나면 매일 도는 크론이 행을 통째로 지운다.
+model CompatInvite {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  // 보낸 사람 브라우저의 무작위 키. 서명 쿠키와 대조해서 보낸 사람만 대기·결과 화면을 본다.
+  inviterKey       String
+  inviterName      String?
+  inviterInputJson String
+  partnerKey       String?
+  partnerName      String?
+  partnerInputJson String?
+  completedAt      DateTime?
+  expiresAt        DateTime
+  // "결과 나오면 알림 받기"를 누른 경우의 웹 푸시 구독. 매일 운세 알림 구독과 섞이지 않게 여기에만
+  // 두고, 결과 알림을 한 번 보내면 지운다.
+  pushEndpoint     String?
+  pushP256dh       String?
+  pushAuth         String?
+  createdAt        DateTime  @default(now())
+
+  @@index([inviterKey])
+  @@index([expiresAt])
 }

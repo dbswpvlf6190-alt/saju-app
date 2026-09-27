@@ -2,19 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/analytics/track";
+import { isPushSupported, subscribeBrowserPush } from "@/lib/push/client";
 
 const DISMISS_KEY = "saju:pushOptInDismissed";
 
 type Status = "idle" | "subscribing" | "subscribed" | "denied" | "error";
-
-/** VAPID 공개키(base64url)를 pushManager.subscribe에 필요한 Uint8Array로 변환한다.
- * 웹 푸시 표준에 정해진 변환 방식으로, 라이브러리 없이 직접 구현하는 게 일반적이다. */
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
-}
 
 /** 무료 결과를 다 본 시점(DailyFortuneCard 아래)에만 노출하는 낮은 강도의 재방문 유도
  * 배너 — 매일 아침 "오늘의 운세" 알림을 받을지 물어본다. 카카오톡 알림처럼 별도 사업자
@@ -27,12 +19,7 @@ export function PushOptIn() {
   useEffect(() => {
     // 브라우저 지원 여부(navigator/Notification)는 서버에서 판단할 수 없어 마운트 후
     // 클라이언트에서만 확인 가능하다 — 최초 렌더 결과와 다를 수밖에 없는 값이다.
-    const isSupported =
-      typeof window !== "undefined" &&
-      "serviceWorker" in navigator &&
-      "PushManager" in window &&
-      "Notification" in window &&
-      Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+    const isSupported = isPushSupported();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSupported(isSupported);
     if (!isSupported) return;
@@ -52,24 +39,17 @@ export function PushOptIn() {
   async function handleEnable() {
     setStatus("subscribing");
     try {
-      const registration = await navigator.serviceWorker.register("/sw.js");
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
+      const subscription = await subscribeBrowserPush();
+      if (subscription === "denied") {
         trackEvent("push_subscribe_denied", {});
         setStatus("denied");
         return;
       }
 
-      const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
-      });
-
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(subscription.toJSON()),
+        body: JSON.stringify(subscription),
       });
       if (!res.ok) throw new Error("구독 저장에 실패했습니다.");
 

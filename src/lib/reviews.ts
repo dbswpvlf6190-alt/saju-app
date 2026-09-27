@@ -7,7 +7,19 @@ export async function getVisibleReviews(limit = 10): Promise<ReviewItem[]> {
     where: { visible: true },
     orderBy: { createdAt: "desc" },
     take: limit,
-    select: { id: true, rating: true, content: true, productType: true, createdAt: true },
+    select: { id: true, rating: true, content: true, productType: true, createdAt: true, paymentId: true },
   });
-  return reviews.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }));
+
+  // 쿠폰 사용 주문은 결제 금액 0원인 PAID 주문으로 남는다(/api/coupons/redeem).
+  const freeOrders = await prisma.order.findMany({
+    where: { paymentId: { in: reviews.map((r) => r.paymentId) }, amount: 0 },
+    select: { paymentId: true },
+  });
+  const freePaymentIds = new Set(freeOrders.map((o) => o.paymentId));
+
+  return reviews.map(({ paymentId, ...r }) => ({
+    ...r,
+    createdAt: r.createdAt.toISOString(),
+    viaCoupon: freePaymentIds.has(paymentId),
+  }));
 }

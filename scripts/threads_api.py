@@ -153,12 +153,15 @@ def reply(to_id, text):
 
 def get_replies(media_id):
     tok = get_token()
-    data = _check(requests.get(
-        f"{API}/{media_id}/replies",
-        params={"fields": "id,text,username,timestamp,is_reply_owned_by_me", "access_token": tok["access_token"]},
-        timeout=30,
-    ))
-    return data.get("data", [])
+    out = []
+    url = f"{API}/{media_id}/replies"
+    params = {"fields": "id,text,username,timestamp,is_reply_owned_by_me,has_replies", "limit": 100, "access_token": tok["access_token"]}
+    while url:
+        data = _check(requests.get(url, params=params, timeout=30))
+        out.extend(data.get("data", []))
+        url = data.get("paging", {}).get("next")
+        params = None  # next URL에 쿼리가 이미 들어 있다
+    return out
 
 
 def get_insights(media_id):

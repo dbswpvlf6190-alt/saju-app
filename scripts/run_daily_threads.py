@@ -1,7 +1,7 @@
 """Threads 하루 1개 자동 게시 — scripts/threads_queue.json 에서 아직 안 올린 첫 글을 올리고,
 바로 내 글에 링크 댓글을 단다(본문에 외부 링크가 있으면 노출이 줄어드는 편이라 링크는 댓글로만).
 
-작업 스케줄러: SajuThreadsDaily 매일 21:00, StartWhenAvailable. run_daily.py와 같은 이유로 반복 트리거 절대 금지.
+작업 스케줄러: SajuThreadsDaily 매일 12:30·21:00(트리거 2개), StartWhenAvailable. run_daily.py와 같은 이유로 반복 트리거 절대 금지.
 게시 기록은 scripts/posted_state/threads/<id>.json(git 추적)이라 노트북·데스크톱이 공유한다.
 """
 import json
@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import git_sync  # noqa: E402
 import notify  # noqa: E402
 import threads_api  # noqa: E402
+import threads_refill  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 QUEUE_PATH = os.path.join(BASE_DIR, "scripts", "threads_queue.json")
@@ -24,7 +25,9 @@ QUEUE_PATH = os.path.join(BASE_DIR, "scripts", "threads_queue.json")
 READING_PATH = os.path.join(BASE_DIR, "scripts", "threads_reading_posts.json")
 READING_EVERY_DAYS = 3
 POSTED_DIR = os.path.join(BASE_DIR, "scripts", "posted_state", "threads")
-MIN_HOURS_BETWEEN_POSTS = 18  # 21:00 실행 기준 하루 1개. 늦게 실행돼도(PC 꺼짐) 다음 날과 겹치지 않게
+# 9/27부터 하루 2개(12:30·21:00, 8.5시간 간격). 늦게 실행돼도(PC 꺼짐) 두 개가 붙어서 나가지 않게 7시간 간격을 둔다.
+MIN_HOURS_BETWEEN_POSTS = 7
+REFILL_BELOW = 5  # 안 올린 글이 이보다 적으면 threads_refill.py로 새 글을 채운다
 MIN_HOURS_SINCE_ANY_POST = 8  # 크롬·앱으로 직접 올린 글(대기열 밖)이 있으면 그 뒤 8시간은 쉰다
 LOW_QUEUE_WARN = 3
 
@@ -109,7 +112,17 @@ def main():
 
     queue = load_queue()
     pending = [q for q in queue if not os.path.exists(posted_path(q["id"]))]
-    reading = pick_reading_post()
+    if len(pending) < REFILL_BELOW:
+        try:
+            added = threads_refill.refill(6)
+            if added:
+                git_sync.git_commit_push(BASE_DIR, ["scripts/threads_queue.json"], f"threads: 대기열 자동 채움 {len(added)}개")
+            queue = load_queue()
+            pending = [q for q in queue if not os.path.exists(posted_path(q["id"]))]
+        except Exception as e:
+            print(f"대기열 자동 채우기 실패(남은 글로 계속): {e}")
+    # 무료 풀이 글은 답글이 밤새 달리는 저녁 슬롯에만 올린다.
+    reading = pick_reading_post() if datetime.now().hour >= 18 else None
     if reading:
         # 무료 풀이 글은 같은 변형을 여러 번 쓰므로 기록 파일 이름에 날짜를 붙인다.
         reading = {**reading, "kind": "reading", "record_id": f"{reading['id']}-{datetime.now().strftime('%Y%m%d')}"}

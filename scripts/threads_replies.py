@@ -3,7 +3,10 @@
   python scripts/threads_replies.py draft MEDIA_ID   # 새 답글 읽기 → 생일 해석 → 일간 계산 → 풀이 초안
   python scripts/threads_replies.py show MEDIA_ID    # 초안 보기
   python scripts/threads_replies.py send MEDIA_ID    # 초안을 실제 답글로 게시(승인 후에만!)
-  python scripts/threads_replies.py auto             # 최근 4일 무료 풀이 글 전부 draft (작업 스케줄러 SajuThreadsReplyDraft 매일 10:00)
+  python scripts/threads_replies.py auto             # 최근 4일 무료 풀이 글 draft → 검사 통과분 자동 send
+                                                     (작업 스케줄러 SajuThreadsReplyDraft 매일 10:00·23:30)
+9/27 사용자가 첫 46개 품질을 확인한 뒤 auto는 검사(금지어·길이·링크) 통과분을 바로 게시하도록 바꿨다.
+검사에 걸린 초안만 남겨 ntfy로 알리고, show/send로 사람이 처리한다.
 
 흐름: ① Claude가 각 답글에서 생년월일·양/음력·궁금한 주제를 뽑고 ② 일간은 앱과 같은 계산
 (scripts/threads_ilgan.mjs, lunar-typescript)으로 정확히 구하고 ③ 그 일간의 ilganPages 내용을 근거로
@@ -54,7 +57,7 @@ WRITE_PROMPT = f"""너는 무료 사주 서비스 '사주랩' Threads 계정 담
 - 두 사람이 있으면 두 사람 유형을 모두 말하고, 둘이 어떤 식으로 맞물리는지 한 문장 + "둘 궁합은 프로필 링크의 궁합 보기에서 자세히 볼 수 있어요" 식으로.
 - 재회·로또·합격 여부·"운이 열리나요" 같은 예/아니오 질문엔 단정하지 말고, 그 유형이 그런 시기에 잘 풀리는 방식/태도를 말해준다.
 - 금지: 무조건, 반드시, 100%, 확실히, 절대, 평생, 당첨·합격·불합격 단정, 공포 조장, 건강·의료 판단.
-- 마지막 문장은 자세한 풀이 안내인데, 답글마다 표현을 조금씩 다르게(예: "더 자세한 풀이는 프로필 링크에서 30초면 무료로 볼 수 있어요 🔮", "프로필 링크 들어가면 오행 비율까지 무료로 나와요", "내 사주 전체 풀이는 프로필 링크에서 무료로 확인해보세요 🍀"). 링크 주소는 쓰지 않는다.
+- 마지막 문장은 다음 단계 안내. 물어본 주제에 맞춰 자연스럽게: 연애·재회·결혼·두 사람이면 "둘 궁합은 프로필 링크의 궁합 보기에서", 돈·일·취업이면 "재물운/직업운만 골라서 자세히 볼 수도 있어요(프로필 링크)", 그 외엔 자세한 풀이 안내. 답글마다 표현을 조금씩 다르게(예: "더 자세한 풀이는 프로필 링크에서 30초면 무료로 볼 수 있어요 🔮", "프로필 링크 들어가면 오행 비율까지 무료로 나와요", "내 사주 전체 풀이는 프로필 링크에서 무료로 확인해보세요 🍀"). 링크 주소는 쓰지 않는다.
 - 말투: 다정한 존댓말(~예요, ~해요). 이모지는 0~2개. 전체 {MAX_LEN}자 이내. 해시태그 금지.
 - 생일이 없는 답글(people 비어 있음)은 "생년월일(양력/음력)을 답글로 남겨주시면 풀어드릴게요 🙏" 한 문장. DM 얘기면 "DM은 확인이 어려워서요, 답글로 남겨주시면 바로 풀어드릴게요 🙏".
 출력: {{"replies":[{{"id":"...","text":"..."}}, ...]}} JSON만."""
@@ -156,7 +159,8 @@ def draft(media_id):
         json.dump(drafts, f, ensure_ascii=False, indent=2)
     bad = sum(1 for d in drafts if d["problems"])
     print(f"초안 {len(drafts)}개 저장: {_draft_path(media_id)} (검사 걸림 {bad}개)")
-    notify.notify("📝 Threads 풀이 답글 초안", f"{len(drafts)}개 준비됨 (검사 걸림 {bad}개) — 승인하면 게시", tags=["memo"])
+    if bad:
+        notify.notify("📝 Threads 풀이 답글 확인 필요", f"검사에 걸린 초안 {bad}개 — Claude에게 'Threads 답글 확인해'", tags=["memo"])
     return drafts
 
 
@@ -211,7 +215,9 @@ def auto():
             continue
         print(f"== {rec['id']} ({rec['media_id']}, {age_h:.0f}시간 전)")
         try:
-            draft(rec["media_id"])
+            drafts = draft(rec["media_id"])
+            if drafts:
+                send(rec["media_id"])
         except Exception as e:
             print(f"  초안 실패: {e}")
             notify.notify("❌ Threads 풀이 초안 실패", f"{rec['id']}\n{notify.summarize_error(str(e))}", priority=4, tags=["warning"])

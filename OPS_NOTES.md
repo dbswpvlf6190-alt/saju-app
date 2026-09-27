@@ -81,3 +81,5 @@
   - 게시: 작업 스케줄러 `SajuThreadsDaily` 매일 21:00 → `run_daily_threads.py`가 `threads_queue.json`의 다음 글 + 링크 댓글. 18시간 간격·직접 올린 글 8시간 이내면 건너뜀. 남은 글 3개 미만이면 ntfy 경고 → 새 글 추가 필요(아직 자동 생성 없음).
   - 성과: `fetch_insights.py`가 `performance/latest.json`의 `threads`에 팔로워·글별 views/likes/replies/reposts를 남김.
   - 무료 풀이 글(9/26 21:00, media 17896512387604733): 하룻밤 조회 1,988·좋아요 33·답글 46 — 설명형 원고(조회 64~344)보다 압도적. 답글은 `python scripts/threads_replies.py draft|show|send MEDIA_ID`(생일 파싱·풀이 문장은 Claude, 일간 계산은 앱과 같은 lunar-typescript). 초안은 로컬 `~/SajuAutoRender/threads_drafts/`(남의 생일 포함이라 git 제외), 답한 id만 `posted_state/threads_replies/`. send는 40~75초 간격(몰아 올리면 스팸 판정 위험). **사용자 승인 후에만 send.**
+  - **9/27 무료 풀이 글 정기화**: `run_daily_threads.py`가 마지막 무료 풀이 글 후 약 3일(66시간+)이 지나면 그날은 대기열 대신 `threads_reading_posts.json`의 다음 변형(RD01~RD04 순환, 기록 파일 `RD0x-YYYYMMDD.json`, kind=reading)을 올린다. `SajuThreadsReplyDraft` 매일 10:00이 최근 4일 풀이 글의 새 답글 초안을 만들고 ntfy로 알림 → 사용자가 "올려"라고 하면 `threads_replies.py send MEDIA_ID`. 첫 풀이 글 답글 46개는 9/27 승인 후 게시.
+  - 프로필 링크 주의: 웹에서 프로필 편집 창의 맨 아래 "완료"를 누르면 링크가 지워진 적 있음(9/27 재등록). 링크는 링크 하위 창에서 저장되자마자 반영되니, 링크 수정 후엔 "완료" 대신 Esc로 닫을 것.

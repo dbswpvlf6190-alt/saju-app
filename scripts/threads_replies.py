@@ -3,6 +3,7 @@
   python scripts/threads_replies.py draft MEDIA_ID   # 새 답글 읽기 → 생일 해석 → 일간 계산 → 풀이 초안
   python scripts/threads_replies.py show MEDIA_ID    # 초안 보기
   python scripts/threads_replies.py send MEDIA_ID    # 초안을 실제 답글로 게시(승인 후에만!)
+  python scripts/threads_replies.py auto             # 최근 4일 무료 풀이 글 전부 draft (작업 스케줄러 SajuThreadsReplyDraft 매일 10:00)
 
 흐름: ① Claude가 각 답글에서 생년월일·양/음력·궁금한 주제를 뽑고 ② 일간은 앱과 같은 계산
 (scripts/threads_ilgan.mjs, lunar-typescript)으로 정확히 구하고 ③ 그 일간의 ilganPages 내용을 근거로
@@ -193,7 +194,33 @@ def send(media_id, gap=(40, 75)):
     notify.notify("✅ Threads 풀이 답글 게시", f"{sent}/{len(todo)}개 완료", tags=["white_check_mark"])
 
 
+def auto():
+    """run_daily_threads.py가 남긴 kind=reading 기록 중 최근 4일 글의 새 답글을 초안으로 만든다. 게시는 안 함."""
+    from datetime import datetime, timezone
+    git_sync.git_pull(BASE_DIR)
+    posted_dir = os.path.join(BASE_DIR, "scripts", "posted_state", "threads")
+    for name in sorted(os.listdir(posted_dir)):
+        if not name.endswith(".json"):
+            continue
+        with open(os.path.join(posted_dir, name), "r", encoding="utf-8") as f:
+            rec = json.load(f)
+        if rec.get("kind") != "reading":
+            continue
+        age_h = (datetime.now(timezone.utc) - datetime.fromisoformat(rec["posted_at"])).total_seconds() / 3600
+        if age_h > 96:
+            continue
+        print(f"== {rec['id']} ({rec['media_id']}, {age_h:.0f}시간 전)")
+        try:
+            draft(rec["media_id"])
+        except Exception as e:
+            print(f"  초안 실패: {e}")
+            notify.notify("❌ Threads 풀이 초안 실패", f"{rec['id']}\n{notify.summarize_error(str(e))}", priority=4, tags=["warning"])
+
+
 if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "auto":
+        auto()
+        sys.exit(0)
     if len(sys.argv) != 3 or sys.argv[1] not in ("draft", "show", "send"):
         print(__doc__)
         sys.exit(1)

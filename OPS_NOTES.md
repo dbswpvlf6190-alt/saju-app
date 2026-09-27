@@ -94,3 +94,12 @@
 - 게시: `SajuThreadsDaily` 12:30·21:00 하루 2개. 대기열(안 올린 글)이 5개 미만이면 `threads_refill.py`가 Claude로 6개 생성(반말·질문으로 끝남·본문 링크 금지·단정/뒷광고 문구 금지 검사, 성과 상위 글을 예시로). 무료 풀이 글(RD0x)은 3일에 한 번 저녁 슬롯에만.
 - 풀이 답글: `SajuThreadsReplyDraft` 10:00·23:30 → 새 답글 초안 → **검사 통과분은 자동 게시**(사용자가 첫 46개 품질 확인 후 9/27 전환). 검사에 걸린 초안만 ntfy 알림 → "Threads 답글 확인해"로 사람이 처리. 임신·질병 등 건강 질문은 시기·결과 언급 금지(검사어 포함 시 수동 확인으로 빠짐).
 - 사람 할 일: 인스타 프로필 링크에 `/exam-luck?ref=ig_profile` 추가(미완), 반응 좋은 Threads 글을 인스타 스토리에 공유(선택).
+
+## 2026-09-27 — 노트북 인수인계 (내일 노트북 작업용)
+- **먼저**: 노트북 저장소에서 `git pull origin main` (오늘 작업은 전부 main에 있음: Threads 자동화, 1가지 1,900원·차액 3,000원 결제, 유료 안내 개편, 퍼널 이벤트).
+- **데스크톱에만 있는 것(git 제외)** — 노트북에서 Threads 스크립트를 돌리려면 필요:
+  - `credentials/threads_token.json` (Threads 60일 토큰). 옮기는 법: USB 등으로 파일 복사, **또는** 노트북에서 새로 발급 — Meta 개발자 > 앱 "sajulab threads" > 이용 사례 > 맞춤 설정 > 설정 > 사용자 토큰 생성기 > sajulab_official "액세스 토큰 생성하기" → `credentials/threads_token.txt`에 붙여넣고 `python scripts/threads_api.py --import-token` → `--check`로 확인. 채팅·git에 토큰 붙이지 말 것.
+  - `.env.development.local` (로컬 `next dev` 전용 PortOne 테스트 채널 키 — 노트북에서 결제 테스트할 때만 필요, 없어도 됨. 키는 PortOne 콘솔 > 결제 연동 > 채널 관리 > 테스트 탭).
+- **자동 작업은 데스크톱 작업 스케줄러에서만 돈다**: SajuThreadsDaily(12:30·21:00), SajuThreadsReplyDraft(10:00·23:30), 기존 릴스(20:00)·카드뉴스(11:00)·인사이트(09:00). 데스크톱이 꺼져 있으면 그 시간 게시는 건너뛰고 켜질 때 StartWhenAvailable로 한 번 실행됨. 노트북에 같은 작업을 새로 등록하지 말 것(중복 게시 위험 — 게시 기록은 git 락으로 막지만 굳이 늘릴 이유 없음).
+- **진행 중·확인할 것**: 9/29 21:00 무료 풀이 글 RD02 자동 게시 예정 / 첫 실제 차액(3,000원) 결제 들어오면 Order 기록 확인 / 10/4경 Threads·결제 퍼널 주간 보고 / 인스타 프로필 링크 `/exam-luck?ref=ig_profile` 추가(사람) / 9/30 중등 임용 공고 뒤 `src/lib/exam/seasons.ts`·`scripts/exam_season.py`·`scripts/threads_refill.py`(EXAMS) 날짜 수정.
+- **풀이 답글 시기 짚기(9/27 사용자 요청)**: 임신·재회·취업 등 "언제" 질문은 `threads_ilgan.mjs`가 계산한 앞으로 5년·12개월의 십성 계열(식상/재성/관성/인성/비겁) 안에서만 시기를 짚는다(AI가 날짜를 지어내지 않게). 질병·완치 같은 의료 판단은 계속 금지.

@@ -44,7 +44,7 @@ CARDSETS_JSON = os.path.join(SCRIPTS_DIR, "cardnews-template", "cardsets.json")
 # 두 타입 모두에서 공통으로 조회 가능한 지표만 요청한다.
 METRICS = "reach,likes,comments,saved,shares,total_interactions,views"
 
-APP_EVENTS = ["landing_view", "saju_start", "saju_complete", "free_result_view", "payment_success", "coupon_redeemed"]
+APP_EVENTS = ["landing_view", "saju_start", "saju_complete", "free_result_view", "premium_offer_seen", "premium_cta_click", "premium_sticky_click", "checkout_start", "payment_success", "coupon_redeemed"]
 
 
 def load_token_data():

@@ -83,3 +83,9 @@
   - 무료 풀이 글(9/26 21:00, media 17896512387604733): 하룻밤 조회 1,988·좋아요 33·답글 46 — 설명형 원고(조회 64~344)보다 압도적. 답글은 `python scripts/threads_replies.py draft|show|send MEDIA_ID`(생일 파싱·풀이 문장은 Claude, 일간 계산은 앱과 같은 lunar-typescript). 초안은 로컬 `~/SajuAutoRender/threads_drafts/`(남의 생일 포함이라 git 제외), 답한 id만 `posted_state/threads_replies/`. send는 40~75초 간격(몰아 올리면 스팸 판정 위험). **사용자 승인 후에만 send.**
   - **9/27 무료 풀이 글 정기화**: `run_daily_threads.py`가 마지막 무료 풀이 글 후 약 3일(66시간+)이 지나면 그날은 대기열 대신 `threads_reading_posts.json`의 다음 변형(RD01~RD04 순환, 기록 파일 `RD0x-YYYYMMDD.json`, kind=reading)을 올린다. `SajuThreadsReplyDraft` 매일 10:00이 최근 4일 풀이 글의 새 답글 초안을 만들고 ntfy로 알림 → 사용자가 "올려"라고 하면 `threads_replies.py send MEDIA_ID`. 첫 풀이 글 답글 46개는 9/27 승인 후 게시.
   - 프로필 링크 주의: 웹에서 프로필 편집 창의 맨 아래 "완료"를 누르면 링크가 지워진 적 있음(9/27 재등록). 링크는 링크 하위 창에서 저장되자마자 반영되니, 링크 수정 후엔 "완료" 대신 Esc로 닫을 것.
+
+## 2026-09-27 — 유료 전환 개편(1가지 1,900원 + 차액 3,000원)
+- **왜**: 30일 퍼널이 유료 안내 노출 145 → 결제 버튼 10(7%) → 결제창 7 → 결제 5. 결제 과정이 아니라 "안내를 보고도 안 누름"이 병목.
+- **무엇**: `PremiumOffer.tsx`(맨 위 항목 한 문단 흐림 없이 공개, "전체 5가지 4,900원(항목당 980원, 추천)" vs "궁금한 1가지만 1,900원" 선택, 하단 고정 바 `StickyPremiumBar`), 상품 `single_section`(1,900원, `Order.sectionKey`)·`section_upgrade`(3,000원, `Order.parentPaymentId` — 원래 주문의 생년월일·이미 만든 해석을 이어받아 나머지 4개만 생성), 결제 후 `SectionUpgradeCard`. 서버는 1가지 주문이면 산 항목만 생성·열람(`/api/orders/[id]`).
+- **측정**: 새 이벤트 `premium_offer_seen`(가격 영역이 실제로 화면에 60% 이상 보였을 때만 — 예전 `premium_preview_view`는 결과 화면 열리자마자 찍혀 과대집계), `premium_sticky_click`. `fetch_insights.py`가 퍼널 이벤트를 `app.daily_events`에 같이 남김. **10/4경 offer_seen → cta_click → payment_success 비율을 이전(7%)과 비교할 것.** `premium_cta_click` meta의 productType(single_section/premium_report)으로 어떤 선택지가 눌리는지도 볼 수 있음.
+- **테스트**: 로컬 API 13항목 + PortOne 테스트 채널(KG이니시스 INIpayTest)로 1,900원 실결제 흐름 확인(9/27). 차액 3,000원은 결제창 실테스트는 생략(API로만 확인) → 첫 실제 차액 결제가 들어오면 주문 기록 확인할 것. 로컬 `.env.development.local`에 테스트 채널 키가 있어 `next dev`에선 결제가 청구되지 않음(운영·미리보기는 Vercel 환경변수의 실채널).

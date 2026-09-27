@@ -9,7 +9,7 @@ import { generateFreeContent } from "@/lib/saju/content";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { ShareButton } from "./ShareButton";
-import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import { SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
 import {
   PREMIUM_CTA_LABEL,
   PREMIUM_DELIVERY_NOTE,
@@ -24,6 +24,7 @@ import {
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 import { NewYearUpsellCard } from "./NewYearUpsellCard";
+import { PremiumOffer, type OfferChoice } from "./PremiumOffer";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -64,6 +65,7 @@ export function PremiumUnlock({
   const [formStep, setFormStep] = useState<"intro" | "details">(() =>
     resumePaymentId ? "details" : "intro",
   );
+  const [offer, setOffer] = useState<OfferChoice>({ kind: "full" });
 
   useEffect(() => {
     // 결제 복귀(resumePaymentId)로 바로 처리 상태에 들어가는 경우가 아니라면, 잠금
@@ -205,6 +207,12 @@ export function PremiumUnlock({
   }
 
   async function handlePurchase() {
+    if (offer.kind === "single") {
+      // 시제품: 1가지 상품은 아직 주문·결제 API에 연결하지 않았다(컨펌 후 구현).
+      setStatus("error");
+      setErrorMessage("시제품 화면이에요 — '1가지만' 결제는 컨펌 후 연결됩니다.");
+      return;
+    }
     trackEvent("checkout_start", { productType: "premium_report" });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
@@ -378,56 +386,19 @@ export function PremiumUnlock({
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="px-1 text-sm font-medium text-foreground-muted">🔒 상세 분석 미리보기</h3>
-      <p className="px-1 text-xs text-foreground-muted">{PREMIUM_SECTION_INTRO}</p>
-      {/* 제목만 나열하면 실제로 뭘 얼마나 받는지 와닿지 않는다는 지적에 따라, 카드 목록
-          위에 구체적인 항목·분량을 먼저 보여준다(과장 없이 실제 생성 규격 그대로). */}
-      <p className="px-1 text-xs font-medium text-accent-gold-soft">{PREMIUM_PREVIEW_VALUE_LINE}</p>
-
-      {/* 카드 하나당 제목 + 블러 처리된 한 줄 미리보기만 보여주는 압축 리스트.
-          예전엔 카드마다 티저 문단 + 블러 문단 + "계속 확인" 문구가 반복돼 5개를 다 보려면
-          스크롤이 상당히 길었다 — 같은 안내 문구를 위 한 줄로 합치고 카드 자체를 줄였다. */}
-      <div className="flex flex-col divide-y divide-border-subtle overflow-hidden rounded-2xl border border-border-subtle bg-background-card/70">
-        {premiumSections.map((section) => (
-          <div key={section.key} className="flex items-center gap-3 px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <span className="text-sm font-medium text-foreground">{section.title}</span>
-              {/* 무료로 공개하는 방향 한 줄 + 그 뒤를 잇는 잠긴 상세 미리보기 */}
-              <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{section.teaser}</p>
-              <p className="mt-0.5 truncate select-none text-xs leading-relaxed text-foreground-muted/40 blur-[2.5px]">
-                {section.previewSnippet}
-              </p>
-            </div>
-            <span className="shrink-0 text-xs font-medium text-accent-gold-soft">🔒</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-1.5 rounded-2xl border border-accent-gold/40 bg-accent-gold/10 p-4 text-center">
-        <h4 className="font-serif text-lg text-accent-gold-soft">{PREMIUM_VALUE_HEADLINE}</h4>
-        <p className="text-sm text-foreground-muted">{PREMIUM_VALUE_SUBHEAD}</p>
-        {/* 5개 항목은 바로 위 잠금 미리보기 목록에 이미 나열돼 있어 체크리스트로 반복하지 않는다. */}
-        <p className="mt-1 text-xs text-foreground-muted">{PREMIUM_VALUE_DETAIL}</p>
-        <p className="mt-3 text-2xl font-semibold text-accent-gold-soft">
-          {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원
-        </p>
-        <p className="text-xs text-foreground-muted">{PREMIUM_DELIVERY_NOTE}</p>
-      </div>
-
       {formStep === "intro" ? (
         // 1단계: 가치 제안 + CTA만 먼저 보여준다. 구매 의사를 밝히기 전에는
         // 이름·이메일·휴대폰 입력란을 아예 노출하지 않는다.
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("premium_cta_click", { productType: "premium_report" });
+          <PremiumOffer
+            name={name}
+            dayMasterLabel={generateFreeContent(result).dayMasterLabel}
+            premiumSections={premiumSections}
+            onChoose={(choice) => {
+              setOffer(choice);
               setFormStep("details");
             }}
-            className="min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
-          >
-            {PREMIUM_CTA_LABEL}
-          </button>
+          />
           <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">
             <p>{PREMIUM_TRUST_ITEMS.map((item) => `✓ ${item}`).join("  ·  ")}</p>
             <Link href="/refund" className="underline underline-offset-4 hover:text-accent-gold-soft">
@@ -476,7 +447,11 @@ export function PremiumUnlock({
         // 2단계: CTA를 눌러 구매 의사를 밝힌 뒤에만 결제 정보 입력란이 나타난다.
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
-            <span className="text-sm text-foreground-muted">{PREMIUM_DETAILS_STEP_INTRO}</span>
+            <span className="text-sm text-foreground-muted">
+              {offer.kind === "full"
+                ? PREMIUM_DETAILS_STEP_INTRO
+                : `${premiumSections.find((x) => x.key === offer.section)?.title} 1가지 · ${SINGLE_SECTION_PRICE_KRW.toLocaleString()}원`}
+            </span>
             <button
               type="button"
               onClick={() => setFormStep("intro")}
@@ -564,7 +539,11 @@ export function PremiumUnlock({
             disabled={status === "processing"}
             className="mt-1 min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {status === "processing" ? "처리 중..." : PREMIUM_CTA_LABEL}
+            {status === "processing"
+              ? "처리 중..."
+              : offer.kind === "full"
+                ? PREMIUM_CTA_LABEL
+                : `${SINGLE_SECTION_PRICE_KRW.toLocaleString()}원 결제하기`}
           </button>
 
           <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">

@@ -6,6 +6,8 @@ export const ANALYTICS_EVENT_NAMES = [
   "free_result_view",
   "premium_preview_view",
   "premium_cta_click",
+  "premium_offer_seen",
+  "premium_sticky_click",
   "checkout_start",
   "payment_success",
   "payment_fail",

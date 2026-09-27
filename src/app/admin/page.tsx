@@ -25,6 +25,8 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   free_result_view: "무료 결과 조회",
   premium_preview_view: "상세분석 미리보기 노출",
   premium_cta_click: "상세분석 CTA 클릭",
+  premium_offer_seen: "가격·상품 선택 영역 실제로 봄",
+  premium_sticky_click: "하단 고정 바 클릭",
   checkout_start: "결제 시작",
   payment_success: "결제 성공",
   payment_fail: "결제 실패",

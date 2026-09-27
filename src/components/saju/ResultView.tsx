@@ -13,6 +13,7 @@ import { getExamLuckFlow } from "@/lib/saju/examLuck";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { PremiumUnlock } from "./PremiumUnlock";
+import { StickyPremiumBar } from "./PremiumOffer";
 import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
 import { ReferralCard } from "./ReferralCard";
@@ -188,6 +189,8 @@ export function ResultView({
         resumePaymentId={resumePaymentId}
         onUnlockedChange={setIsPaid}
       />
+
+      {!isPaid && <StickyPremiumBar name={name} targetId="premium-unlock" />}
 
       {/* 실제 이용 후기 — 4,900원 가치·CTA를 막 확인한 시점 바로 다음에 사회적 증거를
           붙여서, 페이지 맨 아래(구매 판단이 끝난 뒤)에 있던 것보다 설득에 도움이 되게 한다. */}

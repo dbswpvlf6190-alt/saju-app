@@ -2,6 +2,9 @@ export const PREMIUM_REPORT_PRICE_KRW = 4900;
 export const PREMIUM_REPORT_NAME = "사주 상세 분석 리포트";
 
 export const COMPATIBILITY_REPORT_PRICE_KRW = 4900;
+
+// (시제품 2026-09-27) 첫 구매 문턱을 낮추는 "궁금한 1가지만" 상품. 아직 주문·결제 API에 연결 안 됨.
+export const SINGLE_SECTION_PRICE_KRW = 1900;
 export const COMPATIBILITY_REPORT_NAME = "궁합 상세 분석 리포트";
 
 // 이번 시즌(2026년 11월~2027년 2월) 한정 업셀 상품의 대상 연도. 다음 신년운세 시즌에는

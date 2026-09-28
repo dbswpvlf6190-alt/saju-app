@@ -37,6 +37,11 @@ CTAS = {
         "button": "팔로우하면 무료 쿠폰 🎟️",
         "narration": "궁금하면 댓글에 사주라고 남겨주세요. 팔로우하면 무료 쿠폰 드릴게요.",
         "caption": "궁금하면 댓글에 '사주'라고 남겨주세요. 팔로우하면 무료 쿠폰 드릴게요 🎟️",
+        # 캡션 맨 첫 줄 전용(2026-09-28 추가). 인스타는 캡션 앞 1~2줄만 "더보기" 없이 보이고,
+        # 릴스 평균 시청시간이 영상 길이의 13% 안팎이라 본문 CTA(13~17초)까지 보는 사람이 거의 없음
+        # — Threads 무료 풀이 글(질문형 훅으로 조회 1,988·답글 46, 설명형 대비 압도적)에서 확인된
+        # "영상/스크롤 없이 캡션만 보고 바로 참여 가능"한 구조를 릴스에도 적용.
+        "hookLine": "내 사주엔 뭐가 있을까? 댓글에 '사주'라고 써봐 🎟️",
     },
     "B": {
         "pill": "'사주' 댓글 + 팔로우하면 무료 쿠폰 🎟️",  # 영상 처음부터 끝까지 상단에 고정 노출되는 한 줄 CTA
@@ -45,6 +50,7 @@ CTAS = {
         "button": "팔로우 + 댓글 → 무료 쿠폰 🎟️",
         "narration": "내 사주도 궁금하다면 사주라고 댓글 남겨주세요. 팔로우하면 무료 쿠폰을 받을 수 있어요.",
         "caption": "내 사주도 궁금하다면 '사주'라고 댓글 남겨주세요. 팔로우하면 무료 쿠폰을 받을 수 있어요 🎟️",
+        "hookLine": "이거 보고 내 사주도 궁금해졌다면? '사주'라고 댓글 남겨봐 🎟️",
     },
     "C": {
         "pill": "댓글에 '사주' 남겨주세요 💬",  # 영상 처음부터 끝까지 상단에 고정 노출되는 한 줄 CTA
@@ -53,6 +59,7 @@ CTAS = {
         "button": "내 사주 결과 궁금하다면 💬",
         "narration": "내 사주에서는 어떻게 나오는지 궁금하다면 댓글에 사주 남겨주세요.",
         "caption": "내 사주에서는 어떻게 나오는지 궁금하다면 댓글에 '사주' 남겨주세요 💬",
+        "hookLine": "내 사주에서는 어떻게 나올지 궁금하지 않아? 댓글에 '사주' 💬",
     },
 }
 CTA_ORDER = ["A", "B", "C"]
@@ -397,7 +404,9 @@ def add_link_line(caption, line=SITE_LINK_LINE):
 def build_caption(item, cta_type):
     # 시험 시즌 편은 유형 테스트 대신 해당 시험의 합격운 페이지로 보낸다.
     line = exam_season.link_line(item["exam"], "ig_reel") if item.get("exam") else SITE_LINK_LINE
-    return add_link_line(f"{item['captionBody'].strip()}\n\n{CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}", line)
+    # hookLine을 맨 앞줄에 둔다 — 영상을 안 보고 캡션만 훑어도 바로 참여할 수 있게(위 CTAS 주석 참고).
+    body = f"{CTAS[cta_type]['hookLine']}\n\n{item['captionBody'].strip()}\n\n{CTAS[cta_type]['caption']}\n\n{' '.join(item['hashtags'])}"
+    return add_link_line(body, line)
 
 
 def build_pinned_comment(item):

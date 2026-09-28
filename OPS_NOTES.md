@@ -120,3 +120,6 @@
 - `SajuThreadsDaily` — 매일 12:30·21:00, `python scripts/run_daily_threads.py`, StartWhenAvailable, 반복 트리거 없음(절대 걸지 말 것 — 위 "노트북 인수인계" 섹션 이유 참고)
 - `SajuThreadsReplyDraft` — 매일 10:00·23:30, `python scripts/threads_replies.py auto`, 동일 설정
 이제 어느 컴퓨터가 켜져있든 하루 2번씩 정상 게시됨. 데스크톱에도 이 두 작업이 실제로 등록·활성화돼 있는지는 다음에 데스크톱 사용 시 확인할 것(주말 몫).
+
+## 2026-09-28 — 프로필 링크에 시험 시즌 주소 추가는 하지 않기로 결정
+지금 프로필 링크(`saju-app-three-dusky.vercel.app?ref=ig_profile`) 하나로 충분하다고 판단, `/exam-luck?ref=ig_profile` 등 추가 링크는 진행하지 않기로 함(사용자 결정, 2026-09-28). 시험 시즌 고정댓글의 "프로필 링크에서…" 안내는 그대로 두되, 도착지는 메인 페이지로 유지. **앞으로 이 항목을 "남은 할 일"로 다시 올리지 말 것** — 위 9/26 섹션의 표에 있던 해당 항목은 이걸로 종결.

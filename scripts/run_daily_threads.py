@@ -100,6 +100,11 @@ def last_own_thread_at():
 
 
 def main():
+    # 컴퓨터가 꺼져 있다가 아침에 켜지면 StartWhenAvailable로 밤 슬롯이 새벽·아침에 실행돼(10/1 06:11, 10/3 06:03 게시)
+    # 사람 없는 시간에 올라가고, 그 바람에 다음 슬롯까지 간격 제한으로 막혔다. 10시 전 실행은 건너뛴다.
+    if datetime.now().hour < 10:
+        print("오전 10시 전의 밀린 실행이라 건너뜁니다(다음 정규 슬롯에서 게시).")
+        return
     git_sync.git_pull(BASE_DIR)
     last = last_posted_at()
     if last is not None and hours_since(last) < MIN_HOURS_BETWEEN_POSTS:

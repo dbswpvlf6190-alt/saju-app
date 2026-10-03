@@ -62,6 +62,11 @@ def main():
     # 30분마다 계속 다음 항목을 찾아 여러 건이 연달아 게시돼버림(하루에 3건 이상 나간 사고 있었음).
     # shorts_auto의 run_queue.py는 매번 새 콘텐츠를 사람이 준비해야 해서 반복을 걸어도 안전하지만,
     # 여기는 manifest에 미리 만들어둔 항목이 쌓여있어서 절대 반복 트리거를 걸면 안 됨.
+    # 컴퓨터가 꺼져 있다가 아침에 켜지면 StartWhenAvailable로 밤 슬롯이 새벽·아침에 실행돼(10/1 06:11, 10/3 06:03 게시)
+    # 사람 없는 시간에 올라가고, 그 바람에 다음 슬롯까지 간격 제한으로 막혔다. 10시 전 실행은 건너뛴다.
+    if datetime.now().hour < 10:
+        print("오전 10시 전의 밀린 실행이라 건너뜁니다(다음 정규 슬롯에서 게시).")
+        return
     git_sync.git_pull(BASE_DIR)
     try:
         refill_queue.ensure_reel_buffer()

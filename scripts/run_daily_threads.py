@@ -67,14 +67,15 @@ def pick_reading_post():
 
 
 def last_posted_at():
+    # kind=extra(사용자가 요청한 추가 게시, threads_extra_post.py)는 정규 슬롯 간격 계산에서 뺀다 — 추가 글 때문에
+    # 그날 정규 글이 건너뛰어지면 "하나 더"가 아니라 시간만 옮긴 셈이 된다.
     latest = None
-    for name in os.listdir(POSTED_DIR) if os.path.isdir(POSTED_DIR) else []:
-        if not name.endswith(".json"):
+    for rec in load_records():
+        if rec.get("kind") == "extra":
             continue
         try:
-            with open(os.path.join(POSTED_DIR, name), "r", encoding="utf-8") as f:
-                ts = datetime.fromisoformat(json.load(f)["posted_at"])
-        except (OSError, ValueError, KeyError):
+            ts = datetime.fromisoformat(rec["posted_at"])
+        except (KeyError, ValueError, TypeError):
             continue
         latest = ts if latest is None or ts > latest else latest
     return latest
@@ -91,8 +92,11 @@ def last_own_thread_at():
     except Exception as e:
         print(f"최근 글 조회 실패(무시): {e}")
         return None
+    extra_ids = {r.get("media_id") for r in load_records() if r.get("kind") == "extra"}
     times = []
     for t in threads:
+        if t.get("id") in extra_ids:
+            continue
         try:
             times.append(datetime.strptime(t["timestamp"], "%Y-%m-%dT%H:%M:%S%z"))
         except (KeyError, ValueError):

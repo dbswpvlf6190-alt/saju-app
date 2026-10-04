@@ -49,25 +49,11 @@
     "exam": null
   },
   {
-    "id": "T09",
-    "topic": "수능응원",
-    "text": "스터디원 중에 꼭 있는 유형\n\n- 계획표만 완벽한 사람\n- 조용히 진도 제일 빠른 사람\n- 모르는 거 제일 많이 물어보는데 결국 잘 보는 사람\n\n너는 어디야? 🙋",
-    "comment": "스터디원끼리 합격운 흐름 타입 비교해보는 것도 재밌어 👇\nhttps://saju-app-three-dusky.vercel.app/exam-luck?ref=threads",
-    "exam": "suneung"
-  },
-  {
     "id": "T10",
     "topic": "사주",
     "text": "사주 여덟 글자 중에 태어난 날 첫 글자(일간)가 \"나 자신\"을 뜻한대\n\n그래서 같은 해에 태어나도 성격이 완전 다를 수 있음\n생일로 내 일간 뭔지 아는 사람?",
     "comment": "생일만 넣으면 내 일간 30초 만에 나와 👇\nhttps://saju-app-three-dusky.vercel.app/type-test?ref=threads",
     "exam": null
-  },
-  {
-    "id": "T11",
-    "topic": "수능응원",
-    "text": "시험 전날 잠 못 자는 사람 vs 오히려 푹 자는 사람\n\n긴장할수록 머리가 또렷해지는 타입이 있고, 긴장하면 몸이 먼저 굳는 타입이 있음\n나 어느 쪽인지 알면 전날 루틴이 달라짐",
-    "comment": "시험 전날 루틴 짤 때 참고할 내 흐름, 30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/exam-luck?ref=threads",
-    "exam": "suneung"
   },
   {
     "id": "T12",
@@ -93,22 +79,6 @@
     "generated": "2026-09-27"
   },
   {
-    "id": "T15",
-    "topic": "수능응원",
-    "text": "시험지 받자마자 아는 문제부터 푸는 사람\nvs\n순서대로 차근차근 푸는 사람\n\n둘 다 나름의 이유가 있긴 한데\n결과는 은근 갈리더라\n\n너는 실전에서 어느 스타일이야?",
-    "comment": "실전 스타일도 사람마다 다르니까 자기한테 맞는 방식 찾는 게 중요해. 30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/exam-luck?ref=threads",
-    "exam": "suneung",
-    "generated": "2026-09-27"
-  },
-  {
-    "id": "T16",
-    "topic": "수능응원",
-    "text": "임용 스터디 오래 하다 보면\n합격하는 사람들한테 공통점이 있다는데\n\n멘탈 관리를 진짜 잘하거나\n루틴이 흔들리지 않거나\n\n너는 어느 쪽에 더 가까워?",
-    "comment": "멘탈 관리 방식도 타고난 성향이랑 관련 있대. 30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/exam-luck/imyong?ref=threads",
-    "exam": "imyong",
-    "generated": "2026-09-27"
-  },
-  {
     "id": "T17",
     "topic": "사주",
     "text": "돈 얘기만 나오면 계산부터 하는 사람\nvs\n일단 만나고 나중에 정산하는 사람\n\n연애할 때 이거 은근 중요하더라\n\n너희 커플은 어느 쪽이야?",
@@ -118,10 +88,50 @@
   },
   {
     "id": "T18",
-    "topic": "수능응원",
-    "text": "수능 D-day 다가올수록\n말수 줄어드는 사람 vs 오히려 더 예민하게 말 많아지는 사람\n\n스트레스 푸는 방식이 진짜 다르더라\n\n너는 요즘 어느 쪽이야?",
-    "comment": "스트레스 반응 방식도 사람마다 다르니까 너무 걱정 마. 30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/exam-luck?ref=threads",
-    "exam": "suneung",
-    "generated": "2026-09-27"
+    "topic": "사주",
+    "text": "결정할 때 남 의견 다 들어보고 정하는 사람?\n\n사주에선 귀 얇은 게 아니라 주변 기운 잘 받아들이는 유연풀잎형으로 보기도 해\n이런 사람 손",
+    "comment": "혼자 결정하는 게 편한 사람도 있고 같이 정해야 마음 놓이는 사람도 있어\n30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/type-test?ref=threads",
+    "exam": null,
+    "generated": "2026-10-04"
+  },
+  {
+    "id": "T19",
+    "topic": "사주",
+    "text": "친구는 많은데 진짜 속마음 아는 사람은 손에 꼽는 사람 vs 적은 사람이랑 깊게 파는 사람\n\n너는 어느 쪽?",
+    "comment": "관계 맺는 방식도 타고난 기운 영향 있다고 봄\n30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/type-test?ref=threads",
+    "exam": null,
+    "generated": "2026-10-04"
+  },
+  {
+    "id": "T20",
+    "topic": "사주",
+    "text": "일 벌이는 건 잘하는데 마무리가 약한 사람?\n\n사주에선 시작 기운은 센데 마무리 기운이 약한 편으로 보기도 해\n이런 사람 손",
+    "comment": "반대로 시작은 느려도 끝까지 파는 유형도 있어\n30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/type-test?ref=threads",
+    "exam": null,
+    "generated": "2026-10-04"
+  },
+  {
+    "id": "T21",
+    "topic": "사주",
+    "text": "계획 세우는 거 좋아하는 사람 vs 그냥 일단 저지르고 보는 사람\n\n너는 어느 쪽?",
+    "comment": "계획형이랑 즉흥형, 사주에서도 기운 따라 갈린다고 봐\n30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/type-test?ref=threads",
+    "exam": null,
+    "generated": "2026-10-04"
+  },
+  {
+    "id": "T22",
+    "topic": "사주",
+    "text": "남 부탁은 거절 못 하면서 내 부탁은 못 하는 사람?\n\n사람 챙기는 기운은 넘치는데 정작 자기 몫은 못 챙기는 편으로 보기도 함\n이런 사람 손",
+    "comment": "이런 성향, 사주 원국 보면 은근 이유가 있어\n30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/type-test?ref=threads",
+    "exam": null,
+    "generated": "2026-10-04"
+  },
+  {
+    "id": "T23",
+    "topic": "사주",
+    "text": "겉으론 쿨한 척하면서 뒤에서 계속 생각하는 사람?\n\n감정 안 드러내는 유형이라 오해도 많이 받는 편\n이런 사람 손",
+    "comment": "속으로 담아두는 기운, 유형별로 다르게 나타나\n30초 무료로 👇\nhttps://saju-app-three-dusky.vercel.app/type-test?ref=threads",
+    "exam": null,
+    "generated": "2026-10-04"
   }
 ]

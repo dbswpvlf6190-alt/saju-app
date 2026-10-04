@@ -23,7 +23,8 @@ QUEUE_PATH = os.path.join(BASE_DIR, "scripts", "threads_queue.json")
 # "생일 적어주면 무료로 알려줄게" 글. 9/26 첫 글이 하룻밤 조회 1,988·답글 46으로 설명형 원고(64~344)를 압도해서
 # 사흘에 한 번은 대기열 대신 이 글을 올린다. 답글 풀이는 threads_replies.py(auto → 승인 → send).
 READING_PATH = os.path.join(BASE_DIR, "scripts", "threads_reading_posts.json")
-READING_EVERY_DAYS = 3
+# 10/4 분석: 팔로워 대부분이 무료 풀이 글에서 왔고 일반 글은 조회 60~300 → 이틀에 한 번으로 늘림.
+READING_EVERY_DAYS = 2
 POSTED_DIR = os.path.join(BASE_DIR, "scripts", "posted_state", "threads")
 # 9/27부터 하루 2개(12:30·21:00, 8.5시간 간격). 늦게 실행돼도(PC 꺼짐) 두 개가 붙어서 나가지 않게 7시간 간격을 둔다.
 MIN_HOURS_BETWEEN_POSTS = 7
@@ -154,6 +155,8 @@ def main():
         record = {
             "id": item["id"], "media_id": media_id, "posted_at": datetime.now(timezone.utc).isoformat(),
             "topic": item.get("topic"), "exam": item.get("exam"), "kind": item.get("kind", "queue"),
+            # 무료 풀이 글이 약속한 주제(연애 스타일·돈 타입 등) — 답글 풀이가 이 주제로 답하게 threads_replies가 읽는다.
+            "promise": item.get("promise"),
         }
         # 게시 기록부터 남긴다 — 댓글이 실패해도 같은 글을 다음 날 또 올리면 안 되므로.
         os.makedirs(POSTED_DIR, exist_ok=True)

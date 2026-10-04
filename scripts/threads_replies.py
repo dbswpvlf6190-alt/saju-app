@@ -54,7 +54,7 @@ EXTRACT_PROMPT = """너는 Threads 답글에서 생년월일 정보를 뽑는 �
 WRITE_PROMPT = f"""너는 무료 사주 서비스 '사주랩' Threads 계정 담당자야. '생일 적어주면 사주 타입 알려줄게' 글에 달린 답글마다 풀이 답글을 쓴다.
 규칙:
 - 각 사람의 일간·유형은 주어진 값만 쓴다(직접 계산하거나 바꾸지 말 것). 첫 문장은 "[유형](일간 이름) 일간이에요"로 유형을 알려준다(예: "이슬비형(계수) 일간이에요."). 답글은 그 사람 글 밑에 달리므로 아이디·이름을 부르지 말고, 아이디로 별명을 지어내지도 말 것.
-- 그다음 1~2문장: 물어본 주제(topic/question)에 맞춰 주어진 ilgan 내용(love/work/money/relations/summary)에서 핵심만 쉬운 말로. 문장을 그대로 복사하지 말고 그 사람 질문에 답하듯 다듬는다.
+- 그다음 1~2문장: 물어본 주제(topic/question)에 맞춰(답글에 주제가 없고 post_promise가 있으면 그 주제로 — 예: "연애" → 연애 스타일, "돈" → 모으는/쓰는 타입, "올해 남은 흐름" → timing의 이번 달~연말 흐름, "잘 맞는 사람" → 잘 맞는 기운) 주어진 ilgan 내용(love/work/money/relations/summary)에서 핵심만 쉬운 말로. 문장을 그대로 복사하지 말고 그 사람 질문에 답하듯 다듬는다.
 - 두 사람이 있으면 두 사람 유형을 모두 말하고, 둘이 어떤 식으로 맞물리는지 한 문장 + "둘 궁합은 프로필 링크의 궁합 보기에서 자세히 볼 수 있어요" 식으로.
 - 재회·로또·합격 여부·"운이 열리나요" 같은 예/아니오 질문엔 단정하지 말고, 그 유형이 그런 시기에 잘 풀리는 방식/태도를 말해준다.
 - 금지: 무조건, 반드시, 100%, 확실히, 절대, 평생, 당첨·합격·불합격 단정, 공포 조장, 건강·의료 판단.
@@ -115,7 +115,7 @@ def validate(text):
     return problems
 
 
-def draft(media_id):
+def draft(media_id, promise=None):
     state = load_state(media_id)
     replies = [r for r in threads_api.get_replies(media_id) if not r.get("is_reply_owned_by_me")]
     new = [r for r in replies if r["id"] not in state["answered"] and not r.get("has_replies")]
@@ -150,6 +150,10 @@ def draft(media_id):
     for i in range(0, len(cases), 12):
         chunk = cases[i:i + 12]
         payload = [{k: c[k] for k in ("id", "username", "original", "topic", "question", "people")} for c in chunk]
+        if promise:
+            # 글이 "생일만 적으면 연애 스타일 알려줄게"처럼 주제를 약속했으면, 답글에 주제가 없을 때 그 주제로 답한다.
+            for item in payload:
+                item["post_promise"] = promise
         res = call_claude_raw(WRITE_PROMPT, json.dumps(payload, ensure_ascii=False))
         texts = {x["id"]: x["text"].strip() for x in res["replies"]}
         for c in chunk:
@@ -227,7 +231,7 @@ def auto():
             continue
         try:
             git_sync.git_pull(BASE_DIR)  # 락을 잡는 사이 다른 컴퓨터가 답한 기록을 받아온다
-            drafts = draft(rec["media_id"])
+            drafts = draft(rec["media_id"], rec.get("promise"))
             if drafts:
                 send(rec["media_id"])
         except Exception as e:

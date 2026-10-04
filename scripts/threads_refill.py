@@ -29,15 +29,17 @@ LINKS = {
     "imyong": f"{SITE}/exam-luck/imyong?ref=threads",
 }
 BANNED = ["해봤는데", "찾아봤는데", "놀랐음", "소름", "무조건", "반드시", "평생", "100%", "확실히", "틀림없", "절대", "합격한다", "합격해", "떨어진다", "떨어져", "망한다", "저주", "죽", "http"]
-MAX_TEXT = 300
+MAX_TEXT = 130
 
 # 수능 2026-11-19, 초등 임용 1차 11/7, 중등 11/28(예정). 시험 8일 전까지만 새 시험 글을 만든다(exam_season.py와 같은 원칙).
 EXAMS = [("suneung", date(2026, 11, 19)), ("imyong", date(2026, 11, 28))]
 
 SYSTEM = """너는 무료 사주 서비스 '사주랩'의 Threads 계정 글을 쓰는 사람이야. 20~40대 한국 Threads 이용자가 스크롤을 멈추고 답글을 달게 만드는 짧은 글을 쓴다.
-형식(골고루 섞기): ① 유형 고르기(A/B/C) ② 체크리스트 "몇 개 해당돼?" ③ vs 비교 "너는 어느 쪽?" ④ "이런 사람 특징" 공감 ⑤ 사주 미니 지식(일간·오행·10가지 유형: 리더나무형/유연풀잎형/태양형/촛불형/큰산형/기름진밭형/원석형/보석형/큰강형/이슬비형) + 질문.
+10/4 실측: 가장 잘 된 일반 글은 "첫인상이랑 실제 성격 완전 다르다는 말 자주 듣는 사람?"(조회 887, 85자) — 읽는 사람이 "나 얘기네" 하고 자기 얘기로 답글을 단다. 체크리스트·시험 소재·긴 설명은 조회 20~150으로 약했다.
+형식(비중 순): ① "~하는 사람?" 자기 찾기(절반 이상) ② vs 비교 "너는 어느 쪽?" ③ 사주 유형 한 줄 묘사(10가지 유형: 리더나무형/유연풀잎형/태양형/촛불형/큰산형/기름진밭형/원석형/보석형/큰강형/이슬비형) + "너는 뭐야?".
 규칙:
-- 반말, 친근하게. 줄바꿈을 살려 3~8줄, 본문 300자 이내. 마지막 줄은 답글을 부르는 질문.
+- 반말, 친근하게. 줄바꿈을 살려 2~5줄, 본문 100자 안팎(최대 120자). 마지막 줄은 한 단어·한 마디로 답할 수 있는 질문("너는 어느 쪽?", "이런 사람 손?", "네 유형 댓글로").
+- 시험·수험생 소재는 쓰지 않는다(Threads 이용자 반응이 없었음).
 - 본문에 링크·해시태그 금지. 이모지는 0~2개.
 - 사주 해석은 "~로 보기도 해/~한 편" 정도로 부드럽게. 단정(무조건·반드시·평생·100%), 합격/불합격·재물 보장, 공포 조장, 건강 판단 금지.
 - comment: 내 글에 다는 첫 댓글. 본문 질문에 대한 짧은 힌트 1문장 + "30초 무료로 👇" 같은 안내 1문장. 링크 주소는 쓰지 말 것(시스템이 붙임).
@@ -53,8 +55,8 @@ def load_queue():
 
 
 def active_exams(today=None):
-    today = today or date.today()
-    return [k for k, d in EXAMS if 0 <= (d - today).days - 8]
+    # 10/4: Threads에선 시험 소재 반응이 없어(조회 22~149) 배정을 끈다. 인스타·사이트 시험 시즌은 exam_season.py가 그대로 담당.
+    return []
 
 
 def top_examples():
@@ -76,8 +78,8 @@ def validate(post):
     if post.get("link") not in LINKS:
         problems.append("link 값")
     lines = text.strip().splitlines()
-    if not lines or "?" not in lines[-1]:
-        problems.append("질문으로 안 끝남")
+    if not lines or not any(k in lines[-1] for k in ("?", "댓글", "손")):
+        problems.append("답글 부르는 질문으로 안 끝남")
     return problems
 
 
@@ -88,7 +90,7 @@ def refill(n=6):
     exams = active_exams()
     ask = {
         "count": n,
-        "exam_share": f"{n}개 중 {max(1, n // 3)}개는 {'/'.join(exams)} 수험생 소재" if exams else "시험 소재 없이",
+        "exam_share": "시험 소재 없이",
         "avoid_first_lines": existing_first[-40:],
         "good_examples": top_examples(),
     }

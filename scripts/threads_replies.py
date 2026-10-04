@@ -4,7 +4,8 @@
   python scripts/threads_replies.py show MEDIA_ID    # 초안 보기
   python scripts/threads_replies.py send MEDIA_ID    # 초안을 실제 답글로 게시(승인 후에만!)
   python scripts/threads_replies.py auto             # 최근 4일 무료 풀이 글 draft → 검사 통과분 자동 send
-                                                     (작업 스케줄러 SajuThreadsReplyDraft 매일 10:00·23:30)
+                                                     (작업 스케줄러 SajuThreadsReplyDraft 매일 10:00·21:30·22:30·23:30 — 무료 풀이 글(21:00)의
+                                                      첫 1시간 반응이 노출을 좌우해서 10/4에 21:30·22:30 추가)
 9/27 사용자가 첫 46개 품질을 확인한 뒤 auto는 검사(금지어·길이·링크) 통과분을 바로 게시하도록 바꿨다.
 검사에 걸린 초안만 남겨 ntfy로 알리고, show/send로 사람이 처리한다.
 
@@ -218,13 +219,22 @@ def auto():
         if age_h > 96:
             continue
         print(f"== {rec['id']} ({rec['media_id']}, {age_h:.0f}시간 전)")
+        # 노트북·데스크톱이 같은 시각에 돌면 같은 답글에 두 번 답할 수 있어 글마다 git 락을 잡는다.
+        lock_rel = os.path.relpath(os.path.join(STATE_DIR, f"{rec['media_id']}.lock"), BASE_DIR)
+        acquired, holder = git_sync.try_acquire_lock(BASE_DIR, lock_rel)
+        if not acquired:
+            print(f"  다른 컴퓨터({holder})가 처리 중 — 건너뜀")
+            continue
         try:
+            git_sync.git_pull(BASE_DIR)  # 락을 잡는 사이 다른 컴퓨터가 답한 기록을 받아온다
             drafts = draft(rec["media_id"])
             if drafts:
                 send(rec["media_id"])
         except Exception as e:
             print(f"  초안 실패: {e}")
             notify.notify("❌ Threads 풀이 초안 실패", f"{rec['id']}\n{notify.summarize_error(str(e))}", priority=4, tags=["warning"])
+        finally:
+            git_sync.release_lock(BASE_DIR, lock_rel)
 
 
 if __name__ == "__main__":

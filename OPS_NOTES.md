@@ -123,3 +123,10 @@
 
 ## 2026-09-28 — 프로필 링크에 시험 시즌 주소 추가는 하지 않기로 결정
 지금 프로필 링크(`saju-app-three-dusky.vercel.app?ref=ig_profile`) 하나로 충분하다고 판단, `/exam-luck?ref=ig_profile` 등 추가 링크는 진행하지 않기로 함(사용자 결정, 2026-09-28). 시험 시즌 고정댓글의 "프로필 링크에서…" 안내는 그대로 두되, 도착지는 메인 페이지로 유지. **앞으로 이 항목을 "남은 할 일"로 다시 올리지 말 것** — 위 9/26 섹션의 표에 있던 해당 항목은 이걸로 종결.
+
+## 2026-10-04 — 무료 풀이 답글 첫 1시간 대응
+- `SajuThreadsReplyDraft` 트리거를 10:00·21:30·22:30·23:30으로 늘림(무료 풀이 글은 21:00 게시 → 첫 1시간 답글 속도가 노출을 좌우). 데스크톱은 적용 완료.
+- **노트북에도 같은 트리거 적용 필요**(노트북 PowerShell, 작업이 이미 있을 때):
+  `$t = @("10:00","21:30","22:30","23:30" | % { New-ScheduledTaskTrigger -Daily -At $_ }); Set-ScheduledTask -TaskName SajuThreadsReplyDraft -Trigger $t`
+- 두 컴퓨터가 동시에 돌아도 중복 답글이 안 나가게 `threads_replies.py auto`가 글마다 git 락(`posted_state/threads_replies/<media>.lock`)을 잡음.
+- 10/4 기준 유입: 주간 방문 83→41로 감소, Threads 유입만 11→14로 증가(이번 주 방문의 1/3). 인스타 팔로워 5 정체. 실제 결제 0(9/21 주 5건은 9/27 테스트).

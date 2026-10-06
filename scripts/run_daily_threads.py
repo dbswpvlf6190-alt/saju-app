@@ -23,7 +23,8 @@ QUEUE_PATH = os.path.join(BASE_DIR, "scripts", "threads_queue.json")
 # "생일 적어주면 무료로 알려줄게" 글. 9/26 첫 글이 하룻밤 조회 1,988·답글 46으로 설명형 원고(64~344)를 압도해서
 # 사흘에 한 번은 대기열 대신 이 글을 올린다. 답글 풀이는 threads_replies.py(auto → 승인 → send).
 READING_PATH = os.path.join(BASE_DIR, "scripts", "threads_reading_posts.json")
-READING_EVERY_DAYS = 3
+# 10/4 분석: 팔로워 대부분이 무료 풀이 글에서 왔고 일반 글은 조회 60~300 → 이틀에 한 번으로 늘림.
+READING_EVERY_DAYS = 2
 POSTED_DIR = os.path.join(BASE_DIR, "scripts", "posted_state", "threads")
 # 9/27부터 하루 2개(12:30·21:00, 8.5시간 간격). 늦게 실행돼도(PC 꺼짐) 두 개가 붙어서 나가지 않게 7시간 간격을 둔다.
 MIN_HOURS_BETWEEN_POSTS = 7
@@ -66,14 +67,15 @@ def pick_reading_post():
 
 
 def last_posted_at():
+    # kind=extra(사용자가 요청한 추가 게시, threads_extra_post.py)는 정규 슬롯 간격 계산에서 뺀다 — 추가 글 때문에
+    # 그날 정규 글이 건너뛰어지면 "하나 더"가 아니라 시간만 옮긴 셈이 된다.
     latest = None
-    for name in os.listdir(POSTED_DIR) if os.path.isdir(POSTED_DIR) else []:
-        if not name.endswith(".json"):
+    for rec in load_records():
+        if rec.get("kind") == "extra":
             continue
         try:
-            with open(os.path.join(POSTED_DIR, name), "r", encoding="utf-8") as f:
-                ts = datetime.fromisoformat(json.load(f)["posted_at"])
-        except (OSError, ValueError, KeyError):
+            ts = datetime.fromisoformat(rec["posted_at"])
+        except (KeyError, ValueError, TypeError):
             continue
         latest = ts if latest is None or ts > latest else latest
     return latest
@@ -90,8 +92,11 @@ def last_own_thread_at():
     except Exception as e:
         print(f"최근 글 조회 실패(무시): {e}")
         return None
+    extra_ids = {r.get("media_id") for r in load_records() if r.get("kind") == "extra"}
     times = []
     for t in threads:
+        if t.get("id") in extra_ids:
+            continue
         try:
             times.append(datetime.strptime(t["timestamp"], "%Y-%m-%dT%H:%M:%S%z"))
         except (KeyError, ValueError):
@@ -100,6 +105,11 @@ def last_own_thread_at():
 
 
 def main():
+    # 컴퓨터가 꺼져 있다가 아침에 켜지면 StartWhenAvailable로 밤 슬롯이 새벽·아침에 실행돼(10/1 06:11, 10/3 06:03 게시)
+    # 사람 없는 시간에 올라가고, 그 바람에 다음 슬롯까지 간격 제한으로 막혔다. 10시 전 실행은 건너뛴다.
+    if datetime.now().hour < 10:
+        print("오전 10시 전의 밀린 실행이라 건너뜁니다(다음 정규 슬롯에서 게시).")
+        return
     git_sync.git_pull(BASE_DIR)
     last = last_posted_at()
     if last is not None and hours_since(last) < MIN_HOURS_BETWEEN_POSTS:
@@ -149,6 +159,8 @@ def main():
         record = {
             "id": item["id"], "media_id": media_id, "posted_at": datetime.now(timezone.utc).isoformat(),
             "topic": item.get("topic"), "exam": item.get("exam"), "kind": item.get("kind", "queue"),
+            # 무료 풀이 글이 약속한 주제(연애 스타일·돈 타입 등) — 답글 풀이가 이 주제로 답하게 threads_replies가 읽는다.
+            "promise": item.get("promise"),
         }
         # 게시 기록부터 남긴다 — 댓글이 실패해도 같은 글을 다음 날 또 올리면 안 되므로.
         os.makedirs(POSTED_DIR, exist_ok=True)

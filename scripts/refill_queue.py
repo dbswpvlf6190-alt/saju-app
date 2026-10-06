@@ -6,6 +6,7 @@ run_daily.py / run_daily_cardnews.py가 게시 직전에 ensure_buffer()를 호�
 수동 실행: python scripts/refill_queue.py reel   (또는 cardnews, 둘 다 검사하려면 인자 없이 실행)
 """
 import json
+from collections import Counter
 import os
 import re
 import subprocess
@@ -119,7 +120,17 @@ def call_claude_raw(system_prompt, user_content):
         raise RuntimeError(f"Claude 응답에 텍스트 블록이 없습니다: {blocks}")
     text = text_block["text"].strip()
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip())
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # 가끔 JSON 앞뒤에 설명 문장이 붙어 와서 전체 자동 채우기가 죽었다(2026-10-03 릴스 대기열 고갈 원인).
+        # 첫 [ 또는 { 부터 짝이 맞는 마지막 ] / } 까지만 잘라 다시 시도한다.
+        starts = [i for i in (text.find("["), text.find("{")) if i != -1]
+        if not starts:
+            raise
+        start = min(starts)
+        end = max(text.rfind("]"), text.rfind("}"))
+        return json.loads(text[start:end + 1])
 
 
 def next_id(existing_ids, prefix):
@@ -136,6 +147,21 @@ def probe_duration(path):
         return round(float(out), 1)
     except (ValueError, subprocess.TimeoutExpired, OSError):
         return None
+
+
+def match_exam_slot(item, pool):
+    """후보가 고른 exam 값을 남은 시험 배정에서 하나 꺼내 짝지어 준다. 예전엔 i번째 후보 = i번째 배정으로
+    순서까지 맞춰야 해서, 모델이 순서만 바꿔 써도 전부 탈락했다(2026-10-03 릴스 대기열 고갈 원인).
+    배정 비율(3편 중 1편)은 pool 개수로 그대로 지켜진다."""
+    got = item.get("exam") or None
+    if got in ("", "null"):
+        got = None
+    if pool.get(got, 0) > 0:
+        pool[got] -= 1
+        return got
+    # 남은 배정에 없는 값이면 일부러 어긋난 기대값을 줘서 validate가 탈락시키게 한다.
+    remaining = [k for k, n in pool.items() if n > 0]
+    return remaining[0] if remaining else None
 
 
 def generate_reel_items(reels, need):
@@ -155,10 +181,11 @@ def generate_reel_items(reels, need):
         user_msg = reel_rules.build_user_message(reels + accepted, request_count, formats, exam_slots) + feedback
         candidates = call_claude_raw(reel_rules.SYSTEM_PROMPT_REELS, user_msg)
         rejected = []
-        for i, item in enumerate(candidates):
+        pool = Counter(exam_slots)
+        for item in candidates:
             if len(accepted) >= need:
                 break
-            expected = exam_slots[i] if i < len(exam_slots) else None
+            expected = match_exam_slot(item, pool)
             problems = reel_rules.validate_item(item, reels, accepted, expected)
             if problems:
                 rejected.append((item.get("title", "?"), problems))
@@ -274,10 +301,11 @@ def generate_card_items(cardsets, need):
         user_msg = cardnews_rules.build_user_message(cardsets + accepted, request_count, formats, exam_slots) + feedback
         candidates = call_claude_raw(cardnews_rules.SYSTEM_PROMPT_CARDNEWS, user_msg)
         rejected = []
-        for i, item in enumerate(candidates):
+        pool = Counter(exam_slots)
+        for item in candidates:
             if len(accepted) >= need:
                 break
-            expected = exam_slots[i] if i < len(exam_slots) else None
+            expected = match_exam_slot(item, pool)
             problems = cardnews_rules.validate_item(item, cardsets, accepted, expected)
             if problems:
                 rejected.append((item.get("title", "?"), problems))

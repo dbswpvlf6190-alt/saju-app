@@ -1,0 +1,143 @@
+{
+  "saved_at": "2026-10-04T10:13:42",
+  "followers": 23,
+  "posts": [
+    {
+      "id": "17889867504460105",
+      "timestamp": "2026-10-03T13:34:07+0000",
+      "first_line": "연애 고민 있는 사람, 둘 생일 적어줘 💞",
+      "chars": 105,
+      "reading": true,
+      "views": 209,
+      "likes": 1,
+      "real_replies": 2
+    },
+    {
+      "id": "18009410975776671",
+      "timestamp": "2026-10-02T21:03:21+0000",
+      "first_line": "첫인상이랑 실제 성격 완전 다르다는 말 자주 듣는 사람?",
+      "chars": 85,
+      "reading": false,
+      "views": 887,
+      "likes": 8,
+      "real_replies": 4
+    },
+    {
+      "id": "17965046196077913",
+      "timestamp": "2026-10-02T03:30:15+0000",
+      "first_line": "수험생 자녀 둔 부모님들, 요즘 무슨 말 해주세요?",
+      "chars": 113,
+      "reading": false,
+      "views": 149,
+      "likes": 0,
+      "real_replies": 0
+    },
+    {
+      "id": "18123603322693472",
+      "timestamp": "2026-10-01T12:00:19+0000",
+      "first_line": "돈 들어와도 금방 없어지는 사람 특징",
+      "chars": 112,
+      "reading": false,
+      "views": 63,
+      "likes": 0,
+      "real_replies": 0
+    },
+    {
+      "id": "17932577913146690",
+      "timestamp": "2026-09-30T21:11:08+0000",
+      "first_line": "수능 한 달 남기고 제일 흔한 실수: 안 해본 걸 새로 시작하기",
+      "chars": 106,
+      "reading": false,
+      "views": 76,
+      "likes": 0,
+      "real_replies": 0
+    },
+    {
+      "id": "17942788497353342",
+      "timestamp": "2026-09-30T03:30:17+0000",
+      "first_line": "연락은 늘 내가 먼저, 약속도 내가 먼저 잡는 사람",
+      "chars": 97,
+      "reading": false,
+      "views": 234,
+      "likes": 0,
+      "real_replies": 0
+    },
+    {
+      "id": "17903259024595670",
+      "timestamp": "2026-09-29T12:00:21+0000",
+      "first_line": "요즘 제일 고민되는 거 하나만 적어줘, 내 사주 타입으로 답해줄게 🔮",
+      "chars": 112,
+      "reading": true,
+      "views": 142,
+      "likes": 1,
+      "real_replies": 2
+    },
+    {
+      "id": "18370871065240185",
+      "timestamp": "2026-09-29T03:30:18+0000",
+      "first_line": "임용 준비생들한테 물어보고 싶은 거",
+      "chars": 93,
+      "reading": false,
+      "views": 22,
+      "likes": 0,
+      "real_replies": 0
+    },
+    {
+      "id": "18122993797901258",
+      "timestamp": "2026-09-28T04:12:10+0000",
+      "first_line": "혼자 있을 때 충전되는 사람 vs 사람 만나야 충전되는 사람",
+      "chars": 74,
+      "reading": false,
+      "views": 300,
+      "likes": 0,
+      "real_replies": 0
+    },
+    {
+      "id": "17896512387604733",
+      "timestamp": "2026-09-26T12:00:19+0000",
+      "first_line": "생일만 적어주면 내 사주 타입 무료로 알려줄게 🔮",
+      "chars": 141,
+      "reading": true,
+      "views": 2396,
+      "likes": 42,
+      "real_replies": 107
+    },
+    {
+      "id": "18113064437015613",
+      "timestamp": "2026-09-26T06:23:24+0000",
+      "first_line": "수험생 유형 셋 중 하나 골라봐",
+      "chars": 137,
+      "reading": false,
+      "views": 76,
+      "likes": 1,
+      "real_replies": 0
+    },
+    {
+      "id": "18013440776755623",
+      "timestamp": "2026-09-26T06:21:27+0000",
+      "first_line": "안녕하세요, 사주랩이에요 🔮",
+      "chars": 167,
+      "reading": false,
+      "views": 379,
+      "likes": 0,
+      "real_replies": 0
+    }
+  ],
+  "summary": {
+    "normal": {
+      "count": 9,
+      "avg_views": 242.9,
+      "avg_real_replies": 0.4
+    },
+    "reading": {
+      "count": 3,
+      "avg_views": 915.7,
+      "avg_real_replies": 37.0
+    }
+  },
+  "site_7d": {
+    "threads": 20,
+    "total": 67,
+    "payments": 0
+  }
+}

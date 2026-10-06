@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reel_rules  # noqa: E402
 import cardnews_rules  # noqa: E402
 import exam_season  # noqa: E402
+import node_bin  # noqa: E402
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -271,7 +272,7 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     log(f"reels.json에 {len(new_items)}개 추가: {new_ids}")
 
     for rid in new_ids:
-        subprocess.run(["node", os.path.join(REEL_TEMPLATE_DIR, "build.mjs"), rid], cwd=PROJECT_ROOT, check=True)
+        subprocess.run([node_bin.find_node(), os.path.join(REEL_TEMPLATE_DIR, "build.mjs"), rid], cwd=PROJECT_ROOT, check=True)
 
     for entry, m in zip(new_entries, manifest[-len(new_ids):]):
         entry["durationSec"] = probe_duration(os.path.join(PROJECT_ROOT, m["video"]))
@@ -387,7 +388,7 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     save_json(CARDSETS_JSON, cardsets)
     log(f"cardsets.json에 {len(new_items)}개 추가: {new_ids}")
 
-    subprocess.run(["node", os.path.join(CARDNEWS_TEMPLATE_DIR, "build.mjs")], cwd=PROJECT_ROOT, check=True)
+    subprocess.run([node_bin.find_node(), os.path.join(CARDNEWS_TEMPLATE_DIR, "build.mjs")], cwd=PROJECT_ROOT, check=True)
 
     save_json(CARDNEWS_MANIFEST, manifest)
 

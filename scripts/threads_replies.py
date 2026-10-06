@@ -30,6 +30,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import git_sync  # noqa: E402
 import notify  # noqa: E402
+import node_bin  # noqa: E402
 import threads_api  # noqa: E402
 from refill_queue import call_claude_raw  # noqa: E402
 
@@ -102,7 +103,7 @@ def save_state(state):
 def compute_ilgan(people):
     node_input = json.dumps([{"key": p.get("key"), "date": p["date"], "lunar": bool(p.get("lunar")), "gender": p.get("gender")} for p in people])
     out = subprocess.run(
-        ["node", "--no-warnings", os.path.join(BASE_DIR, "scripts", "threads_ilgan.mjs"), "--batch"],
+        [node_bin.find_node(), "--no-warnings", os.path.join(BASE_DIR, "scripts", "threads_ilgan.mjs"), "--batch"],
         input=node_input, capture_output=True, text=True, encoding="utf-8", cwd=BASE_DIR, timeout=60,
     )
     if out.returncode != 0:

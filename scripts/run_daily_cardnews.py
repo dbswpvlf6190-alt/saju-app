@@ -90,6 +90,10 @@ def main():
 
     if next_entry is None:
         print("모든 카드뉴스 대기열 항목이 이미 게시되었습니다. cardnews_manifest.json에 새 세트를 추가해주세요.")
+        notify.notify(
+            "⚠️ 사주랩 카드뉴스 대기열 소진", "올릴 카드뉴스가 없어요. .env.local의 ANTHROPIC_API_KEY와 자동 채우기를 확인하세요.",
+            priority=5, tags=["warning"],
+        )
         return
 
     day = next_entry["day"]

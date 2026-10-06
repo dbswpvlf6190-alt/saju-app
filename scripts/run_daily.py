@@ -73,6 +73,11 @@ def main():
 
     if next_entry is None:
         print("모든 대기열 항목이 이미 게시되었습니다. reel_manifest.json에 새 항목을 추가해주세요.")
+        # 2026-10-06: 노트북에 ANTHROPIC_API_KEY가 없어 자동 채우기가 조용히 실패하고 릴스가 3일 멈췄는데도 알림이 없었다.
+        notify.notify(
+            "⚠️ 사주랩 릴스 대기열 소진", "올릴 릴스가 없어요. .env.local의 ANTHROPIC_API_KEY와 자동 채우기를 확인하세요.",
+            priority=5, tags=["warning"],
+        )
         return
 
     day = next_entry["day"]

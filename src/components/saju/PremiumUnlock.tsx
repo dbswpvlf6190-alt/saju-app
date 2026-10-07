@@ -10,6 +10,7 @@ import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { ShareButton } from "./ShareButton";
 import { SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
+import { WUXING_PERSONA } from "@/lib/saju/persona";
 import {
   PREMIUM_CTA_LABEL,
   PREMIUM_DETAILS_STEP_INTRO,
@@ -434,6 +435,7 @@ export function PremiumUnlock({
             name={name}
             dayMasterLabel={generateFreeContent(result).dayMasterLabel}
             premiumSections={premiumSections}
+            bridgeLine={WUXING_PERSONA[result.dayPillar.ganWuxing].bridgeLine}
             onChoose={(choice) => {
               setOffer(choice);
               setFormStep("details");

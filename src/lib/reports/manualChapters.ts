@@ -10,7 +10,7 @@ export interface ManualChapterMeta {
 }
 
 export const MANUAL_CHAPTER_META: ManualChapterMeta[] = [
-  { key: "overview", title: "나의 기본 설계도", promise: "내가 어떤 사람인지, 타고난 설계를 한눈에 이해해요" },
+  { key: "overview", title: "나의 기본 설계도", promise: "타고난 설계와, 방금 궁금했던 일간 곁의 기운의 답까지 이해해요" },
   { key: "patterns", title: "내가 반복하는 선택", promise: "왜 같은 선택을 반복하는지, 그 비용과 다르게 해볼 방법을 알아요" },
   { key: "people", title: "사람 앞에서의 나", promise: "상대가 나를 오해하는 지점과, 바로 쓸 수 있는 말을 가져가요" },
   { key: "workmoney", title: "일과 돈에서의 나", promise: "일하고 돈을 다루는 방식, 손해 보는 지점과 바로 쓸 규칙을 알아요" },

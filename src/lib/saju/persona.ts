@@ -13,6 +13,8 @@ export interface WuxingPersona {
   inviteLine: string;
   /** 친구 3명을 채워 쿠폰을 받았을 때 건네는 문장. */
   rewardLine: string;
+  /** 결제 직전 미리보기에서 hookLine의 궁금증을 유료 리포트 1장으로 이어주는 문장(2026-10-07). 좋은 쪽/나쁜 쪽 결론은 밝히지 않는다. */
+  bridgeLine: string;
 }
 
 export const WUXING_PERSONA: Record<WuXing, WuxingPersona> = {
@@ -24,6 +26,7 @@ export const WUXING_PERSONA: Record<WuXing, WuxingPersona> = {
     introLine: "먼저 네 뿌리부터 볼까? 타고난 모습은 이래.",
     inviteLine: "친구 셋한테 이 링크 보내봐. 셋 다 자기 사주 보고 나면, 아까 못 한 얘기 전부 해줄게.",
     rewardLine: "약속했지? 이 코드 넣으면 네 사주 나머지 얘기, 처음부터 끝까지 다 들려줄게.",
+    bridgeLine: "이 나무 옆에 뻗은 가지가 무성하게 자랄지 잘라내야 할지 — 사용설명서 1장에서 이어서 풀어드려요.",
   },
   화: {
     name: "온",
@@ -33,6 +36,7 @@ export const WUXING_PERSONA: Record<WuXing, WuxingPersona> = {
     introLine: "자, 먼저 네가 어떤 불인지부터 말해줄게!",
     inviteLine: "얘, 친구 셋만 불러와 봐! 셋 다 자기 사주 보고 나면, 아까 그 불씨 얘기 끝까지 다 말해줄게.",
     rewardLine: "와, 진짜 셋 다 데려왔네! 이 코드 넣으면 네 얘기 하나도 안 빼고 다 해줄게.",
+    bridgeLine: "네 불씨 옆에 붙은 기운이 활활 돕는 불씨인지 태워버리는 불씨인지 — 사용설명서 1장에서 이어서 풀어드려요.",
   },
   토: {
     name: "산이",
@@ -42,6 +46,7 @@ export const WUXING_PERSONA: Record<WuXing, WuxingPersona> = {
     introLine: "서두르지 말고, 네 타고난 바탕부터 차근차근 보세.",
     inviteLine: "친구 셋에게 이 길을 알려주게. 셋 모두 자기 사주를 보고 나면, 아까 하다 만 이야기를 마저 하지.",
     rewardLine: "약속은 지키지. 이 코드를 넣으면 네 산 이야기를 처음부터 끝까지 들려주겠네.",
+    bridgeLine: "네 산 옆자리가 든든한 버팀목인지 짊어질 짐인지 — 사용설명서 1장에서 이어서 풀어드려요.",
   },
   금: {
     name: "다듬",
@@ -51,6 +56,7 @@ export const WUXING_PERSONA: Record<WuXing, WuxingPersona> = {
     introLine: "우선 네가 어떤 원석인지부터 보자고.",
     inviteLine: "친구 셋한테 이 링크 보내봐. 셋 다 자기 사주 보고 오면, 아까 그 조합 얘기 끝까지 해주지.",
     rewardLine: "셋 다 왔군. 약속대로 이 코드 넣으면 나머지 얘기 전부 보여주지.",
+    bridgeLine: "기운 옆에 붙어 있는 그 조합이 좋은 쪽으로 튈지 골치 아픈 쪽으로 튈지 — 사용설명서 1장에서 이어서 풀어드려요.",
   },
   수: {
     name: "이슬",
@@ -60,5 +66,6 @@ export const WUXING_PERSONA: Record<WuXing, WuxingPersona> = {
     introLine: "먼저 네 물길이 어떻게 생겼는지부터 따라가 볼게.",
     inviteLine: "친구 셋에게 이 물길을 흘려보내 줘. 셋 모두 자기 사주를 보고 나면, 아까 멈춘 이야기를 마저 들려줄게.",
     rewardLine: "셋 모두 다녀갔네. 이 코드를 넣으면 네 물길 이야기를 끝까지 흘려줄게.",
+    bridgeLine: "네 물길 옆에 생긴 작은 물줄기가 큰 강으로 이어질지 막힌 웅덩이가 될지 — 사용설명서 1장에서 이어서 풀어드려요.",
   },
 };

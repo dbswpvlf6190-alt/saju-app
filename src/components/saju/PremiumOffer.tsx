@@ -22,12 +22,15 @@ export function PremiumOffer({
   premiumSections,
   onChoose,
   initialMode = "full",
+  bridgeLine,
 }: {
   name: string;
   dayMasterLabel: string;
   premiumSections: PremiumSection[];
   onChoose: (choice: OfferChoice) => void;
   initialMode?: "full" | "single";
+  /** 무료 화면 캐릭터가 건 궁금증을 1장으로 이어주는 한 줄(persona.bridgeLine). 새 방식(6장)에서 미리보기 카드로 쓴다. */
+  bridgeLine?: string;
 }) {
   const [first, ...rest] = premiumSections;
   // 6장 "나 사용설명서"(2026-10-07): 가격(4,900원)·상품명은 그대로, 본문 구성과 소개 문구만 바뀐다.
@@ -71,10 +74,10 @@ export function PremiumOffer({
       {/* 1) 첫 항목은 흐림 없이 한 문단 공개 */}
       <div className="relative overflow-hidden rounded-2xl border border-accent-gold/40 bg-background-card/80 p-4">
         <div className="flex items-center justify-between">
-          <span className="font-medium text-accent-gold-soft">{manual ? "내가 반복하는 선택" : first.title}</span>
+          <span className="font-medium text-accent-gold-soft">{manual && bridgeLine ? "방금 궁금했던 그 얘기" : manual ? "내가 반복하는 선택" : first.title}</span>
           <span className="rounded-full bg-accent-gold/15 px-2 py-0.5 text-[11px] text-accent-gold-soft">미리 보기</span>
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-foreground">{first.previewSnippet}</p>
+        <p className="mt-2 text-sm leading-relaxed text-foreground">{manual && bridgeLine ? bridgeLine : first.previewSnippet}</p>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background-card to-transparent" />
         <p className="relative mt-3 text-center text-xs text-foreground-muted">
           {manual ? "🔒 이어서 6장 · 6,000자 이상 · 결제 후 바로 열려요" : "🔒 이어서 1,200자 이상 · 결제 후 바로 열려요"}

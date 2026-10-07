@@ -46,6 +46,17 @@ describe("buildManualFacts", () => {
     expect(facts.나이대).toBe("20대 초반");
   });
 
+  it("일간 곁의 기운(월간·일지·시간)을 코드가 분류한다", () => {
+    expect(facts.곁의_기운.항목).toEqual([
+      "월간: 정관(관성) — 일간을 누르는(부담이 되는) 기운",
+      "일지: 식신(식상) — 일간의 힘을 쓰게 하는 기운",
+      "시간: 정인(인성) — 일간을 돕는 기운",
+    ]);
+    expect(facts.곁의_기운.요약).toBe("돕는 기운 1개 / 힘을 쓰거나 부담이 되는 기운 2개 → 힘을 쓰거나 부담이 되는 쪽이 우세");
+    expect(facts.무료_화면에서_예고한_궁금증).toContain("불씨");
+    expect(facts.무료_화면에서_예고한_궁금증).not.toContain("1장에서");
+  });
+
   it("올해·앞으로의 해 흐름은 코드가 계산한다", () => {
     expect(facts.올해_흐름["2026"]).toContain("병오년, 비겁");
     expect(facts.올해_흐름["2030"]).toContain("재성");

@@ -38,6 +38,21 @@ describe("결제 전 소개(PremiumOffer)", () => {
     expect(html).not.toContain("나 사용설명서 전체 6장");
   });
 
+  it("캐릭터가 건 궁금증을 미리보기 카드로 1장에 이어준다", () => {
+    const line = "네 불씨 옆에 붙은 기운이 활활 돕는 불씨인지 태워버리는 불씨인지 — 사용설명서 1장에서 이어서 풀어드려요.";
+    const html = renderToStaticMarkup(
+      createElement(PremiumOffer, { name: "", dayMasterLabel: "병화(丙火)", premiumSections, onChoose: () => {}, bridgeLine: line }),
+    );
+    expect(html).toContain("방금 궁금했던 그 얘기");
+    expect(html).toContain(line);
+    expect(html).toContain("타고난 설계와, 방금 궁금했던 일간 곁의 기운의 답까지 이해해요");
+  });
+
+  it("연결 문구가 없으면 기존 미리보기를 쓴다", () => {
+    expect(offer()).toContain("내가 반복하는 선택");
+    expect(offer()).not.toContain("방금 궁금했던 그 얘기");
+  });
+
   it("하단 고정 바 문구", () => {
     expect(renderToStaticMarkup(createElement(StickyPremiumBar, { name: "제필", targetId: "x" }))).toBeDefined();
   });

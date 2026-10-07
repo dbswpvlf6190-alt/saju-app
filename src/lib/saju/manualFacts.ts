@@ -1,5 +1,6 @@
 import { Solar } from "lunar-typescript";
 import { generateFreeContent } from "./content";
+import { WUXING_PERSONA } from "./persona";
 import type { SajuResult } from "./types";
 
 /**
@@ -130,6 +131,10 @@ export interface ManualFacts {
   달별_흐름: string;
   /** 사주에 하나도 없는 십성 그룹(없으면 빈 배열) */
   없는_기운: TenGodGroup[];
+  /** 일간 바로 곁(월간·일지·시간)의 기운이 일간을 돕는지 힘들게 하는지. 무료 화면 캐릭터가 예고한 궁금증의 답. */
+  곁의_기운: { 항목: string[]; 요약: string };
+  /** 무료 화면에서 캐릭터가 건 궁금증(1장이 이어서 답한다) */
+  무료_화면에서_예고한_궁금증: string;
 }
 
 export function buildManualFacts(result: SajuResult, now: Date = new Date()): ManualFacts {
@@ -168,6 +173,18 @@ export function buildManualFacts(result: SajuResult, now: Date = new Date()): Ma
     (missing.length ? ` — 사주 안에 ${missing.join("·")}이(가) 하나도 없음` : "") +
     ` | 천간에 뜬 십성: ${stemSlots.join(", ") || "없음"} | 지지에 있는 십성: ${branchSlots.join(", ")}`;
 
+  // 일간 곁의 기운: 월간·일지·시간. 인성·비겁은 일간을 돕고, 식상·재성은 힘을 쓰게 하며, 관성은 누른다(전통 신강·신약 개념을 단순화한 경향 분류).
+  const neighbors: { 자리: string; god: TenGod }[] = [
+    { 자리: "월간", god: tenGodOf(dayGan, result.monthPillar.ganKor) },
+    { 자리: "일지", god: tenGodOf(dayGan, BRANCH_MAIN_STEM[result.dayPillar.zhiKor]) },
+    ...(result.timePillar ? [{ 자리: "시간", god: tenGodOf(dayGan, result.timePillar.ganKor) }] : []),
+  ];
+  const role = (g: TenGodGroup) => (g === "인성" || g === "비겁" ? "일간을 돕는 기운" : g === "관성" ? "일간을 누르는(부담이 되는) 기운" : "일간의 힘을 쓰게 하는 기운");
+  const helpCount = neighbors.filter((n) => ["인성", "비겁"].includes(groupOfTenGod(n.god))).length;
+  const burdenCount = neighbors.length - helpCount;
+  const neighborSummary =
+    helpCount > burdenCount ? "돕는 쪽이 우세" : helpCount < burdenCount ? "힘을 쓰거나 부담이 되는 쪽이 우세" : "돕는 기운과 힘을 쓰는 기운이 팽팽";
+
   const track = yearTrack(dayGan, now);
   const yearly: Record<string, string> = {};
   for (const t of track) {
@@ -198,6 +215,11 @@ export function buildManualFacts(result: SajuResult, now: Date = new Date()): Ma
     올해_흐름: yearly,
     달별_흐름: monthly,
     없는_기운: missing,
+    곁의_기운: {
+      항목: neighbors.map((n) => `${n.자리}: ${n.god}(${groupOfTenGod(n.god)}) — ${role(groupOfTenGod(n.god))}`),
+      요약: `돕는 기운 ${helpCount}개 / 힘을 쓰거나 부담이 되는 기운 ${burdenCount}개 → ${neighborSummary}`,
+    },
+    무료_화면에서_예고한_궁금증: WUXING_PERSONA[result.dayPillar.ganWuxing].bridgeLine.replace(/ — 사용설명서 1장에서 이어서 풀어드려요\.$/, ""),
   };
 }
 

@@ -92,7 +92,19 @@ def call_claude(system_prompt, used_titles, count):
     )
 
 
-def call_claude_raw(system_prompt, user_content):
+def call_claude_raw(system_prompt, user_content, attempts=3):
+    """모델 응답의 JSON이 가끔 깨져(따옴표 등) 자동 채우기 전체가 죽었다(2026-10-07) — 같은 요청을 몇 번 더 시도한다."""
+    last = None
+    for _ in range(attempts):
+        try:
+            return _call_claude_raw_once(system_prompt, user_content)
+        except json.JSONDecodeError as e:
+            last = e
+            log(f"응답 JSON 파싱 실패 — 다시 요청합니다: {e}")
+    raise last
+
+
+def _call_claude_raw_once(system_prompt, user_content):
     if not ANTHROPIC_API_KEY:
         raise RuntimeError("ANTHROPIC_API_KEY가 없어서 자동 채우기를 할 수 없습니다.")
     resp = requests.post(

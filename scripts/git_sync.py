@@ -8,6 +8,8 @@ import socket
 import subprocess
 from datetime import datetime
 
+import node_bin  # noqa: F401  (스케줄러 PATH에 node·ffmpeg를 넣는다)
+
 LOCK_STALE_HOURS = 3  # 이 시간이 지난 락은 이전 실행이 비정상 종료된 것으로 보고 무시
 
 

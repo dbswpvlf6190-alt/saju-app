@@ -22,7 +22,7 @@ export function CompatInviteeForm({
   errorMessage: string | null;
   onSubmit: (values: { partnerName: string; partnerInput: ReturnType<typeof personToSajuInput> }) => void;
 }) {
-  const [me, setMe] = useState<PersonFormValues>({ ...DEFAULT_PERSON_VALUES, gender: "male" });
+  const [me, setMe] = useState<PersonFormValues>(DEFAULT_PERSON_VALUES);
   const canSubmit = isPersonComplete(me);
   const sender = inviterName ? `${inviterName}님이` : "친구가";
   const senderShort = inviterName ? `${inviterName}님` : "보낸 분";
@@ -66,7 +66,7 @@ export function CompatInviteeForm({
         disabled={submitting || !canSubmit}
         className="rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {submitting ? "궁합을 분석하는 중..." : canSubmit ? "❤️ 궁합 결과 보기" : "내 생년월일시를 선택해주세요"}
+        {submitting ? "궁합을 분석하는 중..." : canSubmit ? "❤️ 궁합 결과 보기" : "내 생년월일시와 성별을 선택해주세요"}
       </button>
     </form>
   );

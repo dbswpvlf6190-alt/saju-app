@@ -12,7 +12,8 @@ export interface PersonFormValues {
   timeUnknown: boolean;
   hour: number | null;
   minute: number | null;
-  gender: Gender;
+  /** 성별은 기본값 없이 비워 둔다 — 기본값이 있으면 확인 없이 넘어가 틀린 성별로 풀이가 나간다(2026-10-07 점검). */
+  gender: Gender | null;
 }
 
 // 생년월일시는 일부러 기본값을 두지 않는다 — 기본값이 있으면 아무것도 안 고르고 바로
@@ -29,12 +30,18 @@ export const DEFAULT_PERSON_VALUES: PersonFormValues = {
   timeUnknown: false,
   hour: null,
   minute: null,
-  gender: "female",
+  gender: null,
 };
 
-/** 제출 가능한 상태인지(생년월일 + 시간을 모른다고 체크 안 했다면 시각까지) 확인한다. */
+/** 제출 가능한 상태인지(생년월일 + 성별 + 시간을 모른다고 체크 안 했다면 시각까지) 확인한다. */
 export function isPersonComplete(p: PersonFormValues): boolean {
-  return p.year !== null && p.month !== null && p.day !== null && (p.timeUnknown || (p.hour !== null && p.minute !== null));
+  return (
+    p.year !== null &&
+    p.month !== null &&
+    p.day !== null &&
+    p.gender !== null &&
+    (p.timeUnknown || (p.hour !== null && p.minute !== null))
+  );
 }
 
 // 연도 선택지는 올해부터 거꾸로 내려가게 한다 — 미래 연도(2100 등)부터 시작하면
@@ -266,6 +273,6 @@ export function personToSajuInput(p: PersonFormValues) {
     day: Math.min(p.day!, getDayCount(p.calendarType, p.year!, p.month!)),
     hour: p.timeUnknown ? undefined : p.hour!,
     minute: p.timeUnknown ? undefined : p.minute!,
-    gender: p.gender,
+    gender: p.gender!,
   };
 }

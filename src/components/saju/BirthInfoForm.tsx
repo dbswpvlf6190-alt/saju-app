@@ -54,7 +54,8 @@ export function BirthInfoForm({
   const [timeUnknown, setTimeUnknown] = useState(false);
   const [hour, setHour] = useState<number | null>(null);
   const [minute, setMinute] = useState<number | null>(null);
-  const [gender, setGender] = useState<Gender>("female");
+  // 성별은 기본값 없이 비워 둔다 — 미리 골라 두면 확인 없이 넘어간 남성이 여성으로 풀이된다(2026-10-07 점검).
+  const [gender, setGender] = useState<Gender | null>(null);
 
   // day는 그대로 두고(달을 바꿨다 되돌려도 원래 고른 날짜가 유지되도록), 실제로 존재하지
   // 않는 날짜가 되는 경우에만 선택지/제출값에서 그 달의 마지막 날로 보정해서 사용한다.
@@ -63,12 +64,13 @@ export function BirthInfoForm({
   const dayOptions = Array.from({ length: dayCount }, (_, i) => i + 1);
   const effectiveDay = day !== null ? Math.min(day, dayCount) : null;
 
-  const canSubmit =
+  const dateComplete =
     year !== null && month !== null && effectiveDay !== null && (timeUnknown || (hour !== null && minute !== null));
+  const canSubmit = dateComplete && gender !== null;
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!canSubmit || year === null || month === null || effectiveDay === null) return;
+    if (!canSubmit || gender === null || year === null || month === null || effectiveDay === null) return;
     onSubmit({
       name: name.trim(),
       calendarType,
@@ -264,7 +266,7 @@ export function BirthInfoForm({
         disabled={submitting || !canSubmit}
         className="mt-2 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {submitting ? "사주를 풀이하는 중..." : canSubmit ? "무료로 사주 보기" : "생년월일시를 선택해주세요"}
+        {submitting ? "사주를 풀이하는 중..." : canSubmit ? "무료로 사주 보기" : dateComplete ? "성별을 선택해주세요" : "생년월일시를 선택해주세요"}
       </button>
     </form>
   );

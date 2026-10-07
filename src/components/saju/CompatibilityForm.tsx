@@ -36,7 +36,7 @@ export function CompatibilityForm({
   errorMessage: string | null;
 }) {
   const [self, setSelf] = useState<PersonFormValues>(DEFAULT_PERSON_VALUES);
-  const [partner, setPartner] = useState<PersonFormValues>({ ...DEFAULT_PERSON_VALUES, gender: "male" });
+  const [partner, setPartner] = useState<PersonFormValues>(DEFAULT_PERSON_VALUES);
   // 상대 생시를 몰라 포기하거나 상대 정보를 대신 넣는 대신, 상대가 직접 넣게 하는 쪽을 기본으로 둔다.
   const [partnerMode, setPartnerMode] = useState<PartnerMode>("link");
   const canSubmit = isPersonComplete(self) && (partnerMode === "link" || isPersonComplete(partner));
@@ -128,8 +128,8 @@ export function CompatibilityForm({
             : "궁합을 분석하는 중..."
           : !canSubmit
             ? partnerMode === "link"
-              ? "내 생년월일시를 선택해주세요"
-              : "두 사람의 생년월일시를 선택해주세요"
+              ? "내 생년월일시와 성별을 선택해주세요"
+              : "두 사람의 생년월일시와 성별을 선택해주세요"
             : partnerMode === "link"
               ? "💌 궁합 링크 만들기"
               : "❤️ 무료로 궁합 보기"}

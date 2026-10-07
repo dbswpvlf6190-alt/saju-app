@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { SajuFlow } from "./SajuFlow";
 import type { ReviewItem } from "./ReviewList";
+import { focusBannerParts } from "@/lib/saju/focusCopy";
+import { reportV2Enabled } from "@/lib/reports/manualChapters";
 
 type Focus = "wealth" | "love";
 
@@ -26,6 +28,8 @@ export interface ExamBadge {
 
 export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[]; examBadges?: ExamBadge[] }) {
   const [focus, setFocus] = useState<Focus | null>(null);
+  // 배너 문구(focus가 있을 때만 화면에 쓰인다)
+  const banner = focusBannerParts(focus ?? "wealth", FOCUS_LABEL[focus ?? "wealth"], reportV2Enabled());
   const formRef = useRef<HTMLDivElement>(null);
 
   function choose(next: Focus) {
@@ -130,8 +134,9 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
             </h1>
             <div className="flex items-center gap-2 rounded-xl border border-accent-gold/40 bg-accent-gold/10 px-4 py-2 text-sm text-foreground">
               <span>
-                🔮 <strong className="text-accent-gold-soft">{FOCUS_LABEL[focus]}</strong>부터 먼저
-                보여드릴게요
+                {banner.head}
+                <strong className="text-accent-gold-soft">{banner.label}</strong>
+                {banner.tail}
               </span>
               <button
                 type="button"

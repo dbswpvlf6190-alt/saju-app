@@ -304,7 +304,7 @@ def auto():
 
                 os.makedirs(RENDER_ROOT, exist_ok=True)
                 with open(os.path.join(RENDER_ROOT, "threads_replies_error.log"), "a", encoding="utf-8") as lf:
-                    lf.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {rec['id']} PATH={os.environ.get('PATH', '')[:400]}\n{traceback.format_exc()}\n")
+                    lf.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {rec['id']} node={node_bin.find_node()!r} exists={os.path.exists(node_bin.find_node())} USERPROFILE={os.environ.get('USERPROFILE')!r} LOCALAPPDATA={os.environ.get('LOCALAPPDATA')!r} home={os.path.expanduser('~')!r} nodejs_dir={[(d, os.listdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs', d))[:6]) for d in os.listdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs'))] if os.path.isdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs')) else 'NO_DIR'}\n{traceback.format_exc()}\n")
             except OSError:
                 pass
             notify.notify("❌ Threads 풀이 초안 실패", f"{rec['id']}\n{notify.summarize_error(str(e))}", priority=4, tags=["warning"])

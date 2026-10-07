@@ -4,6 +4,10 @@ import {
   COMPATIBILITY_REPORT_PRICE_KRW,
   PREMIUM_REPORT_NAME,
   PREMIUM_REPORT_PRICE_KRW,
+  SECTION_UPGRADE_NAME,
+  SECTION_UPGRADE_PRICE_KRW,
+  SINGLE_SECTION_NAME,
+  SINGLE_SECTION_PRICE_KRW,
 } from "@/lib/payment/config";
 
 export function SiteFooter() {
@@ -11,7 +15,9 @@ export function SiteFooter() {
     <footer className="mt-16 flex w-full max-w-md flex-col items-center gap-4 border-t border-border-subtle pt-8 text-center text-xs text-foreground-muted">
       <p>
         판매 상품: {PREMIUM_REPORT_NAME} · {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원 /{" "}
-        {COMPATIBILITY_REPORT_NAME} · {COMPATIBILITY_REPORT_PRICE_KRW.toLocaleString()}원
+        {COMPATIBILITY_REPORT_NAME} · {COMPATIBILITY_REPORT_PRICE_KRW.toLocaleString()}원 /{" "}
+        {SINGLE_SECTION_NAME} · {SINGLE_SECTION_PRICE_KRW.toLocaleString()}원 /{" "}
+        {SECTION_UPGRADE_NAME} · {SECTION_UPGRADE_PRICE_KRW.toLocaleString()}원
         (결제 즉시 제공되는 디지털 콘텐츠)
       </p>
       <nav className="flex gap-4">

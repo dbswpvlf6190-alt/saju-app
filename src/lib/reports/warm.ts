@@ -27,7 +27,7 @@ export async function warmReportCache(order: OrderRow): Promise<void> {
         await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, [order.sectionKey as PremiumSectionKey]);
       }
     } else {
-      await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+      await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, undefined, order.productType);
     }
   } catch (e) {
     console.error(`리포트 웜업 생성 중 오류 (paymentId=${order.paymentId}):`, e);

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PremiumSection, PremiumSectionKey } from "@/lib/saju";
 import { PREMIUM_REPORT_PRICE_KRW, SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
+import { MANUAL_CHAPTER_META, reportV2Enabled } from "@/lib/reports/manualChapters";
 
 export type OfferChoice = { kind: "full" } | { kind: "single"; section: PremiumSectionKey };
 
@@ -29,6 +30,8 @@ export function PremiumOffer({
   initialMode?: "full" | "single";
 }) {
   const [first, ...rest] = premiumSections;
+  // 6장 "나 사용설명서"(2026-10-07): 가격(4,900원)·상품명은 그대로, 본문 구성과 소개 문구만 바뀐다.
+  const manual = reportV2Enabled();
   const [mode, setMode] = useState<"full" | "single">(initialMode);
   const [single, setSingle] = useState<PremiumSectionKey>(first.key);
   const offerRef = useRef<HTMLDivElement>(null);
@@ -56,25 +59,42 @@ export function PremiumOffer({
       <div className="flex flex-col gap-1 px-1 text-center">
         <span className="text-xs font-medium tracking-[0.2em] text-accent-gold-soft">{dayMasterLabel}</span>
         <h3 className="font-serif text-lg leading-snug text-foreground">
-          {name ? `${name}님` : "내"} 사주로 쓴 상세 풀이 5가지
+          {manual ? `${name ? `${name}님` : "나"}의 사용설명서 6장` : `${name ? `${name}님` : "내"} 사주로 쓴 상세 풀이 5가지`}
         </h3>
-        <p className="text-xs text-foreground-muted">오늘 운세가 아니라, 태어난 사주 전체를 근거로 풀어요.</p>
+        <p className="text-xs text-foreground-muted">
+          {manual
+            ? "왜 같은 선택을 반복하는지, 상대에게 쓸 말, 지금 시기까지 — 태어난 사주 전체를 근거로 풀어요."
+            : "오늘 운세가 아니라, 태어난 사주 전체를 근거로 풀어요."}
+        </p>
       </div>
 
       {/* 1) 첫 항목은 흐림 없이 한 문단 공개 */}
       <div className="relative overflow-hidden rounded-2xl border border-accent-gold/40 bg-background-card/80 p-4">
         <div className="flex items-center justify-between">
-          <span className="font-medium text-accent-gold-soft">{first.title}</span>
+          <span className="font-medium text-accent-gold-soft">{manual ? "내가 반복하는 선택" : first.title}</span>
           <span className="rounded-full bg-accent-gold/15 px-2 py-0.5 text-[11px] text-accent-gold-soft">미리 보기</span>
         </div>
         <p className="mt-2 text-sm leading-relaxed text-foreground">{first.previewSnippet}</p>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background-card to-transparent" />
-        <p className="relative mt-3 text-center text-xs text-foreground-muted">🔒 이어서 1,200자 이상 · 결제 후 바로 열려요</p>
+        <p className="relative mt-3 text-center text-xs text-foreground-muted">
+          {manual ? "🔒 이어서 6장 · 6,000자 이상 · 결제 후 바로 열려요" : "🔒 이어서 1,200자 이상 · 결제 후 바로 열려요"}
+        </p>
       </div>
 
-      {/* 나머지 4개는 기존처럼 제목 + 흐린 한 줄 */}
+      {/* 나머지: 새 방식은 6장 제목 + 읽고 나면 얻는 것, 옛 방식은 제목 + 흐린 한 줄 */}
       <div className="flex flex-col divide-y divide-border-subtle overflow-hidden rounded-2xl border border-border-subtle bg-background-card/70">
-        {rest.map((section) => (
+        {manual &&
+          MANUAL_CHAPTER_META.map((chapter, i) => (
+            <div key={chapter.key} className="flex items-center gap-3 px-4 py-3">
+              <span className="w-5 shrink-0 text-center text-xs text-accent-gold-soft">{i + 1}</span>
+              <div className="min-w-0 flex-1">
+                <span className="text-sm font-medium text-foreground">{chapter.title}</span>
+                <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{chapter.promise}</p>
+              </div>
+              <span className="shrink-0 text-xs text-accent-gold-soft">🔒</span>
+            </div>
+          ))}
+        {!manual && rest.map((section) => (
           <div key={section.key} className="flex items-center gap-3 px-4 py-3">
             <div className="min-w-0 flex-1">
               <span className="text-sm font-medium text-foreground">{section.title}</span>
@@ -100,12 +120,16 @@ export function PremiumOffer({
             추천
           </span>
           <span className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground">전체 5가지 한 번에</span>
-            <span className="text-xs text-foreground-muted">연애·재물·직업·인간관계·올해 흐름 · 6,000자 이상</span>
+            <span className="text-sm font-semibold text-foreground">{manual ? "나 사용설명서 전체 6장" : "전체 5가지 한 번에"}</span>
+            <span className="text-xs text-foreground-muted">
+              {manual ? "바로 쓸 말·시기별 할 일까지 · 6,000자 이상" : "연애·재물·직업·인간관계·올해 흐름 · 6,000자 이상"}
+            </span>
           </span>
           <span className="flex shrink-0 flex-col items-end whitespace-nowrap">
             <span className="text-lg font-semibold text-accent-gold-soft">{PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원</span>
-            <span className="text-[11px] text-foreground-muted">항목당 {perSection.toLocaleString()}원</span>
+            <span className="text-[11px] text-foreground-muted">
+              {manual ? "1회 결제 · 바로 열람" : `항목당 ${perSection.toLocaleString()}원`}
+            </span>
           </span>
         </button>
 
@@ -155,7 +179,9 @@ export function PremiumOffer({
         className="min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
       >
         {mode === "full"
-          ? `${PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원으로 5가지 전체 보기`
+          ? manual
+            ? `${PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원으로 나 사용설명서 열기`
+            : `${PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원으로 5가지 전체 보기`
           : `${SINGLE_SECTION_PRICE_KRW.toLocaleString()}원으로 ${singleTitle} 보기`}
       </button>
     </div>
@@ -187,7 +213,7 @@ export function StickyPremiumBar({ name, targetId }: { name: string; targetId: s
         className="flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border border-accent-gold/50 bg-[#1a1430]/95 px-4 py-3 shadow-lg backdrop-blur"
       >
         <span className="text-sm text-foreground">
-          🔒 {name ? `${name}님` : "내"} 상세 풀이 5가지
+          🔒 {name ? `${name}님` : "내"} {reportV2Enabled() ? "나 사용설명서" : "상세 풀이 5가지"}
           <span className="ml-1 text-xs text-foreground-muted">1,900원부터</span>
         </span>
         <span className="shrink-0 rounded-lg bg-accent-gold px-3 py-1.5 text-xs font-semibold text-[#1a1430]">보기</span>

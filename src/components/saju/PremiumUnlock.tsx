@@ -19,7 +19,9 @@ import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 import { NewYearUpsellCard } from "./NewYearUpsellCard";
 import { PremiumOffer, type OfferChoice } from "./PremiumOffer";
+import { MANUAL_CHAPTER_META, MANUAL_CHAPTER_KEYS, type ReportLayout } from "@/lib/reports/manualChapters";
 import { SectionUpgradeCard } from "./SectionUpgradeCard";
+import { ReportSections } from "./ReportSections";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -44,6 +46,8 @@ export function PremiumUnlock({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sections, setSections] = useState<Record<string, string> | null>(null);
   const [missingSections, setMissingSections] = useState<string[]>([]);
+  // 이 주문이 열리는 방식. 새 주문은 6장 "나 사용설명서"(manual), 기존 결제 고객·1가지·차액 주문은 결제 당시 주제 방식(topics).
+  const [layout, setLayout] = useState<ReportLayout>("topics");
   const [activePaymentId, setActivePaymentId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -76,7 +80,7 @@ export function PremiumUnlock({
   /** 항목 하나를 요청해서 성공하면 sections에 바로 반영한다. 5개를 한 번에 묶어 요청하면
    * 제일 늦게 끝나는 항목만큼 화면이 계속 비어 있어서, 항목별로 쪼개 병렬 요청하고 먼저
    * 끝난 것부터 바로 보여주기 위함이다(?section=, /api/orders/[paymentId]/route.ts). */
-  const fetchSection = useCallback(async (paymentId: string, key: PremiumSectionKey) => {
+  const fetchSection = useCallback(async (paymentId: string, key: string) => {
     const res = await fetch(`/api/orders/${encodeURIComponent(paymentId)}?section=${key}`);
     const data = await res.json();
     if (data.sections?.[key]) {
@@ -87,8 +91,24 @@ export function PremiumUnlock({
   }, []);
 
   const fetchReport = useCallback(
-    async (paymentId: string, keys: PremiumSectionKey[] = PREMIUM_SECTION_KEYS) => {
-      // 5개 요청이 다 끝나길 기다리지 않고, 첫 요청을 보내는 즉시 언락 화면으로 전환한다.
+    async (paymentId: string, explicitKeys?: string[]) => {
+      // 키를 안 넘기면(전체 구매·쿠폰) 서버에 이 주문이 어떤 방식인지 먼저 묻는다 — 기존 고객은 주제 5개, 새 주문은 6장.
+      let keys: string[] = explicitKeys ?? PREMIUM_SECTION_KEYS;
+      if (!explicitKeys) {
+        try {
+          const res = await fetch(`/api/orders/${encodeURIComponent(paymentId)}?layout=1`);
+          const data = await res.json();
+          if (res.ok && Array.isArray(data.keys) && data.keys.length > 0) {
+            keys = data.keys;
+            setLayout(data.layout === "manual" ? "manual" : "topics");
+          }
+        } catch {
+          // 방식을 못 알아내면 주제 방식으로 시도한다(서버가 거부하면 아래 재시도 버튼으로 이어진다).
+        }
+      } else {
+        setLayout("topics");
+      }
+      // 모든 요청이 다 끝나길 기다리지 않고, 첫 요청을 보내는 즉시 언락 화면으로 전환한다.
       // 각 항목은 도착하는 대로 위 fetchSection이 sections에 채워 넣고, 아직 안 끝난
       // 항목은 missingSections와 동일한 방식(불러오는 중 표시)으로 자연스럽게 보인다.
       setActivePaymentId(paymentId);
@@ -149,7 +169,7 @@ export function PremiumUnlock({
   async function handleRetryMissing() {
     if (!activePaymentId || missingSections.length === 0) return;
     setStatus("processing");
-    const keysToRetry = missingSections as PremiumSectionKey[];
+    const keysToRetry = missingSections;
     setMissingSections([]);
     setErrorMessage(null);
 
@@ -284,11 +304,14 @@ export function PremiumUnlock({
 
   if (sections) {
     const free = generateFreeContent(result);
-    const ownsAll = PREMIUM_SECTION_KEYS.every((key) => ownedKeys.includes(key));
-    const allSectionsLoaded = ownedKeys.every((key) => Boolean(sections[key]));
+    const isManual = layout === "manual";
+    const ownsAll = isManual || PREMIUM_SECTION_KEYS.every((key) => ownedKeys.includes(key));
+    const allSectionsLoaded = isManual
+      ? MANUAL_CHAPTER_KEYS.every((key) => Boolean(sections[key]))
+      : ownedKeys.every((key) => Boolean(sections[key]));
     return (
       <div className="flex flex-col gap-3">
-        <h3 className="px-1 text-sm font-medium text-foreground-muted">상세 운세</h3>
+        <h3 className="px-1 text-sm font-medium text-foreground-muted">{isManual ? "나의 사용설명서" : "상세 운세"}</h3>
 
         {/* 사주 기본 정보(일간·오행비율·4기둥)를 여기서 결정론적으로 한 번만 보여준다.
             아래 5개 섹션은 각자 이 정보를 처음부터 다시 설명하지 않도록 프롬프트를 바꿔뒀다
@@ -308,22 +331,17 @@ export function PremiumUnlock({
           <WuxingBar percent={result.wuxingPercent} />
         </div>
 
-        {premiumSections.filter((section) => ownedKeys.includes(section.key)).map((section) => {
-          const text = sections[section.key];
-          const isMissing = missingSections.includes(section.key);
-          return (
-            <div key={section.key} className="rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-              <h4 className="font-medium text-accent-gold-soft">{section.title}</h4>
-              {text ? (
-                <p className="mt-2 whitespace-pre-line leading-relaxed text-foreground">{text}</p>
-              ) : (
-                <p className="mt-2 text-sm text-foreground-muted">
-                  {isMissing ? "생성에 실패했어요. 아래에서 다시 시도해 주세요." : "불러오는 중..."}
-                </p>
-              )}
-            </div>
-          );
-        })}
+        <ReportSections
+          items={
+            isManual
+              ? MANUAL_CHAPTER_META.map((c, i) => ({ key: c.key as string, title: `${i + 1}. ${c.title}` }))
+              : premiumSections
+                  .filter((section) => ownedKeys.includes(section.key))
+                  .map((s) => ({ key: s.key as string, title: s.title }))
+          }
+          sections={sections}
+          missing={missingSections}
+        />
 
         {/* 1가지만 산 경우: 나머지 4가지를 차액(3,000원)으로 바로 여는 카드. 방금 받은 1가지를 읽은
             직후라 가장 설득력이 높은 자리다. 결제 정보는 방금 입력한 값을 그대로 재사용한다. */}

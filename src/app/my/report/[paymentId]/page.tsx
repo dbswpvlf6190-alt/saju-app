@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db/prisma";
 import { SESSION_COOKIE_NAME, verifySessionCookie } from "@/lib/auth/session";
 import { calculateSaju, type SajuInput } from "@/lib/saju";
 import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
-import { getPremiumReport, getNewYearReport } from "@/lib/reports/generate";
+import { getPremiumReport, getNewYearReport, getReportLayout } from "@/lib/reports/generate";
+import { MANUAL_CHAPTER_META } from "@/lib/reports/manualChapters";
 import { PRODUCT_CATALOG, type ProductType } from "@/lib/payment/config";
 import { PillarCard } from "@/components/saju/PillarCard";
 import { WuxingBar } from "@/components/saju/WuxingBar";
@@ -60,12 +61,21 @@ export default async function MyReportPage({ params }: { params: Promise<{ payme
 
   // premium_report / section_upgrade(차액으로 5가지 전체) / single_section(산 1가지만)
   const isSingle = order.productType === "single_section";
-  const premiumSections = getPremiumSections(result).filter((s) => !isSingle || s.key === order.sectionKey);
+  const cached = (order.aiResultJson ? JSON.parse(order.aiResultJson) : {}) as Record<string, string>;
+  const layout = getReportLayout(cached, order.productType);
+  // 새 주문은 6장 "나 사용설명서", 기존 결제 고객·1가지·차액 주문은 결제 당시 주제 방식 그대로.
+  const premiumSections: { key: string; title: string }[] =
+    !isSingle && layout.layout === "manual"
+      ? MANUAL_CHAPTER_META.map((c) => ({ key: c.key, title: c.title }))
+      : getPremiumSections(result)
+          .filter((s) => !isSingle || s.key === order.sectionKey)
+          .map((s) => ({ key: s.key, title: s.title }));
   const res = await getPremiumReport(
     order.paymentId,
     order.birthInputJson,
     order.aiResultJson,
-    premiumSections.map((s) => s.key),
+    premiumSections.map((s) => s.key) as Parameters<typeof getPremiumReport>[3],
+    order.productType,
   );
   const data = await res.json();
   const sections: Record<string, string> = data.sections ?? {};

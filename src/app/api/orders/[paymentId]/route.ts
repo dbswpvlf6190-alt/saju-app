@@ -2,7 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import type { PremiumSectionKey } from "@/lib/saju";
 import { prisma } from "@/lib/db/prisma";
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
-import { PREMIUM_SECTION_KEYS, getCompatibilityReport, getNewYearReport, getPremiumReport } from "@/lib/reports/generate";
+import {
+  PREMIUM_SECTION_KEYS,
+  getCompatibilityReport,
+  getNewYearReport,
+  getPremiumReport,
+  getReportLayout,
+  type ReportSectionKey,
+} from "@/lib/reports/generate";
+import { isManualChapterKey } from "@/lib/reports/manualChapters";
 
 function isPremiumSectionKey(value: string | null): value is PremiumSectionKey {
   return !!value && (PREMIUM_SECTION_KEYS as string[]).includes(value);
@@ -58,10 +66,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ paym
       }
       return await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, [order.sectionKey]);
     }
-    const sectionKeys: PremiumSectionKey[] = isPremiumSectionKey(sectionParam)
-      ? [sectionParam]
-      : PREMIUM_SECTION_KEYS;
-    return await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, sectionKeys);
+    // premium_report / section_upgrade. 기존 결제 고객은 결제 당시 방식(주제 5개), 새 주문은 6장 "나 사용설명서"다.
+    // 클라이언트는 ?layout=1로 어떤 키를 요청해야 하는지 먼저 묻고, 그 키만 ?section=으로 요청할 수 있다.
+    const cached = (order.aiResultJson ? JSON.parse(order.aiResultJson) : {}) as Record<string, string>;
+    const layout = getReportLayout(cached, order.productType);
+    if (req.nextUrl.searchParams.get("layout")) {
+      return NextResponse.json({ status: "PAID", layout: layout.layout, keys: layout.keys });
+    }
+    const requested = isPremiumSectionKey(sectionParam) || isManualChapterKey(sectionParam) ? sectionParam : null;
+    if (requested && !(layout.keys as string[]).includes(requested)) {
+      return NextResponse.json({ status: "PAID", error: "이 주문에서 열 수 없는 항목입니다." }, { status: 403 });
+    }
+    const sectionKeys: ReportSectionKey[] = requested ? [requested] : layout.keys;
+    return await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, sectionKeys, order.productType);
   } catch (e) {
     console.error(`리포트 조회 중 예상하지 못한 오류 (paymentId=${paymentId}):`, e);
     return NextResponse.json({ error: "리포트를 불러오지 못했습니다." }, { status: 500 });

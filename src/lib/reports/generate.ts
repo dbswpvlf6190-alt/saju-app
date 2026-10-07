@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { calculateSaju, type PremiumSectionKey, type SajuInput } from "@/lib/saju";
+import { calculateSaju, type SajuInput } from "@/lib/saju";
 import {
   calculateCompatibilityScores,
   isCompatibilityReportComplete,
@@ -9,6 +9,8 @@ import {
 import { prisma } from "@/lib/db/prisma";
 import { AiInterpretationError, interpretNewYearFortune, interpretSajuSection } from "@/lib/ai/interpretSaju";
 import { interpretCompatibilitySection } from "@/lib/ai/interpretCompatibility";
+import { interpretManualChapter } from "@/lib/ai/interpretManual";
+import { isManualChapterKey } from "@/lib/reports/manualChapters";
 import { NEW_YEAR_REPORT_TARGET_YEAR } from "@/lib/payment/config";
 
 /**
@@ -18,7 +20,8 @@ import { NEW_YEAR_REPORT_TARGET_YEAR } from "@/lib/payment/config";
  * 생성됐든 같은 캐시(Order.aiResultJson)에 쌓이므로 동작이 갈라지지 않는다.
  */
 
-export const PREMIUM_SECTION_KEYS: PremiumSectionKey[] = ["love", "wealth", "career", "relationship", "yearly"];
+export { PREMIUM_SECTION_KEYS, getReportLayout, isPremiumTopicKey, type ReportSectionKey } from "@/lib/reports/layout";
+import { getReportLayout, type ReportSectionKey } from "@/lib/reports/layout";
 
 /** 궁합 상대방(제3자) 원본 생년월일이 보관기간 경과 후 파기되면 이 표시로 대체된다
  * (scripts/purge-partner-data 라우트 참고). 파기 이후에는 이 분기를 만날 일이 없어야
@@ -38,9 +41,11 @@ export async function getPremiumReport(
   paymentId: string,
   birthInputJson: string,
   aiResultJson: string | null,
-  sectionKeys: PremiumSectionKey[] = PREMIUM_SECTION_KEYS,
+  requestedKeys?: ReportSectionKey[],
+  productType: string = "premium_report",
 ) {
   const cached = (aiResultJson ? JSON.parse(aiResultJson) : {}) as Record<string, string>;
+  const sectionKeys: ReportSectionKey[] = requestedKeys ?? getReportLayout(cached, productType).keys;
   const missingKeys = sectionKeys.filter((key) => !cached[key]);
   if (missingKeys.length === 0) {
     const sections = Object.fromEntries(sectionKeys.map((key) => [key, cached[key]]));
@@ -57,7 +62,10 @@ export async function getPremiumReport(
   const result = calculateSaju(birthInput);
 
   const settled = await Promise.allSettled(
-    missingKeys.map(async (key) => [key, await interpretSajuSection(result, key)] as const),
+    missingKeys.map(
+      async (key) =>
+        [key, isManualChapterKey(key) ? await interpretManualChapter(result, key) : await interpretSajuSection(result, key)] as const,
+    ),
   );
   const response = await finalizeSections(paymentId, cached, settled, sectionKeys);
 
@@ -67,7 +75,7 @@ export async function getPremiumReport(
   const data = await response.json();
   if (data.sections) {
     data.sections = Object.fromEntries(
-      Object.entries(data.sections).filter(([key]) => sectionKeys.includes(key as PremiumSectionKey)),
+      Object.entries(data.sections).filter(([key]) => sectionKeys.includes(key as ReportSectionKey)),
     );
   }
   return NextResponse.json(data, { status: response.status });

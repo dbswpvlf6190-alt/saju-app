@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
+import { reportV2Enabled } from "@/lib/reports/manualChapters";
 
 export const metadata: Metadata = { title: "이용약관 | 사주랩" };
 
@@ -21,8 +22,9 @@ export default function TermsPage() {
         <h2>제2조 (서비스의 내용)</h2>
         <p>
           서비스는 이용자가 입력한 생년월일·생시·성별을 바탕으로 사주팔자를 계산하고, 무료
-          결과(오행 분포, 기본 성격 분석, 오늘의 운세)와 유료 상세 리포트(연애운·재물운·직업운·인간관계운·올해의
-          흐름에 대한 AI 기반 해석)를 제공합니다. 또한 이용자 본인과 상대방의 생년월일을 함께
+          결과(오행 분포, 기본 성격 분석, 오늘의 운세)와 유료 상세 리포트({reportV2Enabled()
+            ? "나의 기본 설계도·반복하는 선택·사람 앞에서의 나·일과 돈·지금 시기·오늘부터 해볼 행동으로 구성된 AI 기반 해석. 일부 상품은 연애운·재물운·직업운·인간관계운·올해의 흐름 중 항목별 해석"
+            : "연애운·재물운·직업운·인간관계운·올해의 흐름에 대한 AI 기반 해석"})를 제공합니다. 또한 이용자 본인과 상대방의 생년월일을 함께
           입력하면 궁합 결과(무료 요약 및 유료 상세 분석)를 확인할 수 있는 궁합 서비스도 제공합니다.
         </p>
         <p>

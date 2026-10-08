@@ -39,6 +39,8 @@ STATE_DIR = os.path.join(BASE_DIR, "scripts", "posted_state", "threads_replies")
 RENDER_ROOT = os.environ.get("SAJU_RENDER_DIR", os.path.join(os.path.expanduser("~"), "SajuAutoRender"))
 DRAFT_DIR = os.path.join(RENDER_ROOT, "threads_drafts")
 SITE = "saju-app-three-dusky.vercel.app"
+# 두 사람(궁합) 풀이 답글에만 붙는 직접 링크. ref로 이 링크에서 온 방문·결제를 따로 센다.
+COMPAT_LINK = f"https://{SITE}/compatibility?ref=threads_reply"
 
 BANNED = ["완치", "무조건", "반드시", "100%", "확실히", "틀림없", "당첨될", "당첨돼", "합격합니다", "합격해요", "떨어져요", "떨어집니다", "평생", "절대", "timing", "ilgan", "오늘만", "선착순", "마감", "한정", "후회할"]
 MAX_LEN = 430
@@ -220,10 +222,17 @@ def draft(media_id, promise=None):
         texts = {x["id"]: x["text"].strip() for x in res["replies"]}
         for c in chunk:
             text = strip_name(texts.get(c["id"], ""))
+            problems = validate(text) if text else ["초안 없음"]
+            # 두 사람 답글(궁합 질문)에만 궁합 링크를 코드가 직접 붙인다(2026-10-08 시험). 링크가 있는 답글은 스팸으로 보일 수 있어 일부로
+            # 한정하고, AI가 쓴 본문은 링크 없이 검사한 뒤에 붙인다. 500자(Threads 한도)를 넘으면 붙이지 않는다.
+            if text and not problems and len(c["people"]) == 2:
+                with_link = text.replace("프로필 링크", "아래 링크") + "\n\n" + COMPAT_LINK
+                if len(with_link) <= 500:
+                    text = with_link
             drafts.append({
                 "id": c["id"], "username": c["username"], "original": c["original"],
                 "types": [f"{p['typeName']}({p['hangul']}, {p['date']}{' 음' if p.get('lunar') else ''})" for p in c["people"]],
-                "text": text, "problems": validate(text) if text else ["초안 없음"],
+                "text": text, "problems": problems,
             })
     os.makedirs(DRAFT_DIR, exist_ok=True)
     with open(_draft_path(media_id), "w", encoding="utf-8") as f:

@@ -12,6 +12,9 @@ import { getSessionUserId } from "@/lib/auth/session";
  * 클라이언트가 보낸 값은 신뢰하지 않고, 서버가 PortOne API를 직접 조회해
  * 결제 상태(PAID)와 금액이 우리가 발급한 주문과 정확히 일치하는지 재검증한다.
  */
+// 리포트 한 장 생성에 20~45초(재시도 포함) 걸린다. 기본 제한이 짧으면 생성이 중간에 끊겨 '준비 중'으로 남는다 (모든 요금제 공통 상한 60초).
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest, { params }: { params: Promise<{ paymentId: string }> }) {
   const { ok, retryAfterSeconds } = rateLimit(req, "orders:complete", {
     limit: 20,

@@ -12,6 +12,9 @@ import {
 } from "@/lib/reports/generate";
 import { isManualChapterKey } from "@/lib/reports/manualChapters";
 
+// 리포트 한 장 생성에 20~45초(재시도 포함) 걸린다. 기본 제한이 짧으면 생성이 중간에 끊겨 '준비 중'으로 남는다 (모든 요금제 공통 상한 60초).
+export const maxDuration = 60;
+
 function isPremiumSectionKey(value: string | null): value is PremiumSectionKey {
   return !!value && (PREMIUM_SECTION_KEYS as string[]).includes(value);
 }

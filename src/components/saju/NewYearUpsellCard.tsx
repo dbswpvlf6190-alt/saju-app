@@ -146,21 +146,20 @@ export function NewYearUpsellCard({
       {needsContactInfo && (
         <div className="flex flex-col gap-2 text-left">
           <input
-            type="text"
-            value={fullName}
+            type="text" autoComplete="name" value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="결제자 이름"
             className="w-full rounded-lg border border-[rgba(200,98,63,0.3)] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#c8623f]"
           />
           <input
-            type="email"
+            type="email" autoComplete="email" inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             className="w-full rounded-lg border border-[rgba(200,98,63,0.3)] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#c8623f]"
           />
           <input
-            type="tel"
+            type="tel" autoComplete="tel" inputMode="tel"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="01012345678"

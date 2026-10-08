@@ -266,8 +266,7 @@ export function CompatibilityUnlock({
         </label>
         <input
           id="compat-purchase-name"
-          type="text"
-          value={fullName}
+          type="text" autoComplete="name" value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           placeholder="홍길동"
           className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
@@ -280,7 +279,7 @@ export function CompatibilityUnlock({
         </label>
         <input
           id="compat-purchase-email"
-          type="email"
+          type="email" autoComplete="email" inputMode="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
@@ -294,7 +293,7 @@ export function CompatibilityUnlock({
         </label>
         <input
           id="compat-purchase-phone"
-          type="tel"
+          type="tel" autoComplete="tel" inputMode="tel"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           placeholder="01012345678"

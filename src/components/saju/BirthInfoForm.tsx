@@ -201,7 +201,11 @@ export function BirthInfoForm({
             <select
               aria-label="시"
               value={hour ?? ""}
-              onChange={(e) => setHour(e.target.value ? Number(e.target.value) : null)}
+              onChange={(e) => {
+                setHour(e.target.value ? Number(e.target.value) : null);
+                // 분은 몰라도 풀이에 거의 영향이 없어서, 시를 고르면 00분으로 미리 채워 둔다(따로 안 골라도 제출되게).
+                if (e.target.value && minute === null) setMinute(0);
+              }}
               className={inputClass}
             >
               <option value="" disabled>

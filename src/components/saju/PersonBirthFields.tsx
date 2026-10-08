@@ -205,7 +205,9 @@ export function PersonBirthFields({
             <select
               aria-label="시"
               value={value.hour ?? ""}
-              onChange={(e) => patch({ hour: e.target.value ? Number(e.target.value) : null })}
+              onChange={(e) =>
+                patch({ hour: e.target.value ? Number(e.target.value) : null, ...(e.target.value && value.minute === null ? { minute: 0 } : {}) })
+              }
               className={inputClass}
             >
               <option value="" disabled>

@@ -119,11 +119,11 @@ export function SectionUpgradeCard({
 
       {needsContactInfo && (
         <div className="flex flex-col gap-2">
-          <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="결제자 이름"
+          <input type="text" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="결제자 이름"
             className="w-full rounded-lg border border-border-subtle bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-accent-gold" />
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+          <input type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
             className="w-full rounded-lg border border-border-subtle bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-accent-gold" />
-          <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="01012345678"
+          <input type="tel" autoComplete="tel" inputMode="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="01012345678"
             className="w-full rounded-lg border border-border-subtle bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-accent-gold" />
         </div>
       )}

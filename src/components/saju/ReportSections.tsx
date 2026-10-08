@@ -24,9 +24,16 @@ export function ReportSections({
             {text ? (
               <p className="mt-2 whitespace-pre-line leading-relaxed text-foreground">{text}</p>
             ) : (
-              <p className="mt-2 text-sm text-foreground-muted">
-                {isMissing ? "생성에 실패했어요. 아래에서 다시 시도해 주세요." : "불러오는 중..."}
-              </p>
+              isMissing ? (
+                <p className="mt-2 text-sm text-foreground-muted">생성에 실패했어요. 아래에서 다시 시도해 주세요.</p>
+              ) : (
+                <div className="mt-2 flex flex-col gap-2" aria-label="불러오는 중...">
+                  <p className="text-sm text-foreground-muted">불러오는 중... 이 장을 쓰고 있어요</p>
+                  <div className="h-3 w-full animate-pulse rounded bg-background-elevated" />
+                  <div className="h-3 w-5/6 animate-pulse rounded bg-background-elevated" />
+                  <div className="h-3 w-2/3 animate-pulse rounded bg-background-elevated" />
+                </div>
+              )
             )}
           </div>
         );

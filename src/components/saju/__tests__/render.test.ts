@@ -88,3 +88,25 @@ describe("결제 후 본문(ReportSections)", () => {
     expect(html).toContain("연애 본문");
   });
 });
+
+describe("결제 후 진행 안내(ReportProgress)", () => {
+  it("완성 장 수와 대기 안내가 보인다", async () => {
+    const { ReportProgress } = await import("../ReportProgress");
+    const html = renderToStaticMarkup(createElement(ReportProgress, { total: 6, done: 2 }));
+    expect(html).toContain("리포트를 쓰고 있어요");
+    expect(html).toContain("보통 30~60초");
+    expect(html).toContain("2/6장 완성");
+  });
+
+  it("아직 안 온 장은 깜박이는 빈 칸으로 보인다", () => {
+    const html = renderToStaticMarkup(
+      createElement(ReportSections, { items: [{ key: "overview", title: "1. 나의 기본 설계도" }], sections: {}, missing: [] }),
+    );
+    expect(html).toContain("animate-pulse");
+    expect(html).toContain("불러오는 중...");
+  });
+
+  it("결제 전 소개 화면에는 대기 안내를 넣지 않는다", () => {
+    expect(offer()).not.toContain("30~60초");
+  });
+});

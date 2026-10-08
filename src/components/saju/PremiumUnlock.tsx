@@ -23,6 +23,7 @@ import { PremiumOffer, type OfferChoice } from "./PremiumOffer";
 import { MANUAL_CHAPTER_META, MANUAL_CHAPTER_KEYS, type ReportLayout } from "@/lib/reports/manualChapters";
 import { SectionUpgradeCard } from "./SectionUpgradeCard";
 import { ReportSections } from "./ReportSections";
+import { ReportProgress } from "./ReportProgress";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -331,6 +332,13 @@ export function PremiumUnlock({
           </div>
           <WuxingBar percent={result.wuxingPercent} />
         </div>
+
+        {!allSectionsLoaded && missingSections.length === 0 && (
+          <ReportProgress
+            total={isManual ? MANUAL_CHAPTER_KEYS.length : ownedKeys.length}
+            done={(isManual ? MANUAL_CHAPTER_KEYS : ownedKeys).filter((key) => Boolean(sections[key])).length}
+          />
+        )}
 
         <ReportSections
           items={

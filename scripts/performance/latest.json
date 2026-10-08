@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-04T09:03:36",
+  "generated_at": "2026-10-08T12:58:57",
   "account": {
     "followers": 5,
-    "media_count": 63,
+    "media_count": 68,
     "followers_delta_7d": 0,
     "followers_delta_30d": 0
   },
@@ -22,7 +22,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 864.0,
+      "age_hours": 964.0,
       "metrics": {
         "reach": 147,
         "likes": 0,
@@ -51,7 +51,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 852.6,
+      "age_hours": 952.5,
       "metrics": {
         "reach": 6,
         "likes": 0,
@@ -80,7 +80,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 829.0,
+      "age_hours": 928.9,
       "metrics": {
         "reach": 123,
         "likes": 1,
@@ -109,7 +109,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 814.9,
+      "age_hours": 914.9,
       "metrics": {
         "reach": 105,
         "likes": 1,
@@ -138,7 +138,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 805.0,
+      "age_hours": 904.9,
       "metrics": {
         "reach": 19,
         "likes": 0,
@@ -167,7 +167,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 781.0,
+      "age_hours": 880.9,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -196,7 +196,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 757.0,
+      "age_hours": 856.9,
       "metrics": {
         "reach": 69,
         "likes": 1,
@@ -225,7 +225,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 756.5,
+      "age_hours": 856.4,
       "metrics": {
         "reach": 8,
         "likes": 0,
@@ -254,7 +254,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 756.0,
+      "age_hours": 855.9,
       "metrics": {
         "reach": 6,
         "likes": 1,
@@ -283,7 +283,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 733.0,
+      "age_hours": 832.9,
       "metrics": {
         "reach": 25,
         "likes": 0,
@@ -312,7 +312,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 722.2,
+      "age_hours": 822.1,
       "metrics": {
         "reach": 49,
         "likes": 0,
@@ -341,7 +341,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 669.9,
+      "age_hours": 769.9,
       "metrics": {
         "reach": 103,
         "likes": 0,
@@ -370,7 +370,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 538.9,
+      "age_hours": 638.9,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -399,7 +399,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 514.4,
+      "age_hours": 614.3,
       "metrics": {
         "reach": 128,
         "likes": 1,
@@ -428,7 +428,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 493.0,
+      "age_hours": 592.9,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -457,7 +457,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 397.4,
+      "age_hours": 497.4,
       "metrics": {
         "reach": 120,
         "likes": 2,
@@ -486,7 +486,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 387.1,
+      "age_hours": 487.0,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -515,7 +515,7 @@
       "ctaType": null,
       "durationSec": 32.3,
       "keywords": null,
-      "age_hours": 349.0,
+      "age_hours": 448.9,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -550,7 +550,7 @@
         "소비습관",
         "돈관리"
       ],
-      "age_hours": 325.0,
+      "age_hours": 424.9,
       "metrics": {
         "reach": 16,
         "likes": 0,
@@ -585,7 +585,7 @@
         "일간",
         "연애성향"
       ],
-      "age_hours": 301.0,
+      "age_hours": 400.9,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -620,7 +620,7 @@
         "일간",
         "성향"
       ],
-      "age_hours": 277.0,
+      "age_hours": 376.9,
       "metrics": {
         "reach": 111,
         "likes": 1,
@@ -655,7 +655,7 @@
         "연애",
         "성향차이"
       ],
-      "age_hours": 253.0,
+      "age_hours": 352.9,
       "metrics": {
         "reach": 141,
         "likes": 1,
@@ -690,7 +690,7 @@
         "일간",
         "사주해석"
       ],
-      "age_hours": 215.9,
+      "age_hours": 315.9,
       "metrics": {
         "reach": 108,
         "likes": 1,
@@ -725,7 +725,7 @@
         "비겁",
         "식상"
       ],
-      "age_hours": 205.0,
+      "age_hours": 304.9,
       "metrics": {
         "reach": 137,
         "likes": 1,
@@ -760,7 +760,7 @@
         "자기진단",
         "사주"
       ],
-      "age_hours": 133.0,
+      "age_hours": 232.9,
       "metrics": {
         "reach": 43,
         "likes": 0,
@@ -795,7 +795,7 @@
         "편안함",
         "사주"
       ],
-      "age_hours": 109.0,
+      "age_hours": 208.9,
       "metrics": {
         "reach": 42,
         "likes": 1,
@@ -830,7 +830,7 @@
         "자기이해",
         "결과확인"
       ],
-      "age_hours": 85.0,
+      "age_hours": 184.9,
       "metrics": {
         "reach": 103,
         "likes": 1,
@@ -865,7 +865,7 @@
         "댓글참여",
         "사주"
       ],
-      "age_hours": 61.0,
+      "age_hours": 160.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -900,7 +900,7 @@
         "자기진단",
         "사주"
       ],
-      "age_hours": 37.0,
+      "age_hours": 136.9,
       "metrics": {
         "reach": 15,
         "likes": 0,
@@ -909,9 +909,9 @@
         "shares": 0,
         "total_interactions": 0,
         "views": 18,
-        "avg_watch_sec": 1.57
+        "avg_watch_sec": 1.66
       },
-      "watch_ratio": 0.058,
+      "watch_ratio": 0.061,
       "interaction_rate": 0.0
     },
     {
@@ -935,7 +935,7 @@
         "반응",
         "사주"
       ],
-      "age_hours": 205.6,
+      "age_hours": 305.5,
       "metrics": {
         "reach": 116,
         "likes": 1,
@@ -970,7 +970,7 @@
         "사주",
         "성격"
       ],
-      "age_hours": 181.0,
+      "age_hours": 280.9,
       "metrics": {
         "reach": 102,
         "likes": 0,
@@ -1005,7 +1005,7 @@
         "사주",
         "성격"
       ],
-      "age_hours": 157.0,
+      "age_hours": 256.9,
       "metrics": {
         "reach": 134,
         "likes": 1,
@@ -1040,7 +1040,7 @@
         "사주",
         "성격"
       ],
-      "age_hours": 146.4,
+      "age_hours": 246.3,
       "metrics": {
         "reach": 108,
         "likes": 1,
@@ -1055,6 +1055,110 @@
       "interaction_rate": 0.0185
     },
     {
+      "type": "릴스",
+      "day": 35,
+      "id": "R50",
+      "posted_at": "2026-10-04T11:01:06.641795+00:00",
+      "title": "임용 1차 막판, 사주로 보는 공부 스타일 3가지",
+      "category": "인간관계",
+      "subcategory": "시험",
+      "topic": "임용 1차를 앞두고 막판 교육학 논술 정리할 때 드러나는 성향 3가지",
+      "format": "리스트형",
+      "exam": "imyong",
+      "hook_first": "임용 1차 앞두고",
+      "ctaType": "C",
+      "durationSec": 25.3,
+      "keywords": [
+        "임용고시",
+        "임용1차",
+        "교육학논술",
+        "수험생",
+        "사주성향"
+      ],
+      "age_hours": 88.9,
+      "metrics": {
+        "reach": 25,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 27,
+        "avg_watch_sec": 2.43
+      },
+      "watch_ratio": 0.096,
+      "interaction_rate": 0.08
+    },
+    {
+      "type": "릴스",
+      "day": 36,
+      "id": "R51",
+      "posted_at": "2026-10-06T11:01:01.738556+00:00",
+      "title": "스터디에서 유독 흔들리는 사람들의 공통점",
+      "category": "직업운",
+      "subcategory": "시험",
+      "topic": "임용 스터디에서 비교당하는 느낌에 쉽게 흔들리는 수험생의 사주적 특징",
+      "format": "스토리형",
+      "exam": "imyong",
+      "hook_first": "스터디원이 그러는데",
+      "ctaType": "A",
+      "durationSec": 24.3,
+      "keywords": [
+        "임용고시",
+        "임용스터디",
+        "수험생",
+        "멘탈관리",
+        "비교심리"
+      ],
+      "age_hours": 40.9,
+      "metrics": {
+        "reach": 26,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 26,
+        "avg_watch_sec": 1.99
+      },
+      "watch_ratio": 0.082,
+      "interaction_rate": 0.0
+    },
+    {
+      "type": "릴스",
+      "day": 37,
+      "id": "R52",
+      "posted_at": "2026-10-07T11:02:28.900517+00:00",
+      "title": "유독 나한테만 편하게 구는 사람",
+      "category": "인간관계",
+      "subcategory": "인간관계",
+      "topic": "나에게만 유독 편하게 굴고 예의를 덜 차리는 사람과의 관계 패턴",
+      "format": "관계형",
+      "exam": null,
+      "hook_first": "나한테만",
+      "ctaType": "B",
+      "durationSec": 23.3,
+      "keywords": [
+        "인간관계",
+        "편한사람",
+        "비겁",
+        "성격"
+      ],
+      "age_hours": 16.9,
+      "metrics": {
+        "reach": 111,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 121,
+        "avg_watch_sec": 3.69
+      },
+      "watch_ratio": 0.158,
+      "interaction_rate": 0.018
+    },
+    {
       "type": "카드뉴스",
       "day": 1,
       "id": "C01",
@@ -1067,7 +1171,7 @@
       "exam": null,
       "hook_first": "오행, 3분이면 완전히 이해돼요",
       "ctaType": null,
-      "age_hours": 863.7,
+      "age_hours": 963.7,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1092,7 +1196,7 @@
       "exam": null,
       "hook_first": "사주 용어, 헷갈리셨죠?",
       "ctaType": null,
-      "age_hours": 862.0,
+      "age_hours": 961.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1117,7 +1221,7 @@
       "exam": null,
       "hook_first": "재물운 좋은 사람들의 공통점",
       "ctaType": null,
-      "age_hours": 838.0,
+      "age_hours": 937.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1142,7 +1246,7 @@
       "exam": null,
       "hook_first": "연애할 때 나는 어떤 스타일일까?",
       "ctaType": null,
-      "age_hours": 814.9,
+      "age_hours": 914.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1167,7 +1271,7 @@
       "exam": null,
       "hook_first": "이직·승진 타이밍, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 814.0,
+      "age_hours": 913.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1192,7 +1296,7 @@
       "exam": null,
       "hook_first": "태어난 계절, 기운에 힌트를 준대요",
       "ctaType": null,
-      "age_hours": 790.0,
+      "age_hours": 889.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1217,7 +1321,7 @@
       "exam": null,
       "hook_first": "궁합 볼 때, 뭘 보는 건지 아세요?",
       "ctaType": null,
-      "age_hours": 766.0,
+      "age_hours": 865.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1242,7 +1346,7 @@
       "exam": null,
       "hook_first": "재물 그릇이 크다는 사주, 신호래요",
       "ctaType": null,
-      "age_hours": 742.0,
+      "age_hours": 841.9,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1267,7 +1371,7 @@
       "exam": null,
       "hook_first": "조직형 vs 자율형, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 741.5,
+      "age_hours": 841.4,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1292,7 +1396,7 @@
       "exam": null,
       "hook_first": "사주가 자기이해 도구인 이유",
       "ctaType": null,
-      "age_hours": 741.0,
+      "age_hours": 840.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1317,7 +1421,7 @@
       "exam": null,
       "hook_first": "내 인생 귀인, 사주에 신호가 있대요",
       "ctaType": null,
-      "age_hours": 722.3,
+      "age_hours": 822.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1342,7 +1446,7 @@
       "exam": null,
       "hook_first": "삼재, 무섭게만 알고 계셨나요",
       "ctaType": null,
-      "age_hours": 670.0,
+      "age_hours": 769.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1367,7 +1471,7 @@
       "exam": null,
       "hook_first": "정재 vs 편재, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 669.9,
+      "age_hours": 769.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1392,7 +1496,7 @@
       "exam": null,
       "hook_first": "짝사랑이 유독 긴 사람 특징",
       "ctaType": null,
-      "age_hours": 538.9,
+      "age_hours": 638.9,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -1417,7 +1521,7 @@
       "exam": null,
       "hook_first": "N잡·부업 체질, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 526.0,
+      "age_hours": 625.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1442,7 +1546,7 @@
       "exam": null,
       "hook_first": "맨날 나만 손해보는 관계, 신호 있나요",
       "ctaType": null,
-      "age_hours": 502.0,
+      "age_hours": 601.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1467,7 +1571,7 @@
       "exam": null,
       "hook_first": "이사 날짜, 아무 날이나 잡아도 될까",
       "ctaType": null,
-      "age_hours": 369.5,
+      "age_hours": 469.4,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1492,7 +1596,7 @@
       "exam": null,
       "hook_first": "십성이라는 말, 사실 어렵지 않아요",
       "ctaType": null,
-      "age_hours": 358.0,
+      "age_hours": 457.9,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1517,7 +1621,7 @@
       "exam": null,
       "hook_first": "태어난 시간, 왜 중요하다고 할까요",
       "ctaType": null,
-      "age_hours": 333.9,
+      "age_hours": 433.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1542,7 +1646,7 @@
       "exam": null,
       "hook_first": "거절 못하는 나, 거절 잘하는 쟤",
       "ctaType": "A",
-      "age_hours": 253.1,
+      "age_hours": 353.1,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1567,7 +1671,7 @@
       "exam": null,
       "hook_first": "이 중 몇 개나 해당되나요",
       "ctaType": "B",
-      "age_hours": 190.0,
+      "age_hours": 289.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1592,7 +1696,7 @@
       "exam": null,
       "hook_first": "칭찬받아야 크는 사람, 알아서 크는 사람",
       "ctaType": "C",
-      "age_hours": 118.0,
+      "age_hours": 217.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1617,7 +1721,7 @@
       "exam": null,
       "hook_first": "월급날마다 통장이 텅 비는 이유",
       "ctaType": "A",
-      "age_hours": 46.0,
+      "age_hours": 145.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1628,186 +1732,65 @@
         "views": 6
       },
       "interaction_rate": 1.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 24,
+      "id": "C24",
+      "posted_at": "2026-10-04T21:33:09.726104+00:00",
+      "title": "이 중 3개 이상이면 번아웃 위험군",
+      "category": "직업운",
+      "subcategory": "직장",
+      "topic": "번아웃이 빨리 오는 성향을 자기진단 형태로 짚는 카드뉴스",
+      "format": "자기진단형",
+      "exam": null,
+      "hook_first": "이 중 3개 이상이면 번아웃 위험군",
+      "ctaType": "B",
+      "age_hours": 78.4,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 6
+      },
+      "interaction_rate": 1.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 25,
+      "id": "C25",
+      "posted_at": "2026-10-08T02:03:45.611108+00:00",
+      "title": "왜 유독 그 사람\n앞에서만 예민해질까",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "특정 사람 앞에서만 유독 예민하고 날카로워지는 현상을 사주 관점으로 해석",
+      "format": "궁금증형",
+      "exam": null,
+      "hook_first": "왜 유독 그 사람\n앞에서만 예민해질까",
+      "ctaType": "C",
+      "age_hours": 1.9,
+      "metrics": {
+        "reach": 1,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 2
+      },
+      "interaction_rate": 2.0
     }
   ],
   "app": {
-    "daily_events": {
-      "2026-09-03": {
-        "landing_view": 2
-      },
-      "2026-09-04": {
-        "free_result_view": 3,
-        "landing_view": 4,
-        "saju_complete": 3,
-        "saju_start": 3
-      },
-      "2026-09-05": {
-        "landing_view": 3
-      },
-      "2026-09-06": {
-        "landing_view": 1
-      },
-      "2026-09-07": {
-        "landing_view": 3
-      },
-      "2026-09-08": {
-        "landing_view": 1
-      },
-      "2026-09-09": {
-        "landing_view": 2
-      },
-      "2026-09-10": {
-        "free_result_view": 2,
-        "landing_view": 4,
-        "saju_complete": 2,
-        "saju_start": 2
-      },
-      "2026-09-11": {
-        "free_result_view": 21,
-        "landing_view": 47,
-        "premium_cta_click": 1,
-        "saju_complete": 20,
-        "saju_start": 20
-      },
-      "2026-09-12": {
-        "free_result_view": 2,
-        "landing_view": 10,
-        "saju_complete": 2,
-        "saju_start": 2
-      },
-      "2026-09-13": {
-        "free_result_view": 2,
-        "landing_view": 6,
-        "saju_complete": 2,
-        "saju_start": 2
-      },
-      "2026-09-14": {
-        "landing_view": 1
-      },
-      "2026-09-15": {
-        "landing_view": 1
-      },
-      "2026-09-16": {
-        "checkout_start": 2,
-        "coupon_redeemed": 2,
-        "free_result_view": 20,
-        "landing_view": 29,
-        "premium_cta_click": 2,
-        "saju_complete": 18,
-        "saju_start": 18
-      },
-      "2026-09-17": {
-        "free_result_view": 3,
-        "landing_view": 7,
-        "saju_complete": 3,
-        "saju_start": 3
-      },
-      "2026-09-18": {
-        "free_result_view": 11,
-        "landing_view": 18,
-        "saju_complete": 11,
-        "saju_start": 11
-      },
-      "2026-09-19": {
-        "landing_view": 1
-      },
-      "2026-09-20": {
-        "landing_view": 1
-      },
-      "2026-09-21": {
-        "landing_view": 1
-      },
-      "2026-09-23": {
-        "free_result_view": 2,
-        "landing_view": 4,
-        "saju_complete": 2,
-        "saju_start": 2
-      },
-      "2026-09-25": {
-        "checkout_start": 1,
-        "coupon_redeemed": 1,
-        "free_result_view": 18,
-        "landing_view": 38,
-        "premium_cta_click": 1,
-        "saju_complete": 16,
-        "saju_start": 16
-      },
-      "2026-09-26": {
-        "checkout_start": 6,
-        "free_result_view": 15,
-        "landing_view": 38,
-        "payment_success": 5,
-        "premium_cta_click": 3,
-        "premium_offer_seen": 7,
-        "saju_complete": 10,
-        "saju_start": 10
-      },
-      "2026-09-27": {
-        "free_result_view": 2,
-        "landing_view": 11,
-        "premium_offer_seen": 2,
-        "saju_complete": 2,
-        "saju_start": 2
-      },
-      "2026-09-28": {
-        "free_result_view": 1,
-        "landing_view": 6,
-        "premium_offer_seen": 1,
-        "saju_complete": 1,
-        "saju_start": 1
-      },
-      "2026-09-29": {
-        "free_result_view": 3,
-        "landing_view": 10,
-        "premium_cta_click": 2,
-        "premium_offer_seen": 2,
-        "saju_complete": 3,
-        "saju_start": 3
-      },
-      "2026-09-30": {
-        "landing_view": 1
-      },
-      "2026-10-01": {
-        "landing_view": 2
-      },
-      "2026-10-02": {
-        "free_result_view": 1,
-        "landing_view": 3,
-        "premium_offer_seen": 1,
-        "saju_complete": 1,
-        "saju_start": 1
-      },
-      "2026-10-03": {
-        "checkout_start": 1,
-        "free_result_view": 3,
-        "landing_view": 10,
-        "premium_cta_click": 1,
-        "premium_offer_seen": 1,
-        "saju_complete": 2,
-        "saju_start": 2
-      }
-    },
-    "coupons": {
-      "issued": 10,
-      "used": 3
-    },
-    "landing_by_ref_30d": {
-      "(없음)": 214,
-      "threads": 25,
-      "ig_profile": 15,
-      "share_kakao": 4,
-      "home_banner": 4,
-      "kakao_open": 2,
-      "ig_reel": 1
-    },
-    "payments_by_src_30d": {
-      "(없음)": 5
-    }
+    "error": "DATABASE_URL을 찾을 수 없음"
   },
   "threads": {
     "account": {
       "username": "sajulab_official",
-      "followers": 23
+      "followers": 33
     },
     "items": [
       {
@@ -1816,7 +1799,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 2396,
+          "views": 2417,
           "likes": 42,
           "replies": 107,
           "reposts": 5,
@@ -1844,9 +1827,37 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 209,
+          "views": 214,
           "likes": 1,
           "replies": 2,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "RD03",
+        "posted_at": "2026-10-05T12:00:18.649537+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 1586,
+          "likes": 11,
+          "replies": 40,
+          "reposts": 6,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "RD08",
+        "posted_at": "2026-10-07T12:00:22.841278+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 112,
+          "likes": 4,
+          "replies": 10,
           "reposts": 0,
           "quotes": 0,
           "shares": 0
@@ -1942,7 +1953,7 @@
         "topic": "수능응원",
         "exam": "suneung",
         "metrics": {
-          "views": 149,
+          "views": 150,
           "likes": 0,
           "replies": 1,
           "reposts": 0,
@@ -1956,9 +1967,107 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 885,
+          "views": 901,
           "likes": 8,
           "replies": 5,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "T09",
+        "posted_at": "2026-10-04T21:32:18.630613+00:00",
+        "topic": "수능응원",
+        "exam": "suneung",
+        "metrics": {
+          "views": 144,
+          "likes": 0,
+          "replies": 1,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "T10",
+        "posted_at": "2026-10-06T03:30:19.376989+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 85,
+          "likes": 0,
+          "replies": 1,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "T12",
+        "posted_at": "2026-10-06T12:00:21.267798+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 129,
+          "likes": 0,
+          "replies": 1,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "T13",
+        "posted_at": "2026-10-07T03:30:18.436730+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 46,
+          "likes": 0,
+          "replies": 1,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "T14",
+        "posted_at": "2026-10-08T03:30:21.152721+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 0,
+          "likes": 0,
+          "replies": 1,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "T22",
+        "posted_at": "2026-10-04T10:00:21.259911+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 129,
+          "likes": 1,
+          "replies": 0,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
+        "id": "T23",
+        "posted_at": "2026-10-04T01:59:36.849713+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 217,
+          "likes": 0,
+          "replies": 1,
           "reposts": 0,
           "quotes": 0,
           "shares": 0

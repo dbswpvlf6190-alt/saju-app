@@ -27,12 +27,13 @@ def find_node():
     local = _home_local()
     home = os.path.expanduser("~")
     return _find("node", [
+        # 정식 설치(2026-10-08, winget OpenJS.NodeJS.LTS)를 가장 먼저 쓴다.
+        r"C:\Program Files\nodejs\node.exe",
         os.path.join(local, "nodejs", "*", "node.exe"),
         os.path.join(home, "AppData", "Local", "nodejs", "*", "node.exe"),
-        # Claude 데스크톱 앱이 설치한 node는 앱 패키지 저장소에 실제 파일이 있다. 앱 안에서는 AppData\Local\nodejs로 보이지만
-        # 스케줄러 같은 일반 프로그램에는 그 경로가 없다(2026-10-08 Threads 풀이 초안 실패 원인). 정식으로 Node를 설치하면 which가 먼저 찾는다.
+        # 예비: Claude 데스크톱 앱이 설치한 node는 앱 패키지 저장소에 실제 파일이 있다. 앱 안에서는 AppData\Local\nodejs로 보이지만
+        # 스케줄러 같은 일반 프로그램에는 그 경로가 없다(2026-10-08 Threads 풀이 초안 실패 원인).
         os.path.join(home, "AppData", "Local", "Packages", "Claude_*", "LocalCache", "Local", "nodejs", "*", "node.exe"),
-        r"C:\Program Files\nodejs\node.exe",
     ]) or "node"
 
 

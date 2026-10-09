@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { SajuResult } from "@/lib/saju";
 import { resultToInput } from "@/lib/saju/types";
-import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 
 type Status = "teaser" | "processing" | "unlocked" | "error";
@@ -126,6 +126,9 @@ export function NewYearUpsellCard({
       trackEvent("payment_fail", { productType: "new_year_report" });
     }
   }
+
+  // 카드사 심사 중(결제 일시 중단)엔 결제가 실패하므로 업셀 카드를 숨긴다(쿠폰 리포트 아래에 뜨는 경우).
+  if (PAYMENTS_PAUSED && status !== "unlocked") return null;
 
   if (status === "unlocked" && text) {
     return (

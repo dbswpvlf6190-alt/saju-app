@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CompatibilitySection } from "@/lib/saju/compatibility";
 import type { SajuInput } from "@/lib/saju/types";
-import { COMPATIBILITY_REPORT_PRICE_KRW } from "@/lib/payment/config";
+import { COMPATIBILITY_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
+import { PaymentWaitlist } from "./PaymentWaitlist";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 
@@ -237,6 +238,11 @@ export function CompatibilityUnlock({
         </div>
       ))}
 
+      {PAYMENTS_PAUSED ? (
+        // 카드사 심사 중엔 결제 폼 대신 "결제 오픈 알림 받기"(config.ts PAYMENTS_PAUSED)
+        <PaymentWaitlist productType="compatibility_report" title="궁합 상세 분석" />
+      ) : (
+        <>
       <div className="flex flex-col gap-2">
         <span className="px-1 text-sm text-foreground-muted">결제 수단</span>
         <div className="grid grid-cols-2 gap-2">
@@ -320,6 +326,8 @@ export function CompatibilityUnlock({
           ? "처리 중..."
           : `${COMPATIBILITY_REPORT_PRICE_KRW.toLocaleString()}원으로 자세히 확인하기`}
       </button>
+        </>
+      )}
     </div>
   );
 }

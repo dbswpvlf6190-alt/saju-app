@@ -1,3 +1,8 @@
+// 카드사 심사가 끝나기 전에는 실연동 MID에서 카드 결제가 "[V104] NO MPI SET 미사용 설정 지불수단"으로 실패한다
+// (10/4·10/6·10/9 결제 시도 전부 실패 확인). 그동안 결제 버튼 대신 "결제 오픈 알림 받기"(이메일)를 보여준다.
+// 심사가 끝나 카드 결제가 열리면 false로 바꾸고 WaitlistSignup에 오픈 안내를 보낸 뒤 목록을 삭제할 것.
+export const PAYMENTS_PAUSED = true;
+
 export const PREMIUM_REPORT_PRICE_KRW = 4900;
 export const PREMIUM_REPORT_NAME = "사주 상세 분석 리포트";
 

@@ -170,3 +170,16 @@ model CompatInvite {
   @@index([inviterKey])
   @@index([expiresAt])
 }
+
+// 결제 일시 중단(카드사 심사 중) 동안 "결제 오픈 알림"을 신청한 이메일. 오픈 안내 1회 발송 후 지체 없이 삭제,
+// 늦어도 수집 후 3개월 안에 삭제한다(개인정보처리방침 1·4번 항목).
+model WaitlistSignup {
+  id          String    @id @default(cuid())
+  email       String
+  productType String
+  src         String?
+  createdAt   DateTime  @default(now())
+  notifiedAt  DateTime?
+
+  @@unique([email, productType])
+}

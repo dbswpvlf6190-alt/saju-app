@@ -9,7 +9,8 @@ import { generateFreeContent } from "@/lib/saju/content";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { ShareButton } from "./ShareButton";
-import { SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
+import { PAYMENTS_PAUSED, SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
+import { PaymentWaitlist } from "./PaymentWaitlist";
 import { WUXING_PERSONA } from "@/lib/saju/persona";
 import {
   PREMIUM_CTA_LABEL,
@@ -63,7 +64,7 @@ export function PremiumUnlock({
   // 입력폼을 보여주기 위한 2단계 흐름. 결제 실패로 되돌아와도 입력폼은 유지해야 하므로
   // 여기서 "details"로 넘어간 뒤에는 "intro"로 되돌리지 않는다. 모바일 결제창 리디렉션
   // 복귀(resumePaymentId)인 경우는 이미 정보를 다 입력하고 왔던 것이라 처음부터 details로 둔다.
-  const [formStep, setFormStep] = useState<"intro" | "details">(() =>
+  const [formStep, setFormStep] = useState<"intro" | "details" | "waitlist">(() =>
     resumePaymentId ? "details" : "intro",
   );
   const [offer, setOffer] = useState<OfferChoice>({ kind: "full" });
@@ -446,7 +447,8 @@ export function PremiumUnlock({
             bridgeLine={WUXING_PERSONA[result.dayPillar.ganWuxing].bridgeLine}
             onChoose={(choice) => {
               setOffer(choice);
-              setFormStep("details");
+              // 카드사 심사 중엔 결제 폼 대신 "결제 오픈 알림 받기"(config.ts PAYMENTS_PAUSED)
+              setFormStep(PAYMENTS_PAUSED ? "waitlist" : "details");
             }}
           />
           <div className="flex flex-col items-center gap-1 text-center text-xs text-foreground-muted">
@@ -492,6 +494,20 @@ export function PremiumUnlock({
               🎟️ 쿠폰 코드가 있으신가요?
             </button>
           )}
+        </div>
+      ) : formStep === "waitlist" ? (
+        <div className="flex flex-col gap-2">
+          <PaymentWaitlist
+            productType={offer.kind === "single" ? "single_section" : "premium_report"}
+            title="상세 풀이"
+          />
+          <button
+            type="button"
+            onClick={() => setFormStep("intro")}
+            className="text-center text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+          >
+            ‹ 이전으로
+          </button>
         </div>
       ) : (
         // 2단계: CTA를 눌러 구매 의사를 밝힌 뒤에만 결제 정보 입력란이 나타난다.

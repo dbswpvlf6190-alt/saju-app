@@ -41,6 +41,24 @@ DRAFT_DIR = os.path.join(RENDER_ROOT, "threads_drafts")
 SITE = "saju-app-three-dusky.vercel.app"
 # 두 사람(궁합) 풀이 답글에만 붙는 직접 링크. ref로 이 링크에서 온 방문·결제를 따로 센다.
 COMPAT_LINK = f"https://{SITE}/compatibility?ref=threads_reply"
+# 결제가 닫혀 있는 동안(PAYMENTS_PAUSED) 한 사람 풀이 답글에 붙이는 무료 사주 링크.
+FREE_LINK = f"https://{SITE}/?ref=threads_reply"
+PAYMENT_CONFIG = os.path.join(BASE_DIR, "src", "lib", "payment", "config.ts")
+
+
+def payments_paused():
+    """사이트 결제 일시 중단 여부(config.ts의 PAYMENTS_PAUSED). 결제가 다시 열리면 답글 마무리도 자동으로 원래(유료 상세 안내)로 돌아간다."""
+    try:
+        with open(PAYMENT_CONFIG, "r", encoding="utf-8") as f:
+            return re.search(r"export const PAYMENTS_PAUSED\s*=\s*true", f.read()) is not None
+    except OSError:
+        return False
+
+
+# 결제 일시 중단 중의 마무리 규칙(2026-10-09). 유료 상세로 보내도 살 수 없으니 사이트의 무료 결과로 보낸다 —
+# 답글에선 일간만 봤고 여덟 글자·오행 비율·성격 풀이(두 사람이면 궁합 점수)는 사이트에서 무료로 바로 나온다는 사실로 넘긴다.
+FREE_MODE_RULES = """- **[지금은 결제 준비 중 — 아래 규칙이 위의 마무리 규칙보다 우선]** 마지막 1~2문장은 유료 상세 풀이가 아니라 사이트의 **무료** 결과로 안내한다. 사실만: 답글은 일간 하나만 본 거고, 여덟 글자(네 기둥)·오행 비율·캐릭터 성격 풀이는 사이트에서 생일 넣으면 30초 만에 무료로 바로 나온다(두 사람이면 '둘 궁합 점수랑 서로 오행 비교'도 무료). 반쪽으로 넘기면 아깝다는 느낌은 유지하되 '상세', '유료', '결제', '프로필 링크'라는 말은 쓰지 말고, 링크는 '아래 링크'라고만 가리킨다(주소는 코드가 붙인다). 예) '답글로는 일간만 봤거든. 네 여덟 글자랑 오행 비율은 아래 링크에서 생일만 넣으면 30초면 무료로 나와 👇' — 그대로 복사하지 말고 매번 다르게.
+"""
 
 BANNED = ["완치", "무조건", "반드시", "100%", "확실히", "틀림없", "당첨될", "당첨돼", "합격합니다", "합격해요", "떨어져요", "떨어집니다", "평생", "절대", "timing", "ilgan", "오늘만", "선착순", "마감", "한정", "후회할"]
 MAX_LEN = 430
@@ -218,15 +236,19 @@ def draft(media_id, promise=None):
             # 글이 "생일만 적으면 연애 스타일 알려줄게"처럼 주제를 약속했으면, 답글에 주제가 없을 때 그 주제로 답한다.
             for item in payload:
                 item["post_promise"] = promise
-        res = call_claude_raw(WRITE_PROMPT, json.dumps(payload, ensure_ascii=False))
+        paused = payments_paused()
+        prompt = WRITE_PROMPT.replace("- 말투:", FREE_MODE_RULES + "- 말투:", 1) if paused else WRITE_PROMPT
+        res = call_claude_raw(prompt, json.dumps(payload, ensure_ascii=False))
         texts = {x["id"]: x["text"].strip() for x in res["replies"]}
         for c in chunk:
             text = strip_name(texts.get(c["id"], ""))
             problems = validate(text) if text else ["초안 없음"]
             # 두 사람 답글(궁합 질문)에만 궁합 링크를 코드가 직접 붙인다(2026-10-08 시험). 링크가 있는 답글은 스팸으로 보일 수 있어 일부로
             # 한정하고, AI가 쓴 본문은 링크 없이 검사한 뒤에 붙인다. 500자(Threads 한도)를 넘으면 붙이지 않는다.
-            if text and not problems and len(c["people"]) == 2:
-                with_link = text.replace("프로필 링크", "아래 링크") + "\n\n" + COMPAT_LINK
+            # 결제 일시 중단 중(10/9~)에는 한 사람 답글에도 무료 사주 링크를 붙여 사이트로 넘어오게 한다(Threads 유입 22→7 대응).
+            link = COMPAT_LINK if len(c["people"]) == 2 else (FREE_LINK if paused and len(c["people"]) == 1 else None)
+            if text and not problems and link:
+                with_link = text.replace("프로필 링크", "아래 링크") + "\n\n" + link
                 if len(with_link) <= 500:
                     text = with_link
             drafts.append({

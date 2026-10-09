@@ -174,3 +174,4 @@
 - 조치: `src/lib/payment/config.ts`의 `PAYMENTS_PAUSED = true` → 상세 풀이(4,900/1,900)·궁합 결제 버튼을 누르면 결제 폼 대신 `PaymentWaitlist`(이메일 + 필수 동의)가 뜨고 `WaitlistSignup` 테이블에 저장(같은 이메일·상품은 1번). 신년운세 업셀 카드는 숨김. 쿠폰 사용은 그대로. 개인정보처리방침에 항목·목적·보관기간(안내 1회 후 삭제, 최대 3개월) 추가, 시행일 10/9.
 - **카드 결제가 열리면**: `PAYMENTS_PAUSED = false`로 바꿔 배포 → `WaitlistSignup` 이메일들에 오픈 안내 1회 발송(아직 메일 발송 기능 없음 — 그때 만들거나 수동 발송) → 보낸 뒤 행 삭제. 이벤트 `waitlist_view`/`waitlist_signup`으로 대기 수요 확인.
 - 데스크톱 점검(노트북 인수인계 5항목): 저장소·node·AI 키·스케줄러 정상, **`credentials/ntfy.json` 없음**(데스크톱 실행분 알림 안 감 — 사용자에게 토픽 요청).
+- **10/9 Threads 답글 → 사이트 유입**: 결제 일시 중단 중(`payments_paused()`가 config.ts의 `PAYMENTS_PAUSED` 읽음)엔 풀이 답글 마무리를 유료 상세 대신 "여덟 글자·오행 비율(두 사람이면 궁합 점수)은 아래 링크에서 30초 무료"로 바꾸고(`FREE_MODE_RULES`), 한 사람 답글에도 `/?ref=threads_reply` 링크를 붙임(두 사람은 기존 `/compatibility?ref=threads_reply`). 결제가 다시 열리면 자동으로 원래 마무리·링크(두 사람만)로 돌아감. 비교 기준: 이번 주 Threads 유입 7(지난주 22), `threads_reply` 누적 0 → 10/16경 비교.

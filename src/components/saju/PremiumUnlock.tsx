@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { PremiumSection, PremiumSectionKey, SajuResult } from "@/lib/saju";
 // ResultView.tsx와 같은 이유로 배럴 대신 서브모듈에서 직접 가져온다.
@@ -68,6 +68,16 @@ export function PremiumUnlock({
     resumePaymentId ? "details" : "intro",
   );
   const [offer, setOffer] = useState<OfferChoice>({ kind: "full" });
+  // 상품 선택(긴 화면) → 결제 정보/알림 신청(짧은 칸)으로 바뀌면 위쪽 높이가 줄어서 화면이 아래로 내려간 것처럼
+  // 보였다(10/9 사용자 제보). 단계가 바뀌면 새 칸을 화면 가운데로 다시 맞춘다. 첫 렌더(결제 복귀 등)엔 움직이지 않는다.
+  const stepRef = useRef<HTMLDivElement>(null);
+  const prevStep = useRef(formStep);
+  useEffect(() => {
+    if (prevStep.current !== formStep && formStep !== "intro") {
+      stepRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+    prevStep.current = formStep;
+  }, [formStep]);
   // 결제 완료 후 실제로 열린 항목들. 1가지 상품이면 그 항목 하나, 전체/차액이면 5개.
   const [ownedKeys, setOwnedKeys] = useState<PremiumSectionKey[]>(PREMIUM_SECTION_KEYS);
 
@@ -496,7 +506,7 @@ export function PremiumUnlock({
           )}
         </div>
       ) : formStep === "waitlist" ? (
-        <div className="flex flex-col gap-2">
+        <div ref={stepRef} className="flex flex-col gap-2">
           <PaymentWaitlist
             productType={offer.kind === "single" ? "single_section" : "premium_report"}
             title="상세 풀이"
@@ -511,7 +521,7 @@ export function PremiumUnlock({
         </div>
       ) : (
         // 2단계: CTA를 눌러 구매 의사를 밝힌 뒤에만 결제 정보 입력란이 나타난다.
-        <div className="flex flex-col gap-3">
+        <div ref={stepRef} className="flex flex-col gap-3">
           <div className="flex items-center justify-between px-1">
             <span className="text-sm text-foreground-muted">
               {offer.kind === "full"

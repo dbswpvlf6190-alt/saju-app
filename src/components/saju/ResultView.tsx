@@ -13,6 +13,7 @@ import { getExamLuckFlow } from "@/lib/saju/examLuck";
 import { PillarCard } from "./PillarCard";
 import { WuxingBar } from "./WuxingBar";
 import { PremiumUnlock } from "./PremiumUnlock";
+import { GoodYearCard } from "./GoodYearCard";
 import { StickyPremiumBar } from "./PremiumOffer";
 import { AdSlot } from "./AdSlot";
 import { ShareButton } from "./ShareButton";
@@ -174,6 +175,9 @@ export function ResultView({
         </p>
       </div>
 
+
+      {/* ②-1 앞으로 흐름이 좋은 해(10/9) — 구체적인 연도가 가장 마음을 움직인다는 사용자 피드백. 유료 '지금 시기 사용법' 장으로 잇는다. */}
+      <GoodYearCard result={result} />
 
       {/* ⑦ 전환 유도 — 유료 미리보기(PremiumUnlock) 바로 앞에서 다음 단계를 안내한다.
           캐릭터 후킹 문구는 성격 카드 위로 옮겨 읽기 시작하는 시점에 먼저 궁금증을 건다. */}

@@ -2,7 +2,7 @@
 
 사주랩 무료 버전을 토스 앱 안에서 여는 미니앱. 사주 계산·문구는 사이트와 같은 `../src/lib/saju` 코드를 그대로 쓴다(`@saju/*` 별칭).
 
-- 실행: `npm run dev` (http://localhost:5173) / 빌드: `npm run build` → `dist/` / 토스 업로드용 번들: `npx ait build`(콘솔 등록 후)
+- 실행: `npm run dev` (http://localhost:5173) / 빌드: `npm run build` → `dist/` / 토스 업로드용 번들: `npx ait build` → `sajulab-app.ait`(콘솔 > 앱 > 테스트/버전 관리에서 업로드)
 - 앱인토스 정책 요약: SSR 금지(CSR만), 라이트 모드, 외부 링크·자사 사이트 이동 유도 금지, 광고는 로딩·팝업 위 금지, 토스 내비게이션 바 사용.
 - 광고: 콘솔에서 배너 광고 그룹을 만들고 ID를 `.env`의 `VITE_AD_BANNER_RESULT`에 넣는다. 사업자 등록 없이 광고 시작 가능, 누적 예상 수익 5,000원 도달 시 5영업일 안에 사업자 등록 필요(간이과세자 세금계산서 이슈 — 사주랩 OPS_NOTES 2026-10-09 참고).
-- `granite.config.ts`의 `appName`·`brand`는 콘솔 등록 정보와 같아야 한다.
+- `apps-in-toss.config.ts`의 `appName`·`brand`는 콘솔 등록 정보와 같아야 한다.

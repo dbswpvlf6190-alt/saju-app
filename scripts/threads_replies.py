@@ -17,6 +17,7 @@ Claude가 2~3문장 풀이를 쓴다. 명리 계산을 AI에게 맡기지 않는
 git에는 "어느 답글에 답했는지"(id만)를 scripts/posted_state/threads_replies/ 에 남겨 두 컴퓨터가 공유한다.
 """
 import json
+from datetime import datetime
 import os
 import random
 import re
@@ -170,8 +171,10 @@ def pick_timing(person, topic):
     gender = person.get("gender")
     if any(w in topic for w in _GOOD_YEAR_WORDS):
         # 좋은 해: 앞으로 5년 중 재성·관성·인성 기운이 들어오는 해를 가까운 순서로 최대 2개(각 해에 어떤 좋은 기운인지 같이).
+        # 올해는 남은 달이 적어 기대감이 약해서 내년부터 고른다(사이트 GoodYearCard와 같은 기준).
+        this_year = int(datetime.now().strftime("%Y"))
         years = [{"year": y["year"], "ganzhi": y["ganzhi"], "기운": _GOOD_GROUPS[y["group"]]}
-                 for y in t.get("years", []) if y.get("group") in _GOOD_GROUPS][:2]
+                 for y in t.get("years", []) if y.get("group") in _GOOD_GROUPS and y["year"] > this_year][:2]
         if not years:
             return {"기운": "좋은 해", "years": [], "months": [], "note": "가까운 5년 안에 뚜렷한 해가 없음 — 지어내지 말 것"}
         months = _merge_months([m["ym"] for m in t.get("months", []) if m.get("group") in ("재성", "관성")])[:2]

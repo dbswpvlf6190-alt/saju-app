@@ -44,8 +44,17 @@ function toInput(f: Form): SajuInput {
 }
 
 export default function App() {
-  const [form, setForm] = useState<Form>(() => loadSaved() ?? EMPTY);
-  const [result, setResult] = useState<SajuResult | null>(null);
+  const [form, setForm] = useState<Form>(() => {
+    if (import.meta.env.DEV && new URLSearchParams(location.search).get("demo") === "form") {
+      return { calendarType: "solar", year: "1995", month: "7", day: "12", hour: "14", unknownTime: false, gender: "female" };
+    }
+    return loadSaved() ?? EMPTY;
+  });
+  // 개발 화면 전용: ?demo=1 이면 예시 생일로 결과 화면을 바로 띄운다(콘솔 스크린샷 캡처용, 배포 번들엔 영향 없음).
+  const [result, setResult] = useState<SajuResult | null>(() => {
+    if (!import.meta.env.DEV || new URLSearchParams(location.search).get("demo") !== "1") return null;
+    return calculateSaju({ calendarType: "solar", gender: "female", year: 1995, month: 7, day: 12, hour: 14, minute: 0 });
+  });
   const [error, setError] = useState<string | null>(null);
 
   // 토스 내비게이션 바의 뒤로가기 = 브라우저 뒤로가기. 결과 화면에서 누르면 입력 화면으로, 첫 화면에서 누르면 미니앱 종료.

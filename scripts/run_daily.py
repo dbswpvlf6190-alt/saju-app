@@ -19,6 +19,9 @@ MANIFEST_PATH = os.path.join(BASE_DIR, "scripts", "reel_manifest.json")
 # 각자 "아직 안 올렸네"라고 판단해서 같은 릴스를 중복 게시할 위험이 있었다
 # (shorts_auto/run_queue.py의 done.txt+락 방식과 통일, 2026-08-30).
 POSTED_DIR = os.path.join(BASE_DIR, "scripts", "posted_state", "reel")
+# 2026-10-09 사용자 결정: 릴스는 매일 → 약 3일에 1번. 최근 릴스 조회 3~121·사이트 유입 주 1~3명이라 효과 대비 부담이 커서.
+# 작업 스케줄러는 매일 20:00 그대로 두고 여기서 걸러낸다(게시 기록이 git 공유라 노트북도 같은 기준).
+MIN_HOURS_BETWEEN_POSTS = 60
 
 
 def load_manifest():
@@ -54,6 +57,20 @@ def mark_posted(day, entry, media_id):
     git_sync.git_commit_push(BASE_DIR, [rel_path], f"posted: reel day {day}")
 
 
+def last_posted_at():
+    latest = None
+    for name in os.listdir(POSTED_DIR) if os.path.isdir(POSTED_DIR) else []:
+        if not name.endswith(".json"):
+            continue
+        try:
+            with open(os.path.join(POSTED_DIR, name), "r", encoding="utf-8") as f:
+                ts = datetime.fromisoformat(json.load(f)["posted_at"])
+        except (OSError, ValueError, KeyError):
+            continue
+        latest = ts if latest is None or ts > latest else latest
+    return latest
+
+
 def main():
     # 하루 실행당 딱 1건만 게시한다. 노트북/데스크톱 둘 다 이 스크립트를 돌릴 수 있으므로,
     # 먼저 최신 게시 기록을 받아오고 처리할 항목에 락을 걸어 중복 게시를 막는다.
@@ -68,6 +85,10 @@ def main():
         print("오전 10시 전의 밀린 실행이라 건너뜁니다(다음 정규 슬롯에서 게시).")
         return
     git_sync.git_pull(BASE_DIR)
+    last = last_posted_at()
+    if last is not None and (datetime.now(timezone.utc) - last).total_seconds() / 3600 < MIN_HOURS_BETWEEN_POSTS:
+        print(f"마지막 릴스 게시 후 {MIN_HOURS_BETWEEN_POSTS}시간이 안 지나 오늘은 건너뜁니다(3일에 1번).")
+        return
     try:
         refill_queue.ensure_reel_buffer()
     except Exception as e:

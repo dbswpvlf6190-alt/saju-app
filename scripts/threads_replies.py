@@ -80,6 +80,7 @@ WRITE_PROMPT = f"""너는 무료 사주 서비스 '사주랩' Threads 계정 담
 - 두 사람이 있으면 두 사람 유형을 모두 말하고, 둘이 어떤 식으로 맞물리는지 한 문장(궁합 상세 안내는 마지막 문장에서).
 - 재회·로또·합격 여부·"운이 열리나요" 같은 예/아니오 질문엔 단정하지 말고, 그 유형이 그런 시기에 잘 풀리는 방식/태도를 말해준다.
 - 금지: 무조건, 반드시, 100%, 확실히, 절대, 평생, 당첨·합격·불합격 단정, 공포 조장, 건강·의료 판단.
+- 좋은 해(post_promise가 '좋은 해'이거나 그렇게 물으면): timing_pick의 years를 그대로 써서 "네 사주로는 2027년 정미년이 돈·성과가 붙는 해로 보여, 그다음은 2028년 무신년에 자리·기회가 열리고" 처럼 **연도와 그 해의 기운을 구체적으로** 짚는다. 듣는 사람이 기대되고 기분 좋아지게 쓰되 '반드시·무조건 좋은 일이 생긴다'는 단정은 금지 — '흐름이 들어오는 해로 봐'까지. months가 있으면 '가깝게는 2026년 10~11월'처럼 한 마디 덧붙인다. years가 비면 연도를 지어내지 말고 성향 이야기로 마무리.
 - 시기: 연애·재회·돈·취업 주제는 각 사람의 **timing_pick만** 쓴다(코드가 성별·주제에 맞는 기운이 들어오는 해/달을 이미 골라 줬다. raw timing으로 관성/재성 등을 직접 판단하지 말 것 — 틀린다). timing_pick이 있으면 반드시 1문장으로 그 시기를 짚어준다(예: "네 쪽은 2028년 무신년에 인연 기운(관성)이 들어오고, 가까운 달로는 2026년 10~11월이 열려 있어"). months가 있으면 가장 가까운 달도 같이 말한다. timing_pick이 None이거나 years·months가 비어 있으면 그 사람의 시기는 조용히 생략한다(지어내지 말 것). 어떤 경우에도 timing, timing_pick, ilgan, 데이터, 값 같은 내부 용어를 답글에 쓰지 말고 "시기를 짚을 수 없다"는 말도 하지 않는다. 두 사람이면 사람별로 각자 말한다. "올해 남은 흐름"처럼 주제 약속(post_promise)이 있는 풀이는 raw timing의 이번 달~연말 months 흐름을 쓴다.
 - 질병·수술·완치 같은 의료 판단은 하지 않는다.
 - 정보를 넉넉히 준다(2026-10-06, 수익 목표 — 무료 답글이 알차야 "그럼 상세는 얼마나 더 나올까" 하고 들어온다). 구성: ① 유형 소개 ② 각 사람의 핵심 성향 한 문장씩(ilgan의 love/relations/summary에서 구체적인 행동·말버릇 수준으로) ③ 둘이 맞물리는 지점 + 부딪히는 지점 ④ 바로 써먹을 수 있는 구체 팁 한 문장(예: "서운하면 '됐어'로 끊지 말고 이유를 한 줄 붙여") ⑤ timing_pick 시기 한 문장(있을 때) ⑥ 마무리 후킹. 개인(한 명) 질문이면 ③은 생략하고 ②를 풍부하게.
@@ -134,6 +135,9 @@ def compute_ilgan(people):
 _ROMANCE_WORDS = ("연애", "재회", "결혼", "궁합", "인연", "썸", "사랑", "남친", "여친", "고백")
 _MONEY_WORDS = ("돈", "재물", "사업", "투자", "월급", "금전", "부자")
 _JOB_WORDS = ("취업", "승진", "합격", "시험", "공부", "일", "직장", "커리어", "이직")
+# 10/9 지인 피드백: "몇 년도에 좋은 일이 생긴다"는 구체적인 연도가 가장 마음을 움직였다 → "좋은 해" 주제.
+_GOOD_YEAR_WORDS = ("좋은 해", "좋은해", "좋은 일", "풀리는 해", "운 좋은", "언제 풀", "대운")
+_GOOD_GROUPS = {"재성": "돈·성과가 붙는 해(재성)", "관성": "자리·기회·인연이 열리는 해(관성)", "인성": "도움·배움이 들어오는 해(인성)"}
 
 
 def _merge_months(yms):
@@ -164,6 +168,14 @@ def pick_timing(person, topic):
     t = person.get("timing") or {}
     topic = topic or ""
     gender = person.get("gender")
+    if any(w in topic for w in _GOOD_YEAR_WORDS):
+        # 좋은 해: 앞으로 5년 중 재성·관성·인성 기운이 들어오는 해를 가까운 순서로 최대 2개(각 해에 어떤 좋은 기운인지 같이).
+        years = [{"year": y["year"], "ganzhi": y["ganzhi"], "기운": _GOOD_GROUPS[y["group"]]}
+                 for y in t.get("years", []) if y.get("group") in _GOOD_GROUPS][:2]
+        if not years:
+            return {"기운": "좋은 해", "years": [], "months": [], "note": "가까운 5년 안에 뚜렷한 해가 없음 — 지어내지 말 것"}
+        months = _merge_months([m["ym"] for m in t.get("months", []) if m.get("group") in ("재성", "관성")])[:2]
+        return {"기운": "좋은 해", "years": years, "months": months}
     if any(w in topic for w in _ROMANCE_WORDS):
         if gender not in ("남", "여"):
             return None
@@ -224,7 +236,10 @@ def draft(media_id, promise=None):
             if "error" in c or not c:
                 continue
             person = {k: c.get(k) for k in ("date", "lunar", "gender", "typeName", "hangul", "dayGan", "metaphor", "keywords", "summary", "love", "work", "money", "relations", "timing")}
-            person["timing_pick"] = pick_timing(person, ex.get("topic"))
+            topic = ex.get("topic")
+            if promise and (not topic or topic == "성격"):
+                topic = promise  # 답글에 주제가 없으면 글이 약속한 주제(예: '좋은 해')로 시기를 고른다
+            person["timing_pick"] = pick_timing(person, topic)
             people.append(person)
         cases.append({"id": r["id"], "username": r.get("username"), "original": r.get("text", ""), "topic": ex.get("topic"), "question": ex.get("question"), "people": people})
 

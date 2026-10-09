@@ -175,3 +175,8 @@
 - **카드 결제가 열리면**: `PAYMENTS_PAUSED = false`로 바꿔 배포 → `WaitlistSignup` 이메일들에 오픈 안내 1회 발송(아직 메일 발송 기능 없음 — 그때 만들거나 수동 발송) → 보낸 뒤 행 삭제. 이벤트 `waitlist_view`/`waitlist_signup`으로 대기 수요 확인.
 - 데스크톱 점검(노트북 인수인계 5항목): 저장소·node·AI 키·스케줄러 정상, **`credentials/ntfy.json` 없음**(데스크톱 실행분 알림 안 감 — 사용자에게 토픽 요청).
 - **10/9 Threads 답글 → 사이트 유입**: 결제 일시 중단 중(`payments_paused()`가 config.ts의 `PAYMENTS_PAUSED` 읽음)엔 풀이 답글 마무리를 유료 상세 대신 "여덟 글자·오행 비율(두 사람이면 궁합 점수)은 아래 링크에서 30초 무료"로 바꾸고(`FREE_MODE_RULES`), 한 사람 답글에도 `/?ref=threads_reply` 링크를 붙임(두 사람은 기존 `/compatibility?ref=threads_reply`). 결제가 다시 열리면 자동으로 원래 마무리·링크(두 사람만)로 돌아감. 비교 기준: 이번 주 Threads 유입 7(지난주 22), `threads_reply` 누적 0 → 10/16경 비교.
+
+## 2026-10-09 — 토스 미니앱(앱인토스) 검토 요청
+- 콘솔: 워크스페이스 "사주랩"(id 99315), 앱 "사주랩" appName **`sajulab-app`**(sajulab은 선점됨), 비게임, 카테고리 생활>콘텐츠>운세. 번들 v20261009-1(`toss-mini/`에서 `npx ait build` → `sajulab-app.ait`) 토스 앱 실기기 테스트 OK 후 **10/9 검토 요청**. 로고·스크린샷은 `toss-mini/store-assets/`.
+- 버전 1은 광고 없음(검수 먼저). 통과 후 다음 버전: 콘솔에서 배너 광고 그룹 생성 → `VITE_AD_BANNER_RESULT` → 재빌드·업로드. 누적 예상 광고수익 5,000원 도달 시 5영업일 안에 사업자 등록 필요(간이과세자 세금계산서 문제 — 세무사 상담 후 일반과세 전환 여부 결정).
+- 정책 메모: 외부 링크·자사 사이트 이동 유도 금지(사주랩 사이트로 보내면 안 됨), SSR 금지, 라이트 모드, 광고는 로딩·팝업 위 금지.

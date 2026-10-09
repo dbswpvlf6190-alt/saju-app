@@ -171,7 +171,7 @@ function ResultScreen({ result, onBack }: { result: SajuResult; onBack: () => vo
 
   async function shareResult() {
     try {
-      const link = await Share.createLink({ path: "intoss://sajulab" });
+      const link = await Share.createLink({ path: "intoss://sajulab-app" });
       await Share.sendMessage({ message: `나는 ${type.typeName}(${free.dayMasterLabel})래 🔮 너는 무슨 타입이야? 생일만 넣으면 30초!\n${link}` });
     } catch {
       /* 토스 밖(개발 화면)에서는 공유 시트가 없다 */

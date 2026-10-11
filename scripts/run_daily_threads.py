@@ -31,6 +31,10 @@ MIN_HOURS_BETWEEN_POSTS = 7
 REFILL_BELOW = 5  # 안 올린 글이 이보다 적으면 threads_refill.py로 새 글을 채운다
 MIN_HOURS_SINCE_ANY_POST = 8  # 크롬·앱으로 직접 올린 글(대기열 밖)이 있으면 그 뒤 8시간은 쉰다
 LOW_QUEUE_WARN = 3
+# 2026-10-11 노출 회복 실험(threads_replies.REPLY_LINKS와 같은 이유): 글마다 링크 댓글을 다는 것도 끈다. 사이트 주소는 프로필 링크에만.
+LINK_COMMENT = False
+# 같은 글을 다시 올리면 노출이 크게 준다(10/5 커플 글 1,599 → 10/9 같은 글 51). 같은 변형은 이 기간 안에 다시 쓰지 않는다.
+READING_REPEAT_DAYS = 21
 
 
 def load_queue():
@@ -63,7 +67,20 @@ def pick_reading_post():
             return None
     with open(READING_PATH, "r", encoding="utf-8") as f:
         variants = json.load(f)
-    return variants[len(readings) % len(variants)]
+    by_id = {v["id"]: v for v in variants}
+    recent_texts = set()
+    for r in readings:
+        if hours_since(datetime.fromisoformat(r["posted_at"])) < READING_REPEAT_DAYS * 24:
+            # 예전 기록엔 본문이 없어 id로 찾는다(RD03은 지금 RD09와 같은 글이라 이름이 달라도 본문으로 걸러진다).
+            recent_texts.add(r.get("text") or by_id.get(r["id"], {}).get("text"))
+    start = len(readings) % len(variants)
+    for v in variants[start:] + variants[:start]:
+        if v["text"] not in recent_texts:
+            return v
+    notify.notify("📭 사주랩 Threads 무료 풀이 글 소진",
+                  f"최근 {READING_REPEAT_DAYS}일 안에 안 쓴 변형이 없어 일반 글로 대신합니다. threads_reading_posts.json에 새 변형을 추가해주세요.",
+                  priority=3, tags=["warning"])
+    return None
 
 
 def last_posted_at():
@@ -161,13 +178,14 @@ def main():
             "topic": item.get("topic"), "exam": item.get("exam"), "kind": item.get("kind", "queue"),
             # 무료 풀이 글이 약속한 주제(연애 스타일·돈 타입 등) — 답글 풀이가 이 주제로 답하게 threads_replies가 읽는다.
             "promise": item.get("promise"),
+            "text": item["text"],
         }
         # 게시 기록부터 남긴다 — 댓글이 실패해도 같은 글을 다음 날 또 올리면 안 되므로.
         os.makedirs(POSTED_DIR, exist_ok=True)
         with open(posted_path(rec_id), "w", encoding="utf-8") as f:
             json.dump(record, f, ensure_ascii=False, indent=2)
         comment_note = ""
-        if item.get("comment"):
+        if LINK_COMMENT and item.get("comment"):
             try:
                 record["comment_id"] = threads_api.reply(media_id, item["comment"])
             except Exception as e:

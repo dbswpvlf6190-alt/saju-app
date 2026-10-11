@@ -122,5 +122,45 @@ def report():
     )
 
 
+KST = timezone(timedelta(hours=9))
+# 2026-10-11 노출 회복 실험: 링크 댓글·답글 링크를 끄고 같은 글 재게시를 막은 시점. 그 전 4.5일(조회 급감 구간)과 비교한다.
+LINKTEST_AT = datetime(2026, 10, 11, 21, 30, tzinfo=KST)
+LINKTEST_BEFORE = datetime(2026, 10, 7, 0, 0, tzinfo=KST)
+
+
+def linktest():
+    posts = collect()
+    ts = lambda p: datetime.strptime(p["timestamp"], "%Y-%m-%dT%H:%M:%S%z")  # noqa: E731
+    before = [p for p in posts if LINKTEST_BEFORE <= ts(p) < LINKTEST_AT]
+    after = [p for p in posts if ts(p) >= LINKTEST_AT]
+    now = datetime.now(KST)
+    b, a = summarize(before), summarize(after)
+    sb, sa = site_visits(LINKTEST_BEFORE, LINKTEST_AT), site_visits(LINKTEST_AT, now)
+    days_b = round((LINKTEST_AT - LINKTEST_BEFORE).total_seconds() / 86400, 1)
+    days_a = round((now - LINKTEST_AT).total_seconds() / 86400, 1)
+    lines = [
+        f"# Threads 링크 끈 뒤 비교 ({now:%Y-%m-%d %H:%M})",
+        "",
+        f"| 항목 | 링크 있을 때(10/7~10/11, {days_b}일) | 링크 끈 뒤({days_a}일) |",
+        "|---|---|---|",
+        f"| 일반 글 평균 조회 | {b['normal']['avg_views']} ({b['normal']['count']}개) | {a['normal']['avg_views']} ({a['normal']['count']}개) |",
+        f"| 무료 풀이 글 평균 조회 | {b['reading']['avg_views']} ({b['reading']['count']}개) | {a['reading']['avg_views']} ({a['reading']['count']}개) |",
+        f"| 무료 풀이 글 평균 실답글 | {b['reading']['avg_real_replies']} | {a['reading']['avg_real_replies']} |",
+        f"| 사이트 방문(Threads/전체) | {sb['threads']}/{sb['total']} | {sa['threads']}/{sa['total']} |",
+        "",
+        "## 링크 끈 뒤 글",
+        *[f"- 조회 {p['views']} · 실답글 {p['real_replies']} · {p['first_line']}" for p in sorted(after, key=lambda p: p["views"], reverse=True)],
+    ]
+    with open(os.path.join(PERF_DIR, "threads_linktest_report.md"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    notify.notify(
+        "🧪 Threads 링크 끈 실험 결과",
+        f"일반 글 평균 조회 {b['normal']['avg_views']}→{a['normal']['avg_views']} · 풀이 글 {b['reading']['avg_views']}→{a['reading']['avg_views']} · "
+        f"Threads 방문 {sb['threads']}→{sa['threads']}\n자세한 건 Claude에게 'Threads 링크 실험 결과'",
+        tags=["test_tube"],
+    )
+
+
 if __name__ == "__main__":
-    {"baseline": baseline, "report": report}[sys.argv[1] if len(sys.argv) > 1 else "report"]()
+    {"baseline": baseline, "report": report, "linktest": linktest}[sys.argv[1] if len(sys.argv) > 1 else "report"]()

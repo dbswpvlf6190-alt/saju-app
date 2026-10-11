@@ -44,6 +44,9 @@ SITE = "saju-app-three-dusky.vercel.app"
 COMPAT_LINK = f"https://{SITE}/compatibility?ref=threads_reply"
 # 결제가 닫혀 있는 동안(PAYMENTS_PAUSED) 한 사람 풀이 답글에 붙이는 무료 사주 링크.
 FREE_LINK = f"https://{SITE}/?ref=threads_reply"
+# 2026-10-11 노출 회복 실험: 10/7부터 글 조회가 243→96으로 급감(새 글 8시간 조회 0). 답글 수십 개마다 같은 주소가 붙은 게
+# 스팸 신호로 보였을 가능성 → 답글엔 주소를 넣지 않고 '프로필 링크'로만 안내. 3일 뒤(10/14) 조회 비교해 결정.
+REPLY_LINKS = False
 PAYMENT_CONFIG = os.path.join(BASE_DIR, "src", "lib", "payment", "config.ts")
 
 
@@ -255,7 +258,12 @@ def draft(media_id, promise=None):
             for item in payload:
                 item["post_promise"] = promise
         paused = payments_paused()
-        prompt = WRITE_PROMPT.replace("- 말투:", FREE_MODE_RULES + "- 말투:", 1) if paused else WRITE_PROMPT
+        rules = FREE_MODE_RULES if REPLY_LINKS else (
+            FREE_MODE_RULES.replace("'결제', '프로필 링크'라는 말은 쓰지 말고, 링크는 '아래 링크'라고만 가리킨다(주소는 코드가 붙인다)",
+                                    "'결제'라는 말은 쓰지 말고, 사이트는 '프로필 링크'라고만 가리킨다(주소는 넣지 않는다)")
+            .replace("아래 링크에서 생일만", "프로필 링크에서 생일만").replace(" 👇'", "'")
+        )
+        prompt = WRITE_PROMPT.replace("- 말투:", rules + "- 말투:", 1) if paused else WRITE_PROMPT
         res = call_claude_raw(prompt, json.dumps(payload, ensure_ascii=False))
         texts = {x["id"]: x["text"].strip() for x in res["replies"]}
         for c in chunk:
@@ -265,6 +273,8 @@ def draft(media_id, promise=None):
             # 한정하고, AI가 쓴 본문은 링크 없이 검사한 뒤에 붙인다. 500자(Threads 한도)를 넘으면 붙이지 않는다.
             # 결제 일시 중단 중(10/9~)에는 한 사람 답글에도 무료 사주 링크를 붙여 사이트로 넘어오게 한다(Threads 유입 22→7 대응).
             link = COMPAT_LINK if len(c["people"]) == 2 else (FREE_LINK if paused and len(c["people"]) == 1 else None)
+            if not REPLY_LINKS:
+                link = None
             if text and not problems and link:
                 with_link = text.replace("프로필 링크", "아래 링크") + "\n\n" + link
                 if len(with_link) <= 500:

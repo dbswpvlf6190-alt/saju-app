@@ -9,6 +9,7 @@ import {
   SINGLE_SECTION_NAME,
   SINGLE_SECTION_PRICE_KRW,
 } from "@/lib/payment/config";
+import { CONTACT_EMAIL } from "@/lib/business";
 
 export function SiteFooter() {
   return (
@@ -43,6 +44,8 @@ export function SiteFooter() {
         통신판매업신고번호: 제2024-창원의창-0186호
         <br />
         유선번호: 055-255-3564 · 휴대폰: 010-7501-3546
+        <br />
+        문의 이메일: {CONTACT_EMAIL}
         <br />
         경상남도 창원시 의창구 동읍 용정길46번길 53 성진5차 1001호
       </p>

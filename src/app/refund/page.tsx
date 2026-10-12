@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
+import { CONTACT_EMAIL } from "@/lib/business";
 
 export const metadata: Metadata = { title: "환불정책 | 사주랩" };
 
@@ -64,6 +65,8 @@ export default function RefundPage() {
           통신판매업신고번호: 제2024-창원의창-0186호
           <br />
           유선번호: 055-255-3564 · 휴대폰: 010-7501-3546
+          <br />
+          문의 이메일: {CONTACT_EMAIL}
           <br />
           환불 관련 문의는 위 연락처로 부탁드립니다.
         </p>

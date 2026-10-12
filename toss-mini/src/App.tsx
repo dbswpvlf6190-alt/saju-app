@@ -32,6 +32,17 @@ function loadSaved(): Form | null {
   }
 }
 
+/** 저장된 생일이 있으면 그 결과를 돌려준다(없거나 계산이 안 되면 null → 입력 화면부터). */
+function savedResult(): { form: Form; result: SajuResult } | null {
+  const form = loadSaved();
+  if (!form || !form.year || !form.month || !form.day || !form.gender) return null;
+  try {
+    return { form, result: calculateSaju(toInput(form)) };
+  } catch {
+    return null;
+  }
+}
+
 function toInput(f: Form): SajuInput {
   return {
     calendarType: f.calendarType,
@@ -43,7 +54,14 @@ function toInput(f: Form): SajuInput {
   };
 }
 
+type Screen = "today" | "form" | "result";
+
 export default function App() {
+  // 다시 온 사람(저장된 생일이 있음)은 입력 화면 대신 "오늘의 운세"부터 보여준다 — 매일 열 이유가 첫 화면에서 보여야 재방문이 생긴다.
+  const [saved] = useState(() => savedResult());
+  const demo = import.meta.env.DEV ? new URLSearchParams(location.search).get("demo") : null;
+  const initialScreen: Screen = demo === "1" ? "result" : demo === "form" ? "form" : saved ? "today" : "form";
+  const [screen, setScreen] = useState<Screen>(initialScreen);
   const [form, setForm] = useState<Form>(() => {
     if (import.meta.env.DEV && new URLSearchParams(location.search).get("demo") === "form") {
       return { calendarType: "solar", year: "1995", month: "7", day: "12", hour: "14", unknownTime: false, gender: "female" };
@@ -52,17 +70,25 @@ export default function App() {
   });
   // 개발 화면 전용: ?demo=1 이면 예시 생일로 결과 화면을 바로 띄운다(콘솔 스크린샷 캡처용, 배포 번들엔 영향 없음).
   const [result, setResult] = useState<SajuResult | null>(() => {
-    if (!import.meta.env.DEV || new URLSearchParams(location.search).get("demo") !== "1") return null;
-    return calculateSaju({ calendarType: "solar", gender: "female", year: 1995, month: 7, day: 12, hour: 14, minute: 0 });
+    if (import.meta.env.DEV && new URLSearchParams(location.search).get("demo") === "1") {
+      return calculateSaju({ calendarType: "solar", gender: "female", year: 1995, month: 7, day: 12, hour: 14, minute: 0 });
+    }
+    return saved?.result ?? null;
   });
   const [error, setError] = useState<string | null>(null);
 
-  // 토스 내비게이션 바의 뒤로가기 = 브라우저 뒤로가기. 결과 화면에서 누르면 입력 화면으로, 첫 화면에서 누르면 미니앱 종료.
+  // 토스 내비게이션 바의 뒤로가기 = 브라우저 뒤로가기. 화면을 열 때마다 기록을 쌓고, 뒤로 가면 그 이전 화면으로 돌아간다. 첫 화면에서 누르면 미니앱 종료.
   useEffect(() => {
-    const onPop = () => setResult(null);
+    const onPop = (e: PopStateEvent) => setScreen((e.state?.screen as Screen | undefined) ?? initialScreen);
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, []);
+  }, [initialScreen]);
+
+  function go(next: Screen) {
+    window.history.pushState({ screen: next }, "");
+    window.scrollTo(0, 0);
+    setScreen(next);
+  }
 
   const daysInMonth = form.year && form.month ? new Date(Number(form.year), Number(form.month), 0).getDate() : 31;
   const ready = form.year && form.month && form.day && form.gender && (form.unknownTime || form.hour !== "");
@@ -76,15 +102,15 @@ export default function App() {
       } catch {
         /* 저장 실패해도 결과는 보여준다 */
       }
-      window.history.pushState({ screen: "result" }, "");
-      window.scrollTo(0, 0);
       setResult(r);
+      go("result");
     } catch (e) {
       setError(e instanceof Error ? e.message : "입력값을 확인해 주세요.");
     }
   }
 
-  if (result) return <ResultScreen result={result} onBack={() => window.history.back()} />;
+  if (screen === "result" && result) return <ResultScreen result={result} onOther={() => go("form")} />;
+  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => go("result")} onOther={() => go("form")} />;
 
   const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
   return (
@@ -166,7 +192,43 @@ export default function App() {
   );
 }
 
-function ResultScreen({ result, onBack }: { result: SajuResult; onBack: () => void }) {
+/** 다시 온 사람이 처음 보는 화면: 오늘의 운세 + 내 사주 타입 요약. 입력 없이 바로 보이게 한다. */
+function TodayScreen({ result, onFull, onOther }: { result: SajuResult; onFull: () => void; onOther: () => void }) {
+  const free = useMemo(() => generateFreeContent(result), [result]);
+  const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
+  const daily = useMemo(() => getDailyFortuneDetail(result), [result]);
+  return (
+    <main className="page">
+      <header className="hero">
+        <div className="eyebrow">SAJU LAB</div>
+        <h1>오늘의 운세</h1>
+        <p>{daily.dateLabel} · {type.typeName} ({free.dayMasterLabel})</p>
+      </header>
+
+      <section className="card">
+        <h2>오늘의 한 줄</h2>
+        <p>{daily.oneLiner}</p>
+        <div className="fortune-grid">
+          <div><b>연애</b>{daily.love}</div>
+          <div><b>재물</b>{daily.wealth}</div>
+          <div><b>일</b>{daily.career}</div>
+          <div><b>관계</b>{daily.relationship}</div>
+        </div>
+        <p className="muted" style={{ marginTop: 10, fontSize: 13 }}>
+          행운의 숫자 {daily.luckyNumber} · 행운의 색 {daily.luckyColor} · 내일 다시 오면 새 운세가 나와요
+        </p>
+      </section>
+
+      <BannerAd />
+
+      <button type="button" className="cta" onClick={onFull}>내 사주 타입 전체 보기</button>
+      <button type="button" className="ghost" onClick={onOther}>다른 생일로 보기</button>
+      <p className="foot">전통 명리학 해석을 쉽게 풀어 쓴 참고용 콘텐츠예요.</p>
+    </main>
+  );
+}
+
+function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => void }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const page = useMemo(() => ILGAN_PAGES.find((p) => p.gan === result.dayPillar.ganKor)!, [result]);
@@ -282,7 +344,7 @@ function ResultScreen({ result, onBack }: { result: SajuResult; onBack: () => vo
       </section>
 
       <button type="button" className="cta" onClick={() => void shareResult()}>친구는 무슨 타입일까? 공유하기</button>
-      <button type="button" className="ghost" onClick={onBack}>다른 생일로 다시 보기</button>
+      <button type="button" className="ghost" onClick={onOther}>다른 생일로 다시 보기</button>
       <p className="foot">전통 명리학 해석을 쉽게 풀어 쓴 참고용 콘텐츠예요. 같은 일간이라도 사주 전체 구성에 따라 해석은 달라질 수 있어요.</p>
     </main>
   );

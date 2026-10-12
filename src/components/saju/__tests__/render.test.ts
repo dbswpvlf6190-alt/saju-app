@@ -110,3 +110,15 @@ describe("결제 후 진행 안내(ReportProgress)", () => {
     expect(offer()).not.toContain("30~60초");
   });
 });
+
+describe("결제 전 청약철회 안내(PurchaseConsent)", () => {
+  it("환불 기준과 환불정책 링크, 필수 표시가 보인다", async () => {
+    const { PurchaseConsent } = await import("../PurchaseConsent");
+    const html = renderToStaticMarkup(createElement(PurchaseConsent, { checked: false, onChange: () => {} }));
+    expect(html).toContain("(필수)");
+    expect(html).toContain("7일 안에 환불");
+    expect(html).toContain("청약철회가 제한될 수 있다");
+    expect(html).toContain('href="/refund"');
+    expect(html).not.toContain("checked");
+  });
+});

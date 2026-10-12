@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { PremiumSection } from "@/lib/saju";
 import { SECTION_UPGRADE_PRICE_KRW } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
+import { PurchaseConsent } from "./PurchaseConsent";
 
 type Status = "idle" | "processing" | "error";
 
@@ -38,7 +39,10 @@ export function SectionUpgradeCard({
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber);
   const needsContactInfo = !initialEmail || !initialPhoneNumber || !initialFullName.trim();
 
+  const [agreed, setAgreed] = useState(false);
+
   async function handlePurchase() {
+    if (!agreed) return;
     trackEvent("checkout_start", { productType: "section_upgrade" });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
@@ -148,10 +152,12 @@ export function SectionUpgradeCard({
 
       {errorMessage && <p className="text-center text-xs text-red-300">{errorMessage}</p>}
 
+      <PurchaseConsent checked={agreed} onChange={setAgreed} />
+
       <button
         type="button"
         onClick={() => void handlePurchase()}
-        disabled={status === "processing"}
+        disabled={status === "processing" || !agreed}
         className="min-h-12 rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing" ? "처리 중..." : `+${SECTION_UPGRADE_PRICE_KRW.toLocaleString()}원으로 나머지 ${lockedSections.length}가지 열기`}

@@ -25,6 +25,7 @@ import { MANUAL_CHAPTER_META, MANUAL_CHAPTER_KEYS, type ReportLayout } from "@/l
 import { SectionUpgradeCard } from "./SectionUpgradeCard";
 import { ReportSections } from "./ReportSections";
 import { ReportProgress } from "./ReportProgress";
+import { PurchaseConsent } from "./PurchaseConsent";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -68,6 +69,7 @@ export function PremiumUnlock({
     resumePaymentId ? "details" : "intro",
   );
   const [offer, setOffer] = useState<OfferChoice>({ kind: "full" });
+  const [agreed, setAgreed] = useState(false);
   // 상품 선택(긴 화면) → 결제 정보/알림 신청(짧은 칸)으로 바뀌면 위쪽 높이가 줄어서 화면이 아래로 내려간 것처럼
   // 보였다(10/9 사용자 제보). 단계가 바뀌면 새 칸을 화면 가운데로 다시 맞춘다. 첫 렌더(결제 복귀 등)엔 움직이지 않는다.
   const stepRef = useRef<HTMLDivElement>(null);
@@ -242,6 +244,7 @@ export function PremiumUnlock({
   }
 
   async function handlePurchase() {
+    if (!agreed) return;
     const productType = offer.kind === "single" ? "single_section" : "premium_report";
     trackEvent("checkout_start", { productType });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
@@ -608,10 +611,12 @@ export function PremiumUnlock({
             </p>
           )}
 
+          <PurchaseConsent checked={agreed} onChange={setAgreed} />
+
           <button
             type="button"
             onClick={() => void handlePurchase()}
-            disabled={status === "processing"}
+            disabled={status === "processing" || !agreed}
             className="mt-1 min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {status === "processing"

@@ -122,3 +122,14 @@ describe("결제 전 청약철회 안내(PurchaseConsent)", () => {
     expect(html).not.toContain("checked");
   });
 });
+
+describe("결제 폼 문구", () => {
+  it("6장 방식에서는 나 사용설명서로, 롤백(V2=0)에서는 옛 문구로 보인다", async () => {
+    const copy = await import("@/lib/payment/ctaCopy");
+    expect(copy.premiumCtaLabel()).toContain("나 사용설명서");
+    expect(copy.premiumDetailsStepIntro()).toContain("6장");
+    vi.stubEnv("NEXT_PUBLIC_REPORT_V2", "0");
+    expect(copy.premiumCtaLabel()).toBe("4,900원으로 전체 분석 보기");
+    expect(copy.premiumDetailsStepIntro()).toContain("전체 분석");
+  });
+});

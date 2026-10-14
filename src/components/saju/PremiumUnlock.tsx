@@ -13,8 +13,8 @@ import { PAYMENTS_PAUSED, SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config"
 import { PaymentWaitlist } from "./PaymentWaitlist";
 import { WUXING_PERSONA } from "@/lib/saju/persona";
 import {
-  PREMIUM_CTA_LABEL,
-  PREMIUM_DETAILS_STEP_INTRO,
+  premiumCtaLabel,
+  premiumDetailsStepIntro,
   PREMIUM_TRUST_ITEMS,
 } from "@/lib/payment/ctaCopy";
 import { trackEvent } from "@/lib/analytics/track";
@@ -528,7 +528,7 @@ export function PremiumUnlock({
           <div className="flex items-center justify-between px-1">
             <span className="text-sm text-foreground-muted">
               {offer.kind === "full"
-                ? PREMIUM_DETAILS_STEP_INTRO
+                ? premiumDetailsStepIntro()
                 : `${premiumSections.find((x) => x.key === offer.section)?.title} 1가지 · ${SINGLE_SECTION_PRICE_KRW.toLocaleString()}원`}
             </span>
             <button
@@ -622,7 +622,7 @@ export function PremiumUnlock({
             {status === "processing"
               ? "처리 중..."
               : offer.kind === "full"
-                ? PREMIUM_CTA_LABEL
+                ? premiumCtaLabel()
                 : `${SINGLE_SECTION_PRICE_KRW.toLocaleString()}원 결제하기`}
           </button>
 

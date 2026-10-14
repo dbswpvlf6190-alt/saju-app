@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Analytics, Notification, Review, Share, TossAds, getOperationalEnvironment, getTossAppVersion, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
+import { Analytics, Notification, Review, Share, TossAds, getOperationalEnvironment, getSchemeUri, getTossAppVersion, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
 import { calculateSaju } from "@saju/engine";
 import type { SajuInput, SajuResult } from "@saju/types";
 import { generateFreeContent } from "@saju/content";
@@ -18,7 +18,7 @@ const BANNER_AD_ID = import.meta.env.VITE_AD_BANNER_RESULT as string | undefined
 // 보상형 광고 그룹 ID와 "오늘의 운세 알림" 템플릿 코드는 콘솔에서 만든 뒤 빌드 때 넣는다. 없으면 해당 기능은 화면에 나오지 않는다.
 const REWARD_AD_ID = import.meta.env.VITE_AD_REWARDED as string | undefined;
 const PUSH_TEMPLATE = import.meta.env.VITE_PUSH_TEMPLATE as string | undefined;
-const KEY_REWARD_DAY = "sajulab:rewardDay";
+const KEY_REWARD_DAY = "sajulab:rewardDay:v3c";
 const KEY_PUSH = "sajulab:push";
 
 /** 사용자 행동 기록(토스 콘솔 분석). 토스 밖이거나 미지원 버전이면 조용히 무시된다. */
@@ -232,7 +232,7 @@ export default function App() {
       <button type="button" className="cta" disabled={!ready || gate.disabled} onClick={submit}>
         {gate.label("내 사주 타입 보기")}
       </button>
-      <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{gate.diag}</p>
+      {gate.diag && <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{gate.diag}</p>}
       {gate.needsAd && <p className="muted" style={{ textAlign: "center", fontSize: 13 }}>광고를 끝까지 보면 내 사주를 무료로 볼 수 있어요. 오늘 한 번만 보면 돼요.</p>}
       <p className="foot">입력한 생년월일은 이 기기에만 저장돼요.</p>
     </main>
@@ -277,7 +277,7 @@ function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, onOther }:
       <BannerAd />
 
       <button type="button" className="cta" disabled={fullDisabled} onClick={onFull}>{fullLabel}</button>
-      <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{diag}</p>
+      {diag && <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{diag}</p>}
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 보기</button>
       <ReviewLink />
       <p className="foot">전통 명리학 해석을 쉽게 풀어 쓴 참고용 콘텐츠예요.</p>
@@ -370,12 +370,13 @@ function useRewardGate() {
     }
   }
 
-  // 임시 진단(테스트 빌드 전용): 폰에서 광고가 왜 안 뜨는지 확인하려고 화면 아래에 상태를 한 줄 보여 준다.
+  // 테스트 QR(intoss-private)로 열었을 때만 광고 상태를 한 줄 보여 준다(출시 버전에서는 숨김).
   let diag = "";
   try {
+    if (!String(getSchemeUri()).startsWith("intoss-private")) throw new Error("");
     diag = `광고진단 id=${!!REWARD_AD_ID} load=${safeSupported(loadFullScreenAd)} show=${safeSupported(showFullScreenAd)} ver=${getTossAppVersion()} env=${getOperationalEnvironment()} state=${state} unlocked=${unlocked}${err ? " err=" + err : ""}`;
-  } catch (e) {
-    diag = `광고진단 오류 ${String((e as Error)?.message ?? e)}`;
+  } catch {
+    diag = ""; // 출시 버전에서는 진단 줄을 보여 주지 않는다(테스트 QR로 연 경우에만 표시).
   }
 
   return {

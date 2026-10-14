@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Analytics, Notification, Review, Share, TossAds, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
 import { calculateSaju } from "@saju/engine";
 import type { SajuInput, SajuResult } from "@saju/types";
 import { generateFreeContent } from "@saju/content";
 import { getTypeProfile } from "@saju/typeProfile";
 import { ILGAN_PAGES } from "@saju/ilganPages";
-import { getDailyFortuneDetail, type DailyFortuneDetail } from "@saju/dailyFortune";
+import { getDailyFortuneDetail } from "@saju/dailyFortune";
+import { currentYearKst, getGoodYears } from "@saju/goodYears";
 import type { WuXing } from "@saju/ganzhi";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
@@ -261,7 +262,13 @@ function TodayScreen({ result, onFull, onOther }: { result: SajuResult; onFull: 
         <p className="muted" style={{ marginTop: 10, fontSize: 13 }}>내일 다시 오면 새 운세가 나와요</p>
       </section>
 
-      <RewardCard daily={daily} />
+      <section className="card">
+        <h2>오늘의 종합 풀이</h2>
+        <p>{daily.overall}</p>
+        <p className="muted" style={{ marginTop: 10, fontSize: 13 }}>
+          행운의 숫자 {daily.luckyNumber} · 행운의 색 {daily.luckyColor}
+        </p>
+      </section>
       <PushCard />
 
       <BannerAd />
@@ -274,8 +281,8 @@ function TodayScreen({ result, onFull, onOther }: { result: SajuResult; onFull: 
   );
 }
 
-/** 보상형 광고를 끝까지 보면 오늘의 종합 풀이와 행운 정보를 열어 준다. 미지원 환경(옛 토스 버전·광고 ID 없음)이면 광고 없이 바로 보여 준다. */
-function RewardCard({ daily }: { daily: DailyFortuneDetail }) {
+/** 보상형 광고를 끝까지 보면 가려 둔 풀이(children)를 오늘 하루 열어 준다. 미지원 환경(옛 토스 버전·광고 ID 없음)이면 광고 없이 바로 보여 준다. */
+function AdGate({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {
   const gated = import.meta.env.DEV || (!!REWARD_AD_ID && safeSupported(loadFullScreenAd) && safeSupported(showFullScreenAd));
   const [unlocked, setUnlocked] = useState(() => !gated || readStore(KEY_REWARD_DAY) === todayKst());
   const [loaded, setLoaded] = useState(false);
@@ -333,21 +340,11 @@ function RewardCard({ daily }: { daily: DailyFortuneDetail }) {
     }
   }
 
-  if (unlocked) {
-    return (
-      <section className="card">
-        <h2>오늘의 종합 풀이</h2>
-        <p>{daily.overall}</p>
-        <p className="muted" style={{ marginTop: 10, fontSize: 13 }}>
-          행운의 숫자 {daily.luckyNumber} · 행운의 색 {daily.luckyColor}
-        </p>
-      </section>
-    );
-  }
+  if (unlocked) return <>{children}</>;
   return (
     <section className="card reward">
-      <h2>오늘의 종합 풀이 · 행운 정보</h2>
-      <p className="muted" style={{ fontSize: 14 }}>광고를 끝까지 보면 오늘의 종합 풀이와 행운의 숫자·색이 열려요.</p>
+      <h2>{title}</h2>
+      <p className="muted" style={{ fontSize: 14 }}>{hint}</p>
       <button type="button" className="cta" style={{ marginTop: 12 }} disabled={!ready || failed} onClick={watch}>
         {failed ? "지금은 광고를 불러올 수 없어요" : ready ? "광고 보고 열어보기" : "광고 불러오는 중..."}
       </button>
@@ -424,6 +421,7 @@ function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => 
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const page = useMemo(() => ILGAN_PAGES.find((p) => p.gan === result.dayPillar.ganKor)!, [result]);
   const daily = useMemo(() => getDailyFortuneDetail(result), [result]);
+  const goodYears = useMemo(() => getGoodYears(result, currentYearKst(), 5, 2), [result]);
   const pillars = [
     { label: "시주", p: result.timePillar },
     { label: "일주", p: result.dayPillar },
@@ -522,6 +520,20 @@ function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => 
         </ul>
       </section>
 
+      <AdGate
+        title="앞으로 좋은 흐름이 오는 해 · 연애 · 일과 돈"
+        hint="광고를 끝까지 보면 앞으로 흐름이 좋은 해와 연애 스타일, 일·돈 풀이, 잘 맞는 기운이 열려요."
+      >
+      {goodYears.length > 0 && (
+        <section className="card">
+          <h2>앞으로 흐름이 좋은 해</h2>
+          <ul className="list">
+            {goodYears.map((g) => (
+              <li key={g.year}><b>{g.year}년 {g.ganzhiKor} · {g.label}</b> — {g.line}</li>
+            ))}
+          </ul>
+        </section>
+      )}
       <section className="card">
         <h2>연애 스타일</h2>
         <p>{page.love}</p>
@@ -536,6 +548,8 @@ function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => 
         <p>{type.synergyNote}</p>
         <p style={{ marginTop: 10 }}>{type.tensionNote}</p>
       </section>
+
+      </AdGate>
 
       <button type="button" className="cta" onClick={() => void shareResult()}>친구는 무슨 타입일까? 공유하기</button>
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 다시 보기</button>

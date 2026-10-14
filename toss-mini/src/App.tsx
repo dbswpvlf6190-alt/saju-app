@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Analytics, Notification, Review, Share, TossAds, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
+import { Analytics, Notification, Review, Share, TossAds, getOperationalEnvironment, getTossAppVersion, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
 import { calculateSaju } from "@saju/engine";
 import type { SajuInput, SajuResult } from "@saju/types";
 import { generateFreeContent } from "@saju/content";
@@ -155,7 +155,7 @@ export default function App() {
   }
 
   if (screen === "result" && result) return <ResultScreen result={result} onOther={() => go("form")} />;
-  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} onOther={() => go("form")} />;
+  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} diag={gate.diag} onOther={() => go("form")} />;
 
   const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
   return (
@@ -232,6 +232,7 @@ export default function App() {
       <button type="button" className="cta" disabled={!ready || gate.disabled} onClick={submit}>
         {gate.label("내 사주 타입 보기")}
       </button>
+      <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{gate.diag}</p>
       {gate.needsAd && <p className="muted" style={{ textAlign: "center", fontSize: 13 }}>광고를 끝까지 보면 내 사주를 무료로 볼 수 있어요. 오늘 한 번만 보면 돼요.</p>}
       <p className="foot">입력한 생년월일은 이 기기에만 저장돼요.</p>
     </main>
@@ -239,7 +240,7 @@ export default function App() {
 }
 
 /** 다시 온 사람이 처음 보는 화면: 오늘의 운세 + 내 사주 타입 요약. 입력 없이 바로 보이게 한다. */
-function TodayScreen({ result, onFull, fullLabel, fullDisabled, onOther }: { result: SajuResult; onFull: () => void; fullLabel: string; fullDisabled: boolean; onOther: () => void }) {
+function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, onOther }: { result: SajuResult; onFull: () => void; fullLabel: string; fullDisabled: boolean; diag: string; onOther: () => void }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const daily = useMemo(() => getDailyFortuneDetail(result), [result]);
@@ -276,6 +277,7 @@ function TodayScreen({ result, onFull, fullLabel, fullDisabled, onOther }: { res
       <BannerAd />
 
       <button type="button" className="cta" disabled={fullDisabled} onClick={onFull}>{fullLabel}</button>
+      <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{diag}</p>
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 보기</button>
       <ReviewLink />
       <p className="foot">전통 명리학 해석을 쉽게 풀어 쓴 참고용 콘텐츠예요.</p>
@@ -288,8 +290,9 @@ function TodayScreen({ result, onFull, fullLabel, fullDisabled, onOther }: { res
  * 광고 미지원(옛 토스 버전·ID 없음)·로드 실패·표시 실패면 광고 없이 바로 결과를 보여 줘서 사용자를 막지 않는다.
  */
 function useRewardGate() {
-  const gated = import.meta.env.DEV || (!!REWARD_AD_ID && safeSupported(loadFullScreenAd) && safeSupported(showFullScreenAd));
+  const gated = import.meta.env.DEV || !!REWARD_AD_ID;
   const [unlocked, setUnlocked] = useState(() => !gated || readStore(KEY_REWARD_DAY) === todayKst());
+  const [err, setErr] = useState("");
   const [state, setState] = useState<"loading" | "ready" | "failed">(import.meta.env.DEV ? "ready" : "loading");
 
   useEffect(() => {
@@ -303,9 +306,13 @@ function useRewardGate() {
           onEvent: (e) => {
             if (e.type === "loaded") setState("ready");
           },
-          onError: () => setState("failed"),
+          onError: (e) => {
+            setErr(String((e as Error)?.message ?? e));
+            setState("failed");
+          },
         });
-      } catch {
+      } catch (e) {
+        setErr(String((e as Error)?.message ?? e));
         setState("failed");
       }
     }, 2500);
@@ -363,7 +370,16 @@ function useRewardGate() {
     }
   }
 
+  // 임시 진단(테스트 빌드 전용): 폰에서 광고가 왜 안 뜨는지 확인하려고 화면 아래에 상태를 한 줄 보여 준다.
+  let diag = "";
+  try {
+    diag = `광고진단 id=${!!REWARD_AD_ID} load=${safeSupported(loadFullScreenAd)} show=${safeSupported(showFullScreenAd)} ver=${getTossAppVersion()} env=${getOperationalEnvironment()} state=${state} unlocked=${unlocked}${err ? " err=" + err : ""}`;
+  } catch (e) {
+    diag = `광고진단 오류 ${String((e as Error)?.message ?? e)}`;
+  }
+
   return {
+    diag,
     run,
     /** 광고를 거쳐야 하는 상태(버튼 문구·안내 표시용) */
     needsAd: !open,

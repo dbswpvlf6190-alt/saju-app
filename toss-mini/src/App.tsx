@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Analytics, Notification, Review, Share, TossAds, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
 import { calculateSaju } from "@saju/engine";
 import type { SajuInput, SajuResult } from "@saju/types";
@@ -119,6 +119,7 @@ export default function App() {
     return saved?.result ?? null;
   });
   const [error, setError] = useState<string | null>(null);
+  const gate = useRewardGate();
 
   // 토스 내비게이션 바의 뒤로가기 = 브라우저 뒤로가기. 화면을 열 때마다 기록을 쌓고, 뒤로 가면 그 이전 화면으로 돌아간다. 첫 화면에서 누르면 미니앱 종료.
   useEffect(() => {
@@ -147,14 +148,14 @@ export default function App() {
       }
       setResult(r);
       track("form_submit");
-      go("result");
+      gate.run(() => go("result"));
     } catch (e) {
       setError(e instanceof Error ? e.message : "입력값을 확인해 주세요.");
     }
   }
 
   if (screen === "result" && result) return <ResultScreen result={result} onOther={() => go("form")} />;
-  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => go("result")} onOther={() => go("form")} />;
+  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} onOther={() => go("form")} />;
 
   const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
   return (
@@ -228,16 +229,17 @@ export default function App() {
       </section>
 
       {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f" }}>{error}</p>}
-      <button type="button" className="cta" disabled={!ready} onClick={submit}>
-        내 사주 타입 보기
+      <button type="button" className="cta" disabled={!ready || gate.disabled} onClick={submit}>
+        {gate.label("내 사주 타입 보기")}
       </button>
+      {gate.needsAd && <p className="muted" style={{ textAlign: "center", fontSize: 13 }}>광고를 끝까지 보면 내 사주를 무료로 볼 수 있어요. 오늘 한 번만 보면 돼요.</p>}
       <p className="foot">입력한 생년월일은 이 기기에만 저장돼요.</p>
     </main>
   );
 }
 
 /** 다시 온 사람이 처음 보는 화면: 오늘의 운세 + 내 사주 타입 요약. 입력 없이 바로 보이게 한다. */
-function TodayScreen({ result, onFull, onOther }: { result: SajuResult; onFull: () => void; onOther: () => void }) {
+function TodayScreen({ result, onFull, fullLabel, fullDisabled, onOther }: { result: SajuResult; onFull: () => void; fullLabel: string; fullDisabled: boolean; onOther: () => void }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const daily = useMemo(() => getDailyFortuneDetail(result), [result]);
@@ -273,7 +275,7 @@ function TodayScreen({ result, onFull, onOther }: { result: SajuResult; onFull: 
 
       <BannerAd />
 
-      <button type="button" className="cta" onClick={onFull}>내 사주 타입 전체 보기</button>
+      <button type="button" className="cta" disabled={fullDisabled} onClick={onFull}>{fullLabel}</button>
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 보기</button>
       <ReviewLink />
       <p className="foot">전통 명리학 해석을 쉽게 풀어 쓴 참고용 콘텐츠예요.</p>
@@ -281,14 +283,14 @@ function TodayScreen({ result, onFull, onOther }: { result: SajuResult; onFull: 
   );
 }
 
-/** 보상형 광고를 끝까지 보면 가려 둔 풀이(children)를 오늘 하루 열어 준다. 미지원 환경(옛 토스 버전·광고 ID 없음)이면 광고 없이 바로 보여 준다. */
-function AdGate({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {
+/**
+ * "광고 보고 내 사주 공짜로 보기": 보상형 광고를 끝까지 보면 결과 화면으로 넘어간다. 하루 한 번만 보면 그날은 다시 묻지 않는다.
+ * 광고 미지원(옛 토스 버전·ID 없음)·로드 실패·표시 실패면 광고 없이 바로 결과를 보여 줘서 사용자를 막지 않는다.
+ */
+function useRewardGate() {
   const gated = import.meta.env.DEV || (!!REWARD_AD_ID && safeSupported(loadFullScreenAd) && safeSupported(showFullScreenAd));
   const [unlocked, setUnlocked] = useState(() => !gated || readStore(KEY_REWARD_DAY) === todayKst());
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  // 개발 화면(또는 광고 ID 없음)에서는 광고 없이 바로 눌러 볼 수 있다.
-  const ready = import.meta.env.DEV || !REWARD_AD_ID ? true : loaded;
+  const [state, setState] = useState<"loading" | "ready" | "failed">(import.meta.env.DEV ? "ready" : "loading");
 
   useEffect(() => {
     if (!gated || unlocked || import.meta.env.DEV || !REWARD_AD_ID) return;
@@ -299,57 +301,75 @@ function AdGate({ title, hint, children }: { title: string; hint: string; childr
         unregister = loadFullScreenAd({
           options: { adGroupId: REWARD_AD_ID },
           onEvent: (e) => {
-            if (e.type === "loaded") setLoaded(true);
+            if (e.type === "loaded") setState("ready");
           },
-          onError: () => setFailed(true),
+          onError: () => setState("failed"),
         });
       } catch {
-        setFailed(true);
+        setState("failed");
       }
     }, 2500);
+    // 12초 안에 로드되지 않으면 광고 없이 열어 준다.
+    const giveUp = window.setTimeout(() => setState((cur) => (cur === "loading" ? "failed" : cur)), 12000);
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(giveUp);
       unregister?.();
     };
   }, [gated, unlocked]);
 
-  function unlock() {
-    writeStore(KEY_REWARD_DAY, todayKst());
-    setUnlocked(true);
-    track("reward_earned");
-  }
+  const open = !gated || unlocked || state === "failed";
 
-  function watch() {
+  function run(onDone: () => void) {
+    if (open) {
+      onDone();
+      return;
+    }
     track("reward_click");
+    let done = false;
+    const finish = (earned: boolean) => {
+      if (done) return;
+      done = true;
+      if (earned) {
+        writeStore(KEY_REWARD_DAY, todayKst());
+        setUnlocked(true);
+        track("reward_earned");
+      }
+      onDone();
+    };
     if (import.meta.env.DEV || !REWARD_AD_ID) {
-      unlock();
+      finish(true);
       return;
     }
     try {
       showFullScreenAd({
         options: { adGroupId: REWARD_AD_ID },
         onEvent: (e) => {
-          // 광고를 끝까지 봤을 때만 지급한다(닫기만 해서는 지급하지 않음).
-          if (e.type === "userEarnedReward") unlock();
-          if (e.type === "failedToShow") setFailed(true);
+          // 광고를 끝까지 봤을 때만 보상으로 기록한다(닫기만 하면 결과는 열지 않는다).
+          if (e.type === "userEarnedReward") finish(true);
+          if (e.type === "failedToShow") {
+            setState("failed");
+            finish(false);
+          }
         },
-        onError: () => setFailed(true),
+        onError: () => {
+          setState("failed");
+          finish(false);
+        },
       });
     } catch {
-      setFailed(true);
+      setState("failed");
+      finish(false);
     }
   }
 
-  if (unlocked) return <>{children}</>;
-  return (
-    <section className="card reward">
-      <h2>{title}</h2>
-      <p className="muted" style={{ fontSize: 14 }}>{hint}</p>
-      <button type="button" className="cta" style={{ marginTop: 12 }} disabled={!ready || failed} onClick={watch}>
-        {failed ? "지금은 광고를 불러올 수 없어요" : ready ? "광고 보고 열어보기" : "광고 불러오는 중..."}
-      </button>
-    </section>
-  );
+  return {
+    run,
+    /** 광고를 거쳐야 하는 상태(버튼 문구·안내 표시용) */
+    needsAd: !open,
+    disabled: !open && state === "loading",
+    label: (base: string) => (open ? base : state === "ready" ? "광고 보고 내 사주 공짜로 보기" : "광고 준비 중..."),
+  };
 }
 
 /** 사용자가 직접 신청한 "매일 오늘의 운세 도착" 알림(기능성 메시지). 템플릿 코드가 없거나 미지원이면 숨긴다. */
@@ -520,10 +540,6 @@ function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => 
         </ul>
       </section>
 
-      <AdGate
-        title="앞으로 좋은 흐름이 오는 해 · 연애 · 일과 돈"
-        hint="광고를 끝까지 보면 앞으로 흐름이 좋은 해와 연애 스타일, 일·돈 풀이, 잘 맞는 기운이 열려요."
-      >
       {goodYears.length > 0 && (
         <section className="card">
           <h2>앞으로 흐름이 좋은 해</h2>
@@ -549,7 +565,6 @@ function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => 
         <p style={{ marginTop: 10 }}>{type.tensionNote}</p>
       </section>
 
-      </AdGate>
 
       <button type="button" className="cta" onClick={() => void shareResult()}>친구는 무슨 타입일까? 공유하기</button>
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 다시 보기</button>

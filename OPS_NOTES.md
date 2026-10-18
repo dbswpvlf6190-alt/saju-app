@@ -259,3 +259,10 @@
 - 10/12~10/18 자동 게시는 노트북(DESKTOP-BNNQ4D5)이 모두 처리. 데스크톱은 10/11 밤부터 절전 → 10/18 19:18 켜지자 밀린 작업 9개가 한꺼번에 시작됨(카드뉴스 27 잠금만 잡았다가 이미 게시돼 있어 중복 게시 없음).
 - 조치: 데스크톱의 `Saju*`·`Shorts*` 작업 10개를 중지 + **사용 안 함(Disabled)**. 노트북 작업은 그대로. 데스크톱을 다시 주 컴퓨터로 쓸 때만 `Get-ScheduledTask Saju*,Shorts* | Enable-ScheduledTask` (노트북 쪽은 그때 사용 안 함으로 — 두 대 동시 운영 금지).
 - 10/15 `SajuThreadsLinkTest`는 데스크톱이 꺼져 있어 안 돌았음 → 10/18 수동 집계: 링크 끈 뒤 일반 글 평균 조회 65→34, 풀이 글 120→159, Threads→사이트 방문 5→3. 링크는 노출 급감의 주원인이 아니었다(판단은 주간 보고서 참고).
+
+## 2026-10-18 — 주간 보고 후 적용(사용자 승인 "다 진행")
+- 보고서: https://claude.ai/artifact/DVcps5rXwwizXM2xGxzsz8 (10/12~10/18).
+- **Threads 풀이 글 매일**: `run_daily_threads.READING_EVERY_DAYS = 1`, `NOON_POSTS = False`(12:30 실행은 아무것도 안 올림, 일반 글은 21시에 쓸 풀이 글이 없을 때만 대신). `threads_reading_posts.json` 21개(새 14개 RD12~RD25: 일 풀리는 시기·돈 들어오는 시기·인연 시기(성별 요청)·재회/짝사랑/결혼 궁합·인간관계 등, RD07 '남은 석 달'은 RD25 '남은 두 달'로 대체). 21일 재사용 금지라 21개면 딱 한 바퀴 — 더 늘리려면 변형 추가. 노트북은 실행 시작 후 git pull이라 10/18 21:00은 옛 코드, **10/19부터 새 방식**.
+- **궁합 답글 링크 재개**: `threads_replies.COMPAT_REPLY_LINK = True`(두 사람 답글에만 `/compatibility?ref=threads_reply`), 한 사람 답글은 `REPLY_LINKS = False` 유지.
+- **카드뉴스 늘리기는 보류**: `ig_cardnews` 12회는 게시 직후 1분 안에 5~7회씩 몰린 로봇 방문(exam 캡션 링크). 사이트 `landing_view`도 게시 시각(10·11·12·21시)에 몰린 미리보기 로봇이 대부분 — 실제 사람 지표는 `saju_start`로 볼 것. 로봇 걸러내기는 사용자 결정 대기.
+- **집계 버그 수정**: `AnalyticsEvent.createdAt`은 시간대 없는 UTC 값인데 `fetch_insights`가 `at time zone 'Asia/Seoul'`만 써서 날짜 구분이 9시간 거꾸로 밀려 있었음 → `("createdAt" at time zone 'UTC') at time zone 'Asia/Seoul'`.

@@ -24,7 +24,10 @@ QUEUE_PATH = os.path.join(BASE_DIR, "scripts", "threads_queue.json")
 # 사흘에 한 번은 대기열 대신 이 글을 올린다. 답글 풀이는 threads_replies.py(auto → 승인 → send).
 READING_PATH = os.path.join(BASE_DIR, "scripts", "threads_reading_posts.json")
 # 10/4 분석: 팔로워 대부분이 무료 풀이 글에서 왔고 일반 글은 조회 60~300 → 이틀에 한 번으로 늘림.
-READING_EVERY_DAYS = 2
+# 10/18 주간 보고: 풀이 글 평균 조회 159·실답글 7 vs 일반 글 34·0 → 풀이 글 매일(21:00), 낮 일반 글 중단.
+READING_EVERY_DAYS = 1
+# 낮(18시 전) 슬롯의 일반 글. 끄면 12:30 실행은 아무것도 안 올리고, 일반 글은 21시에 풀이 글이 없을 때만 대신 나간다.
+NOON_POSTS = False
 POSTED_DIR = os.path.join(BASE_DIR, "scripts", "posted_state", "threads")
 # 9/27부터 하루 2개(12:30·21:00, 8.5시간 간격). 늦게 실행돼도(PC 꺼짐) 두 개가 붙어서 나가지 않게 7시간 간격을 둔다.
 MIN_HOURS_BETWEEN_POSTS = 7
@@ -126,6 +129,9 @@ def main():
     # 사람 없는 시간에 올라가고, 그 바람에 다음 슬롯까지 간격 제한으로 막혔다. 10시 전 실행은 건너뛴다.
     if datetime.now().hour < 10:
         print("오전 10시 전의 밀린 실행이라 건너뜁니다(다음 정규 슬롯에서 게시).")
+        return
+    if not NOON_POSTS and datetime.now().hour < 18:
+        print("낮 일반 글 슬롯은 쉬는 중(NOON_POSTS=False) — 21시 무료 풀이 글만 올립니다.")
         return
     git_sync.git_pull(BASE_DIR)
     last = last_posted_at()

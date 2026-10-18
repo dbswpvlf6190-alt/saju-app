@@ -266,3 +266,8 @@
 - **궁합 답글 링크 재개**: `threads_replies.COMPAT_REPLY_LINK = True`(두 사람 답글에만 `/compatibility?ref=threads_reply`), 한 사람 답글은 `REPLY_LINKS = False` 유지.
 - **카드뉴스 늘리기는 보류**: `ig_cardnews` 12회는 게시 직후 1분 안에 5~7회씩 몰린 로봇 방문(exam 캡션 링크). 사이트 `landing_view`도 게시 시각(10·11·12·21시)에 몰린 미리보기 로봇이 대부분 — 실제 사람 지표는 `saju_start`로 볼 것. 로봇 걸러내기는 사용자 결정 대기.
 - **집계 버그 수정**: `AnalyticsEvent.createdAt`은 시간대 없는 UTC 값인데 `fetch_insights`가 `at time zone 'Asia/Seoul'`만 써서 날짜 구분이 9시간 거꾸로 밀려 있었음 → `("createdAt" at time zone 'UTC') at time zone 'Asia/Seoul'`.
+
+## 2026-10-18 — 이벤트 로봇 제외 + 토스 콘솔 지표
+- `/api/analytics/event`가 User-Agent로 로봇(facebookexternalhit·meta-externalagent·각종 bot/crawler·HeadlessChrome·kakaotalk-scrap·Yeti·python 등, UA 없음 포함)을 **기록하지 않음**. 사람은 `metaJson.ua`에 큰 분류(threads·instagram·facebook·kakao·naver·mobile·desktop·unknown)를 서버가 붙임. 클라이언트는 `navigator.webdriver`면 안 보냄. 분류는 `src/lib/analytics/userAgent.ts`(테스트 있음). 운영 확인: 로봇 UA 요청 0행, Threads 앱 UA는 `ua:"threads"`로 기록(테스트 행은 삭제).
+- **10/18 이전 수치는 로봇 포함**이라 다음 주 비교는 `saju_start` 기준으로. `ua`가 계속 `unknown`/`mobile`로만 몰리고 게시 시각 몰림이 남으면 그 UA를 BOT_RE에 추가.
+- 토스 콘솔(10/18): 누적 유저 7명(10/12 2·10/13 1·10/14 3·10/15 1, 대부분 본인 테스트, 10/16 이후 0), iOS 4·Android 3, 남 6·여 1. 인앱 광고(10/5~10/18) 광고 그룹 2개·노출 25회·eCPM 약 800원·예상 수익 약 20원. 푸시 캠페인 "오늘의 운세 도착 알림" 승인·정기 발송(10/20 시작) — 콘솔에 알림 신청 수 표시 없음. 콘솔 공지: 광고성 푸시 직접 작성 기능 종료(기능성만), 지난 광고성 소재·성과는 10/31까지 다운로드.

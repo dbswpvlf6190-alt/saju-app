@@ -51,11 +51,7 @@ async function getValidAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-export async function sendPaymentKakaoNotification(order: {
-  amount: number;
-  productType: string;
-  paymentId: string;
-}): Promise<void> {
+async function sendKakaoMemo(text: string): Promise<void> {
   if (!REST_API_KEY) {
     throw new Error("KAKAO_REST_API_KEY 환경변수가 설정되지 않았습니다.");
   }
@@ -63,7 +59,7 @@ export async function sendPaymentKakaoNotification(order: {
   const accessToken = await getValidAccessToken();
   const templateObject = {
     object_type: "text",
-    text: `💰 사주랩 결제 완료\n${order.amount.toLocaleString()}원 · ${order.productType}\n${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`,
+    text,
     link: {
       web_url: "https://saju-app-three-dusky.vercel.app/admin",
       mobile_web_url: "https://saju-app-three-dusky.vercel.app/admin",
@@ -81,4 +77,32 @@ export async function sendPaymentKakaoNotification(order: {
   if (!res.ok) {
     throw new Error(`카카오 메시지 전송 실패: ${res.status} ${await res.text()}`);
   }
+}
+
+function nowKst(): string {
+  return new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+}
+
+export async function sendPaymentKakaoNotification(order: {
+  amount: number;
+  productType: string;
+  paymentId: string;
+}): Promise<void> {
+  await sendKakaoMemo(`💰 사주랩 결제 완료
+${order.amount.toLocaleString()}원 · ${order.productType}
+${nowKst()}`);
+}
+
+/** 결제 실패 알림. 카드사 오류(예: V104)나 금액 불일치를 며칠 늦게 알아채는 일을 막는다. */
+export async function sendPaymentFailureKakaoNotification(order: {
+  amount: number;
+  productType: string;
+  paymentId: string;
+  reason: string;
+}): Promise<void> {
+  const reason = order.reason.length > 120 ? `${order.reason.slice(0, 120)}…` : order.reason;
+  await sendKakaoMemo(`⚠️ 사주랩 결제 실패
+${order.amount.toLocaleString()}원 · ${order.productType}
+사유: ${reason}
+${nowKst()}`);
 }

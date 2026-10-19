@@ -8,6 +8,7 @@ import { ILGAN_PAGES } from "@saju/ilganPages";
 import { getDailyFortuneDetail } from "@saju/dailyFortune";
 import { currentYearKst, getGoodYears } from "@saju/goodYears";
 import type { WuXing } from "@saju/ganzhi";
+import { CHAPTER_TITLES, buyManual, iapAvailable, loadManual, recoverPendingOrders, savedPurchase, type Purchase } from "./iap";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
 // (앱인토스 정책: 외부 링크·자사 서비스 이동 유도 금지, SSR 금지). 수익은 인앱 광고(배너)로 — 광고 그룹 ID는
@@ -97,7 +98,7 @@ function toInput(f: Form): SajuInput {
   };
 }
 
-type Screen = "today" | "form" | "result";
+type Screen = "today" | "form" | "result" | "manual";
 
 export default function App() {
   // 다시 온 사람(저장된 생일이 있음)은 입력 화면 대신 "오늘의 운세"부터 보여준다 — 매일 열 이유가 첫 화면에서 보여야 재방문이 생긴다.
@@ -120,6 +121,20 @@ export default function App() {
   });
   const [error, setError] = useState<string | null>(null);
   const gate = useRewardGate();
+  const [purchase, setPurchase] = useState<Purchase | null>(() => savedPurchase());
+
+  // 결제는 됐지만 지급이 끝나지 않은 주문이 있으면 앱을 열 때 이어서 지급한다(앱 종료·네트워크 오류 대비).
+  useEffect(() => {
+    const f = loadSaved();
+    if (!iapAvailable() || !f || !f.year || !f.month || !f.day || !f.gender) return;
+    let alive = true;
+    void recoverPendingOrders(toInput(f)).then((p) => {
+      if (alive && p) setPurchase(p);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // 토스 내비게이션 바의 뒤로가기 = 브라우저 뒤로가기. 화면을 열 때마다 기록을 쌓고, 뒤로 가면 그 이전 화면으로 돌아간다. 첫 화면에서 누르면 미니앱 종료.
   useEffect(() => {
@@ -154,7 +169,21 @@ export default function App() {
     }
   }
 
-  if (screen === "result" && result) return <ResultScreen result={result} onOther={() => go("form")} />;
+  if (screen === "manual" && purchase) return <ManualScreen purchase={purchase} onBack={() => window.history.back()} />;
+  if (screen === "result" && result)
+    return (
+      <ResultScreen
+        result={result}
+        form={form}
+        purchase={purchase}
+        onPurchased={(p) => {
+          setPurchase(p);
+          go("manual");
+        }}
+        onOpenManual={() => go("manual")}
+        onOther={() => go("form")}
+      />
+    );
   if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} diag={gate.diag} onOther={() => go("form")} />;
 
   const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
@@ -453,7 +482,127 @@ function ReviewLink() {
   );
 }
 
-function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => void }) {
+/** 결제 상품 "나 사용설명서 6장" 카드. 구매 전에 AI가 작성한다는 점을 먼저 알리고(생성형 AI 고지), 결제는 토스 인앱 결제로만 한다. */
+function ManualBuyCard({
+  form,
+  purchase,
+  onPurchased,
+  onOpenManual,
+}: {
+  form: Form;
+  purchase: Purchase | null;
+  onPurchased: (p: Purchase) => void;
+  onOpenManual: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!iapAvailable()) return null;
+
+  if (purchase) {
+    return (
+      <section className="card reward">
+        <h2>나 사용설명서 6장</h2>
+        <p className="muted" style={{ fontSize: 14 }}>구매한 사용설명서를 다시 열 수 있어요.</p>
+        <button type="button" className="cta" style={{ marginTop: 12 }} onClick={onOpenManual}>내 사용설명서 열기</button>
+      </section>
+    );
+  }
+
+  function buy() {
+    setError(null);
+    setBusy(true);
+    track("iap_click");
+    buyManual(toInput(form), {
+      onSuccess: (p) => {
+        setBusy(false);
+        track("iap_success");
+        onPurchased(p);
+      },
+      onError: (message) => {
+        setBusy(false);
+        setError(message);
+      },
+    });
+  }
+
+  return (
+    <section className="card reward">
+      <h2>나 사용설명서 6장</h2>
+      <p className="muted" style={{ fontSize: 14 }}>
+        기본 설계도부터 오늘 해볼 행동 3가지까지, 내 사주로 6장을 만들어 드려요. 상대에게 바로 쓸 말과 올해 흐름도 들어 있어요.
+      </p>
+      <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
+        이 사용설명서는 AI가 작성해요. 생성에 1~3분 걸릴 수 있고, 참고용 해석이에요.
+      </p>
+      <button type="button" className="cta" style={{ marginTop: 12 }} disabled={busy} onClick={buy}>
+        {busy ? "결제 진행 중..." : "4,895원으로 나 사용설명서 열기"}
+      </button>
+      {error && <p className="muted" style={{ color: "#e3543f", fontSize: 13, marginTop: 8 }}>{error}</p>}
+    </section>
+  );
+}
+
+/** 구매한 사용설명서 화면. 장마다 생성되는 대로 이어 붙여 보여 준다. */
+function ManualScreen({ purchase, onBack }: { purchase: Purchase; onBack: () => void }) {
+  const [chapters, setChapters] = useState<{ key: string; text: string }[]>([]);
+  const [progress, setProgress] = useState({ done: 0, total: 6 });
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    track("screen_manual");
+    loadManual(purchase, (key, text, pr) => {
+      if (!alive) return;
+      setChapters((prev) => (prev.some((c) => c.key === key) ? prev : [...prev, { key, text }]));
+      setProgress(pr);
+    }).catch((e) => {
+      if (alive) setError(e instanceof Error ? e.message : "불러오지 못했어요.");
+    });
+    return () => {
+      alive = false;
+    };
+  }, [purchase]);
+
+  const finished = progress.total > 0 && progress.done >= progress.total;
+  return (
+    <main className="page">
+      <header className="hero">
+        <div className="eyebrow">AI가 작성한 결과</div>
+        <h1>나 사용설명서</h1>
+        <p>{finished ? "6장이 모두 준비됐어요." : `작성 중이에요 (${progress.done}/${progress.total}장). 먼저 나온 장부터 읽어 보세요.`}</p>
+      </header>
+
+      {chapters.map((c, i) => (
+        <section key={c.key} className="card">
+          <h2>{i + 1}. {CHAPTER_TITLES[c.key] ?? c.key}</h2>
+          <p style={{ whiteSpace: "pre-line" }}>{c.text}</p>
+        </section>
+      ))}
+
+      {!finished && !error && <p className="muted" style={{ textAlign: "center" }}>다음 장을 작성하고 있어요...</p>}
+      {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f" }}>{error}</p>}
+
+      <button type="button" className="ghost" onClick={onBack}>돌아가기</button>
+      <p className="foot">이 내용은 AI가 작성한 결과물이며, 전통 명리학 해석을 바탕으로 한 참고용이에요.</p>
+    </main>
+  );
+}
+
+function ResultScreen({
+  result,
+  form,
+  purchase,
+  onPurchased,
+  onOpenManual,
+  onOther,
+}: {
+  result: SajuResult;
+  form: Form;
+  purchase: Purchase | null;
+  onPurchased: (p: Purchase) => void;
+  onOpenManual: () => void;
+  onOther: () => void;
+}) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const page = useMemo(() => ILGAN_PAGES.find((p) => p.gan === result.dayPillar.ganKor)!, [result]);
@@ -582,6 +731,8 @@ function ResultScreen({ result, onOther }: { result: SajuResult; onOther: () => 
         <p style={{ marginTop: 10 }}>{type.tensionNote}</p>
       </section>
 
+
+      <ManualBuyCard form={form} purchase={purchase} onPurchased={onPurchased} onOpenManual={onOpenManual} />
 
       <button type="button" className="cta" onClick={() => void shareResult()}>친구는 무슨 타입일까? 공유하기</button>
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 다시 보기</button>

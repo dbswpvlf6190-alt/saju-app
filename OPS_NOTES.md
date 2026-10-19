@@ -271,3 +271,10 @@
 - `/api/analytics/event`가 User-Agent로 로봇(facebookexternalhit·meta-externalagent·각종 bot/crawler·HeadlessChrome·kakaotalk-scrap·Yeti·python 등, UA 없음 포함)을 **기록하지 않음**. 사람은 `metaJson.ua`에 큰 분류(threads·instagram·facebook·kakao·naver·mobile·desktop·unknown)를 서버가 붙임. 클라이언트는 `navigator.webdriver`면 안 보냄. 분류는 `src/lib/analytics/userAgent.ts`(테스트 있음). 운영 확인: 로봇 UA 요청 0행, Threads 앱 UA는 `ua:"threads"`로 기록(테스트 행은 삭제).
 - **10/18 이전 수치는 로봇 포함**이라 다음 주 비교는 `saju_start` 기준으로. `ua`가 계속 `unknown`/`mobile`로만 몰리고 게시 시각 몰림이 남으면 그 UA를 BOT_RE에 추가.
 - 토스 콘솔(10/18): 누적 유저 7명(10/12 2·10/13 1·10/14 3·10/15 1, 대부분 본인 테스트, 10/16 이후 0), iOS 4·Android 3, 남 6·여 1. 인앱 광고(10/5~10/18) 광고 그룹 2개·노출 25회·eCPM 약 800원·예상 수익 약 20원. 푸시 캠페인 "오늘의 운세 도착 알림" 승인·정기 발송(10/20 시작) — 콘솔에 알림 신청 수 표시 없음. 콘솔 공지: 광고성 푸시 직접 작성 기능 종료(기능성만), 지난 광고성 소재·성과는 10/31까지 다운로드.
+
+## 2026-10-19 토스 인앱 결제(나 사용설명서 6장) 개발 — 코드 완료, 콘솔 선행 조건 대기
+- **결정(10/19, 사용자)**: 토스 유입 확대보다 인앱 결제를 먼저(1건 순수익 ≈3,500원 ≫ 광고 3~5원). 첫 상품 1종: 나 사용설명서 6장, 공급가 4,450원 → 판매가 4,895원(승인 전 가격 확정 필요).
+- **서버(브랜치 `toss-iap`, 작업 폴더 `C:\saju-app-iap`, 9474164, 미병합·미배포)**: `src/lib/toss/iap.ts`(토스 주문 상태 조회 mTLS·응답 검증·CORS), `POST /api/toss/iap/grant`(주문 확인→Order 멱등 생성→접근 토큰), `GET /api/toss/iap/report`(x-order-token 헤더로 6장 조회). 설정이 없으면 503을 돌려 안전. 테스트 8개 통과. 필요한 Vercel 환경변수: `TOSS_MTLS_CERT`, `TOSS_MTLS_KEY`(PEM 또는 base64), `TOSS_IAP_SKU_MANUAL`, 선택 `TOSS_MINIAPP_ORIGINS`.
+- **미니앱(브랜치 `toss-iap-client`, `C:\saju-app-toss`, eb80ca5)**: `toss-mini/src/iap.ts`(구매·미결 주문 복구·리포트 로드), 결과 화면 구매 카드(AI 생성 고지 포함), 6장 리포트 화면. 빌드 시 `VITE_IAP_SKU` 없으면 구매 카드가 숨겨진다(현재 .env.production에는 없음).
+- **콘솔 선행 조건(사용자)**: ① 인앱 상품 등록(상품 목록 비어 있음) ② mTLS 인증서 발급(`/certificate`, "+ 발급받기") ③ 토스 로그인 약관 동의(`/toss-login`, 문서상 주문 상태 조회 API 전에 필요) — 아직 안 함.
+- **주의**: 콘솔 QR 테스트는 모의가 아니라 **실제 결제**로 처리된다(3.x SDK). 테스트 결제 후 환불 필요. 서버 배포는 mTLS 인증서를 Vercel에 넣은 뒤.

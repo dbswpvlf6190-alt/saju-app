@@ -6,7 +6,32 @@ import type { SajuInput } from "@saju/types";
 export const IAP_SKU = import.meta.env.VITE_IAP_SKU as string | undefined;
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "https://saju-app-three-dusky.vercel.app";
 const KEY_PURCHASES = "sajulab:iap:purchases:v2";
+const KEY_PENDING = "sajulab:iap:pending:v1";
 const T0 = Date.now();
+
+interface LocalPending {
+  orderId: string;
+  input: SajuInput;
+}
+
+function readPending(): LocalPending[] {
+  try {
+    const arr = JSON.parse(read(KEY_PENDING) ?? "[]") as LocalPending[];
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+function addPending(item: LocalPending) {
+  const list = readPending().filter((p) => p.orderId !== item.orderId);
+  list.push(item);
+  write(KEY_PENDING, JSON.stringify(list));
+}
+
+function removePending(orderId: string) {
+  write(KEY_PENDING, JSON.stringify(readPending().filter((p) => p.orderId !== orderId)));
+}
 
 /** 결제 단계 진단 기록(실패해도 무시). 사전 확인 요청이 없도록 text/plain으로 보낸다. */
 function trace(stage: string, extra: Record<string, unknown> = {}) {
@@ -122,40 +147,41 @@ async function grant(orderId: string, input: SajuInput): Promise<Purchase> {
   return purchase;
 }
 
-/** 구매 시작. 결제창은 토스가 띄우고, 결제가 끝나면 processProductGrant에서 서버가 주문을 확인해 지급한다. */
+/**
+ * 구매 시작. 결제창은 토스가 띄운다.
+ * 결제 화면이 떠 있는 동안에는 앱의 통신 응답이 전달되지 않아(2026-10-20 실결제 2회 재현) 지급 콜백에서 서버를 기다리면
+ * 토스가 시간 초과로 "문제가 생겼어요"를 띄운다. 그래서 콜백에서는 주문 번호를 기기에 먼저 저장하고 곧바로 true를 돌려주며,
+ * 서버 지급(토스에 결제 여부를 직접 확인)은 결제 화면이 닫힌 뒤 success 이벤트에서 한다. 실패하면 미결 목록에 남아 다음에 다시 시도한다.
+ */
 export function buyManual(
   input: SajuInput,
   handlers: { onSuccess: (p: Purchase) => void; onError: (message: string) => void },
 ): () => void {
-  let purchase: Purchase | null = null;
-  let grantError = "";
   trace("buy_start");
   try {
     const cleanup = IAP.createOneTimePurchaseOrder({
       options: {
         sku: IAP_SKU as string,
-        processProductGrant: async ({ orderId }) => {
-          trace("grant_enter", { orderTail: orderId.slice(-6) });
-          try {
-            purchase = await grant(orderId, input);
-            trace("grant_return_true");
-            return true;
-          } catch (e) {
-            grantError = e instanceof Error ? e.message : "지급하지 못했어요.";
-            trace("grant_return_false", { error: describeError(e) });
-            return false;
-          }
+        processProductGrant: ({ orderId }) => {
+          addPending({ orderId, input });
+          trace("grant_enter_saved", { orderTail: orderId.slice(-6) });
+          return true;
         },
       },
       onEvent: (e) => {
-        trace("event", { type: e.type, hasPurchase: !!purchase });
-        try {
-          if (e.type === "success" && purchase) handlers.onSuccess(purchase);
-          else if (e.type === "success") handlers.onError(grantError || "결제는 끝났지만 열지 못했어요. 앱을 다시 열면 자동으로 이어져요.");
-        } catch (err) {
-          trace("event_handler_error", { error: describeError(err) });
-          handlers.onError("결제는 끝났어요. 화면을 여는 중 문제가 생겼어요. 앱을 다시 열면 이어져요.");
-        }
+        trace("event", { type: e.type });
+        if (e.type !== "success") return;
+        const orderId = e.data.orderId;
+        grant(orderId, input)
+          .then((p) => {
+            removePending(orderId);
+            trace("grant_after_success_ok");
+            handlers.onSuccess(p);
+          })
+          .catch((err) => {
+            trace("grant_after_success_fail", { error: describeError(err) });
+            handlers.onError("결제는 끝났어요. 사용설명서를 여는 중이에요. 잠시 후 앱을 다시 열면 이어져요.");
+          });
       },
       onError: (e) => {
         trace("event_error", { error: describeError(e) });
@@ -175,29 +201,42 @@ export function buyManual(
  * 서버는 같은 주문을 두 번 만들지 않으므로 여러 번 불러도 안전하다.
  */
 export async function recoverPendingOrders(input: SajuInput | null): Promise<Purchase | null> {
-  if (!IAP_SKU || !input) return null;
+  if (!IAP_SKU) return null;
+  let recovered: Purchase | null = null;
+
+  // 1) 기기에 남겨 둔 미결 주문(결제는 끝났지만 서버 지급이 안 끝난 것)
+  for (const item of readPending()) {
+    try {
+      recovered = await grant(item.orderId, item.input);
+      removePending(item.orderId);
+      trace("recover_local_ok", { orderTail: item.orderId.slice(-6) });
+    } catch (e) {
+      trace("recover_local_error", { error: describeError(e) });
+    }
+  }
+
+  // 2) 토스가 알려 주는 미결 주문(지급 완료 처리가 안 된 것)
   try {
-    if (!IAP.getPendingOrders.isSupported()) return null;
-    const { orders } = await IAP.getPendingOrders();
-    trace("recover_pending", { count: orders.length });
-    let recovered: Purchase | null = null;
-    for (const order of orders) {
-      if (order.sku !== IAP_SKU) continue;
-      try {
-        recovered = await grant(order.orderId, input);
-        if (IAP.completeProductGrant.isSupported()) {
-          const done = await IAP.completeProductGrant({ params: { orderId: order.orderId } });
-          trace("recover_complete", { done });
+    if (input && IAP.getPendingOrders.isSupported()) {
+      const { orders } = await IAP.getPendingOrders();
+      trace("recover_pending", { count: orders.length });
+      for (const order of orders) {
+        if (order.sku !== IAP_SKU) continue;
+        try {
+          recovered = await grant(order.orderId, input);
+          if (IAP.completeProductGrant.isSupported()) {
+            const done = await IAP.completeProductGrant({ params: { orderId: order.orderId } });
+            trace("recover_complete", { done });
+          }
+        } catch (e) {
+          trace("recover_error", { error: describeError(e) });
         }
-      } catch (e) {
-        trace("recover_error", { error: describeError(e) });
-        /* 실패하면 완료 처리하지 않고 다음에 다시 시도한다 */
       }
     }
-    return recovered;
   } catch {
-    return null;
+    /* 복구 실패는 화면에 영향을 주지 않는다 */
   }
+  return recovered;
 }
 
 export interface ManualProgress {

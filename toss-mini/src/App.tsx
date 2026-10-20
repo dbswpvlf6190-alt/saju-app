@@ -542,7 +542,7 @@ function ManualBuyCard({
         {busy ? "결제 진행 중..." : "4,895원으로 나 사용설명서 열기"}
       </button>
       <p className="muted" style={{ fontSize: 11, marginTop: 8, textAlign: "center" }}>
-        AI가 작성한 해석이에요 · 생성에 1~3분 · 참고용
+        한국 전통 사주 명리학을 바탕으로 AI가 작성해요 · 생성에 1~3분
       </p>
       {error && <p className="muted" style={{ color: "#e3543f", fontSize: 13, marginTop: 8 }}>{error}</p>}
     </section>

@@ -8,7 +8,7 @@ import { ILGAN_PAGES } from "@saju/ilganPages";
 import { getDailyFortuneDetail } from "@saju/dailyFortune";
 import { currentYearKst, getGoodYears } from "@saju/goodYears";
 import type { WuXing } from "@saju/ganzhi";
-import { CHAPTER_PROMISES, CHAPTER_TITLES, buyManual, iapAvailable, loadManual, recoverPendingOrders, savedPurchase, type Purchase } from "./iap";
+import { CHAPTER_PROMISES, CHAPTER_TITLES, buyManual, iapAvailable, loadManual, recoverPendingOrders, savedPurchaseFor, type Purchase } from "./iap";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
 // (앱인토스 정책: 외부 링크·자사 서비스 이동 유도 금지, SSR 금지). 수익은 인앱 광고(배너)로 — 광고 그룹 ID는
@@ -121,7 +121,16 @@ export default function App() {
   });
   const [error, setError] = useState<string | null>(null);
   const gate = useRewardGate();
-  const [purchase, setPurchase] = useState<Purchase | null>(() => savedPurchase());
+  // 구매 기록은 생일별로 저장돼 있어, 지금 입력한 생일의 구매만 "열기"로 보인다(다른 생일은 새로 구매할 수 있다).
+  const [purchaseTick, setPurchaseTick] = useState(0);
+  const purchase = useMemo<Purchase | null>(() => {
+    try {
+      return savedPurchaseFor(toInput(form));
+    } catch {
+      return null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, purchaseTick]);
 
   // 결제는 됐지만 지급이 끝나지 않은 주문이 있으면 앱을 열 때 이어서 지급한다(앱 종료·네트워크 오류 대비).
   useEffect(() => {
@@ -129,7 +138,7 @@ export default function App() {
     if (!iapAvailable() || !f || !f.year || !f.month || !f.day || !f.gender) return;
     let alive = true;
     void recoverPendingOrders(toInput(f)).then((p) => {
-      if (alive && p) setPurchase(p);
+      if (alive && p) setPurchaseTick((n) => n + 1);
     });
     return () => {
       alive = false;
@@ -176,8 +185,8 @@ export default function App() {
         result={result}
         form={form}
         purchase={purchase}
-        onPurchased={(p) => {
-          setPurchase(p);
+        onPurchased={() => {
+          setPurchaseTick((n) => n + 1);
           go("manual");
         }}
         onOpenManual={() => go("manual")}

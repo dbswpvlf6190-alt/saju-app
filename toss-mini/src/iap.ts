@@ -5,7 +5,7 @@ import type { SajuInput } from "@saju/types";
 // VITE_IAP_SKU(콘솔에 등록한 상품 SKU)가 없으면 구매 화면은 나오지 않는다.
 export const IAP_SKU = import.meta.env.VITE_IAP_SKU as string | undefined;
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "https://saju-app-three-dusky.vercel.app";
-const KEY_PURCHASE = "sajulab:iap:purchase";
+const KEY_PURCHASES = "sajulab:iap:purchases:v2";
 const T0 = Date.now();
 
 /** 결제 단계 진단 기록(실패해도 무시). 사전 확인 요청이 없도록 text/plain으로 보낸다. */
@@ -71,13 +71,29 @@ function write(key: string, value: string) {
   }
 }
 
-export function savedPurchase(): Purchase | null {
+/** 생일·성별이 같으면 같은 키. 구매한 리포트는 그 생일에만 연결된다. */
+export function birthKey(i: SajuInput): string {
+  return [i.calendarType, i.gender, i.year, i.month, i.day, i.hour ?? "x", i.minute ?? "x"].join("-");
+}
+
+function readPurchases(): Record<string, Purchase> {
   try {
-    const p = JSON.parse(read(KEY_PURCHASE) ?? "null") as Purchase | null;
-    return p && p.paymentId && p.token ? p : null;
+    const all = JSON.parse(read(KEY_PURCHASES) ?? "{}") as Record<string, Purchase>;
+    return all && typeof all === "object" ? all : {};
   } catch {
-    return null;
+    return {};
   }
+}
+
+export function savedPurchaseFor(input: SajuInput): Purchase | null {
+  const p = readPurchases()[birthKey(input)];
+  return p && p.paymentId && p.token ? p : null;
+}
+
+function savePurchase(input: SajuInput, purchase: Purchase) {
+  const all = readPurchases();
+  all[birthKey(input)] = purchase;
+  write(KEY_PURCHASES, JSON.stringify(all));
 }
 
 export function iapAvailable(): boolean {
@@ -102,7 +118,7 @@ async function grant(orderId: string, input: SajuInput): Promise<Purchase> {
   trace("grant_http_done", { status: res.status, took: Date.now() - started });
   if (!res.ok || !data.paymentId || !data.token) throw new Error(data.error ?? "지급하지 못했어요.");
   const purchase = { paymentId: data.paymentId, token: data.token };
-  write(KEY_PURCHASE, JSON.stringify(purchase));
+  savePurchase(input, purchase);
   return purchase;
 }
 

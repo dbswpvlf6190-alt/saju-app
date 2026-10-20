@@ -55,13 +55,8 @@ export async function POST(req: NextRequest) {
   const paymentId = `toss-${orderId}`;
 
   try {
-    // 이미 지급한 주문이면 토스를 다시 부르지 않고 같은 결과를 준다(미결 주문 복구 때 재호출돼도 안전).
-    const existing = await prisma.order.findUnique({ where: { paymentId } });
-    if (existing) {
-      if (existing.status !== "PAID") return json(req, { error: "이 주문은 사용할 수 없습니다." }, 409);
-      return json(req, { paymentId, token: await signOrderAccessToken(paymentId) });
-    }
-
+    // 응답 시간이 짧아야 한다(토스가 지급 응답을 기다리다 시간 초과로 오류를 띄운 사례, 2026-10-20). 그래서 기존 주문 조회와
+    // 토스 주문 상태 확인을 동시에 시작한다. 이미 지급한 주문이면 토스 결과는 쓰지 않는다(미결 주문 복구 때 재호출돼도 안전).
     let birthInputJson: string;
     try {
       if (!body.birthInput) throw new SajuInputError("생년월일 정보가 필요합니다.");
@@ -72,8 +67,19 @@ export async function POST(req: NextRequest) {
       throw e;
     }
 
+    const [existing, tossResult] = await Promise.all([
+      prisma.order.findUnique({ where: { paymentId } }),
+      fetchTossOrderStatus(orderId).catch((e: unknown) => e),
+    ]);
+
+    if (existing) {
+      if (existing.status !== "PAID") return json(req, { error: "이 주문은 사용할 수 없습니다." }, 409);
+      return json(req, { paymentId, token: await signOrderAccessToken(paymentId) });
+    }
+
     // 클라이언트가 보낸 값은 믿지 않고 토스 서버에서 상태와 상품(sku)을 직접 확인한다.
-    const result = await fetchTossOrderStatus(orderId);
+    if (tossResult instanceof Error) throw tossResult;
+    const result = tossResult as Awaited<ReturnType<typeof fetchTossOrderStatus>>;
     if (!isPaidStatus(result.status)) {
       return json(req, { error: "결제가 완료되지 않은 주문입니다.", status: result.status }, 402);
     }

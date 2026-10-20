@@ -6,6 +6,30 @@ import type { SajuInput } from "@saju/types";
 export const IAP_SKU = import.meta.env.VITE_IAP_SKU as string | undefined;
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "https://saju-app-three-dusky.vercel.app";
 const KEY_PURCHASE = "sajulab:iap:purchase";
+const T0 = Date.now();
+
+/** 결제 단계 진단 기록(실패해도 무시). 사전 확인 요청이 없도록 text/plain으로 보낸다. */
+function trace(stage: string, extra: Record<string, unknown> = {}) {
+  try {
+    void fetch(`${API_BASE}/api/toss/iap/trace`, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ stage, ms: Date.now() - T0, ...extra }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* 기록 실패는 무시 */
+  }
+}
+
+function describeError(e: unknown): string {
+  try {
+    if (e instanceof Error) return `${e.name}: ${e.message}`;
+    return JSON.stringify(e)?.slice(0, 300) ?? String(e);
+  } catch {
+    return String(e);
+  }
+}
 
 export interface Purchase {
   paymentId: string;
@@ -66,12 +90,16 @@ export function iapAvailable(): boolean {
 
 /** 서버에 주문 번호를 보내 지급(접근 토큰 발급)을 요청한다. 성공해야만 true를 돌려 토스 주문이 "지급 완료"가 된다. */
 async function grant(orderId: string, input: SajuInput): Promise<Purchase> {
+  const started = Date.now();
+  trace("grant_http_start");
+  // text/plain은 브라우저의 사전 확인(OPTIONS) 요청 없이 바로 보낼 수 있다(서버는 본문을 JSON으로 읽는다).
   const res = await fetch(`${API_BASE}/api/toss/iap/grant`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "text/plain" },
     body: JSON.stringify({ orderId, birthInput: input }),
   });
   const data = (await res.json().catch(() => ({}))) as Partial<Purchase> & { error?: string };
+  trace("grant_http_done", { status: res.status, took: Date.now() - started });
   if (!res.ok || !data.paymentId || !data.token) throw new Error(data.error ?? "지급하지 못했어요.");
   const purchase = { paymentId: data.paymentId, token: data.token };
   write(KEY_PURCHASE, JSON.stringify(purchase));
@@ -85,28 +113,42 @@ export function buyManual(
 ): () => void {
   let purchase: Purchase | null = null;
   let grantError = "";
+  trace("buy_start");
   try {
     const cleanup = IAP.createOneTimePurchaseOrder({
       options: {
         sku: IAP_SKU as string,
         processProductGrant: async ({ orderId }) => {
+          trace("grant_enter", { orderTail: orderId.slice(-6) });
           try {
             purchase = await grant(orderId, input);
+            trace("grant_return_true");
             return true;
           } catch (e) {
             grantError = e instanceof Error ? e.message : "지급하지 못했어요.";
+            trace("grant_return_false", { error: describeError(e) });
             return false;
           }
         },
       },
       onEvent: (e) => {
-        if (e.type === "success" && purchase) handlers.onSuccess(purchase);
-        else if (e.type === "success") handlers.onError(grantError || "결제는 끝났지만 열지 못했어요. 앱을 다시 열면 자동으로 이어져요.");
+        trace("event", { type: e.type, hasPurchase: !!purchase });
+        try {
+          if (e.type === "success" && purchase) handlers.onSuccess(purchase);
+          else if (e.type === "success") handlers.onError(grantError || "결제는 끝났지만 열지 못했어요. 앱을 다시 열면 자동으로 이어져요.");
+        } catch (err) {
+          trace("event_handler_error", { error: describeError(err) });
+          handlers.onError("결제는 끝났어요. 화면을 여는 중 문제가 생겼어요. 앱을 다시 열면 이어져요.");
+        }
       },
-      onError: (e) => handlers.onError(e instanceof Error && e.message ? e.message : "결제를 마치지 못했어요."),
+      onError: (e) => {
+        trace("event_error", { error: describeError(e) });
+        handlers.onError(e instanceof Error && e.message ? e.message : `결제를 마치지 못했어요. (${describeError(e).slice(0, 80)})`);
+      },
     });
     return cleanup;
   } catch (e) {
+    trace("buy_throw", { error: describeError(e) });
     handlers.onError(e instanceof Error ? e.message : "결제를 시작하지 못했어요.");
     return () => {};
   }
@@ -121,13 +163,18 @@ export async function recoverPendingOrders(input: SajuInput | null): Promise<Pur
   try {
     if (!IAP.getPendingOrders.isSupported()) return null;
     const { orders } = await IAP.getPendingOrders();
+    trace("recover_pending", { count: orders.length });
     let recovered: Purchase | null = null;
     for (const order of orders) {
       if (order.sku !== IAP_SKU) continue;
       try {
         recovered = await grant(order.orderId, input);
-        if (IAP.completeProductGrant.isSupported()) await IAP.completeProductGrant({ params: { orderId: order.orderId } });
-      } catch {
+        if (IAP.completeProductGrant.isSupported()) {
+          const done = await IAP.completeProductGrant({ params: { orderId: order.orderId } });
+          trace("recover_complete", { done });
+        }
+      } catch (e) {
+        trace("recover_error", { error: describeError(e) });
         /* 실패하면 완료 처리하지 않고 다음에 다시 시도한다 */
       }
     }

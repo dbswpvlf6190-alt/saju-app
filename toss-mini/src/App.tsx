@@ -65,7 +65,7 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 type Form = { calendarType: "solar" | "lunar"; year: string; month: string; day: string; hour: string; unknownTime: boolean; gender: "" | "male" | "female" };
-const EMPTY: Form = { calendarType: "solar", year: "", month: "", day: "", hour: "", unknownTime: false, gender: "" };
+const EMPTY: Form = { calendarType: "solar", year: "", month: "", day: "", hour: "", unknownTime: true, gender: "" };
 
 function loadSaved(): Form | null {
   try {
@@ -121,6 +121,7 @@ export default function App() {
   });
   const [error, setError] = useState<string | null>(null);
   const gate = useRewardGate();
+  const formStarted = useRef(false);
   // 구매 기록은 생일별로 저장돼 있어, 지금 입력한 생일의 구매만 "열기"로 보인다(다른 생일은 새로 구매할 수 있다).
   const [purchaseTick, setPurchaseTick] = useState(0);
   const purchase = useMemo<Purchase | null>(() => {
@@ -151,6 +152,21 @@ export default function App() {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, [initialScreen]);
+
+  /** 태어난 시간을 나중에 넣으면 같은 폰 안에서 바로 다시 계산한다(서버 불필요). 시주가 들어가 결과가 더 정확해진다. */
+  function addHour(hour: string) {
+    if (hour === "") return;
+    const next: Form = { ...form, hour, unknownTime: false };
+    try {
+      const r = calculateSaju(toInput(next));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      setForm(next);
+      setResult(r);
+      track("hour_added");
+    } catch {
+      /* 계산이 안 되면 그대로 둔다 */
+    }
+  }
 
   function go(next: Screen) {
     window.history.pushState({ screen: next }, "");
@@ -190,12 +206,19 @@ export default function App() {
           go("manual");
         }}
         onOpenManual={() => go("manual")}
+        onAddHour={addHour}
         onOther={() => go("form")}
       />
     );
   if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} diag={gate.diag} onOther={() => go("form")} />;
 
-  const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
+  const set = (patch: Partial<Form>) => {
+    if (!formStarted.current) {
+      formStarted.current = true;
+      track("form_start");
+    }
+    setForm((f) => ({ ...f, ...patch }));
+  };
   return (
     <main className="page">
       <header className="hero">
@@ -206,6 +229,8 @@ export default function App() {
         </h1>
         <p>태어난 날로 보는 나의 일간 유형·오행·오늘의 운세</p>
       </header>
+
+      <SampleCard />
 
       <section className="card">
         <div className="field">
@@ -242,7 +267,7 @@ export default function App() {
           </div>
         </div>
         <div className="field">
-          <span>태어난 시간</span>
+          <span>태어난 시간 (선택)</span>
           <select value={form.hour} disabled={form.unknownTime} onChange={(e) => set({ hour: e.target.value })}>
             <option value="">시간 선택</option>
             {HOURS.map((h) => (
@@ -251,7 +276,7 @@ export default function App() {
           </select>
           <label className="check">
             <input type="checkbox" checked={form.unknownTime} onChange={(e) => set({ unknownTime: e.target.checked, hour: "" })} />
-            시간을 몰라요 (일간 유형은 그대로 나와요)
+            시간을 몰라요 (결과 화면에서 나중에 넣을 수 있어요)
           </label>
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
@@ -491,17 +516,37 @@ function ReviewLink() {
   );
 }
 
+/** 입력 전에 "무엇을 얻는지" 먼저 보여 주는 예시 카드(고정 예시, 개인정보 없음). */
+function SampleCard() {
+  const page = ILGAN_PAGES[0];
+  const type = getTypeProfile(page.gan);
+  return (
+    <section className="card type-card">
+      <div className="eyebrow">이런 결과가 나와요 · 예시</div>
+      <div className="type-name">{type.typeName}</div>
+      <div className="chips">
+        {page.keywords.map((k) => (
+          <span key={k} className="chip">#{k}</span>
+        ))}
+      </div>
+      <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>내 타입·오행 비율·오늘의 운세까지 생일만 넣으면 바로 보여요.</p>
+    </section>
+  );
+}
+
 /** 결제 상품 "나 사용설명서 6장" 카드. 구매 전에 AI가 작성한다는 점을 먼저 알리고(생성형 AI 고지), 결제는 토스 인앱 결제로만 한다. */
 function ManualBuyCard({
   form,
   purchase,
   onPurchased,
   onOpenManual,
+  onAddHour,
 }: {
   form: Form;
   purchase: Purchase | null;
   onPurchased: (p: Purchase) => void;
   onOpenManual: () => void;
+  onAddHour: (hour: string) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -547,6 +592,17 @@ function ManualBuyCard({
           </li>
         ))}
       </ol>
+      {form.unknownTime && (
+        <div style={{ marginTop: 12 }}>
+          <span className="muted" style={{ fontSize: 13 }}>태어난 시간을 알면 선택해 주세요. 시기·타이밍 해석이 더 정확해져요.</span>
+          <select value="" onChange={(e) => onAddHour(e.target.value)} style={{ marginTop: 6, width: "100%" }}>
+            <option value="">시간 선택 (모르면 그대로 구매해도 돼요)</option>
+            {HOURS.map((h) => (
+              <option key={h} value={h}>{String(h).padStart(2, "0")}시</option>
+            ))}
+          </select>
+        </div>
+      )}
       <button type="button" className="cta" style={{ marginTop: 12 }} disabled={busy} onClick={buy}>
         {busy ? "결제 진행 중..." : "4,895원으로 나 사용설명서 열기"}
       </button>
@@ -610,6 +666,7 @@ function ResultScreen({
   purchase,
   onPurchased,
   onOpenManual,
+  onAddHour,
   onOther,
 }: {
   result: SajuResult;
@@ -617,6 +674,7 @@ function ResultScreen({
   purchase: Purchase | null;
   onPurchased: (p: Purchase) => void;
   onOpenManual: () => void;
+  onAddHour: (hour: string) => void;
   onOther: () => void;
 }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
@@ -748,7 +806,20 @@ function ResultScreen({
       </section>
 
 
-      <ManualBuyCard form={form} purchase={purchase} onPurchased={onPurchased} onOpenManual={onOpenManual} />
+      {form.unknownTime && (
+        <section className="card">
+          <h2>태어난 시간을 알면 더 정확해져요</h2>
+          <p className="muted" style={{ fontSize: 14 }}>시간을 넣으면 시주까지 포함해 다시 계산해요. 서버로 보내지 않고 이 폰 안에서만 계산해요.</p>
+          <select value="" onChange={(e) => onAddHour(e.target.value)} style={{ marginTop: 10, width: "100%" }}>
+            <option value="">시간 선택</option>
+            {HOURS.map((h) => (
+              <option key={h} value={h}>{String(h).padStart(2, "0")}시</option>
+            ))}
+          </select>
+        </section>
+      )}
+
+      <ManualBuyCard form={form} purchase={purchase} onPurchased={onPurchased} onOpenManual={onOpenManual} onAddHour={onAddHour} />
 
       <button type="button" className="cta" onClick={() => void shareResult()}>친구는 무슨 타입일까? 공유하기</button>
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 다시 보기</button>

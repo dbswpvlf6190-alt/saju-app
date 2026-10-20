@@ -8,7 +8,7 @@ import { ILGAN_PAGES } from "@saju/ilganPages";
 import { getDailyFortuneDetail } from "@saju/dailyFortune";
 import { currentYearKst, getGoodYears } from "@saju/goodYears";
 import type { WuXing } from "@saju/ganzhi";
-import { CHAPTER_TITLES, buyManual, iapAvailable, loadManual, recoverPendingOrders, savedPurchase, type Purchase } from "./iap";
+import { CHAPTER_PROMISES, CHAPTER_TITLES, buyManual, iapAvailable, loadManual, recoverPendingOrders, savedPurchase, type Purchase } from "./iap";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
 // (앱인토스 정책: 외부 링크·자사 서비스 이동 유도 금지, SSR 금지). 수익은 인앱 광고(배너)로 — 광고 그룹 ID는
@@ -529,14 +529,21 @@ function ManualBuyCard({
     <section className="card reward">
       <h2>나 사용설명서 6장</h2>
       <p className="muted" style={{ fontSize: 14 }}>
-        기본 설계도부터 오늘 해볼 행동 3가지까지, 내 사주로 6장을 만들어 드려요. 상대에게 바로 쓸 말과 올해 흐름도 들어 있어요.
+        내 사주로 만드는 나만의 6장이에요. 읽고 나면 오늘부터 바로 써먹을 말과 행동이 남아요.
       </p>
-      <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
-        이 사용설명서는 AI가 작성해요. 생성에 1~3분 걸릴 수 있고, 참고용 해석이에요.
-      </p>
+      <ol className="list" style={{ marginTop: 10, paddingLeft: 20 }}>
+        {Object.entries(CHAPTER_PROMISES).map(([key, promise]) => (
+          <li key={key}>
+            <b>{CHAPTER_TITLES[key]}</b> — {promise}
+          </li>
+        ))}
+      </ol>
       <button type="button" className="cta" style={{ marginTop: 12 }} disabled={busy} onClick={buy}>
         {busy ? "결제 진행 중..." : "4,895원으로 나 사용설명서 열기"}
       </button>
+      <p className="muted" style={{ fontSize: 11, marginTop: 8, textAlign: "center" }}>
+        AI가 작성한 해석이에요 · 생성에 1~3분 · 참고용
+      </p>
       {error && <p className="muted" style={{ color: "#e3543f", fontSize: 13, marginTop: 8 }}>{error}</p>}
     </section>
   );

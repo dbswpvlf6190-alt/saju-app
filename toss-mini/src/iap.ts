@@ -21,6 +21,16 @@ export const CHAPTER_TITLES: Record<string, string> = {
   actions: "오늘부터 해볼 3가지",
 };
 
+/** 구매 전 카드에 보여 주는 장별 한 줄(무엇을 얻는지). */
+export const CHAPTER_PROMISES: Record<string, string> = {
+  overview: "타고난 설계도와 내 성향의 근거",
+  patterns: "왜 같은 선택을 반복하는지, 다르게 해볼 방법",
+  people: "상대가 나를 오해하는 지점과 바로 쓸 말",
+  workmoney: "일·돈에서 손해 보는 지점과 나만의 규칙",
+  timing: "올해와 앞으로, 시작할 것·미룰 것",
+  actions: "오늘 5분 안에 시작할 행동 3가지",
+};
+
 function read(key: string): string | null {
   try {
     return localStorage.getItem(key);

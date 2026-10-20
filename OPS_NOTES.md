@@ -288,3 +288,11 @@
 - 콘솔에 상품 등록·노출 시작(10/20): **나 사용설명서 6장**, 소모품, 공급가 4,450원/판매가 4,895원, 최소 지원 버전 20261014-7. **상품 ID(SKU) = `ait.0000084678.35ed6afe.124c20c97b.2490307737`** (서버 환경변수 `TOSS_IAP_SKU_MANUAL`, 미니앱 빌드 `VITE_IAP_SKU`에 같은 값).
 - 서버 IAP 코드는 main에 배포됨(설정 전에는 503 "준비되지 않았다"). 미니앱 v4 번들 빌드 완료(`toss-iap-client` eb80ca5 이후, `.env.production`에 VITE_IAP_SKU 추가, 콘솔 업로드 전).
 - 남은 선행 조건: mTLS 인증서 발급(사용자 클릭) → Vercel에 `TOSS_MTLS_CERT`/`TOSS_MTLS_KEY`/`TOSS_IAP_SKU_MANUAL` 설정 후 재배포(Vercel 로그인 필요: `07_사주랩_인수인계\Vercel_로그인.bat`) → v4 업로드 → 폰 실결제 테스트(콘솔 QR은 실제 결제, 환불 필요) → 검토 요청.
+
+## 2026-10-20 토스 인앱 결제 서버 연결 완료
+- mTLS 인증서 발급(이름 `sajulabiap`), 원본은 `C:\saju-secrets\toss-mtls\`(현재 사용자만 접근, git·OneDrive 밖). Vercel production에 `TOSS_MTLS_CERT`·`TOSS_MTLS_KEY`(base64, sensitive)·`TOSS_IAP_SKU_MANUAL` 설정 후 재배포(e23c715).
+- **연결 검증**: 가짜 주문번호로 `/api/toss/iap/grant` 호출 → 토스가 `NOT_FOUND`로 응답(HTTP 402) = 서버→토스 mTLS 연결 정상. **토스 로그인 연동 등록 없이도 주문 상태 조회가 됨**(등록 불필요).
+- Vercel CLI: 로그인됨(scope `saju-reading`), 연결 폴더 `C:\saju-secrets\vercel-link`(프로젝트 saju-app).
+- 이 노트북 `.env.local`에 `DATABASE_URL` 추가(지표·링크 실험 스크립트용, git 제외). 최근 7일 웹 주문 0건 확인.
+- **쓰레드 링크 실험 판정(10/20)**: 링크 끈 뒤 일반 글 평균 조회 66→36(오히려 감소), 무료 풀이 글 121→200(증가), 실답글 9.0→10.2. 링크가 조회 급락의 원인이 아님. 사이트 방문 하루 약 16명(142/8.9일), 쓰레드 경유 5건.
+- 콘솔 버전 `20261020-8`(v4, 인앱 결제 포함) 등록, "검토 필요". 폰 QR 실결제 테스트 후 환불 → 검토 요청.

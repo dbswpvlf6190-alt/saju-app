@@ -118,6 +118,39 @@ export function expectedSku(): string | null {
   return process.env.TOSS_IAP_SKU_MANUAL?.trim() || null;
 }
 
+// 2027 신년운세(2026-10-22). 가격은 토스 콘솔에 등록하는 판매가와 같아야 환불 점검·정산 기록이 맞는다.
+// 콘솔이 허용하는 가격 단위를 확인한 뒤 확정하며, 환경변수 TOSS_IAP_PRICE_NEWYEAR로 재배포 없이 맞출 수 있다.
+export const TOSS_NEWYEAR_PRICE_KRW = 3900;
+
+export interface TossProduct {
+  kind: "manual" | "newYear";
+  /** 우리 주문(Order)의 상품 타입. 웹과 같은 타입을 써서 기존 리포트 생성·조회 코드를 그대로 쓴다. */
+  productType: "premium_report" | "new_year_report";
+  amount: number;
+}
+
+function newYearPrice(): number {
+  const fromEnv = Number(process.env.TOSS_IAP_PRICE_NEWYEAR);
+  return Number.isInteger(fromEnv) && fromEnv > 0 ? fromEnv : TOSS_NEWYEAR_PRICE_KRW;
+}
+
+/**
+ * 토스가 알려준 상품(sku)으로 어떤 상품인지 정한다. 클라이언트가 보낸 값은 쓰지 않는다.
+ * 등록되지 않은 sku는 null — 지급하지 않는다. 환경변수가 비어 있으면 그 상품은 판매되지 않는다.
+ */
+export function resolveTossProduct(sku: string | undefined | null): TossProduct | null {
+  const value = sku?.trim();
+  if (!value) return null;
+  if (value === expectedSku()) {
+    return { kind: "manual", productType: "premium_report", amount: TOSS_MANUAL_PRICE_KRW };
+  }
+  const newYearSku = process.env.TOSS_IAP_SKU_NEWYEAR?.trim();
+  if (newYearSku && value === newYearSku) {
+    return { kind: "newYear", productType: "new_year_report", amount: newYearPrice() };
+  }
+  return null;
+}
+
 export function miniAppOrigins(): string[] {
   const fromEnv = (process.env.TOSS_MINIAPP_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   return fromEnv.length > 0

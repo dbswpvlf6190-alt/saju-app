@@ -5,12 +5,11 @@ import { signOrderAccessToken } from "@/lib/payment/orderAccess";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { warmReportCache } from "@/lib/reports/warm";
 import {
-  TOSS_MANUAL_PRICE_KRW,
   TossIapError,
   corsHeaders,
-  expectedSku,
   fetchTossOrderStatus,
   isPaidStatus,
+  resolveTossProduct,
   tossIapConfigured,
 } from "@/lib/toss/iap";
 
@@ -83,7 +82,8 @@ export async function POST(req: NextRequest) {
     if (!isPaidStatus(result.status)) {
       return json(req, { error: "결제가 완료되지 않은 주문입니다.", status: result.status }, 402);
     }
-    if (!result.sku || result.sku !== expectedSku()) {
+    const product = resolveTossProduct(result.sku);
+    if (!product) {
       return json(req, { error: "알 수 없는 상품입니다." }, 400);
     }
 
@@ -93,8 +93,8 @@ export async function POST(req: NextRequest) {
         data: {
           paymentId,
           status: "PAID",
-          amount: TOSS_MANUAL_PRICE_KRW,
-          productType: "premium_report",
+          amount: product.amount,
+          productType: product.productType,
           birthInputJson,
           paidAt: new Date(),
         },

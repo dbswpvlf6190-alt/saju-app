@@ -6,6 +6,7 @@ import { resultToInput } from "@/lib/saju/types";
 import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 import { PurchaseConsent } from "./PurchaseConsent";
+import { NewYearReportText } from "./NewYearReportText";
 
 type Status = "teaser" | "processing" | "unlocked" | "error";
 
@@ -20,11 +21,17 @@ export function NewYearUpsellCard({
   fullName: initialFullName,
   email: initialEmail,
   phoneNumber: initialPhoneNumber,
+  variant = "upsell",
+  redirectPath,
 }: {
   result: SajuResult;
   fullName: string;
   email: string;
   phoneNumber: string;
+  /** "standalone"이면 /new-year 단독 구매 문구를 쓴다. 기본은 결제 완료 화면 하단 업셀. */
+  variant?: "upsell" | "standalone";
+  /** 모바일 결제창 리디렉션이 돌아올 경로(예: /new-year/return). 없으면 지금 페이지로 돌아온다. */
+  redirectPath?: string;
 }) {
   const [status, setStatus] = useState<Status>("teaser");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -106,7 +113,7 @@ export function NewYearUpsellCard({
         payMethod,
         ...(payMethod === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
         customer: { email, phoneNumber: phoneNumber.replace(/-/g, ""), fullName: fullName.trim() },
-        redirectUrl: window.location.href.split("?")[0],
+        redirectUrl: redirectPath ? `${window.location.origin}${redirectPath}` : window.location.href.split("?")[0],
       });
 
       if (!response || response.code) {
@@ -137,16 +144,20 @@ export function NewYearUpsellCard({
     return (
       <div className="flex flex-col gap-3 rounded-2xl border border-[rgba(200,98,63,0.4)] bg-[rgba(200,98,63,0.1)] p-4">
         <h3 className="font-medium text-[#e8a37f]">🎍 {NEW_YEAR_REPORT_NAME}</h3>
-        <p className="whitespace-pre-line leading-relaxed text-foreground">{text}</p>
+        <NewYearReportText text={text} />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[rgba(200,98,63,0.4)] bg-[rgba(200,98,63,0.1)] p-4 text-center">
-      <strong className="text-sm text-[#e8a37f]">{NEW_YEAR_REPORT_NAME}도 궁금하다면</strong>
+      <strong className="text-sm text-[#e8a37f]">
+        {variant === "standalone" ? `내 ${NEW_YEAR_REPORT_NAME} 열어보기` : `${NEW_YEAR_REPORT_NAME}도 궁금하다면`}
+      </strong>
       <span className="text-xs text-foreground-muted">
-        지금 리포트에 이어서, 새해 흐름만 따로 더 자세히 — 상반기·하반기 흐름과 조심할 시기까지
+        {variant === "standalone"
+          ? "분기별 키워드, 월별 12개월 흐름, 조심할 달과 기회의 달까지 — 내 사주로 풀어드려요"
+          : "지금 리포트에 이어서, 새해 흐름만 따로 더 자세히 — 월별 흐름과 조심할 달·기회의 달까지"}
       </span>
 
       {needsContactInfo && (
@@ -204,7 +215,11 @@ export function NewYearUpsellCard({
         disabled={status === "processing" || !agreed}
         className="rounded-xl bg-[#c8623f] px-4 py-2.5 text-center text-sm font-semibold text-[#1a0f0a] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {status === "processing" ? "처리 중..." : `+${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원으로 신년운세 추가`}
+        {status === "processing"
+          ? "처리 중..."
+          : variant === "standalone"
+            ? `${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원으로 신년운세 보기`
+            : `+${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원으로 신년운세 추가`}
       </button>
     </div>
   );

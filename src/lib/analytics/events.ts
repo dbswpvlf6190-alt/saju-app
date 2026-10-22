@@ -31,6 +31,7 @@ export const ANALYTICS_EVENT_NAMES = [
   "waitlist_signup",
   "good_year_view",
   "good_year_cta_click",
+  "new_year_result_view",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

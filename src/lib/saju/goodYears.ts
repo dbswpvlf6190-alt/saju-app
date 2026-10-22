@@ -7,12 +7,12 @@ import type { SajuResult } from "./types";
 // 본다(전통 해석의 십성 계열) — Threads 풀이 답글(scripts/threads_ilgan.mjs)과 같은 규칙이라 두 곳의 답이 같다.
 // 단정 금지: "좋은 일이 생긴다"가 아니라 "흐름이 들어오는 해로 봐요"까지만 쓴다.
 
-type Group = "비겁" | "식상" | "재성" | "관성" | "인성";
+export type Group = "비겁" | "식상" | "재성" | "관성" | "인성";
 
 const GEN: Record<WuXing, WuXing> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
 const CTRL: Record<WuXing, WuXing> = { 목: "토", 토: "수", 수: "화", 화: "금", 금: "목" };
 
-function groupOf(me: WuXing, other: WuXing): Group {
+export function groupOf(me: WuXing, other: WuXing): Group {
   if (me === other) return "비겁";
   if (GEN[me] === other) return "식상";
   if (CTRL[me] === other) return "재성";

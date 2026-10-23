@@ -360,6 +360,7 @@
 ## 2026-10-23 — 노트북 코드 GitHub로 옮기기(10/26 월 노트북에서 할 일)
 - 배경: 노트북 고장/부재로 10/23 데스크톱이 신년운세·토스 v10 코드를 못 받음. **10/26(월) 노트북이 켜지면 노트북 Claude가 맨 먼저 아래를 한다.**
 - 이제 `vercel.json`의 `git.deploymentEnabled`로 **`work/**`·`proto/**`·`claude/**`·`backup/**` 브랜치는 Vercel이 배포하지 않는다**(f9dc396, 테스트 브랜치로 미배포 확인). 단 Vercel은 **푸시된 커밋 안의 vercel.json**을 읽으므로, 옛 main에서 갈라진 브랜치는 그대로 올리면 배포된다.
+- **0단계: 노트북 작업 스케줄러의 `Saju*`·`Shorts*`·`SajuDailyReport`·`SajuNightSleep` 작업을 전부 '사용 안 함'** — 자동화는 데스크톱이 하고 있어 두 대가 겹치면 안 된다(켜자마자 밀린 작업이 돌 수 있음).
 - 순서(브랜치마다: `feature/new-year-v2`, `toss-v10`, `toss-iap-client`, 그 밖에 main에 없는 로컬 브랜치 전부):
   1. `git fetch origin` → 브랜치에서 `git merge origin/main`(충돌 나면 해결) → **`vercel.json`에 `"work/**": false`가 들어 있는지 확인**
   2. `git push origin <브랜치>:work/<브랜치>` (예: `feature/new-year-v2:work/new-year-v2`)

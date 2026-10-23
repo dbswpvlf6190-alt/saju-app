@@ -356,3 +356,13 @@
 - **10/23 13시경 노트북 끔 → 자동화 데스크톱으로 복귀**: 데스크톱 작업 7개 다시 사용(AnalyticsSnapshot·AutoQueue·AutoQueueCardnews·ThreadsDaily·ThreadsReplyDraft·ShortsAutoQueue·ShortsTopicDiscovery). 일회성 작업(Extra1004·LinkTest·WeeklyReport)은 사용 안 함 유지. 데스크톱 전원: 전원 연결 시 절전·최대 절전 "안 함" 확인. Threads 토큰 정상(팔로워 43). **노트북 전용 `SajuDailyReport`(21:40, `C:\saju-reports`)는 데스크톱에 없음** — 일일 PDF 보고서가 필요하면 노트북 파일을 옮겨야 함. 노트북을 다시 켜서 주 컴퓨터로 쓸 땐 데스크톱 작업을 다시 사용 안 함으로.
 - **10/23 13시대 토스 프로모션 일시정지(사장님 결정)**: 상태 "일시정지됨", 사용 17,135원·**남은 32,865원은 예산에 그대로**(반환 요청 안 함, 재개 시 사용), 지급 3,427회. 재개 조건: 결과 화면 개선판(좋은 해 카드 + 저가 첫 상품) 출시 후. 목표: 결과 본 사람 대비 구매 클릭 1%↑(현재 0.3%), 결제 15건(손익분기).
 - 다음 개발에 필요한 노트북 전용 코드: 토스 최신 미니앱(`toss-v10` b40f5a5, `toss-iap-client`), 신년운세(`feature/new-year-v2`) — 데스크톱 저장소의 `toss-mini/`는 옛 v1이라 그대로 고치면 안 됨. `코드백업\*.bundle` 전체를 데스크톱으로 옮겨 받은 뒤 진행. 토스 빌드용 `.env.production` 값(광고 ID·푸시 템플릿·SKU)은 이 문서 10/12~10/20 항목에 있음(비밀값 아님).
+
+## 2026-10-23 — 노트북 코드 GitHub로 옮기기(10/26 월 노트북에서 할 일)
+- 배경: 노트북 고장/부재로 10/23 데스크톱이 신년운세·토스 v10 코드를 못 받음. **10/26(월) 노트북이 켜지면 노트북 Claude가 맨 먼저 아래를 한다.**
+- 이제 `vercel.json`의 `git.deploymentEnabled`로 **`work/**`·`proto/**`·`claude/**`·`backup/**` 브랜치는 Vercel이 배포하지 않는다**(f9dc396, 테스트 브랜치로 미배포 확인). 단 Vercel은 **푸시된 커밋 안의 vercel.json**을 읽으므로, 옛 main에서 갈라진 브랜치는 그대로 올리면 배포된다.
+- 순서(브랜치마다: `feature/new-year-v2`, `toss-v10`, `toss-iap-client`, 그 밖에 main에 없는 로컬 브랜치 전부):
+  1. `git fetch origin` → 브랜치에서 `git merge origin/main`(충돌 나면 해결) → **`vercel.json`에 `"work/**": false`가 들어 있는지 확인**
+  2. `git push origin <브랜치>:work/<브랜치>` (예: `feature/new-year-v2:work/new-year-v2`)
+  3. GitHub 커밋 상태에 Vercel 배포가 안 생겼는지 확인
+- 함께 옮길 것: `C:\saju-reports`(일일 보고서 스크립트, 비밀값 빼고) → 저장소 `scripts/daily_report/`에 최신본 커밋, `07_사주랩_인수인계\신년운세_인수인계_2026-10-22.md` → 저장소 `docs/handoff/`에 커밋. `toss-mini/.env.production`은 git 제외 유지(값은 이 문서 10/12~10/20 항목).
+- 그 뒤 데스크톱에서 `git fetch` → `work/*` 브랜치로 신년운세·토스 작업을 이어간다. 자동화는 계속 데스크톱(노트북 작업은 켜지 말 것).

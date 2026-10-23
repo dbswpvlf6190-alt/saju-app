@@ -388,3 +388,4 @@
 - 한 장 구성: 한 줄 요약 → 큰 숫자 4개 → 채널별 신호등(Threads·인스타·사이트·토스) → 확인할 것(작업 실패·토큰 55일↑) / 사장님 결정·할 일(최대 3) → Threads 최근 글 → 메모.
 - 사이트 숫자는 `metaJson.ua`가 있는 이벤트(사람)만. 테스트 결제 3건 제외. 토스 콘솔 수치·요약·메모·결정은 **Claude가 `scripts/report_notes.json`에 적는다**(date가 오늘·어제일 때만 표시, decisions는 지울 때까지 유지).
 - 앞으로 사장님 보고는 이 PDF가 기본. 채팅에서는 "PDF 만들었어요" + 꼭 필요한 한두 줄만. 노트북 `C:\saju-reports` 보고서(SajuDailyReport)는 데스크톱 운영 중엔 켜지 말 것.
+- 10/23 보고서 2판(사장님 피드백 "그날 유입과 총 인원을 구분해서"): 숫자표를 **오늘·어제·누적·기준·판정** 칸으로, 결론 한 줄 → 숫자표 → 의미/할 일/확인할 것 → Threads 글. `report_notes.json`은 `summary`, `toss{users_today,users_yesterday,users_total,ad_total,promo_spent,as_of}`, `meaning`, `alerts`, `decisions`. 실결제는 9월 이후·테스트 제외(8월 4건은 출시 전 시험).

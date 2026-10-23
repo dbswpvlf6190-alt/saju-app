@@ -114,7 +114,8 @@ export function NewYearTeaser({ result, priceLabel, pricePerDay, variant = "A", 
           산 풀이는 다시 열어볼 수 있어요
         </p>
       )}
-      <p className="ny-note">태어난 날의 기운과 해·달·날마다 들어오는 기운의 관계로 본 전통 해석이에요. 풀이 문장은 AI가 작성해요.</p>
+      {/* AI 작성 고지: 결제 전 알림(인공지능기본법·소비자 고지) — 작게 줄이되 숨기지 않는다 */}
+      <p className="ny-note">전통 사주 해석을 바탕으로 AI가 쓴 풀이예요</p>
     </section>
   );
 }

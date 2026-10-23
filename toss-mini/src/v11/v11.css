@@ -1,0 +1,16 @@
+/* v11 신년운세 미리보기 카드 — 기존 styles.css의 .card/.cta 위에 얹는다(토스 라이트 모드 전용). */
+.ny-card { display: flex; flex-direction: column; gap: 8px; background: linear-gradient(170deg, #ffffff 0%, #fff6e6 100%); border: 1px solid #f1dfb8; }
+.ny-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--gold); }
+.ny-year { font-size: 30px; font-weight: 800; line-height: 1.2; }
+.ny-year span { font-size: 17px; font-weight: 700; color: var(--muted); margin-left: 4px; }
+.ny-label { font-size: 18px; font-weight: 800; color: var(--gold); }
+.ny-line { margin: 0; font-size: 15px; line-height: 1.6; }
+.ny-later { margin: 0; font-size: 14px; color: var(--muted); }
+.ny-later b { color: var(--text); }
+.ny-locked { position: relative; margin-top: 6px; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px dashed #e8d3a6; display: flex; flex-direction: column; gap: 7px; }
+.ny-row { display: flex; align-items: center; gap: 10px; }
+.ny-month { width: 52px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.ny-blur { flex: 1; height: 10px; border-radius: 6px; background: linear-gradient(90deg, #f0e3c4, #f7efdc 60%, #f0e3c4); filter: blur(1px); }
+.ny-lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 16px; font-size: 14px; font-weight: 700; color: var(--text); background: rgba(255, 255, 255, 0.72); border-radius: 12px; }
+.ny-points { margin: 4px 0 2px; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 1.5; }
+.ny-note { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.5; }

@@ -47,6 +47,26 @@ export function getGoodYears(result: SajuResult, fromYear: number, span = 5, lim
   return out;
 }
 
+/** 한 해의 기운 — 다섯 갈래 모두 긍정 쪽 말로(신년운세 미리보기용, 2026-10-23). 단정 없이 "~로 봐요"까지. */
+const YEAR_THEME: Record<Group, { label: string; line: string }> = {
+  비겁: { label: "나를 세우는 해", line: "내 힘으로 판을 짜고, 내 편이 넓어지는 흐름으로 봐요." },
+  식상: { label: "재능이 빛나는 해", line: "하고 싶은 걸 꺼내 보이고, 표현한 만큼 알아봐 주는 흐름으로 봐요." },
+  재성: GOOD.재성!,
+  관성: GOOD.관성!,
+  인성: GOOD.인성!,
+};
+
+export interface YearTheme extends GoodYear {
+  group: Group;
+}
+
+/** 특정 해(예: 내년)가 내 일간에게 어떤 기운의 해인지. Threads '2027년 한 줄 운세' 답글과 같은 기준. */
+export function getYearTheme(result: SajuResult, year: number): YearTheme {
+  const p = getYearGanzhi(year);
+  const group = groupOf(result.dayPillar.ganWuxing, CHEONGAN_WUXING[p.ganHanja]);
+  return { year, ganzhiKor: p.ganZhiKor, ganzhiHanja: p.ganZhiHanja, group, ...YEAR_THEME[group] };
+}
+
 /** KST 기준 올해. 연말 며칠 차이로 서버·브라우저가 다른 해를 보지 않게 한국 시간으로 고정한다. */
 export function currentYearKst(now: Date = new Date()): number {
   return new Date(now.getTime() + 9 * 3600 * 1000).getUTCFullYear();

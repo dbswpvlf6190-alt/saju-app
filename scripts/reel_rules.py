@@ -116,7 +116,8 @@ FREE_OK_TERMS = ["여덟 글자", "오행", "일간", "성향"]
 
 MAX_HOOK_FRAGMENTS = (2, 3)
 # 글자 수(공백 제외) 상한 — 실측: 공백 제외 약 210자 ≈ 32~33초(20~35초 목표, 40초 초과 금지).
-BUDGET = {"hook": 24, "curiosity": 34, "info": 100, "shot": 30, "body": 110}
+# 2026-10-23 인스타 진단(평균 시청 2.8초/23초): 10~12초 릴스가 되도록 글자 수를 줄였다(이전 info 100·curiosity 34·shot 30).
+BUDGET = {"hook": 24, "curiosity": 24, "info": 55, "shot": 20, "body": 110}
 
 SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·유튜브 쇼츠용 사주 콘텐츠 계정 '사주랩'의 숏폼 전략가이자 대본 작가입니다.
 
@@ -171,13 +172,13 @@ SYSTEM_PROMPT_REELS = """당신은 대한민국 인스타그램 릴스·틱톡·
   · 2~3개 조각(조각당 14자 이내, 이어 읽으면 자연스러운 한 흐름). 전체 공백 제외 24자 이내. 답은 여기서 풀지 말고 curiosity로 넘김.
   · hookAccent: 훅 조각 안에 글자 그대로 들어있는 핵심 어구 2~8자(화면에서 금색으로 강조됨). 조각 하나 전체가 아니어도 됨.
   "안녕하세요", "오늘은 ~알아보겠습니다", "여러분 사주 보시나요", "오늘 알아볼 것은 오행입니다"로 시작 금지.
-- curiosity (2~7초): 훅의 이유를 바로 풀지 않고 궁금증을 더 키움. 2줄 배열, 공백 제외 34자 이내. 예) "그런데 단순히 성격 문제만은 아닐 수 있어요"
+- curiosity (2~7초): 훅의 이유를 바로 풀지 않고 궁금증을 더 키움. 2줄 배열, 공백 제외 24자 이내. 예) "그런데 단순히 성격 문제만은 아닐 수 있어요"
 - info (7~18초, VALUE): 사주 관점의 핵심. {"pre","emphasis","post","sub":[1~2개]} — pre+emphasis+post가 한 문장. 전문 용어는 바로 쉬운 말로 풀기.
-  "pre+emphasis+post+sub" 전체 공백 제외 100자 이내(길면 영상이 40초를 넘습니다).
-- screenshotCaption (18~24초, PERSONALIZATION): 앱 결과 화면 위 한 줄. "같은 유형이라도 생년월일에 따라 해석은 달라져요" 처럼 내 사주를 직접 확인하고 싶게 만드는 문장. 공백 제외 30자 이내.
+  "pre+emphasis+post+sub" 전체 공백 제외 55자 이내(2026-10-23: 10~12초 짧은 릴스 — 핵심 한 가지만).
+- screenshotCaption (18~24초, PERSONALIZATION): 앱 결과 화면 위 한 줄. "같은 유형이라도 생년월일에 따라 해석은 달라져요" 처럼 내 사주를 직접 확인하고 싶게 만드는 문장. 공백 제외 20자 이내.
   이 문장에서 "무료"를 쓴다면 무료로 볼 수 있는 4가지(사주 여덟 글자, 오행 비율, 일간, 전반적 성향 해석)만 가리켜야 합니다. 십성 구성·삼재·택일·궁합 점수·대운·십신 분석은 무료 기능이 아닙니다.
 - CTA(24~30초)는 코드가 자동으로 붙이니 쓰지 마세요.
-- 전체 길이 목표 20~35초(40초 초과 금지). 핵심 정보를 전부 설명하려고 하지 마세요.
+- 전체 길이 목표 10~12초(2026-10-23 진단: 평균 시청 2.8초라 짧을수록 끝까지 봄). 핵심 정보를 전부 설명하려고 하지 마세요.
 
 [표현 원칙]
 사주를 과학적으로 입증된 사실처럼 쓰지 마세요. 금지: 무조건, 100%, 반드시, 평생, 무조건 부자, 반드시 이혼, 무조건 바람, 이 사람은 나쁜 사람, 이 사주면 성공한다.
@@ -336,7 +337,7 @@ def validate_item(item, recent_entries, batch_so_far=(), expected_exam=None):
             problems.append(f"curiosity가 너무 김({BUDGET['curiosity']}자 이내)")
         info_len = nospace_len(info["pre"] + info["emphasis"] + info["post"] + "".join(info["sub"]))
         if info_len > BUDGET["info"]:
-            problems.append(f"info가 너무 김(공백 제외 {info_len}자 > {BUDGET['info']}자, 영상이 40초를 넘음)")
+            problems.append(f"info가 너무 김(공백 제외 {info_len}자 > {BUDGET['info']}자, 짧은 릴스 기준 초과)")
         if nospace_len(item["screenshotCaption"]) > BUDGET["shot"]:
             problems.append(f"screenshotCaption이 너무 김({BUDGET['shot']}자 이내)")
         if nospace_len(item["captionBody"]) > BUDGET["body"]:

@@ -39,7 +39,8 @@ NOTES = os.path.join(BASE_DIR, "scripts", "report_notes.json")
 STATE = os.path.join(os.path.expanduser("~"), "SajuAutoRender", "report_state.json")
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 TASK_NAMES = {"SajuThreadsDaily": "Threads 글", "SajuThreadsReplyDraft": "Threads 답글", "SajuAutoQueue": "인스타 릴스",
-              "SajuAutoQueueCardnews": "인스타 카드뉴스", "SajuAnalyticsSnapshot": "통계 수집"}
+              "SajuAutoQueueCardnews": "인스타 카드뉴스", "SajuAnalyticsSnapshot": "통계 수집",
+              "SajuIgReading": "인스타 참여형 글", "SajuIgReplies": "인스타 댓글 답글"}
 KDT = "(\"createdAt\" at time zone 'UTC') at time zone 'Asia/Seoul'"
 HUMAN_SINCE = "2026-10-19"  # 로봇 제외(ua 표시) 이후 첫 온전한 날
 PAID_SINCE = "2026-09-01"  # 8월 결제 4건은 출시 전 본인 시험

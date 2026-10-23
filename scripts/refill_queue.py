@@ -245,6 +245,8 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
             "order": next_order,
             "id": rid,
             "structure": 2,  # 장면 순서: HOOK → CURIOSITY → INFO → 앱 화면 → CTA (기획서 구조)
+            # 2026-10-23 인스타 진단(평균 시청 2.8초/23초): 새 릴스는 전부 짧은 판(10~12초, build.mjs entry.short)으로.
+            "short": True,
             "category": item["category"],
             "categoryLabel": reel_rules.CATEGORY_MAP[item["category"]],
             "subcategory": item["subcategory"],

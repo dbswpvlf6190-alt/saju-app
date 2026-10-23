@@ -1,16 +1,18 @@
-/* v11 신년운세 미리보기 카드 — 기존 styles.css의 .card/.cta 위에 얹는다(토스 라이트 모드 전용). */
-.ny-card { display: flex; flex-direction: column; gap: 8px; background: linear-gradient(170deg, #ffffff 0%, #fff6e6 100%); border: 1px solid #f1dfb8; }
-.ny-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--gold); }
-.ny-year { font-size: 30px; font-weight: 800; line-height: 1.2; }
-.ny-year span { font-size: 17px; font-weight: 700; color: var(--muted); margin-left: 4px; }
-.ny-label { font-size: 18px; font-weight: 800; color: var(--gold); }
-.ny-line { margin: 0; font-size: 15px; line-height: 1.6; }
-.ny-later { margin: 0; font-size: 14px; color: var(--muted); }
-.ny-later b { color: var(--text); }
-.ny-locked { position: relative; margin-top: 6px; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px dashed #e8d3a6; display: flex; flex-direction: column; gap: 7px; }
-.ny-row { display: flex; align-items: center; gap: 10px; }
-.ny-month { width: 52px; font-size: 13px; font-weight: 700; color: var(--muted); }
-.ny-blur { flex: 1; height: 10px; border-radius: 6px; background: linear-gradient(90deg, #f0e3c4, #f7efdc 60%, #f0e3c4); filter: blur(1px); }
-.ny-lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 16px; font-size: 14px; font-weight: 700; color: var(--text); background: rgba(255, 255, 255, 0.72); border-radius: 12px; }
-.ny-points { margin: 4px 0 2px; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 1.5; }
-.ny-note { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.5; }
+/* v11 신년운세 카드 — 토스 손님 50대 이상 77%라 글자를 크게(본문 17px↑), 버튼은 크고 하나만. 라이트 모드 전용. */
+.ny-card { word-break: keep-all; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(170deg, #ffffff 0%, #fff6e6 100%); border: 1px solid #f1dfb8; padding: 22px 20px; }
+.ny-eyebrow { font-size: 15px; font-weight: 700; color: var(--gold); }
+.ny-card .ny-head { margin: 0; font-size: 26px; line-height: 1.4; font-weight: 800; color: var(--text); }
+.ny-card .ny-head em { font-style: normal; color: #b0701a; }
+.ny-line { margin: 0; font-size: 18px; line-height: 1.65; }
+.ny-free { background: #fff; border: 1px solid #f1dfb8; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.ny-free-tag { align-self: flex-start; font-size: 13px; font-weight: 700; color: #fff; background: #3fa66b; border-radius: 999px; padding: 3px 10px; }
+.ny-free-month { font-size: 19px; font-weight: 800; }
+.ny-free-text { margin: 0; font-size: 17px; line-height: 1.7; }
+.ny-locked { position: relative; border-radius: 14px; background: #fff; border: 1px dashed #e8d3a6; padding: 14px; }
+.ny-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; filter: blur(1.5px); opacity: 0.55; }
+.ny-chip { text-align: center; font-size: 15px; font-weight: 700; padding: 10px 0; border-radius: 10px; background: #f6ecd6; color: #8a6a2b; }
+.ny-lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 18px; line-height: 1.5; font-weight: 800; color: var(--text); }
+.ny-cta { font-size: 19px; padding: 18px; }
+.ny-trust { margin: -2px 0 0; text-align: center; font-size: 15px; line-height: 1.6; color: var(--text); }
+.ny-trust b { color: #b0701a; }
+.ny-note { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }

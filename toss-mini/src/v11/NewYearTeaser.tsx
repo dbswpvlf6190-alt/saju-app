@@ -109,8 +109,8 @@ export function NewYearTeaser({ result, priceLabel, pricePerDay, variant = "A", 
         <p className="ny-trust">
           토스로 <b>한 번만</b> 결제해요 · 자동 결제 없어요
           <br />
-          {/* AI 작성 고지(인공지능기본법·소비자 고지): 사는 물건 이름 바로 옆에 짧게 — "(AI)"만 쓰면 뜻이 모호해 "(AI 작성)"으로 */}
-          열두 달 풀이<span className="ny-ai">(AI 작성)</span>{pricePerDay ? ` · ${pricePerDay}` : ""}
+          {/* AI 작성 고지(인공지능기본법·소비자 고지): 사는 물건 이름 바로 옆에 짧게 — 사장님 결정(10/23)으로 "(AI)" 표시 */}
+          열두 달 풀이<span className="ny-ai">(AI)</span>{pricePerDay ? ` · ${pricePerDay}` : ""}
           <br />
           산 풀이는 다시 열어볼 수 있어요
         </p>

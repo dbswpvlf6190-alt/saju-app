@@ -46,7 +46,10 @@ COMPAT_LINK = f"https://{SITE}/compatibility?ref=threads_reply"
 FREE_LINK = f"https://{SITE}/?ref=threads_reply"
 # 2026-10-11 노출 회복 실험: 10/7부터 글 조회가 243→96으로 급감(새 글 8시간 조회 0). 답글 수십 개마다 같은 주소가 붙은 게
 # 스팸 신호로 보였을 가능성 → 답글엔 주소를 넣지 않고 '프로필 링크'로만 안내. 3일 뒤(10/14) 조회 비교해 결정.
-REPLY_LINKS = False
+REPLY_LINKS = True
+# 2026-10-24 사이트 유입 분석: 사이트 손님의 73%가 Threads인데 한 사람 답글엔 주소가 없어 하루 답글 20~60개가 주소 없이 끝났다.
+# 링크 실험(10/11~10/18)에서 링크는 노출 급감의 원인이 아니었으므로 한 사람 답글에도 무료 사주 주소를 다시 붙인다
+# (사이트 첫 화면은 ref=threads*로 오면 '생일만 넣으면 2027년·좋은 해' 화면을 바로 보여준다 — PersonaHome).
 # 10/18 판정: 링크를 끈 뒤에도 조회는 회복되지 않았고(일반 글 65→34) Threads→사이트 방문만 5→3으로 줄었다 →
 # 두 사람(궁합) 답글에만 궁합 페이지 주소를 다시 붙인다. 한 사람 답글은 계속 REPLY_LINKS를 따른다.
 COMPAT_REPLY_LINK = True
@@ -292,7 +295,7 @@ def draft(media_id, promise=None):
             # 두 사람 답글(궁합 질문)에만 궁합 링크를 코드가 직접 붙인다(2026-10-08 시험). 링크가 있는 답글은 스팸으로 보일 수 있어 일부로
             # 한정하고, AI가 쓴 본문은 링크 없이 검사한 뒤에 붙인다. 500자(Threads 한도)를 넘으면 붙이지 않는다.
             # 결제 일시 중단 중(10/9~)에는 한 사람 답글에도 무료 사주 링크를 붙여 사이트로 넘어오게 한다(Threads 유입 22→7 대응).
-            link = COMPAT_LINK if len(c["people"]) == 2 else (FREE_LINK if paused and len(c["people"]) == 1 else None)
+            link = COMPAT_LINK if len(c["people"]) == 2 else (FREE_LINK if (paused or REPLY_LINKS) and len(c["people"]) == 1 else None)
             if not REPLY_LINKS and not (COMPAT_REPLY_LINK and link == COMPAT_LINK):
                 link = None
             if text and not problems and link:

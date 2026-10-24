@@ -10,7 +10,10 @@ r"""사주랩 일일 보고서 PDF(데스크톱, 2026-10-23~). 사장님 요청:
 자동으로 모으는 것: Threads(팔로워·글 조회/답글), 인스타(performance/latest.json·followers_log.json — 매일 09:00 스냅샷),
 사이트(이벤트 DB: metaJson.ua가 있는 사람 방문만, 10/19부터), 결제(Order: 웹/토스, 9월 이후·테스트 제외), 자동 작업·토큰 상태.
 토스 콘솔 수치(사용자·광고·프로모션)와 요약·의미·할 일은 Claude가 scripts/report_notes.json에 적는다.
-작업 스케줄러: SajuDailyReportPdf 매일 21:50.
+2·3쪽(10/24~): 채널별 퍼널(Instagram·Threads·토스·검색/직접·기타·해외 ja/en), 토스 입점 현황·30일 과제, 해외판, 핵심 질문.
+  report_notes.json의 toss_console(as_of_date 포함, 2일 이상 지나면 '갱신 필요' 표시)·toss_status·toss_plan·toss_value·
+  global_status·qa·channel_summary는 날짜가 지나도 지우지 않는 고정 항목이다.
+작업 스케줄러: SajuDailyReportPdf 매일 20:00(10/24 사장님 요청으로 21:50 → 20:00).
 """
 import argparse
 import html
@@ -47,6 +50,10 @@ PAID_SINCE = "2026-09-01"  # 8월 결제 4건은 출시 전 본인 시험
 TEST_ORDERS = ("toss-9f4e2019", "toss-3f1e76d2", "toss-4738803c")  # 10/20 토스 실결제 시험(사장님 아이폰)
 THREADS_POST_GOAL = 300
 TOSS_BREAKEVEN = 15
+# 2·3쪽(10/24 사장님: 매일 20시 종합 보고 — 채널별 퍼널·토스 입점·해외판). 채널은 사이트 이벤트의 ua(앱 구분)와 ref(유입 링크)로 나눈다.
+CHANNELS = [("instagram", "Instagram"), ("threads", "Threads"), ("search", "검색·직접"), ("other", "기타 외부")]
+FUNNEL = ["landing_view", "saju_start", "saju_complete", "premium_cta_click", "checkout_start", "payment_success"]
+GLOBAL_LOCALES = [("ja", "일본어 (ja)"), ("en", "영어 (en)")]  # 국기 이모지는 윈도우 크롬 PDF에서 'JP' 글자로 깨진다
 
 
 def load_json(path, default):
@@ -138,6 +145,75 @@ def collect_site(today):
             "ua_threads": ua_threads, "web": pay(web), "toss": pay(toss)}
 
 
+def channel_of(ua, ref):
+    """사이트 이벤트 한 건의 유입 채널. ref는 첫 화면(landing_view)에만 있어 이후 단계는 ua(어느 앱 안에서 열었나)로 나눈다."""
+    ref = ref or ""
+    if ref.startswith("ig") or ua in ("instagram", "facebook"):
+        return "instagram"
+    if ref.startswith(("th", "threads")) or ua == "threads":
+        return "threads"
+    if ua == "naver" or ref.startswith(("google", "naver", "search")) or (ua in ("desktop", "mobile", "unknown") and not ref):
+        return "search"
+    return "other"  # 카카오·공유 링크(share_*)·배너 등
+
+
+def collect_channels(today):
+    """최근 7일(오늘 포함) 사람 이벤트를 채널×퍼널 단계로 센다. 결제·환불 금액은 Order 기준(채널을 알 수 없어 합계만)."""
+    since = (today - timedelta(days=6)).isoformat()
+    rows = neon_query(
+        f"select name, \"metaJson\"::json->>'ua' ua, \"metaJson\"::json->>'ref' ref, count(*)::int n from \"AnalyticsEvent\" "
+        f"where {KDT} >= '{since}' and \"metaJson\"::json->>'ua' is not null and name in ({','.join(repr(n) for n in FUNNEL)}) group by 1,2,3"
+    )
+    table = {c: dict.fromkeys(FUNNEL, 0) for c, _ in CHANNELS}
+    for r in rows:
+        table[channel_of(r["ua"], r["ref"])][r["name"]] += r["n"]
+    orders = neon_query(
+        f"select \"paymentId\" pid, amount, status from \"Order\" where amount > 0 and {KDT} >= '{since}' and status in ('PAID','CANCELED')"
+    )
+    real = [o for o in orders if not o["pid"].startswith(TEST_ORDERS)]
+    web_paid = [o for o in real if o["status"] == "PAID" and not o["pid"].startswith("toss-")]
+    refunds = [o for o in real if o["status"] == "CANCELED"]
+    return {"since": since, "table": table, "web_rev": sum(o["amount"] for o in web_paid), "web_n": len(web_paid),
+            "refund_n": len(refunds), "refund_amt": sum(o["amount"] for o in refunds)}
+
+
+def collect_global():
+    """해외판(/ja·/en): 사이트 global_* 이벤트(출시 이후 누적·최근 7일), 오픈 알림 신청, Threads 두 계정."""
+    rows = neon_query(
+        f"select name, \"metaJson\"::json->>'locale' loc, ({KDT})::date >= (now() at time zone 'Asia/Seoul')::date - 6 recent, count(*)::int n "
+        f"from \"AnalyticsEvent\" where name like 'global_%' group by 1,2,3"
+    )
+    ev = {loc: {"all": {}, "7d": {}} for loc, _ in GLOBAL_LOCALES}
+    for r in rows:
+        if r["loc"] not in ev:
+            continue
+        ev[r["loc"]]["all"][r["name"]] = ev[r["loc"]]["all"].get(r["name"], 0) + r["n"]
+        if r["recent"]:
+            ev[r["loc"]]["7d"][r["name"]] = ev[r["loc"]]["7d"].get(r["name"], 0) + r["n"]
+    wait = neon_query("select split_part(src, ':', 1) loc, count(*)::int n from \"WaitlistSignup\" where src like 'ja:%' or src like 'en:%' group by 1")
+    waits = {r["loc"]: r["n"] for r in wait}
+    accounts = {}
+    saved = (threads_api.TOKEN_PATH, threads_api.TOKEN_TXT_PATH)
+    for loc, _ in GLOBAL_LOCALES:
+        try:
+            threads_api.use_account(loc)
+            acc = threads_api.get_account()
+            posts = []
+            for t in threads_api.list_my_threads(7):
+                try:
+                    m = threads_api.get_insights(t["id"])
+                except Exception:
+                    m = {}
+                posts.append({"views": m.get("views") or 0, "replies": m.get("replies") or 0})
+            accounts[loc] = {"followers": acc.get("followers") or 0, "posts": len(posts),
+                             "views": sum(p["views"] for p in posts), "replies": sum(p["replies"] for p in posts)}
+        except Exception as e:
+            accounts[loc] = {"error": str(e)[:80]}
+        finally:
+            threads_api.TOKEN_PATH, threads_api.TOKEN_TXT_PATH = saved
+    return {"events": ev, "waits": waits, "accounts": accounts}
+
+
 def collect_health():
     out = []
     try:
@@ -183,10 +259,10 @@ def dot(light):
     return f'<span class="dot" style="background:{c}"></span><span class="lt" style="color:{c}">{label}</span>'
 
 
-def render(now, th, ig, site, health, notes):
+def render(now, th, ig, site, health, notes, pages23=""):
     today = now.date()
     yday = today - timedelta(days=1)
-    toss = notes.get("toss") or {}
+    toss = notes.get("toss") or notes.get("toss_console") or {}
     tv, tr, tn = th["today"]
     yv, yr, yn = th["yesterday"]
     th_post_light = "gray" if not tn else ("green" if tv >= THREADS_POST_GOAL else "yellow" if tv >= 100 else "red")
@@ -258,6 +334,15 @@ td.st {{ white-space: nowrap; width: 54px; }}
 ul {{ margin: 2px 0 0; padding-left: 16px; line-height: 1.5; font-size: 10pt; }}
 li.ok {{ color: #2f9e5b; list-style: none; margin-left: -16px; }}
 .foot {{ margin-top: 10px; color: #9aa1ab; font-size: 8pt; line-height: 1.5; }}
+.pb {{ page-break-before: always; }}
+table.small td, table.small th {{ font-size: 9pt; padding: 4px 5px; }}
+td small {{ color: #6b7280; font-weight: 400; }}
+.tag {{ display: inline-block; border: 1px solid; border-radius: 4px; font-size: 7.5pt; font-weight: 700; padding: 0 4px; margin-right: 2px; }}
+.two {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }}
+table.stages td {{ width: 25%; text-align: center; border: 1px solid #e5e7eb; font-size: 9.5pt; line-height: 1.35; }}
+td.st2 {{ white-space: nowrap; font-weight: 700; font-size: 8.5pt; }}
+ul.plain {{ font-size: 9.5pt; }}
+.qa {{ font-size: 9.5pt; line-height: 1.45; margin: 5px 0; padding: 5px 8px; border-left: 3px solid #d9cdf5; background: #fcfbff; }}
 </style></head><body>
 <div class="top"><h1>사주랩 일일 보고</h1><div class="date">{now:%Y.%m.%d} ({'월화수목금토일'[now.weekday()]}) {now:%H:%M} 기준</div></div>
 <div class="summary"><small>오늘의 결론</small>{esc(summary)}</div>
@@ -273,7 +358,102 @@ li.ok {{ color: #2f9e5b; list-style: none; margin-left: -16px; }}
 <div class="foot">오늘 = {today:%m/%d} 0시~지금, 어제 = {yday:%m/%d} 하루. 사이트 방문은 사람만(로봇 제외 이후 {HUMAN_SINCE[5:].replace('-', '/')}~). 생일 입력 누적은 사이트 오픈 이후 전체.
 결제는 9월 이후 실결제만(8월 출시 전 시험·10/20 토스 시험 3건·무료 쿠폰 제외). Threads 팔로워 증감은 보고서가 매일 기록한 값끼리 비교.
 인스타 수치는 {esc(ig['snap'])} 스냅샷{toss_asof}.</div>
+{pages23}
 </body></html>"""
+
+
+KIND_STYLE = {"확인": "#2f9e5b", "가설": "#d39b16", "확인 필요": "#d6513a"}
+
+
+def kind_tag(kind):
+    c = KIND_STYLE.get(kind, "#9aa1ab")
+    return f'<span class="tag" style="border-color:{c};color:{c}">{esc(kind)}</span>'
+
+
+def pct(a, b):
+    return "–" if not b else f"{a / b * 100:.0f}%"
+
+
+def render_pages23(now, th, ig, ch, gl, notes):
+    """2쪽: 채널별 퍼널. 3쪽: 토스 입점·해외판·핵심 질문. 숫자가 없는 칸은 실적처럼 채우지 않고 '–'와 측정 방법을 적는다."""
+    today = now.date()
+    t = ch["table"]
+    tc = notes.get("toss_console") or {}
+    stale = ""
+    if tc.get("as_of_date"):
+        age = (today - date.fromisoformat(tc["as_of_date"])).days
+        stale = " · ⚠️ 갱신 필요" if age >= 2 else ""
+    ig_views = sum(p["views"] for p in ig["posts"])
+    impressions = {"instagram": f"{ig_views:,} (최근 글 {len(ig['posts'])}개)", "threads": f"{th['week_views']:,} (7일 글)",
+                   "search": "– (서치콘솔 로그인 필요)", "other": "–"}
+    costs = {"instagram": "광고비 0원", "threads": "광고비 0원", "search": "0원", "other": "0원"}
+    body = ""
+    for key, label in CHANNELS:
+        r = t[key]
+        body += (f"<tr><td class='g'>{esc(label)}</td><td class='n'>{esc(impressions[key])}</td><td class='n'>{r['landing_view']:,}</td>"
+                 f"<td class='n'>{r['saju_start']:,}</td><td class='n'>{r['saju_complete']:,}</td><td class='n'>{r['premium_cta_click']:,}</td>"
+                 f"<td class='n'>{r['payment_success']:,}</td><td class='n'>{pct(r['payment_success'], r['landing_view'])}</td><td>{esc(costs[key])}</td></tr>")
+    tot = {k: sum(t[c][k] for c, _ in CHANNELS) for k in FUNNEL}
+    body += (f"<tr class='grp'><td class='g'>웹 합계</td><td class='n'>–</td><td class='n'>{tot['landing_view']:,}</td><td class='n'>{tot['saju_start']:,}</td>"
+             f"<td class='n'>{tot['saju_complete']:,}</td><td class='n'>{tot['premium_cta_click']:,}</td><td class='n'>{ch['web_n']}건 · {ch['web_rev']:,}원</td>"
+             f"<td class='n'>{pct(ch['web_n'], tot['landing_view'])}</td><td>환불 {ch['refund_n']}건 · {ch['refund_amt']:,}원</td></tr>")
+    toss_row = (f"<tr class='grp'><td class='g'>토스<br><small>콘솔 {esc(tc.get('events_window', '-'))}</small></td><td class='n'>– (콘솔에 노출 지표 없음)</td>"
+                f"<td class='n'>{num(tc.get('users_window'))}</td><td class='n'>{num(tc.get('form_start'))}</td><td class='n'>{num(tc.get('form_done'))}</td>"
+                f"<td class='n'>{num(tc.get('buy_click'))}</td><td class='n'>{num(tc.get('paid'), '건')}</td><td class='n'>{pct(tc.get('paid') or 0, tc.get('users_window') or 0)}</td>"
+                f"<td>프로모션 {num(tc.get('promo_spent'), '원')} · 결제 0이면 CAC 계산 불가</td></tr>")
+    gl_rows = ""
+    for loc, label in GLOBAL_LOCALES:
+        e = gl["events"][loc]["7d"]
+        a = gl["accounts"].get(loc, {})
+        imp = f"{a.get('views', 0):,} (Threads)" if "error" not in a else "– (토큰 오류)"
+        gl_rows += (f"<tr><td class='g'>{label}</td><td class='n'>{imp}</td><td class='n'>{e.get('global_landing_view', 0):,}</td><td class='n'>–</td>"
+                    f"<td class='n'>{e.get('global_saju_complete', 0):,}</td><td class='n'>알림 {gl['waits'].get(loc, 0)}명</td><td class='n'>결제 없음</td><td class='n'>–</td><td>광고비 0원</td></tr>")
+
+    def li(items, key="text"):
+        return "".join(f"<li>{kind_tag(x.get('kind', '확인'))} {esc(x[key])}</li>" for x in items) or "<li>–</li>"
+
+    stages = "".join(f"<td><b>{'✅' if s.get('done') else '❌'} {esc(s['stage'])}</b><br><small>{esc(s.get('detail', ''))}</small></td>"
+                     for s in notes.get("toss_status", []))
+    plan = "".join(f"<tr><td>{esc(p['item'])}</td><td class='st2'>{esc(p['status'])}</td><td><small>{esc(p.get('note', ''))}</small></td></tr>"
+                   for p in notes.get("toss_plan", []))
+    acc_rows = ""
+    for loc, label in GLOBAL_LOCALES:
+        a = gl["accounts"].get(loc, {})
+        ev = gl["events"][loc]["all"]
+        acc_rows += (f"<tr><td class='g'>{label}</td><td class='n'>{num(a.get('followers'), '명')}</td><td class='n'>{a.get('posts', 0)}개</td>"
+                     f"<td class='n'>{a.get('views', 0):,} · {a.get('replies', 0)}</td><td class='n'>{ev.get('global_landing_view', 0):,}</td>"
+                     f"<td class='n'>{ev.get('global_saju_complete', 0):,}</td><td class='n'>{gl['waits'].get(loc, 0)}명</td></tr>")
+    qa = "".join(f"<div class='qa'><b>Q. {esc(x['q'])}</b> {kind_tag(x.get('kind', '확인'))}<br>{esc(x['a'])}</div>" for x in notes.get("qa", []))
+
+    return f"""
+<div class="pb"></div>
+<div class="top"><h1>채널별 성과</h1><div class="date">최근 7일 ({ch['since'][5:].replace('-', '/')}~{today:%m/%d}) · 사람 방문만</div></div>
+<div class="summary"><small>채널 결론</small>{esc(notes.get('channel_summary') or '채널별 숫자를 아래 표로 확인하세요.')}</div>
+<h2>퍼널 — 노출 → 방문 → 무료 시작 → 무료 완료 → 상세 도달 → 결제</h2>
+<table class="small"><tr><th>채널</th><th class="n">노출</th><th class="n">방문</th><th class="n">무료 시작</th><th class="n">무료 완료</th><th class="n">상세 도달</th><th class="n">결제</th><th class="n">방문→결제</th><th>비용 · CAC</th></tr>
+{body}{toss_row}
+<tr class='grp'><td class='g' colspan='9'>해외판 (최근 7일, 결제 기능 없음)</td></tr>{gl_rows}</table>
+<div class="foot">채널 분류: 사이트 이벤트의 앱 구분(ua)과 유입 링크(ref). Instagram = 인스타·페이스북 앱 안 또는 ig_ 링크, Threads = Threads 앱 안 또는 th_/threads 링크,
+검색·직접 = 네이버 앱·검색 링크·링크 없는 브라우저 방문(운영자 확인 포함), 기타 = 카카오·공유 링크 등. 무료 시작 이후 단계는 링크 정보가 없어 앱 구분으로만 나눈다.
+토스 줄은 앱인토스 콘솔 수치({esc(tc.get('as_of', '미입력'))} 기준{stale}, 이벤트는 콘솔의 최근 {esc(tc.get('events_window', '-'))} 누적)로 사이트 방문과 다른 단위다 — 토스 앱 안 진입은 사이트 방문에 포함되지 않는다.
+노출: Threads = 최근 7일 글 조회 합, Instagram = 최근 게시물 조회(09:00 스냅샷). 검색 노출은 구글 서치콘솔·네이버 서치어드바이저 로그인 권한이 있어야 잴 수 있다.
+결제는 9월 이후 실결제(시험 제외). 채널별 결제는 결제 성공 이벤트의 앱 구분 기준. CAC = 채널 비용 ÷ 결제 건수(결제 0이면 계산하지 않음). 개인정보(생년월일·이메일·아이디)는 집계에 쓰지 않는다.</div>
+
+<div class="pb"></div>
+<div class="top"><h1>토스 입점 · 해외판</h1><div class="date">토스 콘솔 {esc(tc.get('as_of', '미입력'))} 기준{stale}</div></div>
+<h2>토스 입점 현황 — 등록 · 심사 · 출시 · 매출 구분</h2>
+<table class="stages"><tr>{stages}</tr></table>
+<div class="two">
+  <div class="box mean"><h3>토스 채널의 가치와 위험</h3><ul>{li(notes.get('toss_value', []))}</ul></div>
+  <div class="box todo"><h3>토스 30일 과제</h3><table class="small">{plan or '<tr><td>–</td></tr>'}</table></div>
+</div>
+<h2>해외판 — 시작 {esc(notes.get('global_start', '10/24'))}</h2>
+<table class="small"><tr><th>계정</th><th class="n">팔로워</th><th class="n">최근 글</th><th class="n">조회 · 답글</th><th class="n">사이트 방문(누적)</th><th class="n">무료 결과(누적)</th><th class="n">오픈 알림</th></tr>{acc_rows}</table>
+<ul class="plain">{li(notes.get('global_status', []))}</ul>
+<h2>핵심 질문</h2>
+{qa or '<div class="qa">–</div>'}
+<div class="foot">태그: <b style="color:#2f9e5b">확인</b> = 콘솔·DB·API로 확인한 사실, <b style="color:#d39b16">가설</b> = 데이터로 검증 전인 판단, <b style="color:#d6513a">확인 필요</b> = 아직 확인하지 못한 항목(추정하지 않음).
+토스 콘솔 수치는 로그인이 필요해 자동 수집되지 않고 Claude가 콘솔에서 옮겨 적는다(반영이 하루가량 늦음). 해외판 Threads 수치는 API 자동 수집.</div>"""
 
 
 def to_pdf(html_text, out_pdf):
@@ -310,9 +490,15 @@ def main():
     ig = collect_instagram(today)
     site = collect_site(today)
     health = collect_health()
+    # 2·3쪽은 실패해도 1쪽 보고는 나가야 하므로 따로 감싼다.
+    try:
+        pages23 = render_pages23(now, th, ig, collect_channels(today), collect_global(), notes)
+    except Exception as e:
+        print(f"2·3쪽 생성 실패: {e}")
+        pages23 = f"<div class='pb'></div><h2>채널·토스·해외판</h2><p>이번 회차는 집계에 실패했습니다: {esc(str(e)[:200])}</p>"
     os.makedirs(OUT_DIR, exist_ok=True)
     out = os.path.join(OUT_DIR, f"{today.isoformat()}_사주랩_일일보고.pdf")
-    to_pdf(render(now, th, ig, site, health, notes), out)
+    to_pdf(render(now, th, ig, site, health, notes, pages23), out)
     try:
         shutil.copyfile(out, LATEST)
     except OSError as e:
@@ -321,7 +507,22 @@ def main():
     with open(STATE, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False)
     print(f"저장: {out}")
+    # 데스크톱·노트북이 같은 20:00에 각자 PDF를 만들므로(각 컴퓨터 바탕 화면용) 알림은 먼저 만든 한 대만 보낸다.
+    marker_rel = os.path.join("scripts", "posted_state", "daily_report", f"{today.isoformat()}.json")
     if not args.no_notify:
+        import git_sync  # 이 파일의 나머지는 git을 쓰지 않아 여기서만 가져온다
+
+        git_sync.git_pull(BASE_DIR)
+        if os.path.exists(os.path.join(BASE_DIR, marker_rel)):
+            print("다른 컴퓨터가 오늘 보고 알림을 이미 보냈습니다(PDF만 저장).")
+            return
+        os.makedirs(os.path.dirname(os.path.join(BASE_DIR, marker_rel)), exist_ok=True)
+        with open(os.path.join(BASE_DIR, marker_rel), "w", encoding="utf-8") as f:
+            json.dump({"at": now.isoformat(), "host": os.environ.get("COMPUTERNAME")}, f)
+        if not git_sync.git_commit_push(BASE_DIR, [marker_rel], f"report: 일일 보고 {today.isoformat()}"):
+            git_sync.git_pull(BASE_DIR)  # push가 밀렸으면 다른 컴퓨터가 먼저 올린 것 — 알림은 그쪽 몫
+            print("다른 컴퓨터가 먼저 보고 알림을 보냈습니다.")
+            return
         tv, _, tn = th["today"]
         notify.notify("📄 사주랩 일일 보고", f"바탕 화면 '오늘의_사주랩_보고.pdf' · 오늘 사이트 방문 {site['t'].get('landing_view', 0)}명 · "
                       f"실결제 누적 {site['web']['n'] + site['toss']['n']}건", tags=["page_facing_up"])

@@ -31,6 +31,10 @@ export const ANALYTICS_EVENT_NAMES = [
   "waitlist_signup",
   "good_year_view",
   "good_year_cta_click",
+  // 해외판(/ja, /en)은 국내 퍼널 집계에 섞이지 않도록 이름을 따로 둔다. meta.locale로 언어를 구분한다.
+  "global_landing_view",
+  "global_saju_complete",
+  "global_waitlist_signup",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

@@ -391,3 +391,11 @@
 - 10/23 보고서 2판(사장님 피드백 "그날 유입과 총 인원을 구분해서"): 숫자표를 **오늘·어제·누적·기준·판정** 칸으로, 결론 한 줄 → 숫자표 → 의미/할 일/확인할 것 → Threads 글. `report_notes.json`은 `summary`, `toss{users_today,users_yesterday,users_total,ad_total,promo_spent,as_of}`, `meaning`, `alerts`, `decisions`. 실결제는 9월 이후·테스트 제외(8월 4건은 출시 전 시험).
 - **10/23 인스타 재실행 준비(미가동)**: `scripts/ig_reading_post.py`(참여형 카드 2장, 매일 1개 — `--render`로 미리보기 확인함), `scripts/ig_reading_posts.json`(변형 6개), `scripts/ig_replies.py`(최근 4일 게시물 댓글에 존댓말 풀이 답글, `--dry-run` 있음, 댓글 관리 권한 확인됨). **남은 일**: ① `ig_replies.py --dry-run` 실제 댓글로 시험 ② 첫 게시 수동 실행 후 작업 스케줄러 등록(SajuIgReading 19:00, SajuIgReplies 10:15·19:50·21:15·22:45) ③ C: `reel_rules.CTAS`·고정 댓글의 '쿠폰' 문구를 "댓글에 생년월일 남기면 풀이 답글"로 ④ B: 릴스 8~10초·첫 화면 질문(reel-template). 판정 10/30.
 - **10/23 밤 인스타 재실행 가동**: 작업 스케줄러 `SajuIgReading`(매일 19:00, 참여형 카드 2장) · `SajuIgReplies`(10:15·19:50·21:15·22:45, 최근 4일 모든 게시물 댓글에 존댓말 풀이 대댓글) 등록. 답글 초안 시험 3건 정상(일간·2027 기운·좋은 달·마무리, 생일 없는 댓글은 안내 한 줄). C: `reel_rules.CTAS`·고정 댓글을 "댓글에 생년월일 → 풀이 답글"로, 대기 중 릴스·카드뉴스 각 2개의 캡션·고정 댓글도 교체(이미 렌더된 릴스 2개의 화면 속 쿠폰 문구는 그대로). B: 새 릴스는 `short: True`(10~12초) + 첫 조각 질문형 규칙. 일일 보고 PDF에 두 작업 상태 표시. **판정 10/30(금)**: 게시물당 댓글 5↑·조회 300↑·팔로워 +20·인스타→사이트 주 10명.
+
+## 2026-10-24 — 사이트 유입 분석 → 수정·재실행(10/31 판정)
+- 분석 PDF: `바탕 화면\사주랩_보고서\2026-10-24_사이트_유입분석.pdf`. 주별 생일 입력 9월 평균 29명 → 최근 2주 12·9명. 10/19~24 사람 방문 41명 중 Threads 앱 30명(73%), 첫 화면→생일 입력 22%(32명 이탈), 검색·카카오 0.
+- **A. 첫 화면**: `PersonaHome` — `ref=threads*`로 오면 "생일만 넣으면 2027년·좋은 해가 바로 나와요" + 입력으로 바로(고르기 4칸은 링크로 숨김). SajuFlow가 useEffect에서 주소의 ?ref를 지우므로 useLayoutEffect로 먼저 읽는다. 운영 반영 확인.
+- **B. Threads 한 사람 답글에도 주소**: `threads_replies.REPLY_LINKS = True`(FREE_LINK `/?ref=threads_reply` → 위 첫 화면).
+- **개발 서버 방문이 운영 통계에 섞였다**: 로컬 `npm run dev`도 운영 DB → `track.ts`는 production 빌드에서만 기록. 분석의 "PC 7명"도 상당수 시험이었을 것. 오늘 시험 기록 11행 삭제.
+- 판정 10/31: Threads 앱 방문 주 50명, 첫 화면→생일 입력 40%, 주간 생일 입력 20명.
+- 같은 날 Threads 2027 주제 풀이 글 4개(RD27~RD30) 추가.

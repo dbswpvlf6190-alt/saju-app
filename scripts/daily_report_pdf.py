@@ -1,6 +1,6 @@
 r"""사주랩 일일 보고서 PDF(데스크톱, 2026-10-23~). 사장님 요청: 채팅 보고는 읽기 어렵다 → 매일 한 장짜리 PDF를 바탕 화면에.
 
-  python scripts/daily_report_pdf.py            # 오늘(KST) 보고서 → 바탕 화면\사주랩_일일보고\YYYY-MM-DD_사주랩_일일보고.pdf
+  python scripts/daily_report_pdf.py            # 오늘(KST) 보고서 → 바탕 화면\사주랩_일일보고\YYYY-MM-DD_HHMM_사주랩_일일보고.pdf(작성 시각)
                                                 #   + 바탕 화면\오늘의_사주랩_보고.pdf(매일 덮어씀) + ntfy 알림
   python scripts/daily_report_pdf.py --no-notify
 
@@ -13,6 +13,8 @@ r"""사주랩 일일 보고서 PDF(데스크톱, 2026-10-23~). 사장님 요청:
 2·3쪽(10/24~): 채널별 퍼널(Instagram·Threads·토스·검색/직접·기타·해외 ja/en), 토스 입점 현황·30일 과제, 해외판, 핵심 질문.
   report_notes.json의 toss_console(as_of_date 포함, 2일 이상 지나면 '갱신 필요' 표시)·toss_status·toss_plan·toss_value·
   global_status·qa·channel_summary는 날짜가 지나도 지우지 않는 고정 항목이다.
+4쪽(10/24~): 할 일 체크리스트 — report_notes.json의 checklist(group·title·detail·say·when·due·done, 고정 항목).
+  due가 지났는데 done이 아니면 '지남', 2일 안이면 '곧'으로 표시. 끝난 항목은 done: true로 두거나 지운다.
 작업 스케줄러: SajuDailyReportPdf 매일 20:00(10/24 사장님 요청으로 21:50 → 20:00).
 """
 import argparse
@@ -342,6 +344,10 @@ td small {{ color: #6b7280; font-weight: 400; }}
 table.stages td {{ width: 25%; text-align: center; border: 1px solid #e5e7eb; font-size: 9.5pt; line-height: 1.35; }}
 td.st2 {{ white-space: nowrap; font-weight: 700; font-size: 8.5pt; }}
 ul.plain {{ font-size: 9.5pt; }}
+table.check td {{ vertical-align: top; font-size: 10pt; line-height: 1.4; }}
+td.cb {{ width: 18px; font-size: 13pt; }}
+tr.done td {{ color: #9aa1ab; text-decoration: line-through; }}
+.say {{ display: inline-block; background: #f3efe6; border-radius: 4px; padding: 0 5px; font-size: 9pt; margin-top: 2px; }}
 .qa {{ font-size: 9.5pt; line-height: 1.45; margin: 5px 0; padding: 5px 8px; border-left: 3px solid #d9cdf5; background: #fcfbff; }}
 </style></head><body>
 <div class="top"><h1>사주랩 일일 보고</h1><div class="date">{now:%Y.%m.%d} ({'월화수목금토일'[now.weekday()]}) {now:%H:%M} 기준</div></div>
@@ -456,6 +462,37 @@ def render_pages23(now, th, ig, ch, gl, notes):
 토스 콘솔 수치는 로그인이 필요해 자동 수집되지 않고 Claude가 콘솔에서 옮겨 적는다(반영이 하루가량 늦음). 해외판 Threads 수치는 API 자동 수집.</div>"""
 
 
+CHECK_GROUPS = [("사장님", "사장님이 직접 할 일"), ("Claude에게 말하기", "Claude에게 말만 하면 되는 일"), ("예정", "예정 (날짜 되면 Claude가 챙김)")]
+
+
+def render_checklist(now, notes):
+    """4쪽: 할 일 체크리스트(report_notes.json checklist). 오른쪽 화면 체크리스트와 같은 내용."""
+    items = notes.get("checklist") or []
+    if not items:
+        return ""
+    today = now.date()
+    body = ""
+    for key, title in CHECK_GROUPS:
+        rows = ""
+        for x in [i for i in items if i.get("group") == key]:
+            flag = ""
+            if x.get("due") and not x.get("done"):
+                left = (date.fromisoformat(x["due"]) - today).days
+                flag = " <b style='color:#d6513a'>⚠️ 지남</b>" if left < 0 else " <b style='color:#d39b16'>곧</b>" if left <= 2 else ""
+            say = f"<br><span class='say'>{esc(x['say'])}</span>" if x.get("say") else ""
+            done = " class='done'" if x.get("done") else ""
+            rows += (f"<tr{done}><td class='cb'>{'☑' if x.get('done') else '☐'}</td><td><b>{esc(x['title'])}</b><br>"
+                     f"<small>{esc(x.get('detail', ''))}</small>{say}</td><td class='st2'>{esc(x.get('when', ''))}{flag}</td></tr>")
+        if rows:
+            body += f"<h2>{esc(title)}</h2><table class='check'>{rows}</table>"
+    n_done = sum(1 for i in items if i.get("done"))
+    return f"""
+<div class="pb"></div>
+<div class="top"><h1>할 일 체크리스트</h1><div class="date">{n_done} / {len(items)} 완료 · {now:%m/%d %H:%M} 기준</div></div>
+{body}
+<div class="foot">체크리스트는 Claude가 report_notes.json에 관리한다. 끝난 일은 "OO 했어"라고 말하면 ☑로 바뀌고, 날짜가 지난 일은 '지남'으로 표시된다.</div>"""
+
+
 def to_pdf(html_text, out_pdf):
     tmp = os.path.join(os.path.dirname(STATE), "daily_report.html")
     os.makedirs(os.path.dirname(tmp), exist_ok=True)
@@ -496,8 +533,12 @@ def main():
     except Exception as e:
         print(f"2·3쪽 생성 실패: {e}")
         pages23 = f"<div class='pb'></div><h2>채널·토스·해외판</h2><p>이번 회차는 집계에 실패했습니다: {esc(str(e)[:200])}</p>"
+    try:
+        pages23 += render_checklist(now, notes)
+    except Exception as e:
+        print(f"체크리스트 생성 실패: {e}")
     os.makedirs(OUT_DIR, exist_ok=True)
-    out = os.path.join(OUT_DIR, f"{today.isoformat()}_사주랩_일일보고.pdf")
+    out = os.path.join(OUT_DIR, f"{now:%Y-%m-%d_%H%M}_사주랩_일일보고.pdf")
     to_pdf(render(now, th, ig, site, health, notes, pages23), out)
     try:
         shutil.copyfile(out, LATEST)

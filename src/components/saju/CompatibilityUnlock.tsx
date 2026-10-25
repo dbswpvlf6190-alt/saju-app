@@ -7,6 +7,7 @@ import { COMPATIBILITY_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/c
 import { PaymentWaitlist } from "./PaymentWaitlist";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
+import { PurchaseConsent } from "./PurchaseConsent";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -110,7 +111,10 @@ export function CompatibilityUnlock({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumePaymentId]);
 
+  const [agreed, setAgreed] = useState(false);
+
   async function handlePurchase() {
+    if (!agreed) return;
     trackEvent("checkout_start", { productType: "compatibility_report" });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
@@ -313,13 +317,15 @@ export function CompatibilityUnlock({
         </p>
       )}
 
+      <PurchaseConsent checked={agreed} onChange={setAgreed} />
+
       <button
         type="button"
         onClick={() => {
           trackEvent("compatibility_premium_click", {});
           void handlePurchase();
         }}
-        disabled={status === "processing"}
+        disabled={status === "processing" || !agreed}
         className="mt-1 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing"

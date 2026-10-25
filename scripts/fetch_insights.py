@@ -189,7 +189,8 @@ def fetch_app_metrics():
     try:
         names = ", ".join(f"'{n}'" for n in APP_EVENTS)
         rows = neon_query(
-            "select to_char(date_trunc('day', \"createdAt\" at time zone 'Asia/Seoul'), 'YYYY-MM-DD') as day, name, count(*)::int as n "
+            # createdAt은 시간대 없는 UTC 값 → UTC로 읽은 뒤 서울 시각으로 바꿔야 한다(그냥 'Asia/Seoul'을 쓰면 9시간 거꾸로 밀림, 10/18 수정).
+            "select to_char(date_trunc('day', (\"createdAt\" at time zone 'UTC') at time zone 'Asia/Seoul'), 'YYYY-MM-DD') as day, name, count(*)::int as n "
             f"from \"AnalyticsEvent\" where \"createdAt\" > now() - interval '30 days' and name in ({names}) group by 1, 2 order by 1"
         )
         daily = {}

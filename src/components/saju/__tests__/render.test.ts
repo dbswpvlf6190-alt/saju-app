@@ -110,3 +110,26 @@ describe("결제 후 진행 안내(ReportProgress)", () => {
     expect(offer()).not.toContain("30~60초");
   });
 });
+
+describe("결제 전 청약철회 안내(PurchaseConsent)", () => {
+  it("환불 기준과 환불정책 링크, 필수 표시가 보인다", async () => {
+    const { PurchaseConsent } = await import("../PurchaseConsent");
+    const html = renderToStaticMarkup(createElement(PurchaseConsent, { checked: false, onChange: () => {} }));
+    expect(html).toContain("(필수)");
+    expect(html).toContain("7일 안에 환불");
+    expect(html).toContain("청약철회가 제한될 수 있다");
+    expect(html).toContain('href="/refund"');
+    expect(html).not.toContain("checked");
+  });
+});
+
+describe("결제 폼 문구", () => {
+  it("6장 방식에서는 나 사용설명서로, 롤백(V2=0)에서는 옛 문구로 보인다", async () => {
+    const copy = await import("@/lib/payment/ctaCopy");
+    expect(copy.premiumCtaLabel()).toContain("나 사용설명서");
+    expect(copy.premiumDetailsStepIntro()).toContain("6장");
+    vi.stubEnv("NEXT_PUBLIC_REPORT_V2", "0");
+    expect(copy.premiumCtaLabel()).toBe("4,900원으로 전체 분석 보기");
+    expect(copy.premiumDetailsStepIntro()).toContain("전체 분석");
+  });
+});

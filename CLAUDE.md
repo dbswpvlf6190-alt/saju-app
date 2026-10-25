@@ -1,2 +1,3 @@
 @AGENTS.md
 @OPS_NOTES.md
+@docs/SYNC_CHECKLIST.md

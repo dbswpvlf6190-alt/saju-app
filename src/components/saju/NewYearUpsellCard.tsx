@@ -5,6 +5,7 @@ import type { SajuResult } from "@/lib/saju";
 import { resultToInput } from "@/lib/saju/types";
 import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
+import { PurchaseConsent } from "./PurchaseConsent";
 
 type Status = "teaser" | "processing" | "unlocked" | "error";
 
@@ -27,6 +28,7 @@ export function NewYearUpsellCard({
 }) {
   const [status, setStatus] = useState<Status>("teaser");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [agreed, setAgreed] = useState(false);
   const [text, setText] = useState<string | null>(null);
   const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
   // 기본 리포트를 결제로 산 사람은 이 값들이 이미 채워져 있어 바로 결제창으로 간다. 쿠폰으로
@@ -49,6 +51,7 @@ export function NewYearUpsellCard({
   }
 
   async function handlePurchase() {
+    if (!agreed) return;
     trackEvent("checkout_start", { productType: "new_year_report" });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
@@ -193,10 +196,12 @@ export function NewYearUpsellCard({
 
       {errorMessage && <p className="text-xs text-red-300">{errorMessage}</p>}
 
+      <PurchaseConsent checked={agreed} onChange={setAgreed} />
+
       <button
         type="button"
         onClick={() => void handlePurchase()}
-        disabled={status === "processing"}
+        disabled={status === "processing" || !agreed}
         className="rounded-xl bg-[#c8623f] px-4 py-2.5 text-center text-sm font-semibold text-[#1a0f0a] transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing" ? "처리 중..." : `+${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원으로 신년운세 추가`}

@@ -15,6 +15,10 @@ const ATTRIBUTED_EVENTS = new Set<AnalyticsEventName>([
 /** 클라이언트에서 전환 이벤트를 기록한다. 실패해도 UI 흐름을 막으면 안 되므로 항상 조용히 무시한다. */
 export function trackEvent(name: AnalyticsEventName, meta?: AnalyticsMeta): void {
   if (typeof window === "undefined") return;
+  // 로컬 개발 서버(npm run dev)도 운영 DB에 붙어 있어 시험 방문이 손님 수에 섞였다(10/24 발견) — 운영 빌드에서만 기록한다.
+  if (process.env.NODE_ENV !== "production") return;
+  // 자동화된 브라우저(미리보기 렌더러·테스트 도구)는 집계하지 않는다. 서버에서도 UA로 한 번 더 거른다.
+  if (navigator.webdriver) return;
   const src = ATTRIBUTED_EVENTS.has(name) ? firstSource() : undefined;
   const safeMeta = sanitizeAnalyticsMeta(src ? { ...meta, src } : meta);
   try {

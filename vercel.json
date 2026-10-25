@@ -12,5 +12,13 @@
       "path": "/api/internal/send-daily-push",
       "schedule": "0 23 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "work/**": false,
+      "proto/**": false,
+      "claude/**": false,
+      "backup/**": false
+    }
+  }
 }

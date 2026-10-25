@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { AdminReviewToggle } from "@/components/admin/AdminReviewToggle";
 import { CouponIssuer } from "@/components/admin/CouponIssuer";
 import { CopyableCode } from "@/components/admin/CopyableCode";
+import { WaitlistPanel } from "@/components/admin/WaitlistPanel";
 import { AdminPreviewTool } from "@/components/admin/AdminPreviewTool";
 import { reconcileStalePendingOrders } from "@/lib/payment/reconcile";
 import { getFunnelSummary } from "@/lib/analytics/funnelSummary";
@@ -50,6 +51,9 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   compat_invite_open: "궁합 링크 열람(받은 사람)",
   compat_invite_complete: "궁합 링크 완성",
   compat_invite_notify: "궁합 결과 알림 신청",
+  global_landing_view: "해외판 랜딩 조회",
+  global_saju_complete: "해외판 무료 결과",
+  global_waitlist_signup: "해외판 오픈 알림 신청",
 };
 
 function pct(numerator: number, denominator: number): string {
@@ -64,13 +68,14 @@ export default async function AdminPage() {
   // PENDING 주문을 즉시 재검증해서 화면에 최신 상태가 보이게 한다.
   await reconcileStalePendingOrders();
 
-  const [orders, paidAgg, statusCounts, reviews, funnel, coupons] = await Promise.all([
+  const [orders, paidAgg, statusCounts, reviews, funnel, coupons, waitlistCount] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amount: true }, _count: true }),
     prisma.order.groupBy({ by: ["status"], _count: true }),
     prisma.review.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     getFunnelSummary(7),
     prisma.coupon.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
+    prisma.waitlistSignup.count(),
   ]);
 
   const totalRevenue = paidAgg._sum.amount ?? 0;
@@ -87,6 +92,8 @@ export default async function AdminPage() {
           <StatCard key={s.status} label={STATUS_LABEL[s.status] ?? s.status} value={`${s._count}건`} />
         ))}
       </div>
+
+      <WaitlistPanel count={waitlistCount} />
 
       <div className="overflow-x-auto rounded-2xl border border-border-subtle">
         <table className="w-full min-w-[640px] text-left text-sm">

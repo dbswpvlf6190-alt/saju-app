@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import type { PortOnePayment } from "@/lib/payment/verify";
-import { sendPaymentKakaoNotification } from "@/lib/kakao/notify";
+import { describeFailure } from "@/lib/payment/failure";
+import { sendPaymentFailureKakaoNotification, sendPaymentKakaoNotification } from "@/lib/kakao/notify";
 
 type OrderRow = Awaited<ReturnType<typeof prisma.order.findUnique>>;
 
@@ -18,6 +19,21 @@ export async function finalizeOrderFromPortOnePayment(
 
   if (!isPaid || !isAmountValid) {
     await prisma.order.update({ where: { paymentId: order.paymentId }, data: { status: "FAILED" } });
+
+    // 알림은 "결제 시도가 실제로 실패했거나 금액이 맞지 않은 경우"만 보낸다. 결제창을 열었다가 닫은 이탈(READY·PENDING 등)은
+    // 정상적으로 자주 일어나므로 알리지 않는다. 알림 실패는 주문 판정에 영향을 주지 않는다.
+    if (payment.status === "FAILED" || (isPaid && !isAmountValid)) {
+      try {
+        await sendPaymentFailureKakaoNotification({
+          amount: order.amount,
+          productType: order.productType,
+          paymentId: order.paymentId,
+          reason: describeFailure(payment, isAmountValid),
+        });
+      } catch (e) {
+        console.error(`카카오 결제 실패 알림 전송 실패 (paymentId=${order.paymentId}):`, e);
+      }
+    }
     return { status: "FAILED", amountValid: isAmountValid };
   }
 

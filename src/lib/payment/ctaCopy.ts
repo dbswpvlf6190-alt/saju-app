@@ -1,3 +1,5 @@
+import { reportV2Enabled } from "@/lib/reports/manualChapters";
+
 // 전환 관련 카피를 한곳에 모아둔다. 나중에 실제 데이터로 문구 A/B 테스트를 하고 싶어지면
 // 이 값들만 바꾸면 되고(예: PREMIUM_CTA_LABEL을 "내 상세 사주 확인하기"로), 지금 당장
 // 무작위 테스트 로직을 넣지는 않는다 — 구조만 미리 준비해둔다.
@@ -7,6 +9,14 @@ export const PREMIUM_VALUE_SUBHEAD = "오늘 하루가 아니라, 사주 전체�
 // 아래 결제 폼(카드/카카오페이 선택 + 이름·이메일·휴대폰) 진입 전에 보여주는 안내 —
 // 구매 의사가 없는 사용자에게 개인정보 입력란부터 들이밀지 않기 위해 2단계로 나눈다.
 export const PREMIUM_DETAILS_STEP_INTRO = "결제 정보를 입력하고 바로 전체 분석을 받아보세요.";
+
+// 6장 "나 사용설명서"(NEXT_PUBLIC_REPORT_V2, 기본 켬)에서는 소개·가격 화면과 같은 이름으로 부른다(옛 5개 주제 문구는 롤백용).
+export function premiumCtaLabel(): string {
+  return reportV2Enabled() ? "4,900원 결제하고 나 사용설명서 열기" : PREMIUM_CTA_LABEL;
+}
+export function premiumDetailsStepIntro(): string {
+  return reportV2Enabled() ? "결제 정보를 입력하면 나 사용설명서 6장이 바로 열려요." : PREMIUM_DETAILS_STEP_INTRO;
+}
 // 무료 "오늘의 운세"와 유료 상세 분석의 차이를 잠금 미리보기 진입부에서 먼저 밝혀둔다.
 export const PREMIUM_SECTION_INTRO =
   "오늘 하루만 보는 운세가 아니라, 사주 전체를 근거로 한 심층 분석이에요.";

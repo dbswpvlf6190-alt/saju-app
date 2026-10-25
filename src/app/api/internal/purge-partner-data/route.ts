@@ -86,6 +86,10 @@ export async function GET(req: NextRequest) {
   // 결과 확인용 7일)이 지나면 행을 통째로 지운다. 결제한 경우의 기록은 Order에 따로 남는다.
   const expiredInvites = await prisma.compatInvite.deleteMany({ where: { expiresAt: { lt: new Date() } } });
 
+  // 결제 오픈 알림 이메일은 개인정보처리방침에 "늦어도 신청 후 3개월 안에 삭제"로 약속했다.
+  const waitlistCutoff = new Date(Date.now() - 92 * 24 * 60 * 60 * 1000);
+  const expiredWaitlist = await prisma.waitlistSignup.deleteMany({ where: { createdAt: { lt: waitlistCutoff } } });
+
   return NextResponse.json({
     ok: true,
     checked: candidates.length,
@@ -93,5 +97,6 @@ export async function GET(req: NextRequest) {
     skippedIncomplete,
     skippedCorrupt,
     expiredInvitesDeleted: expiredInvites.count,
+    expiredWaitlistDeleted: expiredWaitlist.count,
   });
 }

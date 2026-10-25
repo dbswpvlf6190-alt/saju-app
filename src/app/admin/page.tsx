@@ -52,6 +52,9 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   compat_invite_open: "궁합 링크 열람(받은 사람)",
   compat_invite_complete: "궁합 링크 완성",
   compat_invite_notify: "궁합 결과 알림 신청",
+  global_landing_view: "해외판 랜딩 조회",
+  global_saju_complete: "해외판 무료 결과",
+  global_waitlist_signup: "해외판 오픈 알림 신청",
 };
 
 function pct(numerator: number, denominator: number): string {

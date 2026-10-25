@@ -47,6 +47,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    // 해외판(일본어·영어) 무료 결과 페이지
+    ...(["ja", "en"] as const).map((lang) => ({
+      url: `${SITE_URL}/${lang}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
     {
       url: `${SITE_URL}/new-year`,
       lastModified: new Date(),

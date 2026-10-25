@@ -46,7 +46,10 @@ COMPAT_LINK = f"https://{SITE}/compatibility?ref=threads_reply"
 FREE_LINK = f"https://{SITE}/?ref=threads_reply"
 # 2026-10-11 노출 회복 실험: 10/7부터 글 조회가 243→96으로 급감(새 글 8시간 조회 0). 답글 수십 개마다 같은 주소가 붙은 게
 # 스팸 신호로 보였을 가능성 → 답글엔 주소를 넣지 않고 '프로필 링크'로만 안내. 3일 뒤(10/14) 조회 비교해 결정.
-REPLY_LINKS = False
+REPLY_LINKS = True
+# 2026-10-24 사이트 유입 분석: 사이트 손님의 73%가 Threads인데 한 사람 답글엔 주소가 없어 하루 답글 20~60개가 주소 없이 끝났다.
+# 링크 실험(10/11~10/18)에서 링크는 노출 급감의 원인이 아니었으므로 한 사람 답글에도 무료 사주 주소를 다시 붙인다
+# (사이트 첫 화면은 ref=threads*로 오면 '생일만 넣으면 2027년·좋은 해' 화면을 바로 보여준다 — PersonaHome).
 # 10/18 판정: 링크를 끈 뒤에도 조회는 회복되지 않았고(일반 글 65→34) Threads→사이트 방문만 5→3으로 줄었다 →
 # 두 사람(궁합) 답글에만 궁합 페이지 주소를 다시 붙인다. 한 사람 답글은 계속 REPLY_LINKS를 따른다.
 COMPAT_REPLY_LINK = True
@@ -87,6 +90,7 @@ WRITE_PROMPT = f"""너는 무료 사주 서비스 '사주랩' Threads 계정 담
 - 두 사람이 있으면 두 사람 유형을 모두 말하고, 둘이 어떤 식으로 맞물리는지 한 문장(궁합 상세 안내는 마지막 문장에서).
 - 재회·로또·합격 여부·"운이 열리나요" 같은 예/아니오 질문엔 단정하지 말고, 그 유형이 그런 시기에 잘 풀리는 방식/태도를 말해준다.
 - 금지: 무조건, 반드시, 100%, 확실히, 절대, 평생, 당첨·합격·불합격 단정, 공포 조장, 건강·의료 판단.
+- 내년 한 줄 운세(post_promise가 '2027년 운세'이거나 내년·새해 운을 물으면): timing_pick의 years[0](내년 한 해의 기운)을 써서 "네 2027년 정미년은 재능·표현이 빛나는 해로 보여"처럼 **한 줄로 먼저** 짚고, 그 기운에서 할 만한 것 한 가지를 쉬운 말로 덧붙인다. months가 있으면 "특히 2027년 3~4월에 흐름이 좋아"처럼 한 마디. 비겁·식상도 긍정 쪽으로 풀되 단정 금지('~로 봐', '~흐름이야'). years가 비면 연도 기운을 지어내지 말고 성향 이야기로 마무리. post_promise가 '2027년 재물운'·'2027년 일운'·'2027년 좋은 달'처럼 주제가 붙어 있으면 같은 계산값(years[0]·months)을 그 주제(돈·일·좋은 달) 쪽 말로 풀어준다 — 좋은 달 주제면 months를 먼저 짚는다.
 - 좋은 해(post_promise가 '좋은 해'이거나 그렇게 물으면): timing_pick의 years를 그대로 써서 "네 사주로는 2027년 정미년이 돈·성과가 붙는 해로 보여, 그다음은 2028년 무신년에 자리·기회가 열리고" 처럼 **연도와 그 해의 기운을 구체적으로** 짚는다. 듣는 사람이 기대되고 기분 좋아지게 쓰되 '반드시·무조건 좋은 일이 생긴다'는 단정은 금지 — '흐름이 들어오는 해로 봐'까지. months가 있으면 '가깝게는 2026년 10~11월'처럼 한 마디 덧붙인다. years가 비면 연도를 지어내지 말고 성향 이야기로 마무리.
 - 시기: 연애·재회·돈·취업 주제는 각 사람의 **timing_pick만** 쓴다(코드가 성별·주제에 맞는 기운이 들어오는 해/달을 이미 골라 줬다. raw timing으로 관성/재성 등을 직접 판단하지 말 것 — 틀린다). timing_pick이 있으면 반드시 1문장으로 그 시기를 짚어준다(예: "네 쪽은 2028년 무신년에 인연 기운(관성)이 들어오고, 가까운 달로는 2026년 10~11월이 열려 있어"). months가 있으면 가장 가까운 달도 같이 말한다. timing_pick이 None이거나 years·months가 비어 있으면 그 사람의 시기는 조용히 생략한다(지어내지 말 것). 어떤 경우에도 timing, timing_pick, ilgan, 데이터, 값 같은 내부 용어를 답글에 쓰지 말고 "시기를 짚을 수 없다"는 말도 하지 않는다. 두 사람이면 사람별로 각자 말한다. "올해 남은 흐름"처럼 주제 약속(post_promise)이 있는 풀이는 raw timing의 이번 달~연말 months 흐름을 쓴다.
 - 질병·수술·완치 같은 의료 판단은 하지 않는다.
@@ -145,6 +149,13 @@ _JOB_WORDS = ("취업", "승진", "합격", "시험", "공부", "일", "직장",
 # 10/9 지인 피드백: "몇 년도에 좋은 일이 생긴다"는 구체적인 연도가 가장 마음을 움직였다 → "좋은 해" 주제.
 _GOOD_YEAR_WORDS = ("좋은 해", "좋은해", "좋은 일", "풀리는 해", "운 좋은", "언제 풀", "대운")
 _GOOD_GROUPS = {"재성": "돈·성과가 붙는 해(재성)", "관성": "자리·기회·인연이 열리는 해(관성)", "인성": "도움·배움이 들어오는 해(인성)"}
+# 2026-10-23 '2027년 한 줄 운세' 풀이 글(신년운세 수요 확인용). 내년 한 해의 기운을 다섯 갈래 모두 긍정 쪽 말로 풀어준다.
+_NEXT_YEAR_WORDS = ("2027", "내년", "신년", "새해")
+_YEAR_THEMES = {
+    "비겁": "나를 세우고 내 편을 넓히는 해(비겁)",
+    "식상": "재능·표현이 빛나는 해(식상)",
+    **_GOOD_GROUPS,
+}
 
 
 def _merge_months(yms):
@@ -175,6 +186,15 @@ def pick_timing(person, topic):
     t = person.get("timing") or {}
     topic = topic or ""
     gender = person.get("gender")
+    if any(w in topic for w in _NEXT_YEAR_WORDS):
+        # 내년 한 줄 운세: 내년(세운)의 기운 하나 + 그 해 안에서 재성·관성·인성이 들어오는 달(있으면 최대 2개).
+        next_year = int(datetime.now().strftime("%Y")) + 1
+        y = next((y for y in t.get("years", []) if y["year"] == next_year), None)
+        if not y or y.get("group") not in _YEAR_THEMES:
+            return {"기운": "내년 흐름", "years": [], "months": [], "note": "내년 기운을 계산하지 못함 — 지어내지 말고 성향 이야기로"}
+        months = _merge_months([m["ym"] for m in t.get("months", [])
+                                if m.get("group") in _GOOD_GROUPS and str(m.get("ym", "")).startswith(str(next_year))])[:2]
+        return {"기운": "내년 한 줄 운세", "years": [{"year": y["year"], "ganzhi": y["ganzhi"], "기운": _YEAR_THEMES[y["group"]]}], "months": months}
     if any(w in topic for w in _GOOD_YEAR_WORDS):
         # 좋은 해: 앞으로 5년 중 재성·관성·인성 기운이 들어오는 해를 가까운 순서로 최대 2개(각 해에 어떤 좋은 기운인지 같이).
         # 올해는 남은 달이 적어 기대감이 약해서 내년부터 고른다(사이트 GoodYearCard와 같은 기준).
@@ -275,7 +295,7 @@ def draft(media_id, promise=None):
             # 두 사람 답글(궁합 질문)에만 궁합 링크를 코드가 직접 붙인다(2026-10-08 시험). 링크가 있는 답글은 스팸으로 보일 수 있어 일부로
             # 한정하고, AI가 쓴 본문은 링크 없이 검사한 뒤에 붙인다. 500자(Threads 한도)를 넘으면 붙이지 않는다.
             # 결제 일시 중단 중(10/9~)에는 한 사람 답글에도 무료 사주 링크를 붙여 사이트로 넘어오게 한다(Threads 유입 22→7 대응).
-            link = COMPAT_LINK if len(c["people"]) == 2 else (FREE_LINK if paused and len(c["people"]) == 1 else None)
+            link = COMPAT_LINK if len(c["people"]) == 2 else (FREE_LINK if (paused or REPLY_LINKS) and len(c["people"]) == 1 else None)
             if not REPLY_LINKS and not (COMPAT_REPLY_LINK and link == COMPAT_LINK):
                 link = None
             if text and not problems and link:

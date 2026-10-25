@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SajuFlow } from "./SajuFlow";
 import type { ReviewItem } from "./ReviewList";
@@ -28,6 +28,17 @@ export interface ExamBadge {
 
 export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[]; examBadges?: ExamBadge[] }) {
   const [focus, setFocus] = useState<Focus | null>(null);
+  // 2026-10-24 사이트 유입 분석: 손님의 73%가 Threads("생일만 적어주면 ○○ 알려줄게" 글)에서 오는데, 첫 화면이
+  // "궁금한 게 뭐예요?" 고르기부터라 약속과 어긋나 41명 중 32명이 생일을 안 넣고 나갔다. ref=threads*로 오면
+  // 고르기 대신 약속한 화면(생일 입력 → 2027년·좋은 해)으로 바로 안내한다. 판정: 첫 화면→생일 입력 22% → 40%(10/31).
+  const [fromThreads, setFromThreads] = useState(false);
+  // SajuFlow(자식)의 useEffect가 방문 기록 뒤 주소창의 ?ref=를 지우므로, 그보다 먼저 도는 layout effect에서 읽는다.
+  useLayoutEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref") ?? "";
+    // 주소창 값은 첫 렌더 뒤에만 읽을 수 있어(서버 렌더와 맞추려고) 효과 안에서 한 번만 반영한다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (ref.startsWith("threads")) setFromThreads(true);
+  }, []);
   // 배너 문구(focus가 있을 때만 화면에 쓰인다)
   const banner = focusBannerParts(focus ?? "wealth", FOCUS_LABEL[focus ?? "wealth"], reportV2Enabled());
   const formRef = useRef<HTMLDivElement>(null);
@@ -46,7 +57,32 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
           SAJU LAB
         </span>
 
-        {focus === null ? (
+        {focus === null && fromThreads ? (
+          <>
+            <h1 className="font-serif text-3xl leading-snug text-foreground">
+              생일만 넣으면
+              <br />
+              2027년·좋은 해가 바로 나와요
+            </h1>
+            <p className="max-w-xs text-sm leading-relaxed text-foreground-muted">
+              Threads에서 본 그 풀이를 여기선 여덟 글자·오행 비율까지 30초면 무료로 볼 수 있어요. 가입 없이 바로.
+            </p>
+            <button
+              type="button"
+              onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="mt-1 w-full max-w-xs rounded-xl bg-accent-gold px-4 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+            >
+              생일 넣고 바로 보기 ↓
+            </button>
+            <button
+              type="button"
+              onClick={() => setFromThreads(false)}
+              className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+            >
+              돈·연애·궁합 중에서 골라 보고 싶다면
+            </button>
+          </>
+        ) : focus === null ? (
           <>
             {/* 시험 시즌에만 보이는 배너. 홈에서는 수능 페이지로만 가는 버튼이 있어서 임용 페이지로 가는
                 길이 없었다 — 시즌 동안은 두 시험을 맨 위에서 바로 고르게 한다. */}

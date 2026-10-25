@@ -31,6 +31,15 @@ API = f"{GRAPH}/v1.0"
 SCOPES = "threads_basic,threads_content_publish,threads_manage_replies,threads_read_replies,threads_manage_insights"
 
 
+def use_account(market):
+    """해외판 계정(ja=@sajulab.jp, en=@sajulab.en)으로 바꾼다. 토큰 파일 경로만 바뀌고 나머지 함수는 그대로 쓴다.
+    토큰은 같은 Meta 앱의 사용자 토큰 생성기에서 받아 credentials/threads_token_{market}.txt에 붙여넣고
+    `python scripts/threads_api.py --market ja --import-token`으로 옮긴다."""
+    global TOKEN_PATH, TOKEN_TXT_PATH
+    TOKEN_PATH = os.path.join(CRED_DIR, f"threads_token_{market}.json")
+    TOKEN_TXT_PATH = os.path.join(CRED_DIR, f"threads_token_{market}.txt")
+
+
 def _load_secret():
     with open(SECRET_PATH, "r", encoding="utf-8-sig") as f:
         return json.load(f)
@@ -205,7 +214,10 @@ def main():
     ap.add_argument("--get-auth-url", action="store_true")
     ap.add_argument("--exchange-code")
     ap.add_argument("--check", action="store_true", help="토큰·계정 확인 + 최근 글 목록")
+    ap.add_argument("--market", choices=["ja", "en"], help="해외판 계정으로 실행(생략하면 국내 @sajulab_official)")
     args = ap.parse_args()
+    if args.market:
+        use_account(args.market)
     if args.import_token:
         import_token()
     elif args.get_auth_url:

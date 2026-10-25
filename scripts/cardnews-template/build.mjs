@@ -76,6 +76,9 @@ async function buildSet(set) {
   console.log(`완료: ${set.id} (${total}장) -> ${dir}`);
 }
 
+// node build.mjs C31 C32 처럼 id를 주면 그 세트만 다시 만든다(2026-10-23, CTA 문구 교체 때 이미 올린 세트를 건드리지 않으려고).
+const ONLY = process.argv.slice(2);
 for (const set of CARD_SETS_IN_ORDER) {
+  if (ONLY.length && !ONLY.includes(set.id)) continue;
   await buildSet(set);
 }

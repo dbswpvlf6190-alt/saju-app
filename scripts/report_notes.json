@@ -2,27 +2,27 @@
   "date": "2026-10-24",
   "summary": "실결제는 웹·토스 모두 아직 0건. 웹 방문은 거의 Threads에서만 오고, 토스는 프로모션을 멈추자 하루 1명. 오늘부터 해외판(일본어·영어) Threads 자동 게시를 시작했다.",
   "toss": {
-    "users_today": 1,
-    "users_yesterday": 734,
-    "users_total": 4107,
-    "ad_total": 2983,
+    "users_today": null,
+    "users_yesterday": 3,
+    "users_total": 4108,
+    "ad_total": 3638,
     "promo_spent": 17135,
-    "as_of": "10/24 13시"
+    "as_of": "10/25 09시(광고는 10/23까지)"
   },
   "toss_console": {
-    "as_of": "10/24 13시",
-    "as_of_date": "2026-10-24",
+    "as_of": "10/25 09시",
+    "as_of_date": "2026-10-25",
     "events_window": "14일",
-    "users_today": 1,
-    "users_yesterday": 734,
-    "users_total": 4107,
-    "users_window": 4107,
+    "users_today": null,
+    "users_yesterday": 3,
+    "users_total": 4108,
+    "users_window": 4108,
     "form_start": 371,
     "form_done": 360,
     "result_open": 285,
     "buy_click": 1,
     "paid": 0,
-    "ad_total": 2983,
+    "ad_total": 3638,
     "promo_spent": 17135
   },
   "meaning": [
@@ -56,7 +56,7 @@
     {
       "stage": "실제 매출",
       "done": false,
-      "detail": "인앱 결제 0건(시험 3건 제외) · 광고 예상수익 2,983원(정산 전)"
+      "detail": "인앱 결제 0건(시험 3건 제외) · 광고 예상수익 3,638원(10/23까지·정산 전)"
     }
   ],
   "toss_value": [
@@ -163,7 +163,7 @@
     {
       "q": "현재 토스 입점 상태는 정확히 무엇인가?",
       "kind": "확인",
-      "a": "등록·심사·정식 출시 완료(현재 v10, 인앱 결제 포함). 실제 매출은 0원 — 인앱 결제 0건, 광고 예상수익 2,983원은 정산 전 금액."
+      "a": "등록·심사·정식 출시 완료(현재 v10, 인앱 결제 포함). 실제 매출은 0원 — 인앱 결제 0건, 광고 예상수익 3,638원(10/23까지)은 정산 전 금액."
     },
     {
       "q": "실제 고객이 사주랩을 이용할 수 있는가?",
@@ -219,7 +219,8 @@
       "detail": "2일 넘으면 보고서에 '갱신 필요' 표시. 토스 콘솔 로그인 상태 필요",
       "say": "\"토스 수치 갱신해\"",
       "when": "10/26까지",
-      "due": "2026-10-26"
+      "due": "2026-10-26",
+      "done": true
     },
     {
       "group": "Claude에게 말하기",

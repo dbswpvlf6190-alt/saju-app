@@ -118,9 +118,10 @@ export function expectedSku(): string | null {
   return process.env.TOSS_IAP_SKU_MANUAL?.trim() || null;
 }
 
-// 2027 신년운세(2026-10-22). 가격은 토스 콘솔에 등록하는 판매가와 같아야 환불 점검·정산 기록이 맞는다.
-// 콘솔이 허용하는 가격 단위를 확인한 뒤 확정하며, 환경변수 TOSS_IAP_PRICE_NEWYEAR로 재배포 없이 맞출 수 있다.
-export const TOSS_NEWYEAR_PRICE_KRW = 3900;
+// 2027 신년운세. 가격은 토스 콘솔에 등록한 판매가와 같아야 환불 점검·정산 기록이 맞는다.
+// 2026-10-23 콘솔 등록: 공급가 3,540원 → 판매가 3,894원(공급가는 10원 단위만 가능해 3,900원은 불가).
+// 환경변수 TOSS_IAP_PRICE_NEWYEAR로 재배포 없이 맞출 수도 있다.
+export const TOSS_NEWYEAR_PRICE_KRW = 3894;
 
 export interface TossProduct {
   kind: "manual" | "newYear";

@@ -20,5 +20,6 @@
       "claude/**": false,
       "backup/**": false
     }
-  }
+  },
+  "ignoreCommand": "[ -n \"$VERCEL_GIT_PREVIOUS_SHA\" ] && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- . ':(exclude)scripts/posted_state' ':(exclude)scripts/performance' ':(exclude)cardnews' ':(exclude)reels' ':(exclude)OPS_NOTES.md' ':(exclude)docs'"
 }

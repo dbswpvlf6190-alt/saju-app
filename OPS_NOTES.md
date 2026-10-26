@@ -421,3 +421,9 @@
 - 서버 선배포 main 병합·푸시(ba1435d) → Vercel 배포 success. 확인: `/`·`/terms` 200, 웹 `/new-year` 404(비공개 유지), 사이트맵에 new-year 없음, `/api/toss/iap/grant` 빈 요청 400.
 - 미니앱 v11 번들: `C:\saju-app-toss\toss-mini\sajulab-app.ait`(deploymentId 01a1772a-56ef-7dfd-b3ae-41382ff9633a, 브랜치 toss-v11), `.env.production`에 `VITE_IAP_SKU_NEWYEAR` 추가(git 제외). 이전 v10 번들은 `C:\saju-secrets\sajulab-app.v10-backup.ait`.
 - **남은 사장님 작업**: ① Vercel `TOSS_IAP_SKU_NEWYEAR` 설정 후 재배포 ② 콘솔에 .ait 새 버전 업로드 ③ QR 실결제 iOS·Android(환불) ④ 검토 요청 ⑤ 상품 노출 켜기. 상품 노출은 아직 꺼짐 — 지금 사용자 영향 없음.
+
+## 2026-10-26 (노트북) 토스 v11 콘솔 등록 완료 — QR 실결제 테스트 대기
+- Vercel `TOSS_IAP_SKU_NEWYEAR` 추가(Production, 비밀 값) + 재배포 완료(Ready). 웹 `/new-year` 404 유지.
+- 콘솔 앱 출시에 새 버전 **20261026-15** 등록(sajulab-app.ait, SDK 3.8.0, 빌드 완료, 상태 '검토 필요'). 현재 출시 버전은 20261020-14(v10) 그대로. **검토 요청·상품 노출은 아직 안 함.**
+- 다음(사장님): ① 20261026-15 '테스트' QR로 iOS·Android 실결제(신년운세 3,894원, 환불) — 결제 후 12달 풀이가 바로 열리는지 ② 이상 없으면 검토 요청 ③ 통과 후 인앱 상품 '2027 신년운세' 노출 켜기.
+- 참고: 업로드한 번들 사본 해시 bb0a191e66dd3af3… (원본 C:\saju-app-toss\toss-mini\sajulab-app.ait와 동일). Vercel Functions Storage 11.16/10GB 한도 초과 표시 — 출시 후 정리 필요.

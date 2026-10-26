@@ -400,3 +400,10 @@
 - 판정 10/31: Threads 앱 방문 주 50명, 첫 화면→생일 입력 40%, 주간 생일 입력 20명.
 - 같은 날 Threads 2027 주제 풀이 글 4개(RD27~RD30) 추가.
 - **10/24 토스 분석**(`바탕 화면\사주랩_보고서\2026-10-24_토스_분석.pdf`): 누적 4,107명(10/21 1,672·10/22 1,688·10/23 734, 혜택탭=프로모션), **정지 후 10/24 신규 1명**(검색·추천 유입 사실상 0). 14일 이벤트: 입력 시작 371(9%) → 완료 360(97%) → 광고 보고 결과 285(79%) → 구매 버튼 실손님 ≈1 → 결제 0. 광고 10/21 1,739원·10/22 1,193원(손님당 0.7~1.0원) vs 프로모션 5원. D1 재방문 ≈0.5%. v11 할 일에 **홈 맨 위 "생년월일만 넣으면 2027년 운세"+입력**, 결과 직후 **매일 운세 알림 권유**, 리뷰 요청 버튼 추가. 재개는 1만 원 1차 시험(입력 시작 15%·구매 버튼 1%·결제 2건) 통과 시 나머지.
+
+## 2026-10-26 — 자동화 주 컴퓨터를 다시 노트북으로(사장님 결정: 노트북으로 하고 데스크톱은 주말에만 켬)
+- **노트북(DESKTOP-BNNQ4D5)이 주 컴퓨터.** 10/26 `SYNC_CHECKLIST.md` 절차로 최신화: main 140커밋 받음, `SajuDailyReportPdf`(20:00) 등록 + 예전 `SajuDailyReport` 끔, **`SajuIgReading`(19:00)·`SajuIgReplies`(10:15·19:50·21:15·22:45)·`SajuAnalyticsSnapshot`(09:00, `fetch_insights.py`)을 노트북에 등록**(데스크톱 작업과 같은 시각, 게시는 git 락으로 중복 방지). `ShortsTopicDiscovery`·해외판 Threads(`SajuThreadsGlobal*`)는 노트북에 없음 — 해외판은 토큰 파일이 데스크톱에만 있어 **데스크톱이 켜진 주말에만** 돈다.
+- **데스크톱 Claude가 할 일(다음에 켤 때)**: 데스크톱 작업 스케줄러의 `SajuAutoQueue`·`SajuAutoQueueCardnews`·`SajuThreadsDaily`·`SajuThreadsReplyDraft`·`ShortsAutoQueue`·`SajuIgReading`·`SajuIgReplies`·`SajuAnalyticsSnapshot`·`SajuDailyReportPdf`는 노트북과 겹치니 **'사용 안 함'**(해외판 Threads 작업만 유지). 주말에 켜서 쓰기 전에 `git pull`. 인스타·Threads 토큰은 컴퓨터마다 사본이라 나이를 확인(노트북 인스타 10/18, Threads 9/28 갱신).
+- 노트북 주의: `SajuNightSleep`(22:30 절전) 때문에 22:45 `SajuIgReplies`는 깨어난 뒤에 돈다(StartWhenAvailable). 노트북이 꺼져 있으면 모든 작업이 멈춘다.
+- **일일 보고 PDF 고침 2건**(`daily_report_pdf.py`): ① 해외판 Threads 토큰 파일이 없는 컴퓨터에서 `SystemExit`로 전체가 꺼지던 것 → 그 칸만 "토큰 오류" ② 저장 위치가 `~/Desktop`으로 고정돼 노트북(바탕 화면=`OneDrive\바탕 화면`)에서는 안 보이는 폴더에 만들어지던 것 → 윈도우가 아는 진짜 바탕 화면을 쓰도록(데스크톱은 기존과 같음).
+- 노트북 브랜치(`feature/new-year-v2` 3323367, `toss-v10` a57047f)는 main을 합쳐 두었고 **아직 GitHub에 안 올림**(사장님 확인 대기). 신년운세 토스 서버 금액은 3,894원으로 맞춤. 토스 v11 개발은 `work/toss-v11-parts` + 노트북 `toss-v10` 기준으로 노트북에서 이어간다.

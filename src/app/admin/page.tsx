@@ -47,6 +47,7 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   waitlist_signup: "결제 오픈 알림 신청",
   good_year_view: "좋은 해 카드 봄",
   good_year_cta_click: "좋은 해 → 시기 사용법 클릭",
+  new_year_result_view: "신년운세 단독 페이지 일주 확인",
   compat_invite_create: "궁합 링크 생성",
   compat_invite_open: "궁합 링크 열람(받은 사람)",
   compat_invite_complete: "궁합 링크 완성",

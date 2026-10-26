@@ -7,6 +7,9 @@ import {
   miniAppOrigins,
   parseOrderResponse,
   readPemEnv,
+  resolveTossProduct,
+  TOSS_MANUAL_PRICE_KRW,
+  TOSS_NEWYEAR_PRICE_KRW,
 } from "../iap";
 
 afterEach(() => vi.unstubAllEnvs());
@@ -45,6 +48,47 @@ describe("지급 가능한 상태", () => {
     for (const s of ["ORDER_IN_PROGRESS", "FAILED", "REFUNDED", "NOT_FOUND", "MINIAPP_MISMATCH", "ERROR"] as const) {
       expect(isPaidStatus(s)).toBe(false);
     }
+  });
+});
+
+describe("토스 상품(sku) 판별", () => {
+  it("사용설명서 sku는 premium_report, 신년운세 sku는 new_year_report로 정한다", () => {
+    vi.stubEnv("TOSS_IAP_SKU_MANUAL", "ait.x.manual");
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR", "ait.x.newyear");
+    expect(resolveTossProduct("ait.x.manual")).toEqual({ kind: "manual", productType: "premium_report", amount: TOSS_MANUAL_PRICE_KRW });
+    expect(resolveTossProduct("ait.x.newyear")).toEqual({ kind: "newYear", productType: "new_year_report", amount: TOSS_NEWYEAR_PRICE_KRW });
+  });
+
+  it("등록되지 않은 sku·빈 값은 지급하지 않는다", () => {
+    vi.stubEnv("TOSS_IAP_SKU_MANUAL", "ait.x.manual");
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR", "ait.x.newyear");
+    expect(resolveTossProduct("ait.x.other")).toBeNull();
+    expect(resolveTossProduct("")).toBeNull();
+    expect(resolveTossProduct(undefined)).toBeNull();
+  });
+
+  it("신년운세 환경변수가 없으면 그 상품은 판매되지 않는다(기존 사용설명서는 그대로)", () => {
+    vi.stubEnv("TOSS_IAP_SKU_MANUAL", "ait.x.manual");
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR", "");
+    expect(resolveTossProduct("ait.x.newyear")).toBeNull();
+    expect(resolveTossProduct("ait.x.manual")?.kind).toBe("manual");
+  });
+
+  it("신년운세 금액을 환경변수로 바꿀 수 있고, 잘못된 값은 기본값을 쓴다", () => {
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR", "ait.x.newyear");
+    vi.stubEnv("TOSS_IAP_PRICE_NEWYEAR", "4400");
+    expect(resolveTossProduct("ait.x.newyear")?.amount).toBe(4400);
+    vi.stubEnv("TOSS_IAP_PRICE_NEWYEAR", "abc");
+    expect(resolveTossProduct("ait.x.newyear")?.amount).toBe(TOSS_NEWYEAR_PRICE_KRW);
+    vi.stubEnv("TOSS_IAP_PRICE_NEWYEAR", "-5");
+    expect(resolveTossProduct("ait.x.newyear")?.amount).toBe(TOSS_NEWYEAR_PRICE_KRW);
+  });
+
+  it("사용설명서 sku가 비어 있어도 신년운세 sku와 섞이지 않는다", () => {
+    vi.stubEnv("TOSS_IAP_SKU_MANUAL", "");
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR", "ait.x.newyear");
+    expect(resolveTossProduct("ait.x.newyear")?.kind).toBe("newYear");
+    expect(resolveTossProduct("")).toBeNull();
   });
 });
 

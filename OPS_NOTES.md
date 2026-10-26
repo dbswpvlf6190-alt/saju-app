@@ -433,3 +433,8 @@
 - QR 테스트 로그: 앱 실행·신년운세 구매 시작(product=newYear)·결제창까지 정상, 사장님이 결제창에서 취소(USER_CANCELED). 카드값 부담으로 실결제 테스트는 보류 — **승인·12달 풀이 열림은 미검증.**
 - 순서: 검토 통과 → 3,894원 1회 실결제·환불(iOS·Android, 로그 확인) → 통과 후에만 상품 노출 켜기·출시 → 광고 재개. 노출 켜기 전엔 실사용자 구매 불가. 검토 통과 후 '출시'는 사장님이 직접 누름(자동 출시 아님).
 - 확인 필요: 10/20 테스트 3건(14,685원, 아이폰) 애플 환불 여부(refund_sync.py로 PURCHASED 여부 점검 가능).
+
+## 2026-10-26 (노트북) Vercel 배포 용량 정리 1단계 — 자동화 커밋은 배포 건너뛰기
+- Vercel Hobby 'Functions Storage 11.16/10GB(초과)' 확인(방문자·함수 호출은 한도의 1~7%라 원인이 아님. 배포 사본이 쌓인 것). 자동화 lock/unlock 커밋도 매번 배포되던 것이 주원인으로 추정.
+- `vercel.json`에 `ignoreCommand`(dc06c85): 마지막 성공 배포 대비 `scripts/posted_state`·`scripts/performance`·`cardnews`·`reels`·`OPS_NOTES.md`·`docs` 밖의 변경이 없으면 빌드 건너뜀. 이전 SHA 없음·비교 오류·그 밖 파일 변경이면 배포. **`scripts/migrate-deploy.sh`(빌드가 실행)와 `src`·설정·패키지는 제외 목록에 없어 바뀌면 배포됨.** 자동화 푸시·GitHub 이미지 호스팅(raw.githubusercontent)은 영향 없음.
+- 2단계(대기): 오래된 배포 삭제/보관 기간 설정 — 삭제 대상 확인 후 사장님 승인으로만.

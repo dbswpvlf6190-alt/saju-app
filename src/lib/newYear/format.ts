@@ -33,3 +33,39 @@ export function parseNewYearText(text: string): NewYearBlock[] {
   }
   return blocks;
 }
+
+export interface NewYearSection {
+  heading: string;
+  paras: string[];
+  /** 이 소제목 아래 "N월 — ..." 줄(월별 흐름) */
+  months: { month: number; text: string }[];
+}
+
+/**
+ * 블록을 소제목별로 묶는다(토스 유료 화면용, 2026-10-26). 첫 소제목 앞의 글(v1 글 전체 포함)은 intro로 둔다.
+ * 월별 줄은 어느 소제목 아래 있든 monthLines에도 모아, 달 카드에 한 줄 풀이를 붙일 때 쓴다.
+ */
+export function groupNewYearBlocks(blocks: NewYearBlock[]): {
+  intro: string[];
+  sections: NewYearSection[];
+  monthLines: Record<number, string>;
+} {
+  const intro: string[] = [];
+  const sections: NewYearSection[] = [];
+  const monthLines: Record<number, string> = {};
+  let current: NewYearSection | null = null;
+  for (const b of blocks) {
+    if (b.kind === "heading") {
+      current = { heading: b.text, paras: [], months: [] };
+      sections.push(current);
+    } else if (b.kind === "month") {
+      monthLines[b.month] = b.text;
+      if (current) current.months.push({ month: b.month, text: b.text });
+    } else if (current) {
+      current.paras.push(b.text);
+    } else {
+      intro.push(b.text);
+    }
+  }
+  return { intro, sections, monthLines };
+}

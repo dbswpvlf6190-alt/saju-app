@@ -8,7 +8,10 @@ import { ILGAN_PAGES } from "@saju/ilganPages";
 import { getDailyFortuneDetail } from "@saju/dailyFortune";
 import { currentYearKst, getGoodYears } from "@saju/goodYears";
 import type { WuXing } from "@saju/ganzhi";
-import { CHAPTER_PROMISES, CHAPTER_TITLES, buyManual, iapAvailable, loadManual, recoverPendingOrders, savedPurchaseFor, type Purchase } from "./iap";
+import { CHAPTER_PROMISES, CHAPTER_TITLES, buyManual, buyProduct, iapAvailable, loadManual, recoverPendingOrders, savedPurchaseFor, type Purchase } from "./iap";
+import { NewYearMini, NewYearTeaser } from "./v11/NewYearTeaser";
+import { NewYearScreen } from "./v11/NewYearScreen";
+import { NY_YEAR, getVariant, nyTrack } from "./v11/ny";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
 // (앱인토스 정책: 외부 링크·자사 서비스 이동 유도 금지, SSR 금지). 수익은 인앱 광고(배너)로 — 광고 그룹 ID는
@@ -98,7 +101,7 @@ function toInput(f: Form): SajuInput {
   };
 }
 
-type Screen = "today" | "form" | "result" | "manual";
+type Screen = "today" | "form" | "result" | "manual" | "newyear";
 
 export default function App() {
   // 다시 온 사람(저장된 생일이 있음)은 입력 화면 대신 "오늘의 운세"부터 보여준다 — 매일 열 이유가 첫 화면에서 보여야 재방문이 생긴다.
@@ -132,11 +135,20 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, purchaseTick]);
+  // v11 신년운세 구매 기록(생일별, 사용설명서와 따로 저장).
+  const nyPurchase = useMemo<Purchase | null>(() => {
+    try {
+      return savedPurchaseFor(toInput(form), "newYear");
+    } catch {
+      return null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, purchaseTick]);
 
   // 결제는 됐지만 지급이 끝나지 않은 주문이 있으면 앱을 열 때 이어서 지급한다(앱 종료·네트워크 오류 대비).
   useEffect(() => {
     const f = loadSaved();
-    if (!iapAvailable() || !f || !f.year || !f.month || !f.day || !f.gender) return;
+    if ((!iapAvailable() && !iapAvailable("newYear")) || !f || !f.year || !f.month || !f.day || !f.gender) return;
     let alive = true;
     void recoverPendingOrders(toInput(f)).then((p) => {
       if (alive && p) setPurchaseTick((n) => n + 1);
@@ -195,6 +207,7 @@ export default function App() {
   }
 
   if (screen === "manual" && purchase) return <ManualScreen purchase={purchase} onBack={() => window.history.back()} />;
+  if (screen === "newyear" && nyPurchase && result) return <NewYearScreen purchase={nyPurchase} result={result} onBack={() => window.history.back()} />;
   if (screen === "result" && result)
     return (
       <ResultScreen
@@ -206,11 +219,17 @@ export default function App() {
           go("manual");
         }}
         onOpenManual={() => go("manual")}
+        nyPurchase={nyPurchase}
+        onNyPurchased={() => {
+          setPurchaseTick((n) => n + 1);
+          go("newyear");
+        }}
+        onOpenNy={() => go("newyear")}
         onAddHour={addHour}
         onOther={() => go("form")}
       />
     );
-  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} diag={gate.diag} onOther={() => go("form")} />;
+  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} diag={gate.diag} nyPurchased={!!nyPurchase} onOther={() => go("form")} />;
 
   const set = (patch: Partial<Form>) => {
     if (!formStarted.current) {
@@ -227,7 +246,7 @@ export default function App() {
           생일만 넣으면 30초,
           <br />내 사주 타입
         </h1>
-        <p>태어난 날로 보는 나의 일간 유형·오행·오늘의 운세</p>
+        <p>태어난 날로 보는 나의 일간 유형·오행·오늘의 운세{iapAvailable("newYear") ? `·${NY_YEAR}년 좋은 달` : ""}</p>
       </header>
 
       <SampleCard />
@@ -303,7 +322,7 @@ export default function App() {
 }
 
 /** 다시 온 사람이 처음 보는 화면: 오늘의 운세 + 내 사주 타입 요약. 입력 없이 바로 보이게 한다. */
-function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, onOther }: { result: SajuResult; onFull: () => void; fullLabel: string; fullDisabled: boolean; diag: string; onOther: () => void }) {
+function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, nyPurchased, onOther }: { result: SajuResult; onFull: () => void; fullLabel: string; fullDisabled: boolean; diag: string; nyPurchased: boolean; onOther: () => void }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const daily = useMemo(() => getDailyFortuneDetail(result), [result]);
@@ -335,6 +354,7 @@ function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, onOther }:
           행운의 숫자 {daily.luckyNumber} · 행운의 색 {daily.luckyColor}
         </p>
       </section>
+      {iapAvailable("newYear") && <NewYearMini result={result} purchased={nyPurchased} onGo={() => { nyTrack("ny_mini_click"); onFull(); }} />}
       <PushCard />
 
       <BannerAd />
@@ -615,6 +635,49 @@ function ManualBuyCard({
 }
 
 /** 구매한 사용설명서 화면. 장마다 생성되는 대로 이어 붙여 보여 준다. */
+/** 결과 화면 맨 위의 2027 신년운세 카드 + 구매. 신년운세 상품(SKU)이 없거나 지원하지 않는 토스 버전이면 카드를 그리지 않는다. */
+function NewYearCard({
+  result,
+  form,
+  purchase,
+  onPurchased,
+  onOpen,
+}: {
+  result: SajuResult;
+  form: Form;
+  purchase: Purchase | null;
+  onPurchased: (p: Purchase) => void;
+  onOpen: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const variant = useMemo(() => getVariant(), []);
+  if (!iapAvailable("newYear")) return null;
+
+  function open() {
+    nyTrack("ny_open_click", { variant, purchased: !!purchase });
+    if (purchase) {
+      onOpen();
+      return;
+    }
+    setError(null);
+    setBusy(true);
+    buyProduct("newYear", toInput(form), {
+      onSuccess: (p) => {
+        setBusy(false);
+        nyTrack("ny_purchase", { variant, year: NY_YEAR });
+        onPurchased(p);
+      },
+      onError: (message) => {
+        setBusy(false);
+        setError(message);
+      },
+    });
+  }
+
+  return <NewYearTeaser result={result} variant={variant} purchased={!!purchase} busy={busy} error={error} onOpen={open} />;
+}
+
 function ManualScreen({ purchase, onBack }: { purchase: Purchase; onBack: () => void }) {
   const [chapters, setChapters] = useState<{ key: string; text: string }[]>([]);
   const [progress, setProgress] = useState({ done: 0, total: 6 });
@@ -666,6 +729,9 @@ function ResultScreen({
   purchase,
   onPurchased,
   onOpenManual,
+  nyPurchase,
+  onNyPurchased,
+  onOpenNy,
   onAddHour,
   onOther,
 }: {
@@ -674,6 +740,9 @@ function ResultScreen({
   purchase: Purchase | null;
   onPurchased: (p: Purchase) => void;
   onOpenManual: () => void;
+  nyPurchase: Purchase | null;
+  onNyPurchased: (p: Purchase) => void;
+  onOpenNy: () => void;
   onAddHour: (hour: string) => void;
   onOther: () => void;
 }) {
@@ -713,6 +782,9 @@ function ResultScreen({
           ))}
         </div>
       </section>
+
+      {/* v11: 결과를 열자마자 보이는 자리(광고 보고 결과가 열린 직후 처음 보이는 카드)에 내년 신년운세 */}
+      <NewYearCard result={result} form={form} purchase={nyPurchase} onPurchased={onNyPurchased} onOpen={onOpenNy} />
 
       <section className="card">
         <h2>타고난 성격</h2>

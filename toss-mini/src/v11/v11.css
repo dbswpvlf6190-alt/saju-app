@@ -1,30 +1,94 @@
-/* v11 신년운세 카드 — 토스 손님 50대 이상 77%라 글자를 크게(본문 17px↑), 버튼은 크고 하나만. 라이트 모드 전용. */
-.ny-card { word-break: keep-all; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(170deg, #ffffff 0%, #fff6e6 100%); border: 1px solid #f1dfb8; padding: 22px 20px; }
+/* v11 신년운세 — 토스 손님 50대 이상 77%라 글자를 크게(본문 17px↑), 버튼은 크고 하나만. 라이트 모드 전용. */
+.ny-card, .ny-month, .ny-ai-card, .ny-mini, .ny-status { word-break: keep-all; }
+
+/* ── 결과 화면 맨 위 카드 ─────────────────────────────── */
+.ny-card { display: flex; flex-direction: column; gap: 12px; background: linear-gradient(170deg, #ffffff 0%, #fff6e6 100%); border: 1px solid #f1dfb8; padding: 22px 20px; }
 .ny-eyebrow { font-size: 15px; font-weight: 700; color: var(--gold); }
 .ny-card .ny-head { margin: 0; font-size: 26px; line-height: 1.4; font-weight: 800; color: var(--text); }
 .ny-card .ny-head em { font-style: normal; color: #b0701a; }
 .ny-line { margin: 0; font-size: 18px; line-height: 1.65; }
-.ny-cta { font-size: 19px; padding: 18px; }
-.ny-trust { margin: -2px 0 0; text-align: center; font-size: 15px; line-height: 1.6; color: var(--text); }
-.ny-trust b { color: #b0701a; }
+.ny-card p.ny-line { font-size: 18px; }
+
+/* 먼저 보여 주는 진짜 날짜(결제 전 후킹 구간) */
+.ny-reveal { background: #fff; border: 2px solid #f0b043; border-radius: 16px; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 10px rgba(208, 138, 18, 0.12); }
+.ny-reveal-kicker { font-size: 15px; font-weight: 800; color: #b0701a; }
+.ny-reveal-month { font-size: 26px; font-weight: 800; line-height: 1.35; }
+.ny-reveal-month span { display: block; font-size: 18px; font-weight: 700; color: #b0701a; margin-top: 2px; }
+.ny-days { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; }
+.ny-day { border-radius: 12px; padding: 10px 6px; text-align: center; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; min-height: 66px; }
+.ny-day small { font-size: 12px; font-weight: 700; }
+.ny-day b { font-size: 17px; line-height: 1.3; white-space: nowrap; }
+.ny-day.free { background: #fff1d6; border: 1px solid #f0b043; grid-column: span 1; }
+.ny-day.free small { color: #b0701a; }
+.ny-day.locked { background: #f3f4f6; border: 1px dashed #c9ced6; color: var(--muted); }
+.ny-day.locked b { font-size: 20px; }
+.ny-reveal-note { margin: 0; font-size: 16px; line-height: 1.55; color: var(--text); }
+.ny-card p.ny-reveal-note { font-size: 16px; }
+.ny-card p.ny-tip { margin: 0; font-size: 18px; line-height: 1.6; font-weight: 700; color: var(--text); background: #fff8ea; border-radius: 10px; padding: 10px 12px; }
+
+/* 열두 달 그래프 */
 .ny-flow { background: #fff; border: 1px solid #f1dfb8; border-radius: 14px; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 10px; }
 .ny-flow-title { font-size: 17px; font-weight: 800; }
-.ny-bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; height: 140px; align-items: end; }
-.ny-bar > .ny-fill { flex: 0 0 auto; }
+.ny-bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; height: 130px; align-items: end; }
 .ny-bar { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; }
 .ny-star { font-size: 13px; color: #d08a12; height: 16px; line-height: 16px; }
+.ny-track { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
 .ny-fill { width: 100%; max-width: 20px; border-radius: 5px 5px 2px 2px; background: #e8dcc2; min-height: 8px; }
 .ny-bar.best .ny-fill { background: linear-gradient(180deg, #f0b043, #d08a12); }
 .ny-mon { font-size: 13px; font-weight: 700; color: var(--muted); }
 .ny-bar.best .ny-mon { color: #b0701a; }
-.ny-best { margin: 0; font-size: 18px; line-height: 1.5; }
-.ny-best b { color: #b0701a; }
-.ny-locked { border-radius: 14px; background: #fff; border: 1px dashed #e8d3a6; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-.ny-locked-head { font-size: 18px; font-weight: 800; }
-.ny-locked-rows { display: flex; flex-direction: column; gap: 8px; }
-.ny-locked-rows > div { display: flex; gap: 10px; align-items: baseline; font-size: 16px; }
-.ny-locked-rows .k { flex: 0 0 74px; font-weight: 700; color: var(--muted); }
-.ny-locked-rows .blur { filter: blur(5px); user-select: none; color: var(--text); }
-.ny-lock-note { font-size: 16px; font-weight: 700; line-height: 1.5; color: var(--text); }
-.ny-track { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
-.ny-ai { font-size: 12px; color: #9aa3ad; margin-left: 2px; }
+.ny-card p.ny-best, .ny-card p.ny-money { margin: 0; font-size: 18px; line-height: 1.5; }
+.ny-best b, .ny-money b { color: #b0701a; }
+
+/* 받는 것을 숫자로 */
+.ny-gets { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ny-gets li { background: #fff; border: 1px solid #f1dfb8; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.ny-gets li b { font-size: 18px; color: var(--text); }
+.ny-gets li span { font-size: 15px; color: var(--muted); line-height: 1.45; }
+
+.ny-cta { font-size: 19px; padding: 18px; }
+.ny-trust { margin: -2px 0 0; text-align: center; font-size: 15px; line-height: 1.6; color: var(--text); }
+.ny-card p.ny-trust { font-size: 15px; }
+.ny-trust b { color: #b0701a; }
+.ny-ai { font-size: 12px; color: #8a929c; margin-left: 2px; }
+.ny-error { margin: 0; text-align: center; font-size: 15px; color: #e3543f; line-height: 1.5; }
+.ny-card p.ny-error { font-size: 15px; }
+
+/* ── 오늘의 운세 화면의 작은 카드 ───────────────────── */
+.ny-mini { background: linear-gradient(170deg, #ffffff 0%, #fff6e6 100%); border: 1px solid #f1dfb8; display: flex; flex-direction: column; gap: 8px; padding: 18px; }
+.ny-mini p.ny-mini-line { margin: 0; font-size: 17px; line-height: 1.6; }
+.ny-mini-line b { color: #b0701a; }
+.ny-mini-btn { width: 100%; padding: 15px; border: 0; border-radius: 14px; background: #f0b043; color: #3a2605; font-size: 17px; font-weight: 800; }
+
+/* ── 산 사람이 보는 신년운세 화면 ─────────────────────── */
+.ny-status { background: #fff6e6; border: 1px solid #f1dfb8; border-radius: 14px; padding: 12px 14px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; font-size: 15px; line-height: 1.5; }
+.ny-dots { display: inline-flex; gap: 4px; }
+.ny-dots i { width: 8px; height: 8px; border-radius: 50%; background: #d08a12; animation: nyDot 1.1s infinite ease-in-out; }
+.ny-dots i:nth-child(2) { animation-delay: 0.15s; }
+.ny-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes nyDot { 0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1.1); } }
+.ny-link { background: none; border: 0; color: #b0701a; font-size: 15px; font-weight: 800; text-decoration: underline; padding: 4px 2px; }
+
+.ny-month { padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+.ny-month.best { border: 2px solid #f0b043; background: linear-gradient(170deg, #ffffff 0%, #fff9ee 100%); }
+.ny-month-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.ny-m-no { font-size: 24px; font-weight: 800; }
+.ny-m-title { font-size: 18px; font-weight: 800; color: #b0701a; }
+.ny-m-star { font-size: 13px; font-weight: 800; color: #fff; background: #d08a12; border-radius: 999px; padding: 3px 9px; }
+.ny-card p.ny-m-note, .ny-month p.ny-m-note { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.ny-m-rows { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.ny-m-rows > div { display: flex; gap: 10px; align-items: baseline; }
+.ny-m-rows dt { flex: 0 0 74px; font-size: 15px; font-weight: 800; color: var(--muted); }
+.ny-m-rows dd { margin: 0; font-size: 17px; line-height: 1.6; flex: 1; }
+.ny-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ny-chip { background: #fff1d6; border: 1px solid #f0b043; border-radius: 999px; padding: 5px 11px; font-size: 16px; font-weight: 800; }
+.ny-none { font-size: 16px; color: var(--muted); }
+.ny-month p.ny-m-ai { margin: 0; padding-top: 10px; border-top: 1px dashed #e8d3a6; font-size: 17px; line-height: 1.6; min-height: 52px; }
+.ny-month p.ny-m-ai.pending { color: var(--muted); font-size: 15px; }
+.ny-month p.ny-m-ai:empty { display: none; }
+.ny-ai-card h2 { font-size: 20px; color: #b0701a; }
+.ny-ai-card p { font-size: 17px; line-height: 1.75; }
+.ny-ai-card p + p { margin-top: 10px; }
+.ny-wait h2 { font-size: 18px; }
+.ny-wait p { font-size: 16px; }
+.ny-ai-anchor { height: 1px; }

@@ -8,6 +8,7 @@ import { getPremiumReport, getNewYearReport, getReportLayout } from "@/lib/repor
 import { MANUAL_CHAPTER_META } from "@/lib/reports/manualChapters";
 import { PRODUCT_CATALOG, type ProductType } from "@/lib/payment/config";
 import { PillarCard } from "@/components/saju/PillarCard";
+import { NewYearReportText } from "@/components/saju/NewYearReportText";
 import { WuxingBar } from "@/components/saju/WuxingBar";
 import { WuxingMascot } from "@/components/saju/WuxingMascot";
 
@@ -51,9 +52,13 @@ export default async function MyReportPage({ params }: { params: Promise<{ payme
         <ReportHeader productName={productName} free={free} result={result} />
         <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
           <h3 className="text-sm font-medium text-foreground-muted">{productName}</h3>
-          <p className="whitespace-pre-line leading-relaxed text-foreground">
-            {text ?? "리포트를 준비 중이에요. 잠시 후 다시 확인해 주세요."}
-          </p>
+          {text ? (
+            <NewYearReportText text={text} />
+          ) : (
+            <p className="whitespace-pre-line leading-relaxed text-foreground">
+              리포트를 준비 중이에요. 잠시 후 다시 확인해 주세요.
+            </p>
+          )}
         </div>
       </div>
     );

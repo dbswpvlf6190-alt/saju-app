@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { verifyOrderAccessToken } from "@/lib/payment/orderAccess";
-import { getPremiumReport, getReportLayout, type ReportSectionKey } from "@/lib/reports/generate";
+import { getNewYearReport, getPremiumReport, getReportLayout, type ReportSectionKey } from "@/lib/reports/generate";
 import { isManualChapterKey } from "@/lib/reports/manualChapters";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { corsHeaders } from "@/lib/toss/iap";
@@ -42,6 +42,15 @@ export async function GET(req: NextRequest) {
     const order = await prisma.order.findUnique({ where: { paymentId } });
     if (!order) return withCors(req, NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 }));
     if (order.status !== "PAID") return withCors(req, NextResponse.json({ status: order.status }));
+
+    // 2027 신년운세: 한 편짜리라 장 목록 없이 키 하나(newYear)만 있다. 웹과 같은 생성·캐시 함수를 쓴다.
+    if (order.productType === "new_year_report") {
+      if (req.nextUrl.searchParams.get("layout")) {
+        return withCors(req, NextResponse.json({ status: "PAID", layout: "newYear", keys: ["newYear"] }));
+      }
+      const res = await getNewYearReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+      return withCors(req, res as NextResponse);
+    }
 
     const cached = (order.aiResultJson ? JSON.parse(order.aiResultJson) : {}) as Record<string, string>;
     const layout = getReportLayout(cached, order.productType);

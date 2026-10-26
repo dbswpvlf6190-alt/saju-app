@@ -416,3 +416,8 @@
 - `toss-v11`을 `work/toss-v11`로 푸시함(f67aed0, 배포 0건 확인). 미니앱+웹 /new-year 포함 전체본.
 - **서버만 먼저 내는 브랜치**: worktree `C:\saju-app-release` = 로컬 브랜치 `work/toss-server-release`(db1db6f, main 기준 21파일). 토스 grant/report SKU 매핑·신년운세 계산·프롬프트 v3·/my/report 표시만 포함. **웹 /new-year 화면·사이트맵·푸터 표기는 제외**(웹 결제 미검증이라 공개 금지). 테스트 137개·tsc·eslint 통과. 아직 main 병합·푸시·배포 안 함(사장님 승인 대기).
 - 출시 순서: 이 브랜치 main 병합·배포 → Vercel `TOSS_IAP_SKU_NEWYEAR` 설정 → 기존 결제 확인 → 미니앱 빌드(`VITE_IAP_SKU_NEWYEAR`) → 콘솔 새 버전·QR 실결제(iOS·Android).
+
+## 2026-10-26 (노트북) 토스 v11 서버 배포 + 미니앱 번들 빌드 완료
+- 서버 선배포 main 병합·푸시(ba1435d) → Vercel 배포 success. 확인: `/`·`/terms` 200, 웹 `/new-year` 404(비공개 유지), 사이트맵에 new-year 없음, `/api/toss/iap/grant` 빈 요청 400.
+- 미니앱 v11 번들: `C:\saju-app-toss\toss-mini\sajulab-app.ait`(deploymentId 01a1772a-56ef-7dfd-b3ae-41382ff9633a, 브랜치 toss-v11), `.env.production`에 `VITE_IAP_SKU_NEWYEAR` 추가(git 제외). 이전 v10 번들은 `C:\saju-secrets\sajulab-app.v10-backup.ait`.
+- **남은 사장님 작업**: ① Vercel `TOSS_IAP_SKU_NEWYEAR` 설정 후 재배포 ② 콘솔에 .ait 새 버전 업로드 ③ QR 실결제 iOS·Android(환불) ④ 검토 요청 ⑤ 상품 노출 켜기. 상품 노출은 아직 꺼짐 — 지금 사용자 영향 없음.

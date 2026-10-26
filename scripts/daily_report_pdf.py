@@ -37,7 +37,22 @@ from fetch_insights import neon_query  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KST = timezone(timedelta(hours=9))
-DESKTOP = os.path.join(os.path.expanduser("~"), "Desktop")
+
+
+def _desktop_dir() -> str:
+    """윈도우가 아는 진짜 바탕 화면. OneDrive가 바탕 화면을 가져간 컴퓨터(노트북)는 ~/Desktop이 아니라
+    OneDrive\\바탕 화면이라, ~/Desktop으로 고정하면 사장님 눈에 안 보이는 새 폴더에 PDF가 만들어진다."""
+    try:
+        import ctypes
+        buf = ctypes.create_unicode_buffer(260)
+        if ctypes.windll.shell32.SHGetFolderPathW(None, 0x0010, None, 0, buf) == 0 and buf.value:  # CSIDL_DESKTOPDIRECTORY
+            return buf.value
+    except Exception:
+        pass
+    return os.path.join(os.path.expanduser("~"), "Desktop")
+
+
+DESKTOP = _desktop_dir()
 OUT_DIR = os.path.join(DESKTOP, "사주랩_일일보고")
 LATEST = os.path.join(DESKTOP, "오늘의_사주랩_보고.pdf")
 NOTES = os.path.join(BASE_DIR, "scripts", "report_notes.json")

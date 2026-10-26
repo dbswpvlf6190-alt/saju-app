@@ -4,8 +4,26 @@
     {
       "name": "saju-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "toss-mini",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "toss-mini",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
+      "port": 5173
     }
   ]
 }

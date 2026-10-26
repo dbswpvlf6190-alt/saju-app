@@ -209,7 +209,9 @@ def collect_global():
                 posts.append({"views": m.get("views") or 0, "replies": m.get("replies") or 0})
             accounts[loc] = {"followers": acc.get("followers") or 0, "posts": len(posts),
                              "views": sum(p["views"] for p in posts), "replies": sum(p["replies"] for p in posts)}
-        except Exception as e:
+        except (Exception, SystemExit) as e:
+            # get_token()은 토큰 파일이 없으면 SystemExit로 끝난다. 해외판 토큰은 데스크톱에만 있어서 다른 컴퓨터에서는
+            # 이 칸만 "토큰 오류"로 두고 보고서 전체는 만들어야 한다(docs/SYNC_CHECKLIST.md 3번).
             accounts[loc] = {"error": str(e)[:80]}
         finally:
             threads_api.TOKEN_PATH, threads_api.TOKEN_TXT_PATH = saved

@@ -15,6 +15,11 @@
         "text":  "Ever seen a K-drama character visit a fortune teller before a wedding or a big move?\n\nThat\u0027s Saju 🇰🇷 Korea\u0027s traditional birth chart reading.\n\nWant to know what yours says? 👇"
     },
     {
+        "ref":  "th_en_bday",
+        "id":  "EN08-birthday-strength",
+        "text":  "Drop your birthday (YYYY/MM/DD) 👇\nI\u0027ll tell you your Korean Day Master + your hidden strength in one line.\nFirst 30 replies 🌙"
+    },
+    {
         "id":  "EN04-starter-xin",
         "ref":  "th_en_starter",
         "text":  "Day Master starter pack 💎 Xin (The Jewel)\n\n· notices every typo\n· says \"I\u0027m fine\" (not fine)\n· has a 10-step skincare routine\n\nWhich type should I do next?"
@@ -33,11 +38,6 @@
         "id":  "EN07-vs",
         "ref":  "th_en_vs",
         "text":  "Western astrology: your sun sign.\nKorean Saju: your Day Master + your 5-element balance.\n\nSame birthday, way more detail.\nTry it free 👇"
-    },
-    {
-        "ref":  "th_en_bday",
-        "id":  "EN08-birthday-strength",
-        "text":  "Drop your birthday (YYYY/MM/DD) 👇\nI\u0027ll tell you your Korean Day Master + your hidden strength in one line.\nFirst 30 replies 🌙"
     },
     {
         "ref":  "th_en_starter",

@@ -11,6 +11,13 @@ export const GLOBAL_CURRENCY: Record<GlobalLocale, GlobalCurrency> = { en: "USD"
 /** 포트원 브라우저 SDK 타입 설명(totalAmount)에 "USD는 100배(센트), JPY는 1배"로 명시돼 있어 센트가 맞다. 그래도 테스트 채널에서 한 번 확인한 뒤에 실결제를 연다. */
 export const USD_AMOUNT_IS_CENTS = true;
 
+/** 주문 통화로 해외판 언어를 알아낸다(원화 주문은 null = 한국어). 리포트를 어느 언어로 쓸지 정하는 기준이다. */
+export function localeForCurrency(currency: string | null | undefined): GlobalLocale | null {
+  if (currency === "USD") return "en";
+  if (currency === "JPY") return "ja";
+  return null;
+}
+
 export function isGlobalLocale(value: unknown): value is GlobalLocale {
   return value === "en" || value === "ja";
 }

@@ -148,16 +148,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const accessToken = await signOrderAccessToken(order.paymentId);
     const response = NextResponse.json({
       paymentId: order.paymentId,
       amount: order.amount,
       currency: order.currency,
       orderName: product.name,
+      // 해외 구매자가 쿠키 없이 리포트를 다시 열 수 있는 "내 리포트 링크"용 키(카카오 로그인이 없다). 국내 주문에는 내려주지 않는다.
+      ...(currency !== "KRW" ? { accessKey: accessToken } : {}),
     });
 
     // 이 주문을 실제로 생성한 브라우저만 나중에 리포트를 조회할 수 있도록, paymentId와
     // 묶인 서명 토큰을 httpOnly 쿠키로 심어둔다(GET /api/orders/[paymentId]에서 검증).
-    response.cookies.set(orderAccessCookieName(order.paymentId), await signOrderAccessToken(order.paymentId), {
+    response.cookies.set(orderAccessCookieName(order.paymentId), accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

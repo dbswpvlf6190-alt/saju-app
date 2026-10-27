@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { resultToInput, type SajuResult } from "@/lib/saju/types";
 import { GLOBAL_PRODUCT_CATALOG } from "@/lib/payment/config";
 import { GLOBAL_CURRENCY, formatMoney } from "@/lib/payment/money";
-import { MANUAL_CHAPTER_KEYS, type ManualChapterKey } from "@/lib/reports/manualChapters";
+import { MANUAL_CHAPTER_KEYS } from "@/lib/reports/manualChapters";
+import { GlobalReportView } from "./GlobalReportView";
 import { GLOBAL_PAY_COPY } from "@/lib/global/payCopy";
 import type { GlobalLocale } from "@/lib/global/dayMasters";
 import { trackEvent } from "@/lib/analytics/track";
@@ -26,24 +27,7 @@ export function GlobalPremiumUnlock({ locale, result }: { locale: GlobalLocale; 
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
-  const [chapters, setChapters] = useState<Record<string, string>>({});
-  const [failed, setFailed] = useState<string[]>([]);
-
-  const fetchChapter = useCallback(async (id: string, key: ManualChapterKey) => {
-    const res = await fetch(`/api/orders/${encodeURIComponent(id)}?section=${key}`);
-    const data = await res.json();
-    if (!data.sections?.[key]) throw new Error("chapter");
-    setChapters((prev) => ({ ...prev, [key]: data.sections[key] }));
-  }, []);
-
-  const loadChapters = useCallback(
-    async (id: string, keys: ManualChapterKey[]) => {
-      setFailed([]);
-      const settled = await Promise.allSettled(keys.map((k) => fetchChapter(id, k)));
-      setFailed(keys.filter((_, i) => settled[i].status === "rejected"));
-    },
-    [fetchChapter],
-  );
+  const [accessKey, setAccessKey] = useState<string | null>(null);
 
   async function finalize(id: string) {
     setStep("verifying");
@@ -52,7 +36,6 @@ export function GlobalPremiumUnlock({ locale, result }: { locale: GlobalLocale; 
       if (!res.ok) throw new Error("verify");
       trackEvent("payment_success", { productType: PRODUCT });
       setStep("report");
-      await loadChapters(id, MANUAL_CHAPTER_KEYS);
     } catch {
       setError(`${t.verifyFailed} ${t.chargedNote}`);
       setStep("error");
@@ -82,6 +65,7 @@ export function GlobalPremiumUnlock({ locale, result }: { locale: GlobalLocale; 
       const order = await orderRes.json();
       if (!orderRes.ok) throw new Error("order");
       setPaymentId(order.paymentId);
+      setAccessKey(order.accessKey ?? null);
       setStep("pay");
 
       // PayPal 버튼이 그려질 칸(.portone-ui-container)이 화면에 생긴 다음에 SDK를 부른다.
@@ -112,41 +96,8 @@ export function GlobalPremiumUnlock({ locale, result }: { locale: GlobalLocale; 
     }
   }
 
-  if (step === "report" || (step === "error" && paymentId && Object.keys(chapters).length > 0)) {
-    return (
-      <section className="flex flex-col gap-3">
-        <h3 className="px-1 text-sm font-medium text-foreground-muted">{t.reportTitle}</h3>
-        {MANUAL_CHAPTER_KEYS.map((key) => {
-          const text = chapters[key];
-          return (
-            <div key={key} className="rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-              <h4 className="font-medium text-accent-gold-soft">{t.chapters[key].title}</h4>
-              {text ? (
-                <p className="mt-2 whitespace-pre-line leading-relaxed text-foreground">{text}</p>
-              ) : failed.includes(key) ? (
-                <p className="mt-2 text-sm text-foreground-muted">{t.chapterFailed}</p>
-              ) : (
-                <div className="mt-2 flex flex-col gap-2" aria-label={t.chapterLoading}>
-                  <p className="text-sm text-foreground-muted">{t.chapterLoading}</p>
-                  <div className="h-3 w-full animate-pulse rounded bg-background-elevated" />
-                  <div className="h-3 w-5/6 animate-pulse rounded bg-background-elevated" />
-                </div>
-              )}
-            </div>
-          );
-        })}
-        {failed.length > 0 && paymentId && (
-          <button
-            type="button"
-            onClick={() => void loadChapters(paymentId, failed as ManualChapterKey[])}
-            className="min-h-12 rounded-xl border border-accent-gold px-4 py-3 text-sm font-semibold text-accent-gold-soft"
-          >
-            {t.retry}
-          </button>
-        )}
-        <p className="px-1 text-xs leading-relaxed text-foreground-muted">{t.accessNote}</p>
-      </section>
-    );
+  if (step === "report" && paymentId) {
+    return <GlobalReportView locale={locale} paymentId={paymentId} accessKey={accessKey} />;
   }
 
   return (

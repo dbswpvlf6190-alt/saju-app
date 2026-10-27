@@ -10,7 +10,8 @@ import {
   getReportLayout,
   type ReportSectionKey,
 } from "@/lib/reports/generate";
-import { isManualChapterKey } from "@/lib/reports/manualChapters";
+import { MANUAL_CHAPTER_KEYS, isManualChapterKey } from "@/lib/reports/manualChapters";
+import { localeForCurrency } from "@/lib/payment/money";
 
 // 리포트 한 장 생성에 20~45초(재시도 포함) 걸린다. 기본 제한이 짧으면 생성이 중간에 끊겨 '준비 중'으로 남는다 (모든 요금제 공통 상한 60초).
 export const maxDuration = 60;
@@ -37,7 +38,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ paym
 
     // paymentId는 URL·브라우저 히스토리로 노출될 수 있어, 이것만으로는 리포트를 열람할 수
     // 없게 한다. 주문을 생성한 바로 그 브라우저에만 심어둔 서명 쿠키를 확인한다.
-    const accessToken = req.cookies.get(orderAccessCookieName(paymentId))?.value;
+    // 해외판 구매자는 카카오 로그인이 없어 쿠키(24시간)만으로는 다시 열 수 없다. 해외 주문에 한해 "내 리포트 링크"의 ?k= 토큰도 같은 서명 토큰으로 인정한다.
+    const locale = localeForCurrency(order.currency);
+    const accessToken = req.cookies.get(orderAccessCookieName(paymentId))?.value ?? (locale ? req.nextUrl.searchParams.get("k") : null);
     if (!(await verifyOrderAccessToken(paymentId, accessToken))) {
       return NextResponse.json({ error: "이 리포트에 접근할 권한이 없습니다." }, { status: 403 });
     }
@@ -72,7 +75,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ paym
     // premium_report / section_upgrade. 기존 결제 고객은 결제 당시 방식(주제 5개), 새 주문은 6장 "나 사용설명서"다.
     // 클라이언트는 ?layout=1로 어떤 키를 요청해야 하는지 먼저 묻고, 그 키만 ?section=으로 요청할 수 있다.
     const cached = (order.aiResultJson ? JSON.parse(order.aiResultJson) : {}) as Record<string, string>;
-    const layout = getReportLayout(cached, order.productType);
+    const layout = locale ? { layout: "manual" as const, keys: MANUAL_CHAPTER_KEYS } : getReportLayout(cached, order.productType);
     if (req.nextUrl.searchParams.get("layout")) {
       return NextResponse.json({ status: "PAID", layout: layout.layout, keys: layout.keys });
     }
@@ -81,7 +84,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ paym
       return NextResponse.json({ status: "PAID", error: "이 주문에서 열 수 없는 항목입니다." }, { status: 403 });
     }
     const sectionKeys: ReportSectionKey[] = requested ? [requested] : layout.keys;
-    return await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, sectionKeys, order.productType);
+    return await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, sectionKeys, order.productType, locale);
   } catch (e) {
     console.error(`리포트 조회 중 예상하지 못한 오류 (paymentId=${paymentId}):`, e);
     return NextResponse.json({ error: "리포트를 불러오지 못했습니다." }, { status: 500 });

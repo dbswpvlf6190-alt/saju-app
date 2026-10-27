@@ -10,7 +10,9 @@ import { prisma } from "@/lib/db/prisma";
 import { AiInterpretationError, interpretNewYearFortune, interpretSajuSection } from "@/lib/ai/interpretSaju";
 import { interpretCompatibilitySection } from "@/lib/ai/interpretCompatibility";
 import { interpretManualChapter } from "@/lib/ai/interpretManual";
-import { isManualChapterKey } from "@/lib/reports/manualChapters";
+import { interpretGlobalManualChapter } from "@/lib/ai/interpretManualGlobal";
+import type { GlobalLocale } from "@/lib/payment/money";
+import { MANUAL_CHAPTER_KEYS, isManualChapterKey } from "@/lib/reports/manualChapters";
 import { NEW_YEAR_REPORT_TARGET_YEAR } from "@/lib/payment/config";
 
 /**
@@ -43,9 +45,11 @@ export async function getPremiumReport(
   aiResultJson: string | null,
   requestedKeys?: ReportSectionKey[],
   productType: string = "premium_report",
+  // 해외판 주문(USD·JPY)이면 그 언어. 있으면 항상 6장 방식이고 글도 그 언어로 쓴다.
+  locale: GlobalLocale | null = null,
 ) {
   const cached = (aiResultJson ? JSON.parse(aiResultJson) : {}) as Record<string, string>;
-  const sectionKeys: ReportSectionKey[] = requestedKeys ?? getReportLayout(cached, productType).keys;
+  const sectionKeys: ReportSectionKey[] = requestedKeys ?? (locale ? MANUAL_CHAPTER_KEYS : getReportLayout(cached, productType).keys);
   const missingKeys = sectionKeys.filter((key) => !cached[key]);
   if (missingKeys.length === 0) {
     const sections = Object.fromEntries(sectionKeys.map((key) => [key, cached[key]]));
@@ -64,7 +68,14 @@ export async function getPremiumReport(
   const settled = await Promise.allSettled(
     missingKeys.map(
       async (key) =>
-        [key, isManualChapterKey(key) ? await interpretManualChapter(result, key) : await interpretSajuSection(result, key)] as const,
+        [
+          key,
+          locale && isManualChapterKey(key)
+            ? await interpretGlobalManualChapter(result, key, locale)
+            : isManualChapterKey(key)
+              ? await interpretManualChapter(result, key)
+              : await interpretSajuSection(result, key),
+        ] as const,
     ),
   );
   const response = await finalizeSections(paymentId, cached, settled, sectionKeys);

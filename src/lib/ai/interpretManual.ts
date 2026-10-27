@@ -67,7 +67,7 @@ const SYSTEM_PROMPT = `당신은 사주명리를 쉬운 말로 풀어 쓰는 해
 const BANNED = ["반드시", "100%", "무조건", "소화기", "신장", "질병", "질환", "수술", "병원", "건강이", "건강을"];
 
 let cachedClient: Anthropic | null = null;
-function getClient(): Anthropic {
+export function getClient(): Anthropic {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new AiInterpretationError("ANTHROPIC_API_KEY 환경변수가 설정되지 않아 AI 해석을 생성할 수 없습니다.");

@@ -24,7 +24,11 @@ export interface GlobalPayCopy {
   chapterLoading: string;
   chapterFailed: string;
   retry: string;
-  accessNote: string;
+  linkTitle: string;
+  linkNote: string;
+  copy: string;
+  copied: string;
+  invalidLink: string;
   chapters: Record<ManualChapterKey, { title: string; promise: string }>;
 }
 
@@ -50,7 +54,11 @@ export const GLOBAL_PAY_COPY: Record<GlobalLocale, GlobalPayCopy> = {
     chapterLoading: "この章を書いています…",
     chapterFailed: "読み込めませんでした。",
     retry: "もう一度読み込む",
-    accessNote: "このページを閉じるとレポートを開き直せない場合があります。必要な内容はスクリーンショットなどで保存してください。",
+    linkTitle: "あなたのレポートのリンク",
+    linkNote: "このリンクがあれば、あとからもう一度レポートを開けます。ブックマークするか、自分宛てに送って保存してください。リンクを知っている人は誰でも読めるため、他の人に共有しないでください。",
+    copy: "リンクをコピー",
+    copied: "コピーしました",
+    invalidLink: "このリンクは無効です。お支払い後に表示されたリンクをご確認ください。",
     chapters: {
       overview: { title: "基本の設計図", promise: "生まれ持った設計と、いま気になることへの答えがわかります" },
       patterns: { title: "繰り返してしまう選択", promise: "なぜ同じ選択をしてしまうのか、そのコストと変え方がわかります" },
@@ -81,7 +89,11 @@ export const GLOBAL_PAY_COPY: Record<GlobalLocale, GlobalPayCopy> = {
     chapterLoading: "Writing this chapter…",
     chapterFailed: "This chapter didn't load.",
     retry: "Try again",
-    accessNote: "You may not be able to reopen this report after closing the page. Please save what you need, for example as screenshots.",
+    linkTitle: "Your personal report link",
+    linkNote: "Use this link to reopen your report later. Bookmark it or send it to yourself. Anyone who has the link can read the report, so please don't share it.",
+    copy: "Copy link",
+    copied: "Copied",
+    invalidLink: "This link isn't valid. Please check the link shown after your payment.",
     chapters: {
       overview: { title: "Your core blueprint", promise: "Understand your built-in design, plus an answer to what's on your mind" },
       patterns: { title: "Choices you keep repeating", promise: "See why you repeat them, what they cost, and how to try something different" },

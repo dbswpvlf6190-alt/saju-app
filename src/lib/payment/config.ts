@@ -49,8 +49,9 @@ export function isProductType(value: unknown): value is ProductType {
 // 포트원 + PayPal 실운영 채널이 열리고 테스트 결제를 마치기 전에는 false로 둔다. false인 동안은 해외 주문이 서버에서 거부된다.
 export const GLOBAL_PAYMENTS_ENABLED = false;
 
-/** 해외판에서 파는 상품(국내와 같은 구성). 개별 항목(single_section)은 PayPal 소액결제 요율 적용이 확인될 때 추가한다. */
-export const GLOBAL_PRODUCT_TYPES = ["premium_report", "compatibility_report", "new_year_report"] as const;
+/** 해외판에서 파는 상품. 지금은 6장 "사용설명서"만 영어·일본어 화면·AI 생성이 끝나 있다. 나머지는 같은 방식으로 추가한다
+ * (가격 제안: 궁합 $3.99/¥580, 신년운세 $2.99/¥480, 개별 항목은 PayPal 소액결제 요율 적용이 확인될 때). */
+export const GLOBAL_PRODUCT_TYPES = ["premium_report"] as const;
 export type GlobalProductType = (typeof GLOBAL_PRODUCT_TYPES)[number];
 
 // 가격 제안(10/27, 환율 $1≈1,424원·100엔≈888원 기준 어림값 — 확정 전). amount는 PortOne 단위(money.ts 참고).
@@ -59,14 +60,6 @@ export const GLOBAL_PRODUCT_CATALOG: Record<GlobalProductType, Record<GlobalLoca
   premium_report: {
     en: { amount: usdToAmount(3.99), name: "Saju Full Report" },
     ja: { amount: 580, name: "四柱推命 詳細レポート" },
-  },
-  compatibility_report: {
-    en: { amount: usdToAmount(3.99), name: "Saju Compatibility Report" },
-    ja: { amount: 580, name: "四柱推命 相性レポート" },
-  },
-  new_year_report: {
-    en: { amount: usdToAmount(2.99), name: `${NEW_YEAR_REPORT_TARGET_YEAR} Saju New Year Forecast` },
-    ja: { amount: 480, name: `${NEW_YEAR_REPORT_TARGET_YEAR}年 四柱推命 年運レポート` },
   },
 };
 

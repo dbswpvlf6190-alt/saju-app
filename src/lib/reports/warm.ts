@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { localeForCurrency } from "@/lib/payment/money";
 import type { PremiumSectionKey } from "@/lib/saju";
 import { PREMIUM_SECTION_KEYS, getCompatibilityReport, getNewYearReport, getPremiumReport } from "./generate";
 
@@ -27,7 +28,14 @@ export async function warmReportCache(order: OrderRow): Promise<void> {
         await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, [order.sectionKey as PremiumSectionKey]);
       }
     } else {
-      await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, undefined, order.productType);
+      await getPremiumReport(
+        order.paymentId,
+        order.birthInputJson,
+        order.aiResultJson,
+        undefined,
+        order.productType,
+        localeForCurrency(order.currency),
+      );
     }
   } catch (e) {
     console.error(`리포트 웜업 생성 중 오류 (paymentId=${order.paymentId}):`, e);

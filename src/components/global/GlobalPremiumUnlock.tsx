@@ -127,8 +127,16 @@ export function GlobalPremiumUnlock({ locale, result }: { locale: GlobalLocale; 
           <label className="flex items-start gap-2 text-xs leading-relaxed text-foreground-muted">
             <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5" />
             <span>
-              {t.consent} {t.refundNote}{" "}
-              <Link href="/refund" className="underline underline-offset-2">
+              {t.consent} {t.refundNote} {t.agreeLinks}{" "}
+              <Link href={`/${locale}/terms`} className="underline underline-offset-2">
+                {t.termsLink}
+              </Link>
+              {" · "}
+              <Link href={`/${locale}/privacy`} className="underline underline-offset-2">
+                {t.privacyLink}
+              </Link>
+              {" · "}
+              <Link href={`/${locale}/refund`} className="underline underline-offset-2">
                 {t.refundLink}
               </Link>
             </span>

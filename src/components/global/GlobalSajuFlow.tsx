@@ -16,6 +16,7 @@ import {
   type GlobalLocale,
 } from "@/lib/global/dayMasters";
 import { GLOBAL_MESSAGES } from "@/lib/global/messages";
+import { GLOBAL_LEGAL } from "@/lib/global/legalCopy";
 import { GLOBAL_PAYMENTS_ENABLED } from "@/lib/payment/config";
 import { GlobalPremiumUnlock } from "./GlobalPremiumUnlock";
 
@@ -186,7 +187,7 @@ export function GlobalSajuFlow({ locale }: { locale: GlobalLocale }) {
           >
             {submitting ? t.loading : t.submit}
           </button>
-          <p className="text-center text-xs text-foreground-muted">{t.privacyNote}</p>
+          <p className="text-center text-xs text-foreground-muted">{GLOBAL_PAYMENTS_ENABLED ? t.privacyNotePaid : t.privacyNote}</p>
         </form>
       )}
 
@@ -204,6 +205,13 @@ export function GlobalSajuFlow({ locale }: { locale: GlobalLocale }) {
       )}
 
       <p className="text-center text-xs leading-relaxed text-foreground-muted/80">{t.disclaimer}</p>
+      <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-foreground-muted">
+        {(["terms", "privacy", "refund"] as const).map((k) => (
+          <Link key={k} href={`/${locale}/${k}`} className="underline underline-offset-4">
+            {GLOBAL_LEGAL[locale].navLabels[k]}
+          </Link>
+        ))}
+      </nav>
     </div>
   );
 }
@@ -359,7 +367,7 @@ function LaunchWaitlist({ locale }: { locale: GlobalLocale }) {
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
             <span>
               {t.consent}{" "}
-              <Link href="/privacy" className="underline underline-offset-2">
+              <Link href={`/${locale}/privacy`} className="underline underline-offset-2">
                 {t.privacyLink}
               </Link>
             </span>

@@ -11,6 +11,9 @@ export interface GlobalPayCopy {
   consent: string;
   refundNote: string;
   refundLink: string;
+  termsLink: string;
+  privacyLink: string;
+  agreeLinks: string;
   continueButton: string;
   creating: string;
   payWith: string;
@@ -38,9 +41,12 @@ export const GLOBAL_PAY_COPY: Record<GlobalLocale, GlobalPayCopy> = {
     offerSub: "生年月日をもとに、あなただけの「取扱説明書」を6章でお届けします。",
     includesTitle: "読んだあとに得られること",
     digitalNote: "お支払い後すぐに画面で読める、1回限りのデジタルコンテンツです。",
-    consent: "デジタルコンテンツの性質上、レポートを開いたあとの返金には制限があることに同意します。",
+    consent: "レポートはお支払い後すぐに提供されること、また開いたあとはキャンセル・返金が制限される場合があることに同意します。",
     refundNote: "レポートが表示されないなどの不具合があった場合は、全額返金します。",
-    refundLink: "返金ポリシー（韓国語）",
+    refundLink: "返金ポリシー",
+    termsLink: "利用規約",
+    privacyLink: "プライバシーポリシー",
+    agreeLinks: "ご確認ください:",
     continueButton: "お支払いへ進む",
     creating: "ご注文を準備しています…",
     payWith: "PayPalまたはカードでお支払い",
@@ -73,9 +79,12 @@ export const GLOBAL_PAY_COPY: Record<GlobalLocale, GlobalPayCopy> = {
     offerSub: "A six-chapter \"owner's manual\" built from your birth date.",
     includesTitle: "What you'll get",
     digitalNote: "A one-time digital report you can read on screen right after payment.",
-    consent: "I understand that, because this is digital content, refunds are limited once I've opened the report.",
+    consent: "I agree that the report is delivered immediately and I understand that I may lose my right to cancel or withdraw once I open it.",
     refundNote: "If the report fails to load or something goes wrong on our side, we'll refund you in full.",
-    refundLink: "Refund policy (Korean)",
+    refundLink: "Refund policy",
+    termsLink: "Terms of Service",
+    privacyLink: "Privacy policy",
+    agreeLinks: "Please review:",
     continueButton: "Continue to payment",
     creating: "Preparing your order…",
     payWith: "Pay with PayPal or card",

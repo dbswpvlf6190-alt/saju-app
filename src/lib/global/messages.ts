@@ -16,6 +16,8 @@ export interface GlobalMessages {
   male: string;
   submit: string;
   privacyNote: string;
+  /** 결제가 열린 뒤의 안내 — 유료 주문은 생년월일을 주문과 함께 보관하므로 "저장하지 않는다"고만 쓸 수 없다. */
+  privacyNotePaid: string;
   loading: string;
   inputError: string;
   networkError: string;
@@ -58,6 +60,7 @@ export const GLOBAL_MESSAGES: Record<GlobalLocale, GlobalMessages> = {
     male: "男性",
     submit: "無料で診断する",
     privacyNote: "※生年月日は診断のためだけに使い、保存しません。",
+    privacyNotePaid: "※無料診断では生年月日を保存しません。有料レポートをご購入の場合のみ、レポート作成のため注文情報として保存します。",
     loading: "命式を計算しています…",
     inputError: "入力内容をご確認ください。",
     networkError: "通信エラーが発生しました。もう一度お試しください。",
@@ -73,7 +76,7 @@ export const GLOBAL_MESSAGES: Record<GlobalLocale, GlobalMessages> = {
     lockedNote: "日本語版の詳細レポートは準備中です。公開したらメールでいちばんにお知らせします。",
     emailPlaceholder: "メールアドレス",
     consent: "（必須）公開のお知らせメールを送るためにメールアドレスを利用します。お知らせ1回のあと削除し、遅くとも3か月以内に削除します。",
-    privacyLink: "プライバシーポリシー（韓国語）",
+    privacyLink: "プライバシーポリシー",
     notifyButton: "🔔 公開を知らせてもらう",
     saving: "登録中…",
     emailInvalid: "メールアドレスを正しく入力してください。",
@@ -98,6 +101,7 @@ export const GLOBAL_MESSAGES: Record<GlobalLocale, GlobalMessages> = {
     male: "Male",
     submit: "Get my free reading",
     privacyNote: "Your birth date is only used for the reading and is never stored.",
+    privacyNotePaid: "Your free reading is never stored. If you buy a report, your birth information is saved with the order so we can create it.",
     loading: "Calculating your Four Pillars…",
     inputError: "Please check your birth date.",
     networkError: "Something went wrong. Please try again.",
@@ -113,7 +117,7 @@ export const GLOBAL_MESSAGES: Record<GlobalLocale, GlobalMessages> = {
     lockedNote: "The English full report is on its way. Leave your email and you'll be the first to know when it launches.",
     emailPlaceholder: "you@example.com",
     consent: "(Required) We'll use your email only to send one launch notice, then delete it — within 3 months at the latest.",
-    privacyLink: "Privacy policy (Korean)",
+    privacyLink: "Privacy policy",
     notifyButton: "🔔 Notify me at launch",
     saving: "Saving…",
     emailInvalid: "Please enter a valid email address.",

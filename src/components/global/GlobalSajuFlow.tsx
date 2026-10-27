@@ -16,6 +16,8 @@ import {
   type GlobalLocale,
 } from "@/lib/global/dayMasters";
 import { GLOBAL_MESSAGES } from "@/lib/global/messages";
+import { GLOBAL_PAYMENTS_ENABLED } from "@/lib/payment/config";
+import { GlobalPremiumUnlock } from "./GlobalPremiumUnlock";
 
 const WUXING_ORDER: WuXing[] = ["목", "화", "토", "금", "수"];
 const MIN_LOADING_MS = 1200;
@@ -288,7 +290,8 @@ function GlobalResult({ locale, result }: { locale: GlobalLocale; result: SajuRe
         )}
       </section>
 
-      <LaunchWaitlist locale={locale} />
+      {/* 결제가 열리기 전에는 기존 "공개 알림 받기"를 그대로 보여준다. */}
+      {GLOBAL_PAYMENTS_ENABLED ? <GlobalPremiumUnlock locale={locale} result={result} /> : <LaunchWaitlist locale={locale} />}
     </>
   );
 }

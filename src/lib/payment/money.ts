@@ -8,7 +8,7 @@ export type OrderCurrency = "KRW" | GlobalCurrency;
 
 export const GLOBAL_CURRENCY: Record<GlobalLocale, GlobalCurrency> = { en: "USD", ja: "JPY" };
 
-/** TODO(포트원 테스트 채널에서 확인): V2 amount.total이 USD에서 센트 단위인지. 확인 전에는 실결제를 열지 않는다. */
+/** 포트원 브라우저 SDK 타입 설명(totalAmount)에 "USD는 100배(센트), JPY는 1배"로 명시돼 있어 센트가 맞다. 그래도 테스트 채널에서 한 번 확인한 뒤에 실결제를 연다. */
 export const USD_AMOUNT_IS_CENTS = true;
 
 export function isGlobalLocale(value: unknown): value is GlobalLocale {

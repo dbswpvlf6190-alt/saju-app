@@ -202,21 +202,22 @@ async function finalizeSections(
   allKeys: readonly string[],
 ) {
   const sections: Record<string, string> = { ...cached };
+  const generated: Record<string, string> = {};
   for (const outcome of settled) {
     if (outcome.status === "fulfilled") {
       const [key, text] = outcome.value;
       sections[key] = text;
+      generated[key] = text;
     }
   }
 
   const stillMissing = allKeys.filter((key) => !sections[key]);
 
   // 부분적으로라도 성공한 항목은 저장해서, 다음 조회 때 이미 완료된 항목을 또 호출하지 않는다.
-  if (Object.keys(sections).length > Object.keys(cached).length) {
-    await prisma.order.update({
-      where: { paymentId },
-      data: { aiResultJson: JSON.stringify(sections) },
-    });
+  // 화면이 장마다 요청을 나눠 동시에 보내므로, 각 요청이 "시작할 때 읽은 캐시 + 내 장"으로 통째로 덮어쓰면 마지막에 끝난 요청의
+  // 장만 남고 나머지가 사라진다(다시 열 때 글이 바뀌고 AI 비용이 또 든다). 그래서 DB가 한 번에 새 장만 합치게 한다.
+  if (Object.keys(generated).length > 0) {
+    await prisma.$executeRaw`UPDATE "Order" SET "aiResultJson" = (COALESCE(NULLIF("aiResultJson", ''), '{}')::jsonb || ${JSON.stringify(generated)}::jsonb)::text WHERE "paymentId" = ${paymentId}`;
   }
 
   if (stillMissing.length > 0) {

@@ -17,6 +17,8 @@ type OrderRow = NonNullable<Awaited<ReturnType<typeof prisma.order.findUnique>>>
  * 지연 생성으로 자연히 재시도된다(사용자에게 아무 영향 없음).
  */
 export async function warmReportCache(order: OrderRow): Promise<void> {
+  // 해외 주문은 미리 만들지 않는다. 결제 확인 직후 화면이 곧바로 장을 요청하므로, 미리 만들면 같은 장을 두 번 만들어 AI 비용이 두 배가 된다.
+  if (localeForCurrency(order.currency)) return;
   try {
     if (order.productType === "compatibility_report") {
       await getCompatibilityReport(order.paymentId, order.birthInputJson, order.aiResultJson);

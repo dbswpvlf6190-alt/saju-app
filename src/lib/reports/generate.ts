@@ -211,14 +211,17 @@ async function finalizeSections(
     }
   }
 
-  const stillMissing = allKeys.filter((key) => !sections[key]);
-
   // 부분적으로라도 성공한 항목은 저장해서, 다음 조회 때 이미 완료된 항목을 또 호출하지 않는다.
   // 화면이 장마다 요청을 나눠 동시에 보내므로, 각 요청이 "시작할 때 읽은 캐시 + 내 장"으로 통째로 덮어쓰면 마지막에 끝난 요청의
   // 장만 남고 나머지가 사라진다(다시 열 때 글이 바뀌고 AI 비용이 또 든다). 그래서 DB가 한 번에 새 장만 합치게 한다.
+  // 같은 장이 두 곳에서 동시에 만들어졌으면(결제 직후 미리 만들기와 화면 요청 등) 먼저 저장된 글이 남고, 응답도 그 글로 맞춘다 —
+  // 화면에 보여 준 글과 나중에 다시 열 때의 글이 달라지지 않게.
   if (Object.keys(generated).length > 0) {
-    await prisma.$executeRaw`UPDATE "Order" SET "aiResultJson" = (COALESCE(NULLIF("aiResultJson", ''), '{}')::jsonb || ${JSON.stringify(generated)}::jsonb)::text WHERE "paymentId" = ${paymentId}`;
+    const rows = await prisma.$queryRaw<{ aiResultJson: string }[]>`UPDATE "Order" SET "aiResultJson" = (${JSON.stringify(generated)}::jsonb || COALESCE(NULLIF("aiResultJson", ''), '{}')::jsonb)::text WHERE "paymentId" = ${paymentId} RETURNING "aiResultJson"`;
+    if (rows[0]?.aiResultJson) Object.assign(sections, JSON.parse(rows[0].aiResultJson) as Record<string, string>);
   }
+
+  const stillMissing = allKeys.filter((key) => !sections[key]);
 
   if (stillMissing.length > 0) {
     const firstFailure = settled.find((o) => o.status === "rejected") as PromiseRejectedResult | undefined;

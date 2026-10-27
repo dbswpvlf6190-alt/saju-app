@@ -135,6 +135,10 @@ describe.skipIf(!ENABLED)("해외 주문 전체 흐름 (로컬 테스트 DB)", (
       // 두 번째 열람은 캐시에서 나와 같은 글이다(재생성하지 않는다).
       const again = await (await get(data.paymentId, `?section=overview&k=${data.accessKey}`)).json();
       expect(again.sections.overview).toBe(texts.overview);
+      // 장을 동시에 요청해도 6장 모두 저장돼 있다(서로 덮어쓰지 않는다).
+      const stored = JSON.parse((await prisma.order.findUniqueOrThrow({ where: { paymentId: data.paymentId } })).aiResultJson ?? "{}");
+      expect(Object.keys(stored).sort()).toEqual([...layout.keys].sort());
+      for (const key of layout.keys) expect(stored[key], key).toBe(texts[key]);
     }, 300000);
   }
 });

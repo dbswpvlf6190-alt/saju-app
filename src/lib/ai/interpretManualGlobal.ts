@@ -81,9 +81,32 @@ const CHAPTER_PLAN: Record<ManualChapterKey, string> = {
     "A checklist of three actions (each startable within five minutes today, with a timeframe for trying it) and one closing paragraph with a warm word. Do not bring in new Saju evidence; tie together the key point of each earlier chapter in one line each.",
 };
 
-const BANNED: Record<GlobalLocale, string[]> = {
-  en: ["guaranteed", "100%", "definitely", "certainly will", "disease", "illness", "surgery", "hospital", "diagnos", "cancer"],
-  ja: ["必ず", "絶対", "100%", "間違いなく", "病気", "病院", "手術", "疾患", "診断", "がん"],
+// 단정·질병 표현. 일본어 "必ずしも〜ない"(반드시 그런 건 아니다)는 단정이 아니라 자연스러운 표현이라 걸리지 않게 정규식으로 뺀다.
+const BANNED: Record<GlobalLocale, { label: string; re: RegExp }[]> = {
+  en: [
+    { label: "guaranteed", re: /guaranteed/i },
+    { label: "100%", re: /100\s?%/ },
+    { label: "definitely", re: /definitely/i },
+    { label: "certainly will", re: /certainly will/i },
+    { label: "disease", re: /disease/i },
+    { label: "illness", re: /illness/i },
+    { label: "surgery", re: /surgery/i },
+    { label: "hospital", re: /hospital/i },
+    { label: "diagnos", re: /diagnos/i },
+    { label: "cancer", re: /cancer/i },
+  ],
+  ja: [
+    { label: "必ず", re: /必ず(?!しも)/ },
+    { label: "絶対", re: /絶対/ },
+    { label: "100%", re: /100[%％]/ },
+    { label: "間違いなく", re: /間違いなく/ },
+    { label: "病気", re: /病気/ },
+    { label: "病院", re: /病院/ },
+    { label: "手術", re: /手術/ },
+    { label: "疾患", re: /疾患/ },
+    { label: "診断", re: /診断/ },
+    { label: "がん", re: /がん/ },
+  ],
 };
 
 const HANGUL = /[ㄱ-ㆎ가-힣]/;
@@ -110,8 +133,7 @@ export function cleanGlobalText(text: string, title: string): string {
 
 export function globalManualProblems(text: string, locale: GlobalLocale, key: ManualChapterKey): string[] {
   const problems: string[] = [];
-  const lower = text.toLowerCase();
-  const hit = BANNED[locale].filter((w) => lower.includes(w.toLowerCase()));
+  const hit = BANNED[locale].filter((b) => b.re.test(text)).map((b) => b.label);
   if (hit.length) problems.push(`banned words: ${hit.join(", ")}`);
   if (HANGUL.test(text)) problems.push("contains Hangul (Korean letters)");
   const min = minLengthFor(locale, key);
@@ -130,19 +152,24 @@ async function writeOnce(
   const title = GLOBAL_PAY_COPY[locale].chapters[key].title;
   const dm = DAY_MASTERS[result.dayPillar.ganHanja]?.[locale];
   const unit = locale === "en" ? "words" : "characters (excluding spaces)";
-  const message = await getClient().messages.create({
-    model: "claude-sonnet-5",
-    max_tokens: 4500,
-    // 정해진 분량의 글만 쓰는 작업이라 사고 과정이 필요 없다(켜 두면 사고 토큰이 예산을 먼저 써서 글이 잘린다 — interpretSaju.ts 참고).
-    thinking: { type: "disabled" },
-    system: systemPrompt(locale),
-    messages: [
-      {
-        role: "user",
-        content: `This chapter: ${title}\nMinimum length: at least ${minLengthFor(locale, key)} ${unit} (falling short is not acceptable).\nInstructions: ${CHAPTER_PLAN[key]}${hint}\nDay Master display name to use: ${dm ? `${dm.label} — ${dm.image}` : "(unknown)"}\n\nSaju facts (labels are in Korean; translate with the glossary):\n${JSON.stringify(facts, null, 2)}`,
-      },
-    ],
-  });
+  const message = await getClient().messages.create(
+    {
+      model: "claude-sonnet-5",
+      // 일본어는 글자당 토큰이 많아 4,500이면 긴 장(2,000자대)이 잘릴 수 있다. 쓴 만큼만 비용이 든다.
+      max_tokens: locale === "ja" ? 7000 : 4500,
+      // 정해진 분량의 글만 쓰는 작업이라 사고 과정이 필요 없다(켜 두면 사고 토큰이 예산을 먼저 써서 글이 잘린다 — interpretSaju.ts 참고).
+      thinking: { type: "disabled" },
+      system: systemPrompt(locale),
+      messages: [
+        {
+          role: "user",
+          content: `This chapter: ${title}\nMinimum length: at least ${minLengthFor(locale, key)} ${unit} (falling short is not acceptable).\nInstructions: ${CHAPTER_PLAN[key]}${hint}\nDay Master display name to use: ${dm ? `${dm.label} — ${dm.image}` : "(unknown)"}\n\nSaju facts (labels are in Korean; translate with the glossary):\n${JSON.stringify(facts, null, 2)}`,
+        },
+      ],
+    },
+    // 장 6개를 동시에 요청하므로 일시적인 과부하(429·529)가 가끔 난다. 기본 2번보다 더 재시도한다.
+    { maxRetries: 4 },
+  );
   if (message.stop_reason === "max_tokens") {
     throw new AiInterpretationError(`AI response was cut off by the length limit (chapter=${key}, locale=${locale}).`);
   }

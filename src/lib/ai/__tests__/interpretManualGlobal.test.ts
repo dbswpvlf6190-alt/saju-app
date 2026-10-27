@@ -24,6 +24,12 @@ describe("해외판 사용설명서 글 검사", () => {
     expect(globalManualProblems(`${ja}必ず`, "ja", "overview").some((p) => p.startsWith("banned words"))).toBe(true);
   });
 
+  it("일본어 '必ずしも'(반드시 그런 건 아니다)는 단정이 아니라 통과, '必ず'는 걸린다", () => {
+    const ja = "あ".repeat(1200);
+    expect(globalManualProblems(`${ja}必ずしも当てはまるとは限りません`, "ja", "overview")).toEqual([]);
+    expect(globalManualProblems(`${ja}必ず成功します`, "ja", "overview").some((p) => p.startsWith("banned words"))).toBe(true);
+  });
+
   it("장별 최소 분량이 모든 장에 정해져 있다", () => {
     for (const locale of ["en", "ja"] as const) {
       for (const key of ["overview", "patterns", "people", "workmoney", "timing", "actions"] as const) {

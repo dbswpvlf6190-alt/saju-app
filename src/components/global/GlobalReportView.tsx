@@ -20,11 +20,17 @@ export function GlobalReportView({
   const [chapters, setChapters] = useState<Record<string, string>>({});
   const [failed, setFailed] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  // 주소의 열람 키가 틀리거나 주문이 없으면(403·404) 장마다 "불러오지 못했어요"를 늘어놓지 않고 링크 안내만 보여 준다.
+  const [denied, setDenied] = useState(false);
 
   const fetchChapter = useCallback(
     async (key: ManualChapterKey) => {
       const k = accessKey ? `&k=${encodeURIComponent(accessKey)}` : "";
       const res = await fetch(`/api/orders/${encodeURIComponent(paymentId)}?section=${key}${k}`);
+      if (res.status === 403 || res.status === 404) {
+        setDenied(true);
+        throw new Error("denied");
+      }
       const data = await res.json();
       if (!data.sections?.[key]) throw new Error("chapter");
       setChapters((prev) => ({ ...prev, [key]: data.sections[key] }));
@@ -61,6 +67,8 @@ export function GlobalReportView({
       // 복사를 막는 브라우저에서는 아래 입력칸의 링크를 직접 선택해 복사하면 된다.
     }
   }
+
+  if (denied) return <p className="py-10 text-center text-sm text-foreground-muted">{t.invalidLink}</p>;
 
   return (
     <section className="flex flex-col gap-3">

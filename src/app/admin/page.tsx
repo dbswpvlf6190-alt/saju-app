@@ -69,10 +69,12 @@ export default async function AdminPage() {
   // PENDING 주문을 즉시 재검증해서 화면에 최신 상태가 보이게 한다.
   await reconcileStalePendingOrders();
 
-  const [orders, paidAgg, statusCounts, reviews, funnel, coupons, waitlistCount] = await Promise.all([
+  const [orders, paidAgg, globalPaid, statusCounts, reviews, funnel, coupons, waitlistCount] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     // 매출 합계는 원화 주문만(해외판 USD·JPY 금액이 섞이면 의미가 없다). 해외 주문은 목록에서 통화와 함께 본다.
     prisma.order.aggregate({ where: { status: "PAID", currency: "KRW" }, _sum: { amount: true }, _count: true }),
+    // 해외판 결제는 통화별로 따로 본다(USD·JPY).
+    prisma.order.groupBy({ by: ["currency"], where: { status: "PAID", currency: { not: "KRW" } }, _sum: { amount: true }, _count: true }),
     prisma.order.groupBy({ by: ["status"], _count: true }),
     prisma.review.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     getFunnelSummary(7),
@@ -90,6 +92,9 @@ export default async function AdminPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard label="총 매출" value={`${totalRevenue.toLocaleString()}원`} />
         <StatCard label="결제완료 건수" value={`${paidCount}건`} />
+        {globalPaid.map((g) => (
+          <StatCard key={g.currency} label={`해외 결제 (${g.currency})`} value={`${g._count}건 · ${formatMoney(g._sum.amount ?? 0, g.currency)}`} />
+        ))}
         {statusCounts.map((s) => (
           <StatCard key={s.status} label={STATUS_LABEL[s.status] ?? s.status} value={`${s._count}건`} />
         ))}

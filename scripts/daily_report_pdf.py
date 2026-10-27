@@ -65,6 +65,18 @@ KDT = "(\"createdAt\" at time zone 'UTC') at time zone 'Asia/Seoul'"
 HUMAN_SINCE = "2026-10-19"  # 로봇 제외(ua 표시) 이후 첫 온전한 날
 PAID_SINCE = "2026-09-01"  # 8월 결제 4건은 출시 전 본인 시험
 TEST_ORDERS = ("toss-9f4e2019", "toss-3f1e76d2", "toss-4738803c")  # 10/20 토스 실결제 시험(사장님 아이폰)
+
+_ORDER_HAS_CURRENCY = None
+
+
+def order_currency_col():
+    """주문 SQL에 넣을 통화 칸. 해외판(USD·JPY) 주문이 생기면 금액을 원화와 더하면 안 된다 — 그래서 원화 주문만 센다.
+    통화 칸(Order.currency)은 해외 결제 배포 때 DB에 추가되므로, 아직 없는 DB에서도 이 보고서가 멈추지 않게 칸이 있는지 먼저 확인한다."""
+    global _ORDER_HAS_CURRENCY
+    if _ORDER_HAS_CURRENCY is None:
+        rows = neon_query("select 1 x from information_schema.columns where table_name='Order' and column_name='currency'")
+        _ORDER_HAS_CURRENCY = bool(rows)
+    return "currency" if _ORDER_HAS_CURRENCY else "'KRW' as currency"
 THREADS_POST_GOAL = 300
 TOSS_BREAKEVEN = 15
 # 2·3쪽(10/24 사장님: 매일 20시 종합 보고 — 채널별 퍼널·토스 입점·해외판). 채널은 사이트 이벤트의 ua(앱 구분)와 ref(유입 링크)로 나눈다.
@@ -148,9 +160,9 @@ def collect_site(today):
         f"select count(*)::int n from \"AnalyticsEvent\" where name='landing_view' and {KDT} >= '{HUMAN_SINCE}' and \"metaJson\"::json->>'ua'='threads'"
     )[0]["n"]
     orders = neon_query(
-        f"select \"paymentId\" pid, amount, to_char({KDT},'YYYY-MM-DD') d from \"Order\" where status='PAID' and amount > 0 and {KDT} >= '{PAID_SINCE}'"
+        f"select \"paymentId\" pid, amount, {order_currency_col()}, to_char({KDT},'YYYY-MM-DD') d from \"Order\" where status='PAID' and amount > 0 and {KDT} >= '{PAID_SINCE}'"
     )
-    real = [o for o in orders if not o["pid"].startswith(TEST_ORDERS)]
+    real = [o for o in orders if not o["pid"].startswith(TEST_ORDERS) and o["currency"] == "KRW"]
     web = [o for o in real if not o["pid"].startswith("toss-")]
     toss = [o for o in real if o["pid"].startswith("toss-")]
 
@@ -185,9 +197,9 @@ def collect_channels(today):
     for r in rows:
         table[channel_of(r["ua"], r["ref"])][r["name"]] += r["n"]
     orders = neon_query(
-        f"select \"paymentId\" pid, amount, status from \"Order\" where amount > 0 and {KDT} >= '{since}' and status in ('PAID','CANCELED')"
+        f"select \"paymentId\" pid, amount, {order_currency_col()}, status from \"Order\" where amount > 0 and {KDT} >= '{since}' and status in ('PAID','CANCELED')"
     )
-    real = [o for o in orders if not o["pid"].startswith(TEST_ORDERS)]
+    real = [o for o in orders if not o["pid"].startswith(TEST_ORDERS) and o["currency"] == "KRW"]
     web_paid = [o for o in real if o["status"] == "PAID" and not o["pid"].startswith("toss-")]
     refunds = [o for o in real if o["status"] == "CANCELED"]
     return {"since": since, "table": table, "web_rev": sum(o["amount"] for o in web_paid), "web_n": len(web_paid),

@@ -2,13 +2,23 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { calculateSaju, SajuInputError, type SajuInput } from "@/lib/saju";
 import { prisma } from "@/lib/db/prisma";
-import { PRODUCT_CATALOG, isProductType, type ProductType } from "@/lib/payment/config";
+import {
+  GLOBAL_PAYMENTS_ENABLED,
+  GLOBAL_PRODUCT_CATALOG,
+  PRODUCT_CATALOG,
+  isGlobalProductType,
+  isProductType,
+  type ProductType,
+} from "@/lib/payment/config";
+import { GLOBAL_CURRENCY, isGlobalLocale } from "@/lib/payment/money";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { orderAccessCookieName, signOrderAccessToken, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 import { PREMIUM_SECTION_KEYS } from "@/lib/reports/generate";
 
 interface CreateOrderBody {
   productType?: ProductType;
+  // 해외판(/en·/ja)에서 보낸 주문이면 언어. 있으면 USD·JPY 카탈로그로 가격을 정한다(없으면 기존 원화 주문).
+  locale?: string;
   birthInput?: SajuInput;
   selfInput?: SajuInput;
   partnerInput?: SajuInput;
@@ -65,7 +75,20 @@ export async function POST(req: NextRequest) {
   }
 
   const productType: ProductType = isProductType(body.productType) ? body.productType : "premium_report";
-  const product = PRODUCT_CATALOG[productType];
+
+  // 가격·통화·상품명은 서버 카탈로그만이 정한다. 해외판은 언어별 카탈로그를 쓰고, 열리기 전에는 주문 자체를 거부한다.
+  let product: { amount: number; name: string } = PRODUCT_CATALOG[productType];
+  let currency: string = "KRW";
+  if (body.locale !== undefined) {
+    if (!GLOBAL_PAYMENTS_ENABLED) {
+      return NextResponse.json({ error: "Payments are not available yet." }, { status: 403 });
+    }
+    if (!isGlobalLocale(body.locale) || !isGlobalProductType(productType)) {
+      return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    }
+    product = GLOBAL_PRODUCT_CATALOG[productType][body.locale];
+    currency = GLOBAL_CURRENCY[body.locale];
+  }
 
   let birthInputJson: string;
   let sectionKey: string | null = null;
@@ -116,6 +139,7 @@ export async function POST(req: NextRequest) {
       data: {
         paymentId,
         amount: product.amount,
+        currency,
         productType,
         birthInputJson,
         sectionKey,
@@ -127,6 +151,7 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({
       paymentId: order.paymentId,
       amount: order.amount,
+      currency: order.currency,
       orderName: product.name,
     });
 

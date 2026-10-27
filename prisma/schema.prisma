@@ -18,6 +18,8 @@ model Order {
   paymentId   String    @unique
   status      OrderStatus @default(PENDING)
   amount      Int
+  // 해외판(PayPal)은 원화를 쓸 수 없어 USD·JPY로 받는다. amount는 PortOne amount.total과 같은 단위. 기존 주문은 모두 KRW.
+  currency    String    @default("KRW")
   productType String    @default("premium_report")
   // 리포트 생성에 필요한 최소한의 생년월일시/성별 정보(JSON). 그 외 개인정보는 저장하지 않는다.
   birthInputJson String

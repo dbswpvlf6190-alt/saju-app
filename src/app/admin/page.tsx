@@ -5,6 +5,7 @@ import { CopyableCode } from "@/components/admin/CopyableCode";
 import { WaitlistPanel } from "@/components/admin/WaitlistPanel";
 import { AdminPreviewTool } from "@/components/admin/AdminPreviewTool";
 import { reconcileStalePendingOrders } from "@/lib/payment/reconcile";
+import { formatMoney } from "@/lib/payment/money";
 import { getFunnelSummary } from "@/lib/analytics/funnelSummary";
 import type { AnalyticsEventName } from "@/lib/analytics/events";
 
@@ -70,7 +71,8 @@ export default async function AdminPage() {
 
   const [orders, paidAgg, statusCounts, reviews, funnel, coupons, waitlistCount] = await Promise.all([
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
-    prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amount: true }, _count: true }),
+    // 매출 합계는 원화 주문만(해외판 USD·JPY 금액이 섞이면 의미가 없다). 해외 주문은 목록에서 통화와 함께 본다.
+    prisma.order.aggregate({ where: { status: "PAID", currency: "KRW" }, _sum: { amount: true }, _count: true }),
     prisma.order.groupBy({ by: ["status"], _count: true }),
     prisma.review.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     getFunnelSummary(7),
@@ -111,7 +113,7 @@ export default async function AdminPage() {
               <tr key={order.id} className="border-t border-border-subtle">
                 <td className="px-4 py-3 font-mono text-xs">{order.paymentId}</td>
                 <td className="px-4 py-3">{STATUS_LABEL[order.status] ?? order.status}</td>
-                <td className="px-4 py-3">{order.amount.toLocaleString()}원</td>
+                <td className="px-4 py-3">{formatMoney(order.amount, order.currency)}</td>
                 <td className="px-4 py-3 text-foreground-muted">
                   {order.createdAt.toLocaleString("ko-KR")}
                 </td>

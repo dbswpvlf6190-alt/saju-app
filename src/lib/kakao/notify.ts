@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { formatMoney } from "@/lib/payment/money";
 
 // 카카오톡 "나에게 보내기"로 결제 알림을 보낸다. access_token은 6시간마다 만료되므로,
 // 만료 임박 시 refresh_token으로 자동 갱신하고 DB의 단일 행(KakaoToken)에 갱신 결과를
@@ -85,24 +86,26 @@ function nowKst(): string {
 
 export async function sendPaymentKakaoNotification(order: {
   amount: number;
+  currency?: string;
   productType: string;
   paymentId: string;
 }): Promise<void> {
   await sendKakaoMemo(`💰 사주랩 결제 완료
-${order.amount.toLocaleString()}원 · ${order.productType}
+${formatMoney(order.amount, order.currency)} · ${order.productType}
 ${nowKst()}`);
 }
 
 /** 결제 실패 알림. 카드사 오류(예: V104)나 금액 불일치를 며칠 늦게 알아채는 일을 막는다. */
 export async function sendPaymentFailureKakaoNotification(order: {
   amount: number;
+  currency?: string;
   productType: string;
   paymentId: string;
   reason: string;
 }): Promise<void> {
   const reason = order.reason.length > 120 ? `${order.reason.slice(0, 120)}…` : order.reason;
   await sendKakaoMemo(`⚠️ 사주랩 결제 실패
-${order.amount.toLocaleString()}원 · ${order.productType}
+${formatMoney(order.amount, order.currency)} · ${order.productType}
 사유: ${reason}
 ${nowKst()}`);
 }

@@ -7,6 +7,8 @@ interface PortOnePaymentAmount {
 export interface PortOnePayment {
   status: string;
   amount: PortOnePaymentAmount;
+  /** 결제 통화(KRW·USD·JPY). 없으면 원화로 본다. */
+  currency?: string;
   id: string;
   /** 결제 실패 시 PortOne이 내려주는 사유(카드사·PG 코드와 메시지). */
   failure?: { reason?: string; pgCode?: string; pgMessage?: string };

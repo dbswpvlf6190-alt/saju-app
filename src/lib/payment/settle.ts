@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import type { PortOnePayment } from "@/lib/payment/verify";
 import { describeFailure } from "@/lib/payment/failure";
+import { paymentMatchesOrder } from "@/lib/payment/money";
 import { sendPaymentFailureKakaoNotification, sendPaymentKakaoNotification } from "@/lib/kakao/notify";
 
 type OrderRow = Awaited<ReturnType<typeof prisma.order.findUnique>>;
@@ -14,7 +15,8 @@ export async function finalizeOrderFromPortOnePayment(
   order: NonNullable<OrderRow>,
   payment: PortOnePayment,
 ): Promise<{ status: "PAID" | "FAILED"; amountValid: boolean }> {
-  const isAmountValid = payment.amount.total === order.amount;
+  // 금액만이 아니라 통화도 같아야 한다(해외판 USD 399와 원화 399는 다른 결제).
+  const isAmountValid = paymentMatchesOrder(order, payment);
   const isPaid = payment.status === "PAID";
 
   if (!isPaid || !isAmountValid) {
@@ -26,6 +28,7 @@ export async function finalizeOrderFromPortOnePayment(
       try {
         await sendPaymentFailureKakaoNotification({
           amount: order.amount,
+          currency: order.currency,
           productType: order.productType,
           paymentId: order.paymentId,
           reason: describeFailure(payment, isAmountValid),

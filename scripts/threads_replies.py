@@ -379,14 +379,14 @@ def auto():
             if drafts:
                 send(rec["media_id"])
         except Exception as e:
-            print(f"  초안 실패: {e}")
+            print(f"  초안 실패: {notify.redact(e)}")
             # 스케줄러로 돌 땐 출력이 안 보여 원인(어떤 파일을 못 찾았는지 등)을 알 수 없었다 — 전체 트레이스백을 로컬 파일에 남긴다.
             try:
                 import traceback
 
                 os.makedirs(RENDER_ROOT, exist_ok=True)
                 with open(os.path.join(RENDER_ROOT, "threads_replies_error.log"), "a", encoding="utf-8") as lf:
-                    lf.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {rec['id']} node={node_bin.find_node()!r} exists={os.path.exists(node_bin.find_node())} USERPROFILE={os.environ.get('USERPROFILE')!r} LOCALAPPDATA={os.environ.get('LOCALAPPDATA')!r} home={os.path.expanduser('~')!r} nodejs_dir={[(d, os.listdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs', d))[:6]) for d in os.listdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs'))] if os.path.isdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs')) else 'NO_DIR'}\n{traceback.format_exc()}\n")
+                    lf.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {rec['id']} node={node_bin.find_node()!r} exists={os.path.exists(node_bin.find_node())} USERPROFILE={os.environ.get('USERPROFILE')!r} LOCALAPPDATA={os.environ.get('LOCALAPPDATA')!r} home={os.path.expanduser('~')!r} nodejs_dir={[(d, os.listdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs', d))[:6]) for d in os.listdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs'))] if os.path.isdir(os.path.join(os.environ.get('LOCALAPPDATA', ''), 'nodejs')) else 'NO_DIR'}\n{notify.redact(traceback.format_exc())}\n")
             except OSError:
                 pass
             notify.notify("❌ Threads 풀이 초안 실패", f"{rec['id']}\n{notify.summarize_error(str(e))}", priority=4, tags=["warning"])

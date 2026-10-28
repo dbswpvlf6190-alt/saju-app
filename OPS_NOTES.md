@@ -452,3 +452,8 @@
 - 문제: `scripts/ig_reading_posts.json`이 6개뿐인데 같은 글은 7일 안에 다시 안 쓰는 규칙(REPEAT_DAYS)이라 10/30부터 매주 하루씩 올릴 글이 없고, 알림도 없었음(조용히 건너뜀).
 - 조치: 변형 IG07~IG14 8개 추가(총 14개, 25일 시뮬레이션 빈 날 0). 주제는 답글 자동화(`threads_replies.pick_timing`)가 처리하는 약속만 사용.
 - 경고(`ig_reading_post.py`): 7일 안에 안 쓴 글이 오늘 것 빼고 2개 이하(`LOW_POOL`)면 "⚠️ 소진 임박" 알림, 올릴 글이 0개면 "❌ 소진" 알림. 변형이 8개 미만이면 매주 빈 날이 생기니 8개 이상 유지.
+
+## 10/28 Vercel 배포 건너뛰기 확대 + 오류 토큰 가리기
+- `vercel.json` ignoreCommand 제외 목록에 `scripts/*.py`·`*.json`·`*.mjs`·`*.ps1` 추가. 사이트(`src`)는 scripts의 파일을 읽지 않고 빌드가 쓰는 건 `scripts/migrate-deploy.sh` 하나뿐(제외 안 함). 이 설정은 Vercel 빌드 여부만 정하고 두 컴퓨터의 git push/pull·동기화에는 영향 없음. 나중에 사이트가 scripts 파일을 읽게 바뀌면 이 제외 규칙을 다시 볼 것.
+- 임시 저장소 시뮬레이션: py만/json만 변경 → 건너뜀(0), `migrate-deploy.sh`·`src`·`package.json`·py+src 같이 → 배포(1), 이전 SHA 없음·없는 SHA → 배포(1).
+- `scripts/notify.py`에 `redact()` 추가(access_token=…·Bearer·THAA/IGAA/EAA 토큰·60자 이상 긴 문자열을 `***`로). `notify()`·`summarize_error()`는 자동 적용, `threads_replies.py`의 콘솔·`threads_replies_error.log` 기록도 적용. 새 로그를 쓰는 코드를 추가하면 `notify.redact()`를 거칠 것.

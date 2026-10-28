@@ -4,6 +4,7 @@
 테스트: python scripts/notify.py --test"""
 import json
 import os
+import re
 import sys
 import urllib.request
 
@@ -14,7 +15,24 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, "credentials", "ntfy.json")
 
 
+# 오류 메시지·로그에 요청 주소째로 찍히는 토큰을 가린다(네트워크 오류가 나면 ...?access_token=... 이 그대로 남던 문제).
+_SECRET_PATTERNS = [
+    (re.compile(r"(?i)\b(access_token|client_secret|app_secret|token|secret|password|api[_-]?key)=[^&\s'\")]+"), r"\1=***"),
+    (re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._\-]+"), "Bearer ***"),
+    (re.compile(r"\b(?:THAA|THQW|IGAA|IGQV|EAA)[A-Za-z0-9_\-]{20,}"), "***"),
+    (re.compile(r"[A-Za-z0-9_\-]{60,}"), "***"),
+]
+
+
+def redact(text):
+    t = str(text if text is not None else "")
+    for pattern, repl in _SECRET_PATTERNS:
+        t = pattern.sub(repl, t)
+    return t
+
+
 def notify(title, message, priority=3, tags=None, click=None):
+    title, message = redact(title), redact(message)
     try:
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             cfg = json.load(f)
@@ -48,7 +66,7 @@ _REASONS = [
 
 
 def summarize_error(text):
-    t = str(text or "")
+    t = redact(text)
     for keys, reason in _REASONS:
         if any(k in t for k in keys):
             return f"사유: {reason}"

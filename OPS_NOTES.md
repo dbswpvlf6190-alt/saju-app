@@ -457,3 +457,9 @@
 - `vercel.json` ignoreCommand 제외 목록에 `scripts/*.py`·`*.json`·`*.mjs`·`*.ps1` 추가. 사이트(`src`)는 scripts의 파일을 읽지 않고 빌드가 쓰는 건 `scripts/migrate-deploy.sh` 하나뿐(제외 안 함). 이 설정은 Vercel 빌드 여부만 정하고 두 컴퓨터의 git push/pull·동기화에는 영향 없음. 나중에 사이트가 scripts 파일을 읽게 바뀌면 이 제외 규칙을 다시 볼 것.
 - 임시 저장소 시뮬레이션: py만/json만 변경 → 건너뜀(0), `migrate-deploy.sh`·`src`·`package.json`·py+src 같이 → 배포(1), 이전 SHA 없음·없는 SHA → 배포(1).
 - `scripts/notify.py`에 `redact()` 추가(access_token=…·Bearer·THAA/IGAA/EAA 토큰·60자 이상 긴 문자열을 `***`로). `notify()`·`summarize_error()`는 자동 적용, `threads_replies.py`의 콘솔·`threads_replies_error.log` 기록도 적용. 새 로그를 쓰는 코드를 추가하면 `notify.redact()`를 거칠 것.
+
+## 10/28 Next.js 보안 업데이트
+- Next.js·eslint-config-next 16.3.6 → 16.4.3, `npm audit fix`로 zod·sharp·source-map-js 등 전이 의존성 패치. 운영 의존성 취약점 4건(Next 치명 1 포함) → 0건(남은 건 개발 도구 vitest 보통 3건).
+- 검증: 별도 브랜치(work/next-security-update)에서 테스트 137건·빌드·tsc·주요 페이지/사주 계산 API 스모크 통과 후 main에 fast-forward 병합. 로컬 테스트 DB로 빌드(운영 DB 미접속).
+- 다른 브랜치(해외판 work/global-payment, 토스 v11, 신년운세)는 `package.json`·`package-lock.json`이 충돌할 수 있으니 병합할 때 main의 두 파일을 기준으로 맞출 것.
+- 참고: 노트북 `C:\saju-app\node_modules`는 예전 설치(next 16.3.2)라 lock과 다름 — 로컬에서 빌드할 일이 있으면 `npm ci`부터.

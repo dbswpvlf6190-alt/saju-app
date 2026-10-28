@@ -48,7 +48,11 @@ Rules:
 - Always address the reader directly as "you" (あなた in Japanese, used sparingly). Never refer to the reader in the third person and never use gendered pronouns such as "she" or "he" for them, even though the facts include a gender.
 - Explain each technical term in plain words the first time it appears, then use the plain words afterwards.
 - Use only the evidence assigned to this chapter. Do not repeat other chapters' evidence or phrases.
-- Never state outcomes as certain. Do not use "will", "definitely", "guaranteed", "always", "100%" (or their ${LANGUAGE[locale]} equivalents). Phrase everything as tendencies ("tends to", "often"). Saju is for self-understanding and entertainment.
+- Never state outcomes as certain. Do not use "will", "definitely", "guaranteed", "always", "100%" (or their ${LANGUAGE[locale]} equivalents). Phrase everything as tendencies ("tends to", "often"). Saju is for self-understanding and entertainment.${
+    locale === "ja"
+      ? "\n- In Japanese, never write 必ず or 絶対 anywhere (use 〜しやすい・〜になりがち・多くの場合 instead); 必ずしも〜ない is the only allowed form. Also avoid 確実に, 間違いなく, 100%."
+      : ""
+  }
 - Never mention health, illness, medicine, or body parts. Give no medical, legal, or financial/investment advice, and no predictions of accidents, death, divorce, or lawsuits.
 - Do not use markdown symbols (#, *, **, -). Separate paragraphs with blank lines. Do not write a chapter title line; only the body (the system adds the title).
 

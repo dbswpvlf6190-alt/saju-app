@@ -464,3 +464,9 @@
 - 다른 브랜치(해외판 work/global-payment, 토스 v11, 신년운세)는 `package.json`·`package-lock.json`이 충돌할 수 있으니 병합할 때 main의 두 파일을 기준으로 맞출 것.
 - 참고: 노트북 `C:\saju-app\node_modules`는 예전 설치(next 16.3.2)라 lock과 다름 — 로컬에서 빌드할 일이 있으면 `npm ci`부터.
 - **(10/28 밤 정정)** 위 `vercel.json`의 ignoreCommand가 **256자 제한을 넘어** Vercel이 af2725f·78f8ab0 배포를 "vercel.json schema validation failed"로 거부함(사이트는 직전 정상 배포 3abe5bf로 계속 서비스, 중단 없음). 규칙을 `scripts/vercel-ignore.sh`로 옮기고 `ignoreCommand`는 `sh scripts/vercel-ignore.sh`(27자)로 변경. 앞으로 이 규칙을 고칠 땐 **스크립트 파일만** 수정할 것(vercel.json에 긴 명령을 다시 넣지 말 것). 시뮬레이션: py·json·posted_state만 → 건너뜀(0), migrate-deploy.sh·이 스크립트·src·vercel.json·이전 SHA 없음 → 빌드(1).
+
+## 10/28 밤 해외판(/en·/ja) PayPal 결제 — 인계 (노트북 → 본가)
+- **상세 인계 문서는 브랜치 `work/global-payment`의 `docs/global-payments/HANDOFF.md`(+`PREP_NOTES.md`, `embedded-postgres.mjs`)**. 새 대화는 그걸 먼저 읽을 것. 브랜치는 10/28에 main을 병합했고 GitHub에 푸시함(미배포·Vercel 배포 꺼짐, 스위치 `GLOBAL_PAYMENTS_ENABLED=false`라 main에 합쳐도 노출 안 됨).
+- 현황: 1~5단계 코드 완료, PayPal 샌드박스 결제창 열림·포트원 기록 `USD/399` 확인. **미확인: 승인 후 완료 처리·리포트 열림, 환불, 엔화(사장님이 샌드박스 구매자 로그인 필요 — 10/28 보류).** AI 비용 실측 영어 ≈$0.10·일본어 ≈$0.14/건(마진 ≈85%, 포트원 수수료·세금 제외).
+- 사장님 몫: 포트원 문의 발송(문안 `PREP_NOTES.md`), 전자결제 신청(PayPal SPB), 세무·법률 확인, 가격 확정. 로그인·API 시크릿은 사장님이 직접(채팅에 붙이지 않음).
+- 본가 데스크톱에는 로컬 테스트 DB·`.env.development.local`(비밀값)이 **없다** → HANDOFF.md의 "본가에서 이어가는 방법"대로 새로 구성. PayPal 승인·환불 시험은 노트북에서 하는 편이 빠름.

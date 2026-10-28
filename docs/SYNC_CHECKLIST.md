@@ -30,6 +30,6 @@
 
 ## 이 컴퓨터를 떠날 때 ("정리하고 넘겨줘", "본가 간다", "노트북으로 간다")
 1. 진행 중인 브랜치 작업은 커밋하고 GitHub에 푸시(`work/**` 이름 — Vercel 배포 꺼짐. 옛 main에서 갈라진 브랜치는 main을 먼저 합치고 올린다). 비밀값이 섞이지 않았는지 확인.
-2. `python scripts/claude_memory_sync.py export` → `docs/claude-memory` 커밋·푸시(docs만 바뀌면 Vercel 빌드는 건너뜀).
+2. `python scripts/claude_memory_sync.py export` → `docs/claude-memory` 커밋·푸시(docs만 바뀌면 Vercel 빌드는 건너뜀). **이 저장소는 공개(public)라** 메모리·OPS_NOTES에 계좌·판매자 ID·토큰·개인 연락처를 적지 않는다.
 3. `OPS_NOTES.md`에 인계 한 단락(무엇을 했고, 무엇이 남았고, 다른 컴퓨터에 없는 것 — 로컬 DB·비밀 파일·임시 설정).
 4. 로컬 임시 설정 원복(테스트용 스위치·개발 서버·로컬 DB 종료), `C:\saju-app` main 깨끗한지 확인.

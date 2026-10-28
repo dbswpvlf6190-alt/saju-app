@@ -476,3 +476,5 @@
 - 진행 중 브랜치는 모두 GitHub에 있음: `work/global-payment`(해외 결제, HANDOFF.md), `work/toss-v11`(토스 v11, 심사 중 20261026-15), `work/new-year-v2`(신년운세 웹). GitHub에 없는 건 옛 `pricing-3tier-v2`뿐이고 백업 번들(`07_사주랩_인수인계\코드백업\pricing-3tier-v2.bundle`, 3ca1c37 포함 확인)이 있음.
 - 메모리 정정: 예약 작업은 두 컴퓨터 모두 '사용'(10/23의 '노트북 사용 안 함'은 폐기), 토스 v11·신년운세 브랜치는 `work/toss-v11`·`work/new-year-v2`로 이미 푸시됨.
 - 본가에서: Claude에게 **"변경내용 가져와"** → 끝나면 **"OPS_NOTES 맨 아래 해외판 인계 읽고 이어가자"**.
+- **주의: GitHub 저장소 `saju-app`(과 `shorts-auto-`)는 공개(public)다**(이미지 호스팅에 raw.githubusercontent를 쓰는 구조). 메모리 스냅샷·인계 문서에 비밀값은 없지만, 처음 올린 스냅샷(ae12f67)에 PayPal 판매자 ID가 들어갔다가 e6a9dad에서 지움(이력에는 남음). 앞으로 계좌·판매자 ID·토큰·개인 연락처는 공개 문서에 적지 않는다.
+- Vercel 건너뛰기 실측: docs·OPS_NOTES만 바뀐 355662e·ae12f67은 "Canceled by Ignored Build Step"(정상). 다만 10/28 21:30처럼 마지막 배포 뒤 자동화 커밋이 많이 쌓이면 Vercel 얕은 복제에 이전 SHA가 없어 안전장치(`exit 1`)로 빌드가 한 번 돈다(d10da47·62c2c2a). 기능 문제는 아니고 저장 용량만 조금 쓴다.

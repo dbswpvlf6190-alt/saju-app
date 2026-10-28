@@ -21,5 +21,5 @@
       "backup/**": false
     }
   },
-  "ignoreCommand": "[ -n \"$VERCEL_GIT_PREVIOUS_SHA\" ] && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- . ':(exclude)scripts/posted_state' ':(exclude)scripts/performance' ':(exclude)scripts/*.py' ':(exclude)scripts/*.json' ':(exclude)scripts/*.mjs' ':(exclude)scripts/*.ps1' ':(exclude)cardnews' ':(exclude)reels' ':(exclude)OPS_NOTES.md' ':(exclude)docs' || exit 1"
+  "ignoreCommand": "sh scripts/vercel-ignore.sh"
 }

@@ -463,3 +463,4 @@
 - 검증: 별도 브랜치(work/next-security-update)에서 테스트 137건·빌드·tsc·주요 페이지/사주 계산 API 스모크 통과 후 main에 fast-forward 병합. 로컬 테스트 DB로 빌드(운영 DB 미접속).
 - 다른 브랜치(해외판 work/global-payment, 토스 v11, 신년운세)는 `package.json`·`package-lock.json`이 충돌할 수 있으니 병합할 때 main의 두 파일을 기준으로 맞출 것.
 - 참고: 노트북 `C:\saju-app\node_modules`는 예전 설치(next 16.3.2)라 lock과 다름 — 로컬에서 빌드할 일이 있으면 `npm ci`부터.
+- **(10/28 밤 정정)** 위 `vercel.json`의 ignoreCommand가 **256자 제한을 넘어** Vercel이 af2725f·78f8ab0 배포를 "vercel.json schema validation failed"로 거부함(사이트는 직전 정상 배포 3abe5bf로 계속 서비스, 중단 없음). 규칙을 `scripts/vercel-ignore.sh`로 옮기고 `ignoreCommand`는 `sh scripts/vercel-ignore.sh`(27자)로 변경. 앞으로 이 규칙을 고칠 땐 **스크립트 파일만** 수정할 것(vercel.json에 긴 명령을 다시 넣지 말 것). 시뮬레이션: py·json·posted_state만 → 건너뜀(0), migrate-deploy.sh·이 스크립트·src·vercel.json·이전 SHA 없음 → 빌드(1).

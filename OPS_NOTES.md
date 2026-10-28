@@ -470,3 +470,9 @@
 - 현황: 1~5단계 코드 완료, PayPal 샌드박스 결제창 열림·포트원 기록 `USD/399` 확인. **미확인: 승인 후 완료 처리·리포트 열림, 환불, 엔화(사장님이 샌드박스 구매자 로그인 필요 — 10/28 보류).** AI 비용 실측 영어 ≈$0.10·일본어 ≈$0.14/건(마진 ≈85%, 포트원 수수료·세금 제외).
 - 사장님 몫: 포트원 문의 발송(문안 `PREP_NOTES.md`), 전자결제 신청(PayPal SPB), 세무·법률 확인, 가격 확정. 로그인·API 시크릿은 사장님이 직접(채팅에 붙이지 않음).
 - 본가 데스크톱에는 로컬 테스트 DB·`.env.development.local`(비밀값)이 **없다** → HANDOFF.md의 "본가에서 이어가는 방법"대로 새로 구성. PayPal 승인·환불 시험은 노트북에서 하는 편이 빠름.
+
+## 10/29 새벽 본가 이어하기 세팅
+- **Claude 메모리도 GitHub로 넘긴다:** 메모리는 컴퓨터마다 따로라(OneDrive·git 밖) `scripts/claude_memory_sync.py export|import` + `docs/claude-memory/` 스냅샷을 추가. `docs/SYNC_CHECKLIST.md`("변경내용 가져와")에 메모리 받기·진행 중 브랜치 확인·해외 Threads 토큰 주의, 그리고 **"이 컴퓨터를 떠날 때"** 절차를 추가.
+- 진행 중 브랜치는 모두 GitHub에 있음: `work/global-payment`(해외 결제, HANDOFF.md), `work/toss-v11`(토스 v11, 심사 중 20261026-15), `work/new-year-v2`(신년운세 웹). GitHub에 없는 건 옛 `pricing-3tier-v2`뿐이고 백업 번들(`07_사주랩_인수인계\코드백업\pricing-3tier-v2.bundle`, 3ca1c37 포함 확인)이 있음.
+- 메모리 정정: 예약 작업은 두 컴퓨터 모두 '사용'(10/23의 '노트북 사용 안 함'은 폐기), 토스 v11·신년운세 브랜치는 `work/toss-v11`·`work/new-year-v2`로 이미 푸시됨.
+- 본가에서: Claude에게 **"변경내용 가져와"** → 끝나면 **"OPS_NOTES 맨 아래 해외판 인계 읽고 이어가자"**.

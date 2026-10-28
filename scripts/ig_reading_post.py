@@ -32,6 +32,7 @@ RENDER_ROOT = os.environ.get("SAJU_RENDER_DIR", os.path.join(os.path.expanduser(
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 KST = timezone(timedelta(hours=9))
 REPEAT_DAYS = 7
+LOW_POOL = 2  # 7일 안에 안 쓴 변형이 이 개수 이하로 줄면 미리 알린다(변형이 8개 미만이면 매주 빈 날이 생긴다)
 EXAMPLE = {"date": "1985-03-14", "label": "1985년 3월 14일생"}  # 2장 예시(실제 계산값을 보여준다)
 HASHTAGS = "#2027운세 #신년운세 #사주 #무료사주 #운세 #사주풀이"
 
@@ -46,18 +47,23 @@ def records():
     return out
 
 
-def pick(now):
+def pool(now):
+    """(오늘 이미 올렸는지, 7일 안에 안 쓴 변형 목록 — 순서대로)."""
     recs = records()
-    if any(datetime.fromisoformat(r["posted_at"]).astimezone(KST).date() == now.date() for r in recs):
-        return None
+    done_today = any(datetime.fromisoformat(r["posted_at"]).astimezone(KST).date() == now.date() for r in recs)
     recent = {r["id"] for r in recs if (now - datetime.fromisoformat(r["posted_at"])).days < REPEAT_DAYS}
     with open(VARIANTS, "r", encoding="utf-8") as f:
         variants = json.load(f)
     start = len(recs) % len(variants)
-    for v in variants[start:] + variants[:start]:
-        if v["id"] not in recent:
-            return v
-    return None
+    ordered = variants[start:] + variants[:start]
+    return done_today, [v for v in ordered if v["id"] not in recent]
+
+
+def pick(now):
+    done_today, candidates = pool(now)
+    if done_today or not candidates:
+        return None
+    return candidates[0]
 
 
 def example_lines(promise):
@@ -153,10 +159,19 @@ def main():
     if now.hour < 10:
         print("10시 전 밀린 실행이라 건너뜀")
         return
-    v = pick(now)
-    if not v:
-        print("오늘 이미 올렸거나 쓸 변형이 없음")
+    done_today, candidates = pool(now)
+    if done_today:
+        print("오늘 이미 올림")
         return
+    if not candidates:
+        notify.notify("❌ 인스타 참여형 글 소진", f"오늘 올릴 새 글이 없어 건너뜀 — scripts/ig_reading_posts.json에 변형을 추가해야 해요 "
+                      f"(같은 글은 {REPEAT_DAYS}일 안에 다시 안 씀)", priority=5, tags=["rotating_light"])
+        print("쓸 변형이 없음")
+        return
+    v = candidates[0]
+    if len(candidates) - 1 <= LOW_POOL:
+        notify.notify("⚠️ 인스타 참여형 글 소진 임박", f"오늘 글을 올리면 {REPEAT_DAYS}일 안에 안 쓴 글이 {len(candidates) - 1}개 남아요 — "
+                      "ig_reading_posts.json에 변형 추가 필요", priority=4, tags=["warning"])
     rec_id = f"{v['id']}-{now:%Y%m%d}"
     lock_rel = os.path.relpath(os.path.join(POSTED_DIR, f"{rec_id}.lock"), BASE_DIR)
     ok, holder = git_sync.try_acquire_lock(BASE_DIR, lock_rel)

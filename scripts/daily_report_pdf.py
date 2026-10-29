@@ -567,6 +567,11 @@ def main():
     print(f"저장: {out}")
     # 데스크톱·노트북이 같은 20:00에 각자 PDF를 만들므로(각 컴퓨터 바탕 화면용) 알림은 먼저 만든 한 대만 보낸다.
     marker_rel = os.path.join("scripts", "posted_state", "daily_report", f"{today.isoformat()}.json")
+    # 꺼져 있던 컴퓨터를 켜면 작업 스케줄러가 밀린 20:00 작업을 바로 돌린다(StartWhenAvailable). 그때 알림·표식을 남기면
+    # 그날 저녁 진짜 보고 알림이 안 가므로(10/29 10:38 사례), 19시 전 실행은 PDF만 만들고 알림은 저녁 실행에 맡긴다.
+    if not args.no_notify and now.hour < 19:
+        print("19시 전 실행(밀린 작업 따라잡기) — PDF만 저장, 알림은 20:00 실행이 보냅니다.")
+        return
     if not args.no_notify:
         import git_sync  # 이 파일의 나머지는 git을 쓰지 않아 여기서만 가져온다
 

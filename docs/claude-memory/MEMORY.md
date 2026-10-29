@@ -1,5 +1,7 @@
-# Memory Index
-
+- [스위트 박스 프로젝트](sweet-box-project.md) — 랜덤 숙소 박스 사업 저장소·배포 주소·진행 단계
+- [saju-app 공유 체크아웃 주의](saju-app-shared-checkout.md) — 자동 게시가 같은 폴더에서 pull/push, 변경 방치·로컬 커밋 금지
+- [사주랩 해외판](saju-global-launch.md) — 일·영 해외판 계획·PayPal·/ja /en 진행 상황
+- ["변경내용 가져와" 동기화](sync-phrase.md) — 다른 컴퓨터 변경 반영 절차를 묻지 않고 실행, 명령어 안내 대신 이 말로
 - [daily.factlab 쇼츠 자동화 프로젝트](project_shorts_auto.md) — 최신 정보는 C:\shorts_auto\CLAUDE.md 참고, 여긴 포인터만
 - [사주랩(saju-app) 운영 상태](project_saju_app.md) — 최신은 C:\saju-app\OPS_NOTES.md 끝부분, 결제 오픈 절차·백업 위치 포인터
 - [반복적 수동 동기화 싫어함](feedback_avoid_repetitive_manual_sync.md) — 여러 컴퓨터 워크플로우는 자동화 우선 제안할 것

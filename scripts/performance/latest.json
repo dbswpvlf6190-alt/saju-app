@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-29T10:42:33",
+  "generated_at": "2026-10-30T09:04:59",
   "account": {
-    "followers": 5,
-    "media_count": 88,
-    "followers_delta_7d": -1,
-    "followers_delta_30d": 0
+    "followers": 6,
+    "media_count": 89,
+    "followers_delta_7d": 0,
+    "followers_delta_30d": 1
   },
   "items": [
     {
@@ -12,7 +12,17 @@
       "day": 1,
       "id": "R25",
       "posted_at": "2026-08-28T23:58:58.593976+00:00",
-      "age_hours": 1465.6,
+      "title": "사주팔자란 정확히 무엇인가",
+      "category": "사주상식",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "사주가 미신이라고",
+      "ctaType": null,
+      "durationSec": 27.3,
+      "keywords": null,
+      "age_hours": 1488.0,
       "metrics": {
         "reach": 147,
         "likes": 0,
@@ -23,7 +33,6 @@
         "views": 150,
         "avg_watch_sec": 2.64
       },
-      "durationSec": 27.3,
       "watch_ratio": 0.097,
       "interaction_rate": 0.0
     },
@@ -32,7 +41,17 @@
       "day": 2,
       "id": "R01",
       "posted_at": "2026-08-29T11:26:28.663203+00:00",
-      "age_hours": 1454.1,
+      "title": "돈이 안 모이는 이유",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "월급 들어오고 3일 만에",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1476.6,
       "metrics": {
         "reach": 6,
         "likes": 0,
@@ -43,7 +62,6 @@
         "views": 6,
         "avg_watch_sec": 2.81
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.138,
       "interaction_rate": 0.0
     },
@@ -52,7 +70,17 @@
       "day": 3,
       "id": "R07",
       "posted_at": "2026-08-30T11:00:54.881030+00:00",
-      "age_hours": 1430.6,
+      "title": "썸 탈 때 눈치 없는 사주",
+      "category": "연애운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "썸 탈 때마다",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1453.0,
       "metrics": {
         "reach": 123,
         "likes": 1,
@@ -63,7 +91,6 @@
         "views": 129,
         "avg_watch_sec": 2.38
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.117,
       "interaction_rate": 0.0163
     },
@@ -72,7 +99,17 @@
       "day": 4,
       "id": "R19",
       "posted_at": "2026-08-31T01:03:40.961962+00:00",
-      "age_hours": 1416.5,
+      "title": "생시 몰라도 되는 이유",
+      "category": "생년월일 운세",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "생시 몰라서",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1438.9,
       "metrics": {
         "reach": 105,
         "likes": 1,
@@ -83,7 +120,6 @@
         "views": 125,
         "avg_watch_sec": 3.42
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.168,
       "interaction_rate": 0.0095
     },
@@ -92,7 +128,17 @@
       "day": 5,
       "id": "R13",
       "posted_at": "2026-08-31T11:00:54.414304+00:00",
-      "age_hours": 1406.6,
+      "title": "조직생활 잘 맞는 사주",
+      "category": "직업운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "회사 체질 아니라는",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1429.0,
       "metrics": {
         "reach": 19,
         "likes": 0,
@@ -103,7 +149,6 @@
         "views": 20,
         "avg_watch_sec": 2.15
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.106,
       "interaction_rate": 0.0
     },
@@ -112,7 +157,17 @@
       "day": 6,
       "id": "R02",
       "posted_at": "2026-09-01T11:00:53.465802+00:00",
-      "age_hours": 1382.6,
+      "title": "편재가 많은 사람 특징",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "부수입 아이디어만",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1405.0,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -123,7 +178,6 @@
         "views": 29,
         "avg_watch_sec": 1.96
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.097,
       "interaction_rate": 0.0
     },
@@ -132,7 +186,17 @@
       "day": 7,
       "id": "R08",
       "posted_at": "2026-09-02T11:00:54.014712+00:00",
-      "age_hours": 1358.6,
+      "title": "표현 서툰 사람 vs 직진형",
+      "category": "연애운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "좋아하면서",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1381.0,
       "metrics": {
         "reach": 69,
         "likes": 1,
@@ -143,7 +207,6 @@
         "views": 77,
         "avg_watch_sec": 1.99
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.098,
       "interaction_rate": 0.0145
     },
@@ -152,7 +215,17 @@
       "day": 8,
       "id": "R20",
       "posted_at": "2026-09-02T11:31:13.523971+00:00",
-      "age_hours": 1358.1,
+      "title": "음력 양력 헷갈리는 이유",
+      "category": "생년월일 운세",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "음력이든 양력이든,",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1380.5,
       "metrics": {
         "reach": 8,
         "likes": 0,
@@ -163,7 +236,6 @@
         "views": 9,
         "avg_watch_sec": 3.07
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.151,
       "interaction_rate": 0.0
     },
@@ -172,7 +244,17 @@
       "day": 9,
       "id": "R14",
       "posted_at": "2026-09-02T12:01:34.587316+00:00",
-      "age_hours": 1357.6,
+      "title": "프리랜서 체질 특징",
+      "category": "직업운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "혼자 일하는 게",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1380.0,
       "metrics": {
         "reach": 6,
         "likes": 1,
@@ -183,7 +265,6 @@
         "views": 6,
         "avg_watch_sec": 5.69
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.28,
       "interaction_rate": 0.3333
     },
@@ -192,7 +273,17 @@
       "day": 10,
       "id": "R03",
       "posted_at": "2026-09-03T11:01:18.463421+00:00",
-      "age_hours": 1334.6,
+      "title": "부자 사주는 따로 있다?",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "부자 사주 있냐는",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1357.0,
       "metrics": {
         "reach": 25,
         "likes": 0,
@@ -203,7 +294,6 @@
         "views": 27,
         "avg_watch_sec": 1.98
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.098,
       "interaction_rate": 0.0
     },
@@ -212,7 +302,17 @@
       "day": 11,
       "id": "R26",
       "posted_at": "2026-09-03T21:50:13.531702+00:00",
-      "age_hours": 1323.7,
+      "title": "힘들 때 나타나는 귀인",
+      "category": "인간관계",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "힘들 때마다",
+      "ctaType": null,
+      "durationSec": 20.3,
+      "keywords": null,
+      "age_hours": 1346.2,
       "metrics": {
         "reach": 49,
         "likes": 0,
@@ -223,7 +323,6 @@
         "views": 56,
         "avg_watch_sec": 3.66
       },
-      "durationSec": 20.3,
       "watch_ratio": 0.18,
       "interaction_rate": 0.0
     },
@@ -232,7 +331,17 @@
       "day": 12,
       "id": "R27",
       "posted_at": "2026-09-06T02:03:23.470989+00:00",
-      "age_hours": 1271.5,
+      "title": "삼재, 진짜 의미는 이거예요",
+      "category": "사주상식",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "내 띠가",
+      "ctaType": null,
+      "durationSec": 26.3,
+      "keywords": null,
+      "age_hours": 1293.9,
       "metrics": {
         "reach": 103,
         "likes": 0,
@@ -243,7 +352,6 @@
         "views": 109,
         "avg_watch_sec": 4.4
       },
-      "durationSec": 26.3,
       "watch_ratio": 0.167,
       "interaction_rate": 0.0
     },
@@ -252,7 +360,17 @@
       "day": 13,
       "id": "R28",
       "posted_at": "2026-09-11T13:05:17.131917+00:00",
-      "age_hours": 1140.5,
+      "title": "월급 관리, 사주로 스타일이 갈린대요",
+      "category": "재물운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "월급 관리 잘하는 사람과",
+      "ctaType": null,
+      "durationSec": 27.3,
+      "keywords": null,
+      "age_hours": 1162.9,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -263,7 +381,6 @@
         "views": 25,
         "avg_watch_sec": 3.83
       },
-      "durationSec": 27.3,
       "watch_ratio": 0.14,
       "interaction_rate": 0.0
     },
@@ -272,7 +389,17 @@
       "day": 14,
       "id": "R29",
       "posted_at": "2026-09-12T13:37:59.810233+00:00",
-      "age_hours": 1115.9,
+      "title": "짝사랑이 유독 긴 사람 특징",
+      "category": "연애운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "고백 못 하고",
+      "ctaType": null,
+      "durationSec": 27.3,
+      "keywords": null,
+      "age_hours": 1138.4,
       "metrics": {
         "reach": 128,
         "likes": 1,
@@ -283,7 +410,6 @@
         "views": 139,
         "avg_watch_sec": 3.87
       },
-      "durationSec": 27.3,
       "watch_ratio": 0.142,
       "interaction_rate": 0.0078
     },
@@ -292,7 +418,17 @@
       "day": 15,
       "id": "R30",
       "posted_at": "2026-09-13T11:00:57.030196+00:00",
-      "age_hours": 1094.6,
+      "title": "이직 잦은 사람, 사주에 신호 있나요",
+      "category": "직업운",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "이직을",
+      "ctaType": null,
+      "durationSec": 26.3,
+      "keywords": null,
+      "age_hours": 1117.0,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -303,7 +439,6 @@
         "views": 111,
         "avg_watch_sec": 3.78
       },
-      "durationSec": 26.3,
       "watch_ratio": 0.144,
       "interaction_rate": 0.0098
     },
@@ -312,7 +447,17 @@
       "day": 16,
       "id": "R31",
       "posted_at": "2026-09-17T10:34:14.148797+00:00",
-      "age_hours": 999.0,
+      "title": "맨날 나만 손해보는 관계, 이유 있을까",
+      "category": "인간관계",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "연락도 내가 먼저,",
+      "ctaType": null,
+      "durationSec": 26.3,
+      "keywords": null,
+      "age_hours": 1021.4,
       "metrics": {
         "reach": 120,
         "likes": 2,
@@ -323,7 +468,6 @@
         "views": 128,
         "avg_watch_sec": 5.0
       },
-      "durationSec": 26.3,
       "watch_ratio": 0.19,
       "interaction_rate": 0.025
     },
@@ -332,7 +476,17 @@
       "day": 17,
       "id": "R32",
       "posted_at": "2026-09-17T20:55:57.379735+00:00",
-      "age_hours": 988.6,
+      "title": "이사 날짜, 아무 날이나 잡아도 될까",
+      "category": "사주상식",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "이사·개업 날짜,",
+      "ctaType": null,
+      "durationSec": 26.3,
+      "keywords": null,
+      "age_hours": 1011.1,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -343,7 +497,6 @@
         "views": 108,
         "avg_watch_sec": 1.79
       },
-      "durationSec": 26.3,
       "watch_ratio": 0.068,
       "interaction_rate": 0.0098
     },
@@ -352,7 +505,17 @@
       "day": 18,
       "id": "R33",
       "posted_at": "2026-09-19T11:02:00.865963+00:00",
-      "age_hours": 950.5,
+      "title": "내 사주에 없는 기운이 있다면",
+      "category": "사주상식",
+      "subcategory": null,
+      "topic": null,
+      "format": null,
+      "exam": null,
+      "hook_first": "사주에 나무 기운이",
+      "ctaType": null,
+      "durationSec": 32.3,
+      "keywords": null,
+      "age_hours": 973.0,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -363,7 +526,6 @@
         "views": 155,
         "avg_watch_sec": 4.44
       },
-      "durationSec": 32.3,
       "watch_ratio": 0.137,
       "interaction_rate": 0.0
     },
@@ -372,8 +534,23 @@
       "day": 20,
       "id": "R35",
       "posted_at": "2026-09-20T11:01:05.966635+00:00",
+      "title": "버는 돈 vs 남는 돈",
+      "category": "재물운",
+      "subcategory": "재물",
+      "topic": "돈을 잘 버는 사람과 돈이 실제로 잘 남는 사람의 사주 차이",
+      "format": "비교형",
+      "exam": null,
+      "hook_first": "돈 잘 버는 사람",
       "ctaType": "A",
-      "age_hours": 926.6,
+      "durationSec": 23.3,
+      "keywords": [
+        "재물운",
+        "정재",
+        "편재",
+        "소비습관",
+        "돈관리"
+      ],
+      "age_hours": 949.0,
       "metrics": {
         "reach": 16,
         "likes": 0,
@@ -384,7 +561,6 @@
         "views": 17,
         "avg_watch_sec": 2.87
       },
-      "durationSec": 23.3,
       "watch_ratio": 0.123,
       "interaction_rate": 0.0
     },
@@ -393,8 +569,23 @@
       "day": 21,
       "id": "R36",
       "posted_at": "2026-09-21T11:00:53.454187+00:00",
+      "title": "만난 지 얼마 안 됐는데 벌써 확신 찾는 사람",
+      "category": "연애운",
+      "subcategory": "연애",
+      "topic": "연애 초반부터 미래를 확신하려 하고 불안해하는 사람의 성향",
+      "format": "상황형",
+      "exam": null,
+      "hook_first": "연애 시작 2주 만에",
       "ctaType": "B",
-      "age_hours": 902.6,
+      "durationSec": 27.3,
+      "keywords": [
+        "연애초반",
+        "불안형연애",
+        "확신욕구",
+        "일간",
+        "연애성향"
+      ],
+      "age_hours": 925.0,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -405,7 +596,6 @@
         "views": 153,
         "avg_watch_sec": 2.98
       },
-      "durationSec": 27.3,
       "watch_ratio": 0.109,
       "interaction_rate": 0.0
     },
@@ -414,8 +604,23 @@
       "day": 22,
       "id": "R37",
       "posted_at": "2026-09-22T11:00:57.528845+00:00",
+      "title": "화나도 티 안 나는 사람, 사주엔 뭐가 강할까",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "화가 나도 겉으로 티 내지 않고 속으로 삭이는 성향의 사주 요인",
+      "format": "결과확인형",
+      "exam": null,
+      "hook_first": "화났는데",
       "ctaType": "C",
-      "age_hours": 878.6,
+      "durationSec": 21.3,
+      "keywords": [
+        "감정표현",
+        "성격",
+        "화",
+        "일간",
+        "성향"
+      ],
+      "age_hours": 901.0,
       "metrics": {
         "reach": 111,
         "likes": 1,
@@ -426,7 +631,6 @@
         "views": 128,
         "avg_watch_sec": 2.51
       },
-      "durationSec": 21.3,
       "watch_ratio": 0.118,
       "interaction_rate": 0.009
     },
@@ -435,8 +639,23 @@
       "day": 23,
       "id": "R38",
       "posted_at": "2026-09-23T11:00:58.826111+00:00",
+      "title": "말 없이도 통하는데 자꾸 부딪히는 이유 3가지",
+      "category": "연애운",
+      "subcategory": "연애",
+      "topic": "잘 통하는 것 같은데 사소한 걸로 자주 다투는 커플의 사주적 특징",
+      "format": "리스트형",
+      "exam": null,
+      "hook_first": "잘 통하는데",
       "ctaType": "A",
-      "age_hours": 854.6,
+      "durationSec": 23.3,
+      "keywords": [
+        "궁합",
+        "커플",
+        "다툼",
+        "연애",
+        "성향차이"
+      ],
+      "age_hours": 877.0,
       "metrics": {
         "reach": 141,
         "likes": 1,
@@ -447,7 +666,6 @@
         "views": 152,
         "avg_watch_sec": 2.44
       },
-      "durationSec": 23.3,
       "watch_ratio": 0.105,
       "interaction_rate": 0.0071
     },
@@ -456,8 +674,23 @@
       "day": 24,
       "id": "R39",
       "posted_at": "2026-09-25T00:05:45.845393+00:00",
+      "title": "왜 유독 특정 사람 말에만 상처받을까",
+      "category": "사주상식",
+      "subcategory": "사주 사실",
+      "topic": "특정 상대의 말에만 유독 예민하게 반응하는 이유를 사주로 설명",
+      "format": "궁금증형",
+      "exam": null,
+      "hook_first": "다른 사람 말은",
       "ctaType": "B",
-      "age_hours": 817.5,
+      "durationSec": 24.3,
+      "keywords": [
+        "감정",
+        "관계",
+        "예민함",
+        "일간",
+        "사주해석"
+      ],
+      "age_hours": 839.9,
       "metrics": {
         "reach": 108,
         "likes": 1,
@@ -468,7 +701,6 @@
         "views": 116,
         "avg_watch_sec": 1.61
       },
-      "durationSec": 24.3,
       "watch_ratio": 0.066,
       "interaction_rate": 0.0093
     },
@@ -477,8 +709,23 @@
       "day": 25,
       "id": "R40",
       "posted_at": "2026-09-25T11:01:04.286677+00:00",
+      "title": "한쪽만 계속 맞춰주는 친구 사이",
+      "category": "인간관계",
+      "subcategory": "인간관계",
+      "topic": "친구 사이에서 유독 한 명만 배려하고 맞춰주는 관계 패턴",
+      "format": "관계형",
+      "exam": null,
+      "hook_first": "약속 잡는 것도",
       "ctaType": "C",
-      "age_hours": 806.6,
+      "durationSec": 23.3,
+      "keywords": [
+        "친구관계",
+        "인간관계",
+        "짝사랑친구",
+        "비겁",
+        "식상"
+      ],
+      "age_hours": 829.0,
       "metrics": {
         "reach": 137,
         "likes": 1,
@@ -489,7 +736,6 @@
         "views": 149,
         "avg_watch_sec": 1.8
       },
-      "durationSec": 23.3,
       "watch_ratio": 0.077,
       "interaction_rate": 0.0146
     },
@@ -498,8 +744,23 @@
       "day": 26,
       "id": "R41",
       "posted_at": "2026-09-28T11:00:57.181410+00:00",
+      "title": "완벽주의 때문에 시작을 못 하는 사람",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "완벽하게 하려다 오히려 아무것도 시작하지 못하는 성향의 사주적 이유",
+      "format": "자기진단형",
+      "exam": null,
+      "hook_first": "계획만 짜다가",
       "ctaType": "A",
-      "age_hours": 734.6,
+      "durationSec": 25.3,
+      "keywords": [
+        "완벽주의",
+        "미루기",
+        "성격",
+        "자기진단",
+        "사주"
+      ],
+      "age_hours": 757.0,
       "metrics": {
         "reach": 43,
         "likes": 0,
@@ -510,7 +771,6 @@
         "views": 44,
         "avg_watch_sec": 2.06
       },
-      "durationSec": 25.3,
       "watch_ratio": 0.081,
       "interaction_rate": 0.0
     },
@@ -519,8 +779,23 @@
       "day": 27,
       "id": "R42",
       "posted_at": "2026-09-29T11:00:58.181119+00:00",
+      "title": "연락 답장이 갑자기 늦어지기 시작하는 순간",
+      "category": "연애운",
+      "subcategory": "연애",
+      "topic": "관계가 편해지는 순간부터 오히려 연락 빈도가 줄어드는 사람의 사주적 특징",
+      "format": "상황형",
+      "exam": null,
+      "hook_first": "편해졌다 싶으면",
       "ctaType": "B",
-      "age_hours": 710.6,
+      "durationSec": 27.3,
+      "keywords": [
+        "연락패턴",
+        "권태기",
+        "연애성향",
+        "편안함",
+        "사주"
+      ],
+      "age_hours": 733.0,
       "metrics": {
         "reach": 42,
         "likes": 1,
@@ -531,7 +806,6 @@
         "views": 45,
         "avg_watch_sec": 2.06
       },
-      "durationSec": 27.3,
       "watch_ratio": 0.075,
       "interaction_rate": 0.0238
     },
@@ -540,8 +814,23 @@
       "day": 28,
       "id": "R43",
       "posted_at": "2026-09-30T11:01:37.848567+00:00",
+      "title": "사주 여덟 글자 중 내가 제일 부족한 기운",
+      "category": "사주상식",
+      "subcategory": "사주 사실",
+      "topic": "본인 사주에서 부족한 오행이 생활 습관에 어떻게 드러나는지 확인",
+      "format": "결과확인형",
+      "exam": null,
+      "hook_first": "여덟 글자 중",
       "ctaType": "C",
-      "age_hours": 686.6,
+      "durationSec": 24.3,
+      "keywords": [
+        "오행",
+        "부족한기운",
+        "사주풀이",
+        "자기이해",
+        "결과확인"
+      ],
+      "age_hours": 709.0,
       "metrics": {
         "reach": 103,
         "likes": 1,
@@ -552,7 +841,6 @@
         "views": 109,
         "avg_watch_sec": 1.94
       },
-      "durationSec": 24.3,
       "watch_ratio": 0.08,
       "interaction_rate": 0.0097
     },
@@ -561,8 +849,23 @@
       "day": 29,
       "id": "R44",
       "posted_at": "2026-10-01T11:01:37.864831+00:00",
+      "title": "고집 센 사람 체크리스트",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "본인은 몰라도 주변에서는 다 아는 고집 강한 성향 체크",
+      "format": "댓글참여형",
+      "exam": null,
+      "hook_first": "고집 세다는 말",
       "ctaType": "A",
-      "age_hours": 662.6,
+      "durationSec": 26.3,
+      "keywords": [
+        "고집",
+        "성격체크",
+        "자기진단",
+        "댓글참여",
+        "사주"
+      ],
+      "age_hours": 685.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -573,7 +876,6 @@
         "views": 3,
         "avg_watch_sec": 6.03
       },
-      "durationSec": 26.3,
       "watch_ratio": 0.229,
       "interaction_rate": 1.0
     },
@@ -582,8 +884,23 @@
       "day": 30,
       "id": "R45",
       "posted_at": "2026-10-02T11:01:25.211715+00:00",
+      "title": "돈보다 명예나 인정에 더 반응하는 사람",
+      "category": "재물운",
+      "subcategory": "재물",
+      "topic": "재물보다 인정받는 것에 더 큰 동기를 느끼는 사주적 성향 자가진단",
+      "format": "자기진단형",
+      "exam": null,
+      "hook_first": "칭찬 한마디에",
       "ctaType": "B",
-      "age_hours": 638.6,
+      "durationSec": 27.3,
+      "keywords": [
+        "재물성향",
+        "인정욕구",
+        "돈보다명예",
+        "자기진단",
+        "사주"
+      ],
+      "age_hours": 661.0,
       "metrics": {
         "reach": 15,
         "likes": 0,
@@ -594,7 +911,6 @@
         "views": 18,
         "avg_watch_sec": 1.66
       },
-      "durationSec": 27.3,
       "watch_ratio": 0.061,
       "interaction_rate": 0.0
     },
@@ -603,8 +919,23 @@
       "day": 31,
       "id": "R46",
       "posted_at": "2026-09-25T10:26:26.922134+00:00",
+      "title": "추석 잔소리 반응 유형",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "추석 친척 잔소리에 유형별로 반응이 갈리는 모습",
+      "format": "비교형",
+      "exam": null,
+      "hook_first": "추석 잔소리에",
       "ctaType": "S",
-      "age_hours": 807.1,
+      "durationSec": 26.3,
+      "keywords": [
+        "추석",
+        "잔소리",
+        "유형",
+        "반응",
+        "사주"
+      ],
+      "age_hours": 829.6,
       "metrics": {
         "reach": 116,
         "likes": 1,
@@ -615,7 +946,6 @@
         "views": 121,
         "avg_watch_sec": 2.59
       },
-      "durationSec": 26.3,
       "watch_ratio": 0.098,
       "interaction_rate": 0.0172
     },
@@ -624,8 +954,23 @@
       "day": 32,
       "id": "R47",
       "posted_at": "2026-09-26T11:01:51.895498+00:00",
+      "title": "연휴 마지막 날 저녁 우울",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "연휴가 끝나기 전날 저녁부터 기분이 가라앉는 유형별 차이",
+      "format": "상황형",
+      "exam": null,
+      "hook_first": "연휴 마지막 날",
       "ctaType": "S",
-      "age_hours": 782.5,
+      "durationSec": 12.5,
+      "keywords": [
+        "연휴",
+        "유형",
+        "반응",
+        "사주",
+        "성격"
+      ],
+      "age_hours": 805.0,
       "metrics": {
         "reach": 102,
         "likes": 0,
@@ -636,7 +981,6 @@
         "views": 108,
         "avg_watch_sec": 1.5
       },
-      "durationSec": 12.5,
       "watch_ratio": 0.12,
       "interaction_rate": 0.0
     },
@@ -645,8 +989,23 @@
       "day": 33,
       "id": "R48",
       "posted_at": "2026-09-27T11:01:53.315372+00:00",
+      "title": "카톡 읽고 답장 미루는 사람",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "카톡을 읽고도 바로 답하지 않는 유형별 이유",
+      "format": "궁금증형",
+      "exam": null,
+      "hook_first": "카톡 읽고",
       "ctaType": "S",
-      "age_hours": 758.5,
+      "durationSec": 12.6,
+      "keywords": [
+        "카톡",
+        "유형",
+        "반응",
+        "사주",
+        "성격"
+      ],
+      "age_hours": 781.0,
       "metrics": {
         "reach": 134,
         "likes": 1,
@@ -657,7 +1016,6 @@
         "views": 144,
         "avg_watch_sec": 2.47
       },
-      "durationSec": 12.6,
       "watch_ratio": 0.196,
       "interaction_rate": 0.0075
     },
@@ -666,8 +1024,23 @@
       "day": 34,
       "id": "R49",
       "posted_at": "2026-09-27T21:37:49.183758+00:00",
+      "title": "약속 취소되면 좋아하는 사람",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "약속이 취소되면 속으로 안도하는 유형의 이유",
+      "format": "자기진단형",
+      "exam": null,
+      "hook_first": "약속이 취소되면",
       "ctaType": "S",
-      "age_hours": 748.0,
+      "durationSec": 13.5,
+      "keywords": [
+        "약속",
+        "유형",
+        "반응",
+        "사주",
+        "성격"
+      ],
+      "age_hours": 770.4,
       "metrics": {
         "reach": 108,
         "likes": 1,
@@ -678,7 +1051,6 @@
         "views": 117,
         "avg_watch_sec": 1.89
       },
-      "durationSec": 13.5,
       "watch_ratio": 0.14,
       "interaction_rate": 0.0185
     },
@@ -687,8 +1059,23 @@
       "day": 35,
       "id": "R50",
       "posted_at": "2026-10-04T11:01:06.641795+00:00",
+      "title": "임용 1차 막판, 사주로 보는 공부 스타일 3가지",
+      "category": "인간관계",
+      "subcategory": "시험",
+      "topic": "임용 1차를 앞두고 막판 교육학 논술 정리할 때 드러나는 성향 3가지",
+      "format": "리스트형",
+      "exam": "imyong",
+      "hook_first": "임용 1차 앞두고",
       "ctaType": "C",
-      "age_hours": 590.6,
+      "durationSec": 25.3,
+      "keywords": [
+        "임용고시",
+        "임용1차",
+        "교육학논술",
+        "수험생",
+        "사주성향"
+      ],
+      "age_hours": 613.0,
       "metrics": {
         "reach": 25,
         "likes": 1,
@@ -699,7 +1086,6 @@
         "views": 27,
         "avg_watch_sec": 2.43
       },
-      "durationSec": 25.3,
       "watch_ratio": 0.096,
       "interaction_rate": 0.08
     },
@@ -708,8 +1094,23 @@
       "day": 36,
       "id": "R51",
       "posted_at": "2026-10-06T11:01:01.738556+00:00",
+      "title": "스터디에서 유독 흔들리는 사람들의 공통점",
+      "category": "직업운",
+      "subcategory": "시험",
+      "topic": "임용 스터디에서 비교당하는 느낌에 쉽게 흔들리는 수험생의 사주적 특징",
+      "format": "스토리형",
+      "exam": "imyong",
+      "hook_first": "스터디원이 그러는데",
       "ctaType": "A",
-      "age_hours": 542.6,
+      "durationSec": 24.3,
+      "keywords": [
+        "임용고시",
+        "임용스터디",
+        "수험생",
+        "멘탈관리",
+        "비교심리"
+      ],
+      "age_hours": 565.0,
       "metrics": {
         "reach": 26,
         "likes": 0,
@@ -720,7 +1121,6 @@
         "views": 26,
         "avg_watch_sec": 1.99
       },
-      "durationSec": 24.3,
       "watch_ratio": 0.082,
       "interaction_rate": 0.0
     },
@@ -729,8 +1129,22 @@
       "day": 37,
       "id": "R52",
       "posted_at": "2026-10-07T11:02:28.900517+00:00",
+      "title": "유독 나한테만 편하게 구는 사람",
+      "category": "인간관계",
+      "subcategory": "인간관계",
+      "topic": "나에게만 유독 편하게 굴고 예의를 덜 차리는 사람과의 관계 패턴",
+      "format": "관계형",
+      "exam": null,
+      "hook_first": "나한테만",
       "ctaType": "B",
-      "age_hours": 518.5,
+      "durationSec": 23.3,
+      "keywords": [
+        "인간관계",
+        "편한사람",
+        "비겁",
+        "성격"
+      ],
+      "age_hours": 541.0,
       "metrics": {
         "reach": 111,
         "likes": 1,
@@ -741,7 +1155,6 @@
         "views": 121,
         "avg_watch_sec": 3.69
       },
-      "durationSec": 23.3,
       "watch_ratio": 0.158,
       "interaction_rate": 0.018
     },
@@ -750,8 +1163,22 @@
       "day": 38,
       "id": "R53",
       "posted_at": "2026-10-08T11:01:27.237136+00:00",
+      "title": "모의고사와 실전 컨디션이 다른 수험생",
+      "category": "직업운",
+      "subcategory": "시험",
+      "topic": "평소 모의고사는 괜찮은데 실전 날 유독 긴장이 심해지는 수험생의 성향",
+      "format": "상황형",
+      "exam": "suneung",
+      "hook_first": "평소엔 괜찮은데",
       "ctaType": "C",
-      "age_hours": 494.6,
+      "durationSec": 24.3,
+      "keywords": [
+        "수능",
+        "실전긴장",
+        "수험생",
+        "컨디션관리"
+      ],
+      "age_hours": 517.0,
       "metrics": {
         "reach": 25,
         "likes": 0,
@@ -762,7 +1189,6 @@
         "views": 27,
         "avg_watch_sec": 1.33
       },
-      "durationSec": 24.3,
       "watch_ratio": 0.055,
       "interaction_rate": 0.0
     },
@@ -771,8 +1197,23 @@
       "day": 39,
       "id": "R54",
       "posted_at": "2026-10-11T11:00:58.470246+00:00",
+      "title": "고집 세다는 소리 듣는 사람 체크",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "본인은 아니라고 생각하지만 주변에서 고집 세다고 말하는 성향 체크리스트",
+      "format": "댓글참여형",
+      "exam": null,
+      "hook_first": "나 안 고집세",
       "ctaType": "A",
-      "age_hours": 422.6,
+      "durationSec": 24.3,
+      "keywords": [
+        "고집",
+        "성격",
+        "자기주관",
+        "일간",
+        "사주"
+      ],
+      "age_hours": 445.0,
       "metrics": {
         "reach": 105,
         "likes": 0,
@@ -783,7 +1224,6 @@
         "views": 109,
         "avg_watch_sec": 2.51
       },
-      "durationSec": 24.3,
       "watch_ratio": 0.103,
       "interaction_rate": 0.0
     },
@@ -792,8 +1232,23 @@
       "day": 40,
       "id": "R55",
       "posted_at": "2026-10-14T11:10:29.514928+00:00",
+      "title": "추석 잔소리, 유형별로 반응이 다르다",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "추석 친척 잔소리에 감정형과 절제형이 보이는 반응 차이",
+      "format": "비교형",
+      "exam": null,
+      "hook_first": "잔소리 들을 때",
       "ctaType": "B",
-      "age_hours": 350.4,
+      "durationSec": 24.3,
+      "keywords": [
+        "추석",
+        "잔소리",
+        "성격유형",
+        "감정표현",
+        "사주"
+      ],
+      "age_hours": 372.8,
       "metrics": {
         "reach": 13,
         "likes": 1,
@@ -804,7 +1259,6 @@
         "views": 14,
         "avg_watch_sec": 1.76
       },
-      "durationSec": 24.3,
       "watch_ratio": 0.072,
       "interaction_rate": 0.0769
     },
@@ -813,8 +1267,23 @@
       "day": 41,
       "id": "R56",
       "posted_at": "2026-10-17T11:00:56.553448+00:00",
+      "title": "돈 쓰고 나서 후회하는 소비 유형 3가지",
+      "category": "재물운",
+      "subcategory": "재물",
+      "topic": "돈을 쓸 때는 몰랐다가 나중에 후회하는 소비 패턴을 사주 관점으로 분류",
+      "format": "리스트형",
+      "exam": null,
+      "hook_first": "결제하고",
       "ctaType": "C",
-      "age_hours": 278.6,
+      "durationSec": 23.3,
+      "keywords": [
+        "소비습관",
+        "재물운",
+        "충동소비",
+        "사주",
+        "돈관리"
+      ],
+      "age_hours": 301.0,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -825,7 +1294,6 @@
         "views": 6,
         "avg_watch_sec": 7.02
       },
-      "durationSec": 23.3,
       "watch_ratio": 0.301,
       "interaction_rate": 0.3333
     },
@@ -834,20 +1302,34 @@
       "day": 42,
       "id": "R57",
       "posted_at": "2026-10-20T11:01:03.831565+00:00",
+      "title": "사귄 지 얼마 안 됐는데 미래부터 묻는 사람",
+      "category": "연애운",
+      "subcategory": "연애",
+      "topic": "연애 초반 상대의 마음보다 관계의 확실성부터 확인하려는 성향",
+      "format": "상황형",
+      "exam": null,
+      "hook_first": "세 번 만나고",
       "ctaType": "A",
-      "age_hours": 206.6,
+      "durationSec": 22.3,
+      "keywords": [
+        "연애초반",
+        "불안형연애",
+        "일간",
+        "확신욕구",
+        "관성"
+      ],
+      "age_hours": 229.0,
       "metrics": {
-        "reach": 3,
+        "reach": 4,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 3,
-        "avg_watch_sec": 6.41
+        "views": 4,
+        "avg_watch_sec": 10.23
       },
-      "durationSec": 22.3,
-      "watch_ratio": 0.287,
+      "watch_ratio": 0.459,
       "interaction_rate": 0.0
     },
     {
@@ -855,8 +1337,23 @@
       "day": 43,
       "id": "R58",
       "posted_at": "2026-10-23T07:06:23.776968+00:00",
+      "title": "돈 걱정 많은데 통장엔 여유 있는 사람",
+      "category": "재물운",
+      "subcategory": "재물",
+      "topic": "실제 재정 상황과 무관하게 유독 돈 불안을 크게 느끼는 사주적 성향",
+      "format": "궁금증형",
+      "exam": null,
+      "hook_first": "돈 많은데",
       "ctaType": "B",
-      "age_hours": 138.5,
+      "durationSec": 25.3,
+      "keywords": [
+        "재물운",
+        "돈불안",
+        "정재",
+        "편재",
+        "사주재물"
+      ],
+      "age_hours": 160.9,
       "metrics": {
         "reach": 107,
         "likes": 1,
@@ -867,9 +1364,78 @@
         "views": 113,
         "avg_watch_sec": 2.21
       },
-      "durationSec": 25.3,
       "watch_ratio": 0.087,
       "interaction_rate": 0.0093
+    },
+    {
+      "type": "릴스",
+      "day": 44,
+      "id": "R59",
+      "posted_at": "2026-10-26T11:11:38.524473+00:00",
+      "title": "거절 못 하는 사람, 사주에선 뭐가 강할까",
+      "category": "인간관계",
+      "subcategory": "성격",
+      "topic": "부탁을 거절하지 못하고 떠안는 성향의 사주적 요인을 확인하게 만드는 소재",
+      "format": "결과확인형",
+      "exam": null,
+      "hook_first": "싫다는 말이",
+      "ctaType": "C",
+      "durationSec": 23.3,
+      "keywords": [
+        "거절",
+        "성격",
+        "착한사람",
+        "식상",
+        "자기진단"
+      ],
+      "age_hours": 84.8,
+      "metrics": {
+        "reach": 2,
+        "likes": 1,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 2,
+        "views": 2,
+        "avg_watch_sec": 4.85
+      },
+      "watch_ratio": 0.208,
+      "interaction_rate": 1.0
+    },
+    {
+      "type": "릴스",
+      "day": 45,
+      "id": "R60",
+      "posted_at": "2026-10-29T01:37:12.002673+00:00",
+      "title": "연락 줄어드는 게 식은 게 아닐 수도 있어요",
+      "category": "연애운",
+      "subcategory": "연애",
+      "topic": "관계가 편해진 뒤 연락이 줄어드는 사람이 실제로는 마음이 식은 게 아닌 경우를 다루는 소재",
+      "format": "반전형",
+      "exam": null,
+      "hook_first": "연락 뜸해지면",
+      "ctaType": "A",
+      "durationSec": 24.3,
+      "keywords": [
+        "연애",
+        "연락빈도",
+        "권태기",
+        "표현방식",
+        "커플"
+      ],
+      "age_hours": 22.4,
+      "metrics": {
+        "reach": 106,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 121,
+        "avg_watch_sec": 4.69
+      },
+      "watch_ratio": 0.193,
+      "interaction_rate": 0.0
     },
     {
       "type": "카드뉴스",
@@ -884,7 +1450,7 @@
       "exam": null,
       "hook_first": "오행, 3분이면 완전히 이해돼요",
       "ctaType": null,
-      "age_hours": 1465.3,
+      "age_hours": 1487.7,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -909,7 +1475,7 @@
       "exam": null,
       "hook_first": "사주 용어, 헷갈리셨죠?",
       "ctaType": null,
-      "age_hours": 1463.6,
+      "age_hours": 1486.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -934,7 +1500,7 @@
       "exam": null,
       "hook_first": "재물운 좋은 사람들의 공통점",
       "ctaType": null,
-      "age_hours": 1439.6,
+      "age_hours": 1462.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -959,7 +1525,7 @@
       "exam": null,
       "hook_first": "연애할 때 나는 어떤 스타일일까?",
       "ctaType": null,
-      "age_hours": 1416.5,
+      "age_hours": 1438.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -984,7 +1550,7 @@
       "exam": null,
       "hook_first": "이직·승진 타이밍, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 1415.6,
+      "age_hours": 1438.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1009,7 +1575,7 @@
       "exam": null,
       "hook_first": "태어난 계절, 기운에 힌트를 준대요",
       "ctaType": null,
-      "age_hours": 1391.6,
+      "age_hours": 1414.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1034,7 +1600,7 @@
       "exam": null,
       "hook_first": "궁합 볼 때, 뭘 보는 건지 아세요?",
       "ctaType": null,
-      "age_hours": 1367.6,
+      "age_hours": 1390.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1059,7 +1625,7 @@
       "exam": null,
       "hook_first": "재물 그릇이 크다는 사주, 신호래요",
       "ctaType": null,
-      "age_hours": 1343.6,
+      "age_hours": 1366.0,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1084,7 +1650,7 @@
       "exam": null,
       "hook_first": "조직형 vs 자율형, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 1343.1,
+      "age_hours": 1365.5,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1109,7 +1675,7 @@
       "exam": null,
       "hook_first": "사주가 자기이해 도구인 이유",
       "ctaType": null,
-      "age_hours": 1342.6,
+      "age_hours": 1365.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1134,7 +1700,7 @@
       "exam": null,
       "hook_first": "내 인생 귀인, 사주에 신호가 있대요",
       "ctaType": null,
-      "age_hours": 1323.9,
+      "age_hours": 1346.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1159,7 +1725,7 @@
       "exam": null,
       "hook_first": "삼재, 무섭게만 알고 계셨나요",
       "ctaType": null,
-      "age_hours": 1271.6,
+      "age_hours": 1294.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1184,7 +1750,7 @@
       "exam": null,
       "hook_first": "정재 vs 편재, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 1271.5,
+      "age_hours": 1293.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1209,7 +1775,7 @@
       "exam": null,
       "hook_first": "짝사랑이 유독 긴 사람 특징",
       "ctaType": null,
-      "age_hours": 1140.5,
+      "age_hours": 1162.9,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -1234,7 +1800,7 @@
       "exam": null,
       "hook_first": "N잡·부업 체질, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 1127.6,
+      "age_hours": 1150.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1259,7 +1825,7 @@
       "exam": null,
       "hook_first": "맨날 나만 손해보는 관계, 신호 있나요",
       "ctaType": null,
-      "age_hours": 1103.6,
+      "age_hours": 1126.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1284,7 +1850,7 @@
       "exam": null,
       "hook_first": "이사 날짜, 아무 날이나 잡아도 될까",
       "ctaType": null,
-      "age_hours": 971.1,
+      "age_hours": 993.5,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1309,7 +1875,7 @@
       "exam": null,
       "hook_first": "십성이라는 말, 사실 어렵지 않아요",
       "ctaType": null,
-      "age_hours": 959.6,
+      "age_hours": 982.0,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1334,7 +1900,7 @@
       "exam": null,
       "hook_first": "태어난 시간, 왜 중요하다고 할까요",
       "ctaType": null,
-      "age_hours": 935.5,
+      "age_hours": 957.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1359,7 +1925,7 @@
       "exam": null,
       "hook_first": "거절 못하는 나, 거절 잘하는 쟤",
       "ctaType": "A",
-      "age_hours": 854.7,
+      "age_hours": 877.1,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1384,7 +1950,7 @@
       "exam": null,
       "hook_first": "이 중 몇 개나 해당되나요",
       "ctaType": "B",
-      "age_hours": 791.6,
+      "age_hours": 814.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1409,7 +1975,7 @@
       "exam": null,
       "hook_first": "칭찬받아야 크는 사람, 알아서 크는 사람",
       "ctaType": "C",
-      "age_hours": 719.6,
+      "age_hours": 742.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1434,7 +2000,7 @@
       "exam": null,
       "hook_first": "월급날마다 통장이 텅 비는 이유",
       "ctaType": "A",
-      "age_hours": 647.6,
+      "age_hours": 670.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1459,7 +2025,7 @@
       "exam": null,
       "hook_first": "이 중 3개 이상이면 번아웃 위험군",
       "ctaType": "B",
-      "age_hours": 580.0,
+      "age_hours": 602.4,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1484,7 +2050,7 @@
       "exam": null,
       "hook_first": "왜 유독 그 사람\n앞에서만 예민해질까",
       "ctaType": "C",
-      "age_hours": 503.5,
+      "age_hours": 525.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1509,7 +2075,7 @@
       "exam": null,
       "hook_first": "N잡 체질\n성향 3가지",
       "ctaType": "A",
-      "age_hours": 470.1,
+      "age_hours": 492.5,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1534,7 +2100,7 @@
       "exam": "suneung",
       "hook_first": "모의고사엔 강한데\n실전엔 약한 사람",
       "ctaType": "B",
-      "age_hours": 407.6,
+      "age_hours": 430.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1559,7 +2125,7 @@
       "exam": null,
       "hook_first": "단톡방에서\n혼자 말이 길어지는 사람",
       "ctaType": "C",
-      "age_hours": 335.5,
+      "age_hours": 357.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1584,7 +2150,7 @@
       "exam": "imyong",
       "hook_first": "임용 스터디에서\n이런 모습이면 확인해보세요",
       "ctaType": "A",
-      "age_hours": 263.5,
+      "age_hours": 286.0,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -1609,7 +2175,7 @@
       "exam": null,
       "hook_first": "착한 사람이라서\n이용당하는 게 아니에요",
       "ctaType": "B",
-      "age_hours": 191.6,
+      "age_hours": 214.0,
       "metrics": {
         "reach": 4,
         "likes": 1,
@@ -1634,7 +2200,7 @@
       "exam": null,
       "hook_first": "연락 먼저 하는 쪽,\n항상 나였다면",
       "ctaType": "C",
-      "age_hours": 119.5,
+      "age_hours": 141.9,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -1659,7 +2225,7 @@
       "exam": null,
       "hook_first": "왜 꼭 그런 사람만\n자꾸 좋아질까",
       "ctaType": "A",
-      "age_hours": 47.6,
+      "age_hours": 70.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1674,17 +2240,9 @@
   ],
   "app": {
     "daily_events": {
-      "2026-09-29": {
-        "free_result_view": 2,
-        "landing_view": 10,
-        "premium_cta_click": 1,
-        "premium_offer_seen": 1,
-        "saju_complete": 2,
-        "saju_start": 2
-      },
       "2026-09-30": {
         "free_result_view": 1,
-        "landing_view": 4,
+        "landing_view": 3,
         "premium_cta_click": 1,
         "premium_offer_seen": 1,
         "saju_complete": 1,
@@ -1861,12 +2419,12 @@
         "saju_start": 4
       },
       "2026-10-29": {
-        "free_result_view": 2,
-        "landing_view": 4,
+        "free_result_view": 4,
+        "landing_view": 8,
         "premium_cta_click": 1,
-        "premium_offer_seen": 2,
-        "saju_complete": 2,
-        "saju_start": 2
+        "premium_offer_seen": 4,
+        "saju_complete": 4,
+        "saju_start": 4
       }
     },
     "coupons": {
@@ -1874,13 +2432,13 @@
       "used": 4
     },
     "landing_by_ref_30d": {
-      "(없음)": 207,
-      "threads": 36,
-      "threads_reply": 14,
+      "(없음)": 202,
+      "threads": 31,
+      "threads_reply": 16,
       "ig_cardnews": 12,
       "ig_reel": 5,
-      "ig_profile": 4,
-      "home_banner": 4
+      "home_banner": 5,
+      "ig_profile": 4
     },
     "payments_by_src_30d": {}
   },
@@ -1896,7 +2454,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 2555,
+          "views": 2559,
           "likes": 43,
           "replies": 97,
           "reposts": 5,
@@ -1926,7 +2484,7 @@
         "metrics": {
           "views": 142,
           "likes": 1,
-          "replies": 2,
+          "replies": 1,
           "reposts": 0,
           "quotes": 0,
           "shares": 0
@@ -2003,6 +2561,20 @@
         }
       },
       {
+        "id": "RD08",
+        "posted_at": "2026-10-29T12:00:29.431310+00:00",
+        "topic": "사주",
+        "exam": null,
+        "metrics": {
+          "views": 244,
+          "likes": 5,
+          "replies": 10,
+          "reposts": 0,
+          "quotes": 0,
+          "shares": 0
+        }
+      },
+      {
         "id": "RD09",
         "posted_at": "2026-10-09T12:01:08.119090+00:00",
         "topic": "사주",
@@ -2050,7 +2622,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 516,
+          "views": 518,
           "likes": 13,
           "replies": 30,
           "reposts": 1,
@@ -2078,7 +2650,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 799,
+          "views": 800,
           "likes": 31,
           "replies": 66,
           "reposts": 1,
@@ -2106,7 +2678,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 320,
+          "views": 321,
           "likes": 8,
           "replies": 25,
           "reposts": 2,
@@ -2120,7 +2692,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 263,
+          "views": 265,
           "likes": 6,
           "replies": 12,
           "reposts": 1,
@@ -2134,7 +2706,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 431,
+          "views": 435,
           "likes": 4,
           "replies": 8,
           "reposts": 0,
@@ -2148,9 +2720,9 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 364,
+          "views": 372,
           "likes": 11,
-          "replies": 21,
+          "replies": 22,
           "reposts": 0,
           "quotes": 0,
           "shares": 0

@@ -107,7 +107,7 @@ def last_posted_at():
     # 그날 정규 글이 건너뛰어지면 "하나 더"가 아니라 시간만 옮긴 셈이 된다.
     latest = None
     for rec in load_records():
-        if rec.get("kind") == "extra":
+        if rec.get("kind") == "extra" or rec.get("extra"):  # extra=True: 사장님 요청 일회성 게시(종류는 유지)
             continue
         try:
             ts = datetime.fromisoformat(rec["posted_at"])
@@ -128,7 +128,7 @@ def last_own_thread_at():
     except Exception as e:
         print(f"최근 글 조회 실패(무시): {e}")
         return None
-    extra_ids = {r.get("media_id") for r in load_records() if r.get("kind") == "extra"}
+    extra_ids = {r.get("media_id") for r in load_records() if r.get("kind") == "extra" or r.get("extra")}
     times = []
     for t in threads:
         if t.get("id") in extra_ids:

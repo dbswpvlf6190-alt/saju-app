@@ -492,3 +492,10 @@
 - **해외판(10/31 기준)**: Threads 팔로워 JA 0·EN 0, 7일 조회 JA 114·EN 20, 실제 답글 0, 사이트 방문→완료 JA 19→3·EN 17→5, 알림 신청 0. 자동 게시만 유지하고 추가 작업은 포트원 PayPal 승인 후로 미룸(사장님과 합의: 수익화는 토스 신년운세 우선).
 - 유튜브(도장찍기전에) 작업 인계는 `C:\shorts_auto\CLAUDE.md`(롱폼 v5 한 달 시험, 05 11/3 18:00 예약 `d3G13rxt-PY`, 11월 주 2편 화·일). **노트북 YouTube 토큰에는 자막 권한(force-ssl)이 없어** 노트북에서 롱폼을 올리면 자막만 실패한다 → 노트북에서 처음 롱폼 올릴 때 `C:\shorts_auto\scripts\_reauth_youtube.py` 한 번(사장님이 브라우저에서 동의).
 - 이 컴퓨터에만 있는 것: 롱폼 렌더 폴더(`~\ShortsAutoRender\longform\01~05`), Claude 세션 예약 작업(없음).
+
+## 11/2 아침 노트북 "변경내용 가져와" — 저장소 정지 사고 복구
+- **사고:** 노트북 `C:\saju-app`이 **10/29 11:01부터 `pull --rebase`가 락 파일 충돌로 중간에 멈춘 채(detached HEAD)** 남아, 노트북 자동화가 4일간 GitHub에 아무것도 올리지 못했다(락·인사이트 커밋 53개가 로컬에만). 원인은 `git_sync.git_pull`이 실패를 "무시하고 계속"만 하고 멈춘 rebase를 정리하지 않은 것. 같은 일이 `C:\shorts_auto`에도 있었다(10/30 08:01 노트북의 item 76 `processing.lock` 커밋이 원격과 충돌, 76은 데스크톱이 10/30 13:09 업로드).
+- 확인: 로컬에만 있던 커밋은 락/언락과 11/2 인사이트뿐 — **게시 기록(posted)은 없어 중복 게시 흔적 없음.** 그 기간 게시는 데스크톱이 했다.
+- 복구: 로컬 상태를 백업 브랜치(`backup/laptop-stuck-rebase-20261102`, shorts는 `backup/laptop-stale-lock-20261102`, 둘 다 노트북 로컬 전용)로 남기고 rebase 중단 → main을 origin과 맞춤, 11/2 인사이트는 다시 수집해 푸시.
+- 재발 방지: `scripts/git_sync.py`·`shorts_auto/scripts/run_queue.py`에 `recover_stuck_rebase` — pull 전·실패 후 멈춘 rebase를 찾아 **락 파일 충돌이면 이쪽 오래된 락 커밋을 건너뛰고**, 그 밖의 충돌이면 되돌린 뒤 ntfy로 "⚠️ git 동기화 충돌" 알림. 임시 저장소에서 락 충돌·일반 충돌·이미 멈춘 상태 3가지 시험 통과.
+- 남은 확인: 정지 기간 실패로 남은 작업 결과 `SajuAutoQueueCardnews`(11/1 11:01, 코드 1)·`SajuIgReading`(11/2 06:28, 코드 1)은 오늘 11:00·19:00 정상 실행되는지 볼 것. `ShortsAutoQueue`는 10/30 이후 노트북에서 안 돌았고(0x41306) 오늘 08:00 실행 예정.

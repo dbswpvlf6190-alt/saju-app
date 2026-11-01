@@ -35,6 +35,9 @@ MARKETS = {
 # 새 계정은 첫 몇 주 하루 1개만 올린다(스팸 판정 방지). 늦은 실행으로 두 개가 붙지 않게 20시간 간격을 둔다.
 MIN_HOURS_BETWEEN_POSTS = 20
 LOW_QUEUE_WARN = 2
+# 2026-11-01 진단(글당 조회 일본 18·영어 3, 팔로워 0): 새 계정이 매일 글+링크 댓글만 올려 홍보 계정으로 분류된 것으로 보임.
+# 11/2~11/15 재실행: 링크 댓글 끔(주소는 프로필에만), 참여형·한국 문화 소재 우선, 같은 본문 재게시 금지. 판정 11/15.
+LINK_COMMENT = False
 
 
 def queue_path(market):
@@ -88,7 +91,9 @@ def main():
     with open(queue_path(market), "r", encoding="utf-8") as f:
         queue = json.load(f)
     done = {r["id"] for r in records}
-    pending = [q for q in queue if q["id"] not in done]
+    # 같은 글 재게시 금지(영어 K-drama 글이 10/27·10/29 두 번 나감) — id가 달라도 본문이 같으면 건너뛴다.
+    posted_texts = {r.get("text", "").strip() for r in records}
+    pending = [q for q in queue if q["id"] not in done and q["text"].strip() not in posted_texts]
     if not pending:
         notify.notify(f"⚠️ {label} 대기열 비었음", f"global_threads_{market}.json에 새 글을 추가해주세요.", priority=4, tags=["warning"])
         print("대기열이 비었습니다.")
@@ -119,11 +124,12 @@ def main():
         with open(rec_path, "w", encoding="utf-8") as f:
             json.dump(record, f, ensure_ascii=False, indent=2)
         comment_note = ""
-        try:
-            record["comment_id"] = threads_api.reply(media_id, comment)
-        except Exception as e:
-            comment_note = f"\n⚠️ 링크 댓글 실패(직접 달아주세요): {notify.summarize_error(str(e))}"
-            record["comment_error"] = str(e)[:300]
+        if LINK_COMMENT:
+            try:
+                record["comment_id"] = threads_api.reply(media_id, comment)
+            except Exception as e:
+                comment_note = f"\n⚠️ 링크 댓글 실패(직접 달아주세요): {notify.summarize_error(str(e))}"
+                record["comment_error"] = str(e)[:300]
         with open(rec_path, "w", encoding="utf-8") as f:
             json.dump(record, f, ensure_ascii=False, indent=2)
         git_sync.git_commit_push(BASE_DIR, [os.path.relpath(rec_path, BASE_DIR)], f"posted: threads_{market} {item['id']}")

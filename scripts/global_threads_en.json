@@ -1,72 +1,107 @@
 [
-    {
-        "id":  "EN01-intro",
-        "ref":  "th_en_intro",
-        "text":  "Hi from Korea 🇰🇷\n\nMany Koreans check their Saju — a traditional birth chart reading — before big life decisions.\n\nYour birthday reveals your Day Master, one of 10 types.\nWhich one are you? 👇"
-    },
-    {
-        "id":  "EN02-types",
-        "ref":  "th_en_types",
-        "text":  "Forget your star sign.\nKorean Saju has 10 Day Masters:\n\n🌳Tree 🌿Vine ☀️Sun 🕯Candle ⛰Mountain\n🌾Field ⚔️Steel 💎Jewel 🌊River 🌧Rain\n\nFind yours in 30 sec (link below) and tell me which one you got."
-    },
-    {
-        "id":  "EN03-kdrama",
-        "ref":  "th_en_kdrama",
-        "text":  "Ever seen a K-drama character visit a fortune teller before a wedding or a big move?\n\nThat\u0027s Saju 🇰🇷 Korea\u0027s traditional birth chart reading.\n\nWant to know what yours says? 👇"
-    },
-    {
-        "ref":  "th_en_bday",
-        "id":  "EN08-birthday-strength",
-        "text":  "Drop your birthday (YYYY/MM/DD) 👇\nI\u0027ll tell you your Korean Day Master + your hidden strength in one line.\nFirst 30 replies 🌙"
-    },
-    {
-        "id":  "EN04-starter-xin",
-        "ref":  "th_en_starter",
-        "text":  "Day Master starter pack 💎 Xin (The Jewel)\n\n· notices every typo\n· says \"I\u0027m fine\" (not fine)\n· has a 10-step skincare routine\n\nWhich type should I do next?"
-    },
-    {
-        "id":  "EN05-element",
-        "ref":  "th_en_element",
-        "text":  "Saju measures 5 elements in you: Wood, Fire, Earth, Metal, Water.\n\nThe one you\u0027re MISSING matters most.\n\nCheck yours (free, 30 sec) and reply with your missing element 👇"
-    },
-    {
-        "id":  "EN06-starter-bing",
-        "ref":  "th_en_starter",
-        "text":  "Day Master starter pack ☀️ Bing (The Sun)\n\n· the friend who plans the trip\n· can\u0027t hide a single emotion\n· bad mood lasts 10 minutes max\n\nTag your Bing friend ☀️"
-    },
-    {
-        "id":  "EN07-vs",
-        "ref":  "th_en_vs",
-        "text":  "Western astrology: your sun sign.\nKorean Saju: your Day Master + your 5-element balance.\n\nSame birthday, way more detail.\nTry it free 👇"
-    },
-    {
-        "ref":  "th_en_starter",
-        "id":  "EN09-starter-gui",
-        "text":  "Day Master starter pack 🌧 Gui (The Gentle Rain)\n\n· reads the room in 2 seconds\n· needs alone time to recharge\n· overthinks at 2am\n\nAny Gui people here?"
-    },
-    {
-        "ref":  "th_en_korea",
-        "id":  "EN10-korea",
-        "text":  "In Korea, there are actual Saju cafés where you get your birth chart read over coffee ☕🇰🇷\n\nPeople check it before exams, new jobs, even weddings.\n\nCurious what yours says? 👇"
-    },
-    {
-        "ref":  "th_en_bday",
-        "id":  "EN11-birthday-love",
-        "text":  "Your love pattern is written in your birth chart.\n\nReply with your birthday and I\u0027ll tell you the one habit you repeat in love 🌙 (first 30)"
-    },
-    {
-        "ref":  "th_en_starter",
-        "id":  "EN12-starter-geng",
-        "text":  "Day Master starter pack ⚔️ Geng (The Steel Blade)\n\n· no gray areas, only black and white\n· loyal to a fault\n· decides in 5 seconds, acts in 3\n\nTag a Geng friend ⚔️"
-    },
-    {
-        "ref":  "th_en_element",
-        "id":  "EN13-elements",
-        "text":  "Wood, Fire, Earth, Metal, Water.\n\nIn Korean Saju, everyone has all five — just in different amounts.\nToo much Fire? Burnout. No Water? You forget to rest.\n\nWhich one are you missing? Free check 👇"
-    },
-    {
-        "ref":  "th_en_bday",
-        "id":  "EN14-birthday-money",
-        "text":  "Saver or spender? 💰\n\nDrop your birthday and I\u0027ll tell you your money habit based on your Korean Day Master. First 30 replies."
-    }
+  {
+    "id": "EN01-intro",
+    "ref": "th_en_intro",
+    "text": "Hi from Korea 🇰🇷\n\nMany Koreans check their Saju — a traditional birth chart reading — before big life decisions.\n\nYour birthday reveals your Day Master, one of 10 types.\nWhich one are you? 👇"
+  },
+  {
+    "id": "EN02-types",
+    "ref": "th_en_types",
+    "text": "Forget your star sign.\nKorean Saju has 10 Day Masters:\n\n🌳Tree 🌿Vine ☀️Sun 🕯Candle ⛰Mountain\n🌾Field ⚔️Steel 💎Jewel 🌊River 🌧Rain\n\nFind yours in 30 sec (link below) and tell me which one you got."
+  },
+  {
+    "id": "EN03-kdrama",
+    "ref": "th_en_kdrama",
+    "text": "Ever seen a K-drama character visit a fortune teller before a wedding or a big move?\n\nThat's Saju 🇰🇷 Korea's traditional birth chart reading.\n\nWant to know what yours says? 👇"
+  },
+  {
+    "ref": "th_en_bday",
+    "id": "EN08-birthday-strength",
+    "text": "Drop your birthday (YYYY/MM/DD) 👇\nI'll tell you your Korean Day Master + your hidden strength in one line.\nFirst 30 replies 🌙"
+  },
+  {
+    "id": "EN04-starter-xin",
+    "ref": "th_en_starter",
+    "text": "Day Master starter pack 💎 Xin (The Jewel)\n\n· notices every typo\n· says \"I'm fine\" (not fine)\n· has a 10-step skincare routine\n\nWhich type should I do next?"
+  },
+  {
+    "id": "EN05-element",
+    "ref": "th_en_element",
+    "text": "Saju measures 5 elements in you: Wood, Fire, Earth, Metal, Water.\n\nThe one you're MISSING matters most.\n\nCheck yours (free, 30 sec) and reply with your missing element 👇"
+  },
+  {
+    "id": "EN15-bday-2027",
+    "ref": "th_en_bday",
+    "text": "What will 2027 bring you? 🐑\n\nDrop your birthday (YYYY/MM/DD) and I'll read your 2027 theme with Korean Saju in one line.\n(No birth time needed)"
+  },
+  {
+    "id": "EN16-korea-wedding",
+    "ref": "th_en_korea",
+    "text": "In Korea, many couples check their Saju compatibility (gunghap) before getting married 🇰🇷\n\nWould you ever check compatibility before marrying someone?"
+  },
+  {
+    "ref": "th_en_bday",
+    "id": "EN11-birthday-love",
+    "text": "Your love pattern is written in your birth chart.\n\nReply with your birthday and I'll tell you the one habit you repeat in love 🌙 (first 30)"
+  },
+  {
+    "ref": "th_en_korea",
+    "id": "EN10-korea",
+    "text": "In Korea, there are actual Saju cafés where you get your birth chart read over coffee ☕🇰🇷\n\nPeople check it before exams, new jobs, even weddings.\n\nWould you try a Saju café? ☕"
+  },
+  {
+    "id": "EN19-bday-good-year",
+    "ref": "th_en_bday",
+    "text": "Which of the next 5 years is your best one? 🌟\n\nDrop your birthday and I'll read it with Korean Saju."
+  },
+  {
+    "id": "EN20-guess-type",
+    "ref": "th_en_types",
+    "text": "Which Day Master do you think you are?\n\n🌳Tree 🌿Vine ☀️Sun 🕯Candle ⛰Mountain\n🌾Field ⚔️Steel 💎Jewel 🌊River 🌧Rain\n\nGuess first, then drop your birthday — I'll tell you if you're right 👀"
+  },
+  {
+    "ref": "th_en_bday",
+    "id": "EN14-birthday-money",
+    "text": "Saver or spender? 💰\n\nDrop your birthday and I'll tell you your money habit based on your Korean Day Master. First 30 replies."
+  },
+  {
+    "id": "EN18-korea-newyear",
+    "ref": "th_en_korea",
+    "text": "Every New Year, lots of Koreans get a 'new year fortune' reading 🎆\n\nDo you have a new year ritual?"
+  },
+  {
+    "id": "EN17-bday-work",
+    "ref": "th_en_bday",
+    "text": "What's your hidden work superpower? 💼\n\nReply with your birthday and I'll tell you, based on your Korean Day Master."
+  },
+  {
+    "id": "EN21-kdrama-q",
+    "ref": "th_en_kdrama",
+    "text": "K-drama question 🇰🇷\n\nWhen a character visits a fortune teller before a big decision — would you do the same in real life?"
+  },
+  {
+    "id": "EN07-vs",
+    "ref": "th_en_vs",
+    "text": "Western astrology: your sun sign.\nKorean Saju: your Day Master + your 5-element balance.\n\nSame birthday, way more detail.\nCurious? Drop your birthday and I'll read yours 👇"
+  },
+  {
+    "ref": "th_en_element",
+    "id": "EN13-elements",
+    "text": "Wood, Fire, Earth, Metal, Water.\n\nIn Korean Saju, everyone has all five — just in different amounts.\nToo much Fire? Burnout. No Water? You forget to rest.\n\nWhich one are you missing? Drop your birthday and I'll check 👇"
+  },
+  {
+    "id": "EN06-starter-bing",
+    "ref": "th_en_starter",
+    "text": "Day Master starter pack ☀️ Bing (The Sun)\n\n· the friend who plans the trip\n· can't hide a single emotion\n· bad mood lasts 10 minutes max\n\nTag your Bing friend ☀️"
+  },
+  {
+    "ref": "th_en_starter",
+    "id": "EN09-starter-gui",
+    "text": "Day Master starter pack 🌧 Gui (The Gentle Rain)\n\n· reads the room in 2 seconds\n· needs alone time to recharge\n· overthinks at 2am\n\nAny Gui people here?"
+  },
+  {
+    "ref": "th_en_starter",
+    "id": "EN12-starter-geng",
+    "text": "Day Master starter pack ⚔️ Geng (The Steel Blade)\n\n· no gray areas, only black and white\n· loyal to a fault\n· decides in 5 seconds, acts in 3\n\nTag a Geng friend ⚔️"
+  }
 ]

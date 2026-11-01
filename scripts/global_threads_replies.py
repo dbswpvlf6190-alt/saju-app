@@ -34,6 +34,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://saju-app-three-dusky.vercel.app"
 # 첫 실행분은 사람이(Claude 대화에서) show로 확인한 뒤 send. 품질이 확인되면 True로 바꿔 국내처럼 검사 통과분을 바로 게시한다.
 AUTO_SEND = False
+# 2026-11-01~11/15: 답글에도 링크를 붙이지 않는다(새 계정 신뢰 회복 실험 — run_global_threads.LINK_COMMENT와 같은 이유).
+REPLY_LINK = False
 MAX_PER_RUN = 20  # 새 계정이라 한 번에 너무 많이 달면 스팸으로 볼 수 있다
 MAX_LEN = 500  # Threads 글자 한도(링크 포함)
 
@@ -82,7 +84,7 @@ WRITE_PROMPT = {
 - 生年月日がある人: 名前やIDは呼ばずに、1文目で「日干は壬（みずのえ）・海へ流れる大河タイプですね🌊」のようにday_master_labelを伝える。続けて、与えられた性格メモ（韓国語のsummary/love/work/relations）から、質問や投稿のテーマに合う内容を1〜2文、やさしい日本語で（直訳せず自然に）。
 - タイプ名だけを書いてくれた人（mentioned_type）: そのタイプらしい一言（共感・あるある）を1〜2文。
 - 生年月日もタイプもない人: 感想へのお礼＋「生年月日（年・月・日）をリプしてくれたら日干をお伝えします」を一言。
-- 締めの1文: 「八字（4つの柱）と五行バランスは下のリンクから30秒・無料で見られます👇」のように、無料の診断ページへ自然に案内（毎回言い回しを変える。URLは書かない、コードが付ける）。
+- 締めの1文: 「八字（4つの柱）と五行バランスはプロフィールのリンクから30秒・無料で見られます」のように、無料の診断ページへ自然に案内（毎回言い回しを変える。URLは書かない — 2026-11-01〜は返信にリンクを付けないのでプロフィール案内のみ）。
 - 断定禁止: 絶対・必ず・100%・確実・一生。病気・不安をあおる表現、限定・先着などの煽り禁止。占いは傾向として「〜な傾向があります」「〜と読みます」。
 - 口調: 親しみのあるです・ます調。絵文字0〜2個。ハッシュタグ禁止。全体で280文字以内。
 - 返信本文に半角ダブルクオート(")を使わない。
@@ -94,7 +96,7 @@ Rules:
 - If the person gave a birthday: open with their Day Master without calling their name, e.g. "Your Day Master is Ren · Yang Water (The Great River) 🌊". Then 1-2 sentences grounded in the given personality notes (Korean summary/love/work/relations), matched to their question or the post theme, in natural warm English (do not translate literally).
 - If they only named a type they got (mentioned_type): 1-2 relatable, fun sentences about that type.
 - If neither: thank them and invite them to reply with their birthday (YYYY/MM/DD) to learn their Day Master.
-- Final sentence: casually point to the free page for their full chart (all 8 characters + 5-element balance, free, 30 sec) "below" — vary the wording every time. Never write a URL; code appends it.
+- Final sentence: casually point to the free page for their full chart (all 8 characters + 5-element balance, free, 30 sec) via "the link in our profile" — vary the wording every time. Never write a URL (from 2026-11-01 replies carry no link; profile link only).
 - No absolute claims (guaranteed, definitely, 100%, forever), no fear, no health claims, no fake urgency (limited, last chance). Saju describes tendencies: "you tend to", "Saju reads this as".
 - Tone: friendly, casual. 0-2 emojis. No hashtags. Max 280 characters.
 - Never use the double-quote character (") inside text.
@@ -182,7 +184,7 @@ def draft(market, media_id, post_text=""):
         w = written.get(c["id"], {})
         text = (w.get("text") or "").strip()
         problems = validate(market, text) if text else ["초안 없음"]
-        full = f"{text}\n{link}" if text and not problems else text
+        full = f"{text}\n{link}" if text and not problems and REPLY_LINK else text
         if len(full) > MAX_LEN:
             problems.append("링크 포함 500자 초과")
         drafts.append({"id": c["id"], "username": r.get("username"), "original": c["original"],

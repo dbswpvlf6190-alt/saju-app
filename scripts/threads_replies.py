@@ -361,7 +361,7 @@ def auto():
             continue
         with open(os.path.join(posted_dir, name), "r", encoding="utf-8") as f:
             rec = json.load(f)
-        if rec.get("kind") != "reading":
+        if rec.get("kind") not in ("reading", "tti"):  # tti = 낮 띠 TOP3 글(댓글로 '나!'+생일)
             continue
         age_h = (datetime.now(timezone.utc) - datetime.fromisoformat(rec["posted_at"])).total_seconds() / 3600
         if age_h > 96:

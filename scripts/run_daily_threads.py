@@ -86,6 +86,22 @@ def pick_reading_post():
     return None
 
 
+TTI_PATH = os.path.join(BASE_DIR, "scripts", "threads_tti_posts.json")
+
+
+def next_tti_post():
+    """threads_tti_posts.json에서 아직 안 올린 첫 띠 글(게시 기록은 posted_state/threads/<id>.json)."""
+    try:
+        with open(TTI_PATH, "r", encoding="utf-8") as f:
+            items = json.load(f)
+    except (OSError, ValueError):
+        return None
+    for it in items:
+        if not os.path.exists(posted_path(it["id"])):
+            return it
+    return None
+
+
 def last_posted_at():
     # kind=extra(사용자가 요청한 추가 게시, threads_extra_post.py)는 정규 슬롯 간격 계산에서 뺀다 — 추가 글 때문에
     # 그날 정규 글이 건너뛰어지면 "하나 더"가 아니라 시간만 옮긴 셈이 된다.
@@ -130,10 +146,15 @@ def main():
     if datetime.now().hour < 10:
         print("오전 10시 전의 밀린 실행이라 건너뜁니다(다음 정규 슬롯에서 게시).")
         return
-    if not NOON_POSTS and datetime.now().hour < 18:
-        print("낮 일반 글 슬롯은 쉬는 중(NOON_POSTS=False) — 21시 무료 풀이 글만 올립니다.")
-        return
     git_sync.git_pull(BASE_DIR)
+    noon_tti = None
+    if not NOON_POSTS and datetime.now().hour < 18:
+        # 2026-11-01 잘된 글 분석: 생일 없이 '내 띠'로 바로 자기 찾기가 되는 띠 TOP3 글이 동종 계정에서 가장 반응이 컸다
+        # (예: "남은 두 달 겹경사 터지는 띠 TOP3" 좋아요 707·답글 211). 낮 슬롯은 일반 글 대신 이 띠 글만 올린다.
+        noon_tti = next_tti_post()
+        if not noon_tti:
+            print("낮 슬롯: 올릴 띠 글이 없어 쉽니다(21시 무료 풀이 글만).")
+            return
     last = last_posted_at()
     if last is not None and hours_since(last) < MIN_HOURS_BETWEEN_POSTS:
         print(f"마지막 Threads 자동 게시 후 {hours_since(last):.0f}시간 — 오늘은 건너뜁니다.")
@@ -145,7 +166,9 @@ def main():
 
     queue = load_queue()
     pending = [q for q in queue if not os.path.exists(posted_path(q["id"]))]
-    if len(pending) < REFILL_BELOW:
+    if noon_tti:
+        pending = [{**noon_tti, "kind": "tti"}]
+    elif len(pending) < REFILL_BELOW:
         try:
             added = threads_refill.refill(6)
             if added:
@@ -155,7 +178,7 @@ def main():
         except Exception as e:
             print(f"대기열 자동 채우기 실패(남은 글로 계속): {e}")
     # 무료 풀이 글은 답글이 밤새 달리는 저녁 슬롯에만 올린다.
-    reading = pick_reading_post() if datetime.now().hour >= 18 else None
+    reading = pick_reading_post() if datetime.now().hour >= 18 and not noon_tti else None
     if reading:
         # 무료 풀이 글은 같은 변형을 여러 번 쓰므로 기록 파일 이름에 날짜를 붙인다.
         reading = {**reading, "kind": "reading", "record_id": f"{reading['id']}-{datetime.now().strftime('%Y%m%d')}"}

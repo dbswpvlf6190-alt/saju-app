@@ -11,4 +11,5 @@
 - [토스 프로모션 진행 중](project_toss_promo.md) — 10/21 승인, 소진율을 일일 보고서에 넣기로 함 (11/20 종료)
 - [2027 신년운세 v2 진행](project_newyear_fortune.md) — 10/22 추천안 확정, worktree C:\saju-app-newyear, 12/1 출시 목표
 - [해외판 외국인 결제 도입](project_global_payment.md) — 10/27 포트원+PayPal 결정, 코드는 원화 전용, 가격안·필요 절차
+- [롱폼 v5 한 달 시험](project_longform_v5_trial.md) — 11/1~11/30 경제해적단형(훅·썸네일 A/B·예고 쇼츠), 12월 첫 주 재판단
 - [두 컴퓨터 운영 모델](project_two_computer_ops.md) — 평일 기숙사 노트북·금 저녁~주말 본가 데스크톱, 한 대만 켜짐, 양쪽 작업 모두 사용

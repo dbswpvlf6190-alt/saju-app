@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DEFAULT_OG_IMAGE } from "@/lib/og/defaults";
 import { CompatibilityFlow } from "@/components/saju/CompatibilityFlow";
 import { SiteFooter } from "@/components/saju/SiteFooter";
@@ -32,6 +33,13 @@ export default function CompatibilityPage() {
       <div className="mt-10 w-full max-w-md">
         <CompatibilityFlow />
       </div>
+
+      <Link
+        href="/compatibility/tti"
+        className="mt-6 w-full max-w-md rounded-xl border border-border-subtle px-4 py-2.5 text-center text-sm text-foreground-muted hover:border-accent-gold hover:text-accent-gold-soft"
+      >
+        🐭 띠별 궁합표 (12띠 78가지 조합) 보기
+      </Link>
 
       <SiteFooter />
     </div>

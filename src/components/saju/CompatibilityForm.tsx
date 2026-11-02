@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   DEFAULT_PERSON_VALUES,
   PersonBirthFields,
@@ -37,6 +38,7 @@ export function CompatibilityForm({
 }) {
   const [self, setSelf] = useState<PersonFormValues>(DEFAULT_PERSON_VALUES);
   const [partner, setPartner] = useState<PersonFormValues>(DEFAULT_PERSON_VALUES);
+  const touched = useRef(false);
   // 상대 생시를 몰라 포기하거나 상대 정보를 대신 넣는 대신, 상대가 직접 넣게 하는 쪽을 기본으로 둔다.
   const [partnerMode, setPartnerMode] = useState<PartnerMode>("link");
   const canSubmit = isPersonComplete(self) && (partnerMode === "link" || isPersonComplete(partner));
@@ -80,7 +82,15 @@ export function CompatibilityForm({
   );
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-6">
+    <form
+      onSubmit={handleSubmit}
+      onFocusCapture={() => {
+        if (touched.current) return;
+        touched.current = true;
+        trackEvent("compatibility_form_touch", {});
+      }}
+      className="flex w-full max-w-md flex-col gap-6"
+    >
       <PersonBirthFields
         idPrefix="self"
         title="나의 정보"

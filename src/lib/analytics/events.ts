@@ -13,6 +13,8 @@ export const ANALYTICS_EVENT_NAMES = [
   "payment_fail",
   "compatibility_start",
   "compatibility_complete",
+  // 궁합 폼을 처음 건드린 순간(방문 → 입력 시작 → 완료 중 어디서 빠지는지 나눠 보기, 2026-11-02)
+  "compatibility_form_touch",
   "compatibility_premium_click",
   "daily_fortune_view",
   "share_click",

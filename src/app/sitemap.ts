@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { ILGAN_PAGES } from "@/lib/saju/ilganPages";
+import { TTI_PAIRS } from "@/lib/saju/ttiCompat";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://saju-app-three-dusky.vercel.app";
 
@@ -29,6 +30,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    // 띠별 궁합(검색 입구, 78개 조합)
+    {
+      url: `${SITE_URL}/compatibility/tti`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    ...TTI_PAIRS.map((p) => ({
+      url: `${SITE_URL}/compatibility/tti/${p.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
     {
       url: `${SITE_URL}/type-test`,
       lastModified: new Date(),

@@ -500,3 +500,11 @@
 - 재발 방지: `scripts/git_sync.py`·`shorts_auto/scripts/run_queue.py`에 `recover_stuck_rebase` — pull 전·실패 후 멈춘 rebase를 찾아 **락 파일 충돌이면 이쪽 오래된 락 커밋을 건너뛰고**, 그 밖의 충돌이면 되돌린 뒤 ntfy로 "⚠️ git 동기화 충돌" 알림. 임시 저장소에서 락 충돌·일반 충돌·이미 멈춘 상태 3가지 시험 통과.
 - 남은 확인: 정지 기간 실패로 남은 작업 결과 `SajuAutoQueueCardnews`(11/1 11:01, 코드 1)·`SajuIgReading`(11/2 06:28, 코드 1)은 오늘 11:00·19:00 정상 실행되는지 볼 것. `ShortsAutoQueue`는 10/30 이후 노트북에서 안 돌았고(0x41306) 오늘 08:00 실행 예정.
 - **(11/2 저녁 추가)** 노트북 카드뉴스(11/1·11/2 11:00)·참여형(11/2 06:28) 실패(코드 1)의 진짜 원인: `~\SajuAutoRender\media_host`에 노트북이 예전에 만들다 만 카드뉴스 33·34 이미지(미추적 12개)가 남아, 데스크톱이 같은 이름으로 올린 뒤 `git pull`이 "untracked files would be overwritten"으로 계속 실패. 파일을 `~\SajuAutoRender\media_host_untracked_backup_20261102`로 옮기고 pull → 19:01 참여형 IG10 정상 게시(0x0). 재발 방지: `publish_carousel.py`·`publish_instagram.py`가 커밋 전에 이번에 올릴 파일이 아닌 미추적 파일을 `~\SajuAutoRender\media_host_leftovers`로 옮김. 카드뉴스는 11/3 11:00 다음 실행.
+
+## 11/2 저녁 사주랩 성장 실행 (리서치 100곳 → "싹다 진행")
+- 계획·상태 문서: `docs/marketing/2026-11-saju-growth-actions.md`. 웹 30일: 랜딩 280 → 무료 완료 70 → 공유 6, 궁합 페이지 14 → 완료 2, 결제 시작 4 → 결제 0.
+- **띠별 궁합 78개 페이지 배포(adad9fb):** `/compatibility/tti` + `/compatibility/tti/<띠>-<띠>`(예 jwi-so), 사이트맵 79개, 궁합 페이지에서 링크. 관계는 `src/lib/saju/ttiCompat.ts`가 지지 관계·오행으로 계산. 운영 200 확인. 판정 12월 첫 주(서치콘솔 노출·클릭) → 좋으면 일간 궁합 100개.
+- **Threads 풀이 글 첫 줄 다양화(64bb860):** 20개 중 12개 변경, 8개 유지(11/16 비교).
+- **궁합 입력 시작 이벤트** `compatibility_form_touch` 추가(관리자 화면 "궁합 입력 시작"), 기존 `compatibility_start`는 실제로 페이지 방문이라 라벨을 "궁합 페이지 방문"으로 정정.
+- 대기: 토스 아침 알림(스마트 발송)은 v11 승인·출시 후 콘솔에서, 신년운세 할인은 출시 첫 주 반응 보고 사장님 결정, 해외판 LINE·TikTok은 11/1 합의대로 PayPal 승인 후(계정 생성은 사장님).
+- 사장님 할 일: 구글 서치콘솔·네이버 서치어드바이저에 사이트맵 다시 제출(로그인 필요).

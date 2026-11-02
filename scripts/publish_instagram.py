@@ -41,10 +41,27 @@ def run(cmd, cwd):
     return result.stdout
 
 
+def set_aside_leftovers(keep):
+    """예전에 실패한 실행이 media_host에 남긴 커밋 안 된 파일을 옆 폴더로 옮긴다. 다른 컴퓨터가 같은 이름을 이미 올렸으면
+    이 파일들 때문에 pull이 "untracked working tree files would be overwritten"으로 실패해, 그 뒤 카드뉴스·참여형 게시가
+    전부 실패한다(2026-10-30~11-02 노트북에 남은 카드뉴스 33 이미지로 실제로 겪음). 이번에 올릴 파일(keep)은 건드리지 않는다."""
+    out = subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], cwd=MEDIA_HOST_DIR,
+                         capture_output=True, text=True, encoding="utf-8", errors="replace").stdout.splitlines()
+    leftovers = [p for p in out if p.strip() and p not in set(keep)]
+    if not leftovers:
+        return
+    backup = os.path.join(RENDER_ROOT, "media_host_leftovers")
+    os.makedirs(backup, exist_ok=True)
+    for p in leftovers:
+        shutil.move(os.path.join(MEDIA_HOST_DIR, p), os.path.join(backup, os.path.basename(p)))
+    print(f"  media_host에 남아 있던 이전 실행 파일 {len(leftovers)}개를 {backup}로 옮김")
+
+
 def commit_and_push(add_paths, message):
     """같은 media_host를 노트북·데스크톱이 번갈아 쓰므로 push 전에 항상 최신을 받아 합친다
     (안 그러면 다른 컴퓨터가 먼저 올린 날 push가 fetch first로 거부돼 인스타 게시가 실패함,
     2026-09-21 노트북 38/39번 실제로 겪음). 이미 커밋된 같은 파일의 재시도는 커밋을 건너뛴다."""
+    set_aside_leftovers(add_paths)
     run(["git", "pull", "--no-rebase", "--no-edit", "origin", "main"], MEDIA_HOST_DIR)
     run(["git", "add", *add_paths], MEDIA_HOST_DIR)
     staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=MEDIA_HOST_DIR).returncode != 0

@@ -62,4 +62,21 @@ def ensure_tools_on_path():
         os.environ["PATH"] = os.pathsep.join(missing + [current]) if current else os.pathsep.join(missing)
 
 
+
+def stay_awake_while_running():
+    """작업이 도는 동안 컴퓨터가 다시 잠들지 않게 한다(이 프로세스가 끝나면 자동으로 풀림).
+    작업 스케줄러가 절전 중인 노트북을 깨워도, 아무도 없으면 Windows가 약 14초 만에 다시 재워서 작업이 중간에 얼었다
+    (2026-10-29·30 노트북: 08:01 깨어남 → 08:01:28 다시 절전, 쇼츠·Threads 락만 남기고 멈춤 → 두 컴퓨터 git 충돌로 이어짐).
+    ES_CONTINUOUS | ES_SYSTEM_REQUIRED는 무인 기상 후 작업을 끝까지 돌리게 하는 Windows 표준 방법이다."""
+    if os.name != "nt":
+        return False
+    try:
+        import ctypes
+
+        return bool(ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001))
+    except Exception:
+        return False
+
+
 ensure_tools_on_path()
+stay_awake_while_running()

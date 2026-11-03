@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Share } from "@apps-in-toss/web-framework";
 import type { SajuResult } from "@saju/types";
 import { buildNewYearHook, monthList, weekdayKor } from "@saju/newYearHook";
@@ -19,12 +19,15 @@ export function NewYearScreen({
   result,
   onBack,
   previewText,
+  extra,
 }: {
   purchase: Purchase;
   result: SajuResult;
   onBack: () => void;
   /** 개발 미리보기 전용(v11-preview.html): 서버 없이 글을 바로 채운다. 실제 앱에서는 넘기지 않는다. */
   previewText?: string;
+  /** v12: 공유 버튼 위에 붙이는 카드(매일 아침 운세 알림 신청). */
+  extra?: ReactNode;
 }) {
   const hook = useMemo(() => buildNewYearHook(result, NY_YEAR), [result]);
   const [text, setText] = useState<string | null>(previewText ?? null);
@@ -182,6 +185,8 @@ export function NewYearScreen({
           ))}
         </section>
       ))}
+
+      {extra}
 
       <button type="button" className="cta" onClick={() => void share()}>
         가족에게도 알려주기

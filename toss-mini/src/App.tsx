@@ -207,7 +207,7 @@ export default function App() {
   }
 
   if (screen === "manual" && purchase) return <ManualScreen purchase={purchase} onBack={() => window.history.back()} />;
-  if (screen === "newyear" && nyPurchase && result) return <NewYearScreen purchase={nyPurchase} result={result} onBack={() => window.history.back()} />;
+  if (screen === "newyear" && nyPurchase && result) return <NewYearScreen purchase={nyPurchase} result={result} onBack={() => window.history.back()} extra={<PushCard place="newyear" title="오늘의 운세도 매일 아침 받아보세요" />} />;
   if (screen === "result" && result)
     return (
       <ResultScreen
@@ -355,7 +355,7 @@ function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, nyPurchase
         </p>
       </section>
       {iapAvailable("newYear") && <NewYearMini result={result} purchased={nyPurchased} onGo={() => { nyTrack("ny_mini_click"); onFull(); }} />}
-      <PushCard />
+      <PushCard place="today" />
 
       <BannerAd />
 
@@ -473,13 +473,13 @@ function useRewardGate() {
 }
 
 /** 사용자가 직접 신청한 "매일 오늘의 운세 도착" 알림(기능성 메시지). 템플릿 코드가 없거나 미지원이면 숨긴다. */
-function PushCard() {
+function PushCard({ place, title = "매일 아침 운세 알림" }: { place: "today" | "result" | "newyear"; title?: string }) {
   const available = !!PUSH_TEMPLATE && safeSupported(Notification.requestAgreement);
   const [state, setState] = useState<"idle" | "on" | "rejected">(() => (readStore(KEY_PUSH) === "on" ? "on" : "idle"));
   if (!available) return null;
 
   function request() {
-    track("push_click");
+    track("push_click", { place });
     let cleanup: (() => void) | undefined;
     try {
       cleanup = Notification.requestAgreement({
@@ -491,7 +491,7 @@ function PushCard() {
           } else {
             setState("rejected");
           }
-          track("push_result", { result: r.type });
+          track("push_result", { result: r.type, place });
           cleanup?.();
         },
         onError: () => cleanup?.(),
@@ -503,13 +503,13 @@ function PushCard() {
 
   return (
     <section className="card">
-      <h2>매일 아침 운세 알림</h2>
+      <h2>{title}</h2>
       {state === "on" ? (
         <p className="muted" style={{ fontSize: 14 }}>알림을 신청했어요. 토스 앱 설정에서 언제든 끌 수 있어요.</p>
       ) : (
         <>
           <p className="muted" style={{ fontSize: 14 }}>
-            {state === "rejected" ? "알림을 받지 않기로 했어요. 마음이 바뀌면 다시 신청할 수 있어요." : "신청하면 매일 아침 오늘의 운세가 도착했다고 알려드려요."}
+            {state === "rejected" ? "알림을 받지 않기로 했어요. 마음이 바뀌면 다시 신청할 수 있어요." : "신청하면 매일 아침 8시에 오늘의 운세가 도착했다고 알려드려요."}
           </p>
           <button type="button" className="ghost" style={{ marginTop: 12 }} onClick={request}>알림 받기</button>
         </>
@@ -833,6 +833,9 @@ function ResultScreen({
           행운의 숫자 {daily.luckyNumber} · 행운의 색 {daily.luckyColor} · 내일 다시 오면 새 운세가 나와요
         </p>
       </section>
+
+      {/* v12: 알림 신청 카드가 '오늘의 운세' 화면(14일 45회)에만 있어서 신청 0명 → 결과 화면(385회)의 오늘 운세 바로 아래로 */}
+      <PushCard place="result" title="이 운세, 매일 아침 받아보세요" />
 
       <section className="card">
         <h2>{page.hangul} 일간의 강점</h2>

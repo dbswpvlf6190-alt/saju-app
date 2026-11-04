@@ -123,16 +123,26 @@ export function expectedSku(): string | null {
 // 환경변수 TOSS_IAP_PRICE_NEWYEAR로 재배포 없이 맞출 수도 있다.
 export const TOSS_NEWYEAR_PRICE_KRW = 3894;
 
+// v13(2026-11-05) 토스 상품 둘 추가. 가격은 콘솔 판매가와 같아야 하며, 콘솔 등록 전이라 환경변수로 맞출 수 있게 둔다(공급가는 10원 단위 → 판매가는 ×1.1).
+// - 신년운세 첫 구매 특가(1회): 같은 신년운세 리포트를 낮은 가격 SKU로 판다. 공급가 1,730원 → 판매가 1,903원.
+// - 궁금한 것 하나 풀이: 웹 single_section(주제 1가지)과 같은 생성 코드를 쓴다. 공급가 900원 → 판매가 990원.
+export const TOSS_NEWYEAR_FIRST_PRICE_KRW = 1903;
+export const TOSS_SECTION_PRICE_KRW = 990;
+
 export interface TossProduct {
-  kind: "manual" | "newYear";
+  kind: "manual" | "newYear" | "newYearFirst" | "section";
   /** 우리 주문(Order)의 상품 타입. 웹과 같은 타입을 써서 기존 리포트 생성·조회 코드를 그대로 쓴다. */
-  productType: "premium_report" | "new_year_report";
+  productType: "premium_report" | "new_year_report" | "single_section";
   amount: number;
 }
 
+function priceFromEnv(name: string, fallback: number): number {
+  const fromEnv = Number(process.env[name]);
+  return Number.isInteger(fromEnv) && fromEnv > 0 ? fromEnv : fallback;
+}
+
 function newYearPrice(): number {
-  const fromEnv = Number(process.env.TOSS_IAP_PRICE_NEWYEAR);
-  return Number.isInteger(fromEnv) && fromEnv > 0 ? fromEnv : TOSS_NEWYEAR_PRICE_KRW;
+  return priceFromEnv("TOSS_IAP_PRICE_NEWYEAR", TOSS_NEWYEAR_PRICE_KRW);
 }
 
 /**
@@ -148,6 +158,14 @@ export function resolveTossProduct(sku: string | undefined | null): TossProduct 
   const newYearSku = process.env.TOSS_IAP_SKU_NEWYEAR?.trim();
   if (newYearSku && value === newYearSku) {
     return { kind: "newYear", productType: "new_year_report", amount: newYearPrice() };
+  }
+  const newYearFirstSku = process.env.TOSS_IAP_SKU_NEWYEAR_FIRST?.trim();
+  if (newYearFirstSku && value === newYearFirstSku) {
+    return { kind: "newYearFirst", productType: "new_year_report", amount: priceFromEnv("TOSS_IAP_PRICE_NEWYEAR_FIRST", TOSS_NEWYEAR_FIRST_PRICE_KRW) };
+  }
+  const sectionSku = process.env.TOSS_IAP_SKU_SECTION?.trim();
+  if (sectionSku && value === sectionSku) {
+    return { kind: "section", productType: "single_section", amount: priceFromEnv("TOSS_IAP_PRICE_SECTION", TOSS_SECTION_PRICE_KRW) };
   }
   return null;
 }

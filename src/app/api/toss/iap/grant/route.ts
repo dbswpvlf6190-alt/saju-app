@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { signOrderAccessToken } from "@/lib/payment/orderAccess";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { warmReportCache } from "@/lib/reports/warm";
+import { isPremiumTopicKey } from "@/lib/reports/layout";
 import {
   TossIapError,
   corsHeaders,
@@ -24,6 +25,8 @@ export function OPTIONS(req: NextRequest) {
 interface GrantBody {
   orderId?: string;
   birthInput?: SajuInput;
+  /** "궁금한 것 하나 풀이"(single_section)에서 고른 주제. 가격이 주제와 무관해 클라이언트 값을 쓰되 목록에 있는 값만 받는다. */
+  sectionKey?: string;
 }
 
 function json(req: NextRequest, body: unknown, status = 200, extra: Record<string, string> = {}) {
@@ -86,6 +89,10 @@ export async function POST(req: NextRequest) {
     if (!product) {
       return json(req, { error: "알 수 없는 상품입니다." }, 400);
     }
+    const sectionKey = product.productType === "single_section" ? body.sectionKey : null;
+    if (product.productType === "single_section" && !isPremiumTopicKey(sectionKey)) {
+      return json(req, { error: "풀이 주제가 올바르지 않습니다." }, 400);
+    }
 
     let order;
     try {
@@ -96,6 +103,7 @@ export async function POST(req: NextRequest) {
           amount: product.amount,
           productType: product.productType,
           birthInputJson,
+          sectionKey,
           paidAt: new Date(),
         },
       });

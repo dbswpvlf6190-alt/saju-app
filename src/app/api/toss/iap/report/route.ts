@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { verifyOrderAccessToken } from "@/lib/payment/orderAccess";
-import { getNewYearReport, getPremiumReport, getReportLayout, type ReportSectionKey } from "@/lib/reports/generate";
+import { getNewYearReport, getPremiumReport, getReportLayout, isPremiumTopicKey, type ReportSectionKey } from "@/lib/reports/generate";
 import { isManualChapterKey } from "@/lib/reports/manualChapters";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { corsHeaders } from "@/lib/toss/iap";
@@ -31,7 +31,8 @@ export async function GET(req: NextRequest) {
   }
 
   const paymentId = req.nextUrl.searchParams.get("paymentId") ?? "";
-  if (!paymentId.startsWith("toss-")) {
+  // tfree-: 토스 첫 질문 무료 풀이(0원 주문, /api/toss/section/free)
+  if (!paymentId.startsWith("toss-") && !paymentId.startsWith("tfree-")) {
     return withCors(req, NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 }));
   }
 
@@ -49,6 +50,22 @@ export async function GET(req: NextRequest) {
         return withCors(req, NextResponse.json({ status: "PAID", layout: "newYear", keys: ["newYear"] }));
       }
       const res = await getNewYearReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+      return withCors(req, res as NextResponse);
+    }
+
+    // v13 궁금한 것 하나 풀이: 산(또는 무료로 받은) 주제 하나만 열 수 있다. 웹 single_section과 같은 생성·캐시.
+    if (order.productType === "single_section") {
+      if (!isPremiumTopicKey(order.sectionKey)) {
+        return withCors(req, NextResponse.json({ error: "열 수 없는 항목입니다." }, { status: 400 }));
+      }
+      if (req.nextUrl.searchParams.get("layout")) {
+        return withCors(req, NextResponse.json({ status: "PAID", layout: "topics", keys: [order.sectionKey] }));
+      }
+      const asked = req.nextUrl.searchParams.get("section");
+      if (asked && asked !== order.sectionKey) {
+        return withCors(req, NextResponse.json({ error: "열 수 없는 항목입니다." }, { status: 400 }));
+      }
+      const res = await getPremiumReport(order.paymentId, order.birthInputJson, order.aiResultJson, [order.sectionKey]);
       return withCors(req, res as NextResponse);
     }
 

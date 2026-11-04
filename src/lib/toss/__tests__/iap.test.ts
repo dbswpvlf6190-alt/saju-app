@@ -9,7 +9,9 @@ import {
   readPemEnv,
   resolveTossProduct,
   TOSS_MANUAL_PRICE_KRW,
+  TOSS_NEWYEAR_FIRST_PRICE_KRW,
   TOSS_NEWYEAR_PRICE_KRW,
+  TOSS_SECTION_PRICE_KRW,
 } from "../iap";
 
 afterEach(() => vi.unstubAllEnvs());
@@ -89,6 +91,25 @@ describe("토스 상품(sku) 판별", () => {
     vi.stubEnv("TOSS_IAP_SKU_NEWYEAR", "ait.x.newyear");
     expect(resolveTossProduct("ait.x.newyear")?.kind).toBe("newYear");
     expect(resolveTossProduct("")).toBeNull();
+  });
+});
+
+describe("v13 토스 상품(첫 구매 특가·궁금한 것 하나 풀이)", () => {
+  it("첫 구매 특가 sku는 같은 신년운세 리포트를 특가 금액으로, 풀이 sku는 single_section으로 정한다", () => {
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR", "ait.x.newyear");
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR_FIRST", "ait.x.newyear.first");
+    vi.stubEnv("TOSS_IAP_SKU_SECTION", "ait.x.section");
+    expect(resolveTossProduct("ait.x.newyear.first")).toEqual({ kind: "newYearFirst", productType: "new_year_report", amount: TOSS_NEWYEAR_FIRST_PRICE_KRW });
+    expect(resolveTossProduct("ait.x.section")).toEqual({ kind: "section", productType: "single_section", amount: TOSS_SECTION_PRICE_KRW });
+    expect(resolveTossProduct("ait.x.newyear")?.amount).toBe(TOSS_NEWYEAR_PRICE_KRW);
+  });
+
+  it("새 상품 환경변수가 비어 있으면 판매되지 않고, 금액은 환경변수로 맞출 수 있다", () => {
+    vi.stubEnv("TOSS_IAP_SKU_NEWYEAR_FIRST", "");
+    vi.stubEnv("TOSS_IAP_SKU_SECTION", "ait.x.section");
+    vi.stubEnv("TOSS_IAP_PRICE_SECTION", "1100");
+    expect(resolveTossProduct("ait.x.newyear.first")).toBeNull();
+    expect(resolveTossProduct("ait.x.section")?.amount).toBe(1100);
   });
 });
 

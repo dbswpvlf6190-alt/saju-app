@@ -86,3 +86,13 @@ select {
 .toggle.big { padding: 15px; font-size: 18px; }
 .cta-big { font-size: 19px; padding: 18px; }
 .promo-note { margin: 0; padding: 12px 14px; border-radius: 14px; background: var(--primary-soft); color: var(--primary); font-weight: 700; text-align: center; font-size: 15px; }
+
+/* v13 궁금한 것 하나 풀이·가족 신년운세·첫 구매 특가 */
+.topic-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+.topic-grid .toggle { font-size: 16px; padding: 12px 4px; }
+.topic-ask { margin: 12px 0; font-size: 16px; text-align: center; color: var(--text); }
+.family-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.family-item { text-align: left; font-size: 15px; }
+.family-item b { color: var(--primary); margin-right: 6px; }
+.family-add { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.ny-offer { margin: 0; text-align: center; font-size: 16px; font-weight: 700; color: #b0701a; }

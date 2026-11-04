@@ -8,10 +8,26 @@ import { ILGAN_PAGES } from "@saju/ilganPages";
 import { getDailyFortuneDetail } from "@saju/dailyFortune";
 import { currentYearKst, getGoodYears } from "@saju/goodYears";
 import type { WuXing } from "@saju/ganzhi";
-import { CHAPTER_PROMISES, CHAPTER_TITLES, buyManual, buyProduct, iapAvailable, loadManual, recoverPendingOrders, savedPurchaseFor, type Purchase } from "./iap";
+import {
+  CHAPTER_PROMISES,
+  CHAPTER_TITLES,
+  SECTION_TOPICS,
+  buyManual,
+  buyProduct,
+  claimFreeSection,
+  firstNewYearOfferAvailable,
+  freeSectionAvailable,
+  iapAvailable,
+  loadManual,
+  loadSection,
+  recoverPendingOrders,
+  savedPurchaseFor,
+  type Purchase,
+  type SectionTopic,
+} from "./iap";
 import { NewYearMini, NewYearTeaser } from "./v11/NewYearTeaser";
 import { NewYearScreen } from "./v11/NewYearScreen";
-import { NY_YEAR, getVariant, nyTrack } from "./v11/ny";
+import { NY_PRICE_LABEL, NY_YEAR, getVariant, nyTrack } from "./v11/ny";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
 // (앱인토스 정책: 외부 링크·자사 서비스 이동 유도 금지, SSR 금지). 수익은 인앱 광고(배너)로 — 광고 그룹 ID는
@@ -30,6 +46,13 @@ const PROMO_AMOUNT = Number(import.meta.env.VITE_PROMO_AMOUNT) || 0;
 const KEY_PROMO = "sajulab:promo";
 // 첫 화면의 방문자 수는 콘솔 누적 유저 수(2026-11-04 기준 4,131명)에서 내림한 실제 숫자만 쓴다. 누적이라 시간이 지나도 거짓이 되지 않는다.
 const VISITORS_LABEL = "4,100명";
+// v13 첫 구매 특가 판매가(콘솔 등록가와 같아야 함, 공급가 1,730원 → 1,903원)·궁금한 것 하나 풀이 판매가(공급가 900원 → 990원)
+const NY_FIRST_PRICE_KRW = Number(import.meta.env.VITE_NY_FIRST_PRICE) || 1903;
+const SECTION_PRICE_LABEL = `${(Number(import.meta.env.VITE_SECTION_PRICE) || 990).toLocaleString("ko-KR")}원`;
+const KEY_FAMILY = "sajulab:family:v1";
+const RELATIONS = ["배우자", "자녀", "부모님", "형제자매", "그 밖의 가족"] as const;
+type Relation = (typeof RELATIONS)[number];
+type FamilyMember = { rel: Relation; form: Form };
 
 /** 사용자 행동 기록(토스 콘솔 분석). 토스 밖이거나 미지원 버전이면 조용히 무시된다. */
 function track(name: string, params: Record<string, string | number | boolean> = {}) {
@@ -107,7 +130,21 @@ function toInput(f: Form): SajuInput {
   };
 }
 
-type Screen = "today" | "form" | "result" | "manual" | "newyear";
+type Screen = "today" | "form" | "result" | "manual" | "newyear" | "section" | "family";
+
+/** 가족 생일은 이 기기에만 저장한다(서버로 보내는 건 가족 신년운세를 살 때 그 생일 하나뿐). */
+function loadFamily(): FamilyMember[] {
+  try {
+    const arr = JSON.parse(localStorage.getItem(KEY_FAMILY) ?? "[]") as FamilyMember[];
+    return Array.isArray(arr) ? arr.filter((m) => m && m.form && RELATIONS.includes(m.rel)) : [];
+  } catch {
+    return [];
+  }
+}
+
+function formLabel(f: Form): string {
+  return `${f.year}년 ${f.month}월 ${f.day}일(${f.calendarType === "solar" ? "양력" : "음력"}) · ${f.gender === "female" ? "여성" : "남성"}`;
+}
 
 export default function App() {
   // 다시 온 사람(저장된 생일이 있음)은 입력 화면 대신 "오늘의 운세"부터 보여준다 — 매일 열 이유가 첫 화면에서 보여야 재방문이 생긴다.
@@ -130,6 +167,8 @@ export default function App() {
   });
   const [error, setError] = useState<string | null>(null);
   const [showHour, setShowHour] = useState(() => !form.unknownTime);
+  const [sectionView, setSectionView] = useState<{ purchase: Purchase; topic: SectionTopic } | null>(null);
+  const [familyMember, setFamilyMember] = useState<FamilyMember | null>(null);
   const formStarted = useRef(false);
   // 구매 기록은 생일별로 저장돼 있어, 지금 입력한 생일의 구매만 "열기"로 보인다(다른 생일은 새로 구매할 수 있다).
   const [purchaseTick, setPurchaseTick] = useState(0);
@@ -232,6 +271,8 @@ export default function App() {
   }
 
   if (screen === "manual" && purchase) return <ManualScreen purchase={purchase} onBack={() => window.history.back()} />;
+  if (screen === "section" && sectionView) return <SectionScreen purchase={sectionView.purchase} topic={sectionView.topic} onBack={() => window.history.back()} />;
+  if (screen === "family" && familyMember) return <FamilyScreen member={familyMember} onBack={() => window.history.back()} />;
   if (screen === "newyear" && nyPurchase && result) return <NewYearScreen purchase={nyPurchase} result={result} onBack={() => window.history.back()} extra={<PushCard place="newyear" title="오늘의 운세도 매일 아침 받아보세요" />} />;
   if (screen === "result" && result)
     return (
@@ -252,6 +293,14 @@ export default function App() {
         onOpenNy={() => go("newyear")}
         onAddHour={addHour}
         onOther={() => go("form")}
+        onOpenSection={(p, topic) => {
+          setSectionView({ purchase: p, topic });
+          go("section");
+        }}
+        onOpenFamily={(m) => {
+          setFamilyMember(m);
+          go("family");
+        }}
       />
     );
   if (screen === "today" && result) return <TodayScreen result={result} onFull={() => go("result")} nyPurchased={!!nyPurchase} onOther={() => go("form")} />;
@@ -699,20 +748,22 @@ function NewYearCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const variant = useMemo(() => getVariant(), []);
+  // 이 기기에서 신년운세를 처음 사는 경우에만 특가 상품으로 판다(해외 상위 서비스의 "첫 상담 할인"을 옮긴 것, 1회 한정).
+  const firstOffer = useMemo(() => !purchase && firstNewYearOfferAvailable(), [purchase]);
   if (!iapAvailable("newYear")) return null;
 
   function open() {
-    nyTrack("ny_open_click", { variant, purchased: !!purchase });
+    nyTrack("ny_open_click", { variant, purchased: !!purchase, first: firstOffer });
     if (purchase) {
       onOpen();
       return;
     }
     setError(null);
     setBusy(true);
-    buyProduct("newYear", toInput(form), {
+    buyProduct(firstOffer ? "newYearFirst" : "newYear", toInput(form), {
       onSuccess: (p) => {
         setBusy(false);
-        nyTrack("ny_purchase", { variant, year: NY_YEAR });
+        nyTrack("ny_purchase", { variant, year: NY_YEAR, first: firstOffer });
         onPurchased(p);
       },
       onError: (message) => {
@@ -722,7 +773,236 @@ function NewYearCard({
     });
   }
 
-  return <NewYearTeaser result={result} variant={variant} purchased={!!purchase} busy={busy} error={error} onOpen={open} />;
+  return (
+    <NewYearTeaser
+      result={result}
+      variant={variant}
+      purchased={!!purchase}
+      busy={busy}
+      error={error}
+      onOpen={open}
+      priceKrw={firstOffer ? NY_FIRST_PRICE_KRW : undefined}
+      offerNote={firstOffer ? `처음 사는 분만 한 번, ${NY_FIRST_PRICE_KRW.toLocaleString("ko-KR")}원이에요 (정가 ${NY_PRICE_LABEL})` : undefined}
+    />
+  );
+}
+
+/** 궁금한 것 하나 풀이: 주제를 고르면 내 사주로 그 주제만 깊게 풀어 준다(AI 작성, 첫 질문 무료 → 다음부터 한 주제씩 구매). */
+function SectionCard({ form, onOpen }: { form: Form; onOpen: (p: Purchase, topic: SectionTopic) => void }) {
+  const [topic, setTopic] = useState<SectionTopic>("wealth");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const free = freeSectionAvailable();
+  const paid = iapAvailable("section");
+  if (!free && !paid) return null;
+  const input = toInput(form);
+  const owned = savedPurchaseFor(input, "section", topic);
+  const chosen = SECTION_TOPICS.find((t) => t.key === topic)!;
+
+  function go() {
+    track("section_click", { topic, owned: !!owned, free });
+    setError(null);
+    if (owned) {
+      onOpen(owned, topic);
+      return;
+    }
+    setBusy(true);
+    if (free) {
+      claimFreeSection(input, topic)
+        .then(({ purchase, sectionKey }) => {
+          setBusy(false);
+          track("section_free", { topic: sectionKey });
+          onOpen(purchase, sectionKey);
+        })
+        .catch((e: unknown) => {
+          setBusy(false);
+          setError(e instanceof Error ? e.message : "무료 풀이를 받지 못했어요.");
+        });
+      return;
+    }
+    buyProduct(
+      "section",
+      input,
+      {
+        onSuccess: (p) => {
+          setBusy(false);
+          track("section_purchase", { topic });
+          onOpen(p, topic);
+        },
+        onError: (message) => {
+          setBusy(false);
+          setError(message);
+        },
+      },
+      topic,
+    );
+  }
+
+  return (
+    <section className="card section-card">
+      <h2>궁금한 것 하나, 내 사주로 물어보세요</h2>
+      <p className="muted" style={{ fontSize: 15 }}>주제를 고르면 그 이야기만 깊게 풀어 드려요.</p>
+      <div className="topic-grid">
+        {SECTION_TOPICS.map((t) => (
+          <button key={t.key} type="button" className={`toggle ${topic === t.key ? "on" : ""}`} onClick={() => setTopic(t.key)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <p className="topic-ask">“{chosen.ask}”</p>
+      <button type="button" className="cta" disabled={busy} onClick={go}>
+        {busy ? "준비 중이에요…" : owned ? "받은 풀이 다시 보기" : free ? "첫 질문 무료로 받기" : `풀이 받기 · ${SECTION_PRICE_LABEL}`}
+      </button>
+      {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f", marginTop: 8 }}>{error}</p>}
+      <p className="foot" style={{ marginTop: 8 }}>
+        {free ? "처음 한 번은 무료예요 · 다음부터 한 주제에 " + SECTION_PRICE_LABEL : "토스로 한 번만 결제해요 · 자동 결제 없어요"}
+        <br />
+        풀이<span className="ny-ai">(AI)</span>는 전통 명리학을 바탕으로 한 참고용이에요
+      </p>
+    </section>
+  );
+}
+
+function SectionScreen({ purchase, topic, onBack }: { purchase: Purchase; topic: SectionTopic; onBack: () => void }) {
+  const [text, setText] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const label = SECTION_TOPICS.find((t) => t.key === topic)?.label ?? "풀이";
+  useEffect(() => {
+    let alive = true;
+    track("screen_section", { topic });
+    loadSection(purchase, topic)
+      .then((t) => alive && setText(t))
+      .catch((e: unknown) => alive && setError(e instanceof Error ? e.message : "불러오지 못했어요."));
+    return () => {
+      alive = false;
+    };
+  }, [purchase, topic]);
+  return (
+    <main className="page">
+      <header className="hero">
+        <div className="eyebrow">AI가 작성한 결과</div>
+        <h1>{label} 풀이</h1>
+        <p>{text ? "내 사주로 풀어 봤어요." : "내 사주로 풀고 있어요. 30초쯤 걸려요."}</p>
+      </header>
+      <section className="card">
+        {text ? <p style={{ whiteSpace: "pre-line" }}>{text}</p> : !error && <p className="muted" style={{ textAlign: "center" }}>풀이를 쓰고 있어요...</p>}
+        {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f" }}>{error}</p>}
+      </section>
+      <button type="button" className="ghost" onClick={onBack}>다른 주제도 물어보기</button>
+      <p className="foot">이 내용은 AI가 작성한 결과물이며, 전통 명리학 해석을 바탕으로 한 참고용이에요.</p>
+    </main>
+  );
+}
+
+/** 가족 생일을 이 기기에 저장해 두고, 가족마다 2027 신년운세 미리보기·구매(생일별로 따로 산다). */
+function FamilyCard({ onOpen }: { onOpen: (m: FamilyMember) => void }) {
+  const [list, setList] = useState<FamilyMember[]>(() => loadFamily());
+  const [adding, setAdding] = useState(false);
+  const [rel, setRel] = useState<Relation>("배우자");
+  const [f, setF] = useState<Form>({ ...EMPTY });
+  const [error, setError] = useState<string | null>(null);
+  if (!iapAvailable("newYear")) return null;
+
+  const digits = (v: string, n: number) => v.replace(/\D/g, "").slice(0, n);
+  function save() {
+    setError(null);
+    try {
+      calculateSaju(toInput({ ...f, unknownTime: true, hour: "" }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "생년월일을 확인해 주세요.");
+      return;
+    }
+    const next = [...list, { rel, form: { ...f, unknownTime: true, hour: "" } }].slice(-6);
+    writeStore(KEY_FAMILY, JSON.stringify(next));
+    setList(next);
+    setAdding(false);
+    setF({ ...EMPTY });
+    track("family_add", { rel });
+  }
+  const ok = f.year.length === 4 && f.month !== "" && f.day !== "" && f.gender !== "";
+
+  return (
+    <section className="card">
+      <h2>가족의 {NY_YEAR}년도 함께 보세요</h2>
+      <p className="muted" style={{ fontSize: 15 }}>배우자·자녀·부모님 생년월일을 넣으면 가족마다 좋은 달과 좋은 날을 알려드려요.</p>
+      {list.length > 0 && (
+        <div className="family-list">
+          {list.map((m, i) => (
+            <button key={i} type="button" className="ghost family-item" onClick={() => { track("family_open", { rel: m.rel }); onOpen(m); }}>
+              <b>{m.rel}</b> <span>{formLabel(m.form)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {adding ? (
+        <div className="family-add">
+          <div className="row">
+            <select value={rel} onChange={(e) => setRel(e.target.value as Relation)}>
+              {RELATIONS.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+          <div className="date-row">
+            <input inputMode="numeric" pattern="[0-9]*" aria-label="가족 태어난 해" placeholder="예) 1963" value={f.year} onChange={(e) => setF({ ...f, year: digits(e.target.value, 4) })} />
+            <em>년</em>
+            <input inputMode="numeric" pattern="[0-9]*" aria-label="가족 태어난 달" placeholder="월" value={f.month} onChange={(e) => setF({ ...f, month: digits(e.target.value, 2) })} />
+            <em>월</em>
+            <input inputMode="numeric" pattern="[0-9]*" aria-label="가족 태어난 날" placeholder="일" value={f.day} onChange={(e) => setF({ ...f, day: digits(e.target.value, 2) })} />
+            <em>일</em>
+          </div>
+          <div className="row">
+            {(["solar", "lunar"] as const).map((c) => (
+              <button key={c} type="button" className={`toggle small ${f.calendarType === c ? "on" : ""}`} onClick={() => setF({ ...f, calendarType: c })}>
+                {c === "solar" ? "양력" : "음력"}
+              </button>
+            ))}
+            {(["female", "male"] as const).map((g) => (
+              <button key={g} type="button" className={`toggle small ${f.gender === g ? "on" : ""}`} onClick={() => setF({ ...f, gender: g })}>
+                {g === "female" ? "여성" : "남성"}
+              </button>
+            ))}
+          </div>
+          {error && <p className="hint">{error}</p>}
+          <button type="button" className="cta" disabled={!ok} onClick={save}>가족 추가하기</button>
+        </div>
+      ) : (
+        <button type="button" className="ghost" style={{ marginTop: 12 }} onClick={() => setAdding(true)}>+ 가족 생년월일 넣기</button>
+      )}
+      <p className="foot" style={{ marginTop: 8 }}>가족 생년월일은 이 기기에만 저장돼요</p>
+    </section>
+  );
+}
+
+/** 가족 한 사람의 2027 신년운세: 무료 미리보기 카드 → 구매하면 그 자리에서 열두 달 풀이. */
+function FamilyScreen({ member, onBack }: { member: FamilyMember; onBack: () => void }) {
+  const result = useMemo(() => calculateSaju(toInput(member.form)), [member]);
+  const [tick, setTick] = useState(0);
+  const [open, setOpen] = useState(false);
+  // tick: 방금 산 구매 기록을 다시 읽게 한다(기기 저장소는 React가 모름)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const purchase = useMemo(() => savedPurchaseFor(toInput(member.form), "newYear"), [member, tick]);
+  if (open && purchase) return <NewYearScreen purchase={purchase} result={result} onBack={() => setOpen(false)} />;
+  return (
+    <main className="page">
+      <header className="hero">
+        <div className="eyebrow">가족 신년운세</div>
+        <h1>{member.rel}의 {NY_YEAR}년</h1>
+        <p>{formLabel(member.form)}</p>
+      </header>
+      <NewYearCard
+        result={result}
+        form={member.form}
+        purchase={purchase}
+        onPurchased={() => {
+          setTick((n) => n + 1);
+          setOpen(true);
+        }}
+        onOpen={() => setOpen(true)}
+      />
+      <button type="button" className="ghost" onClick={onBack}>돌아가기</button>
+    </main>
+  );
 }
 
 function ManualScreen({ purchase, onBack }: { purchase: Purchase; onBack: () => void }) {
@@ -781,6 +1061,8 @@ function ResultScreen({
   onOpenNy,
   onAddHour,
   onOther,
+  onOpenSection,
+  onOpenFamily,
 }: {
   result: SajuResult;
   form: Form;
@@ -792,6 +1074,8 @@ function ResultScreen({
   onOpenNy: () => void;
   onAddHour: (hour: string) => void;
   onOther: () => void;
+  onOpenSection: (p: Purchase, topic: SectionTopic) => void;
+  onOpenFamily: (m: FamilyMember) => void;
 }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
@@ -887,6 +1171,12 @@ function ResultScreen({
 
       {/* v12: 알림 신청 카드가 '오늘의 운세' 화면(14일 45회)에만 있어서 신청 0명 → 결과 화면(385회)의 오늘 운세 바로 아래로 */}
       <PushCard place="result" title="이 운세, 매일 아침 받아보세요" />
+
+      {/* v13: 해외 상위 서비스(Co-Star·Astrotalk·LINE占い)의 "질문 하나씩 + 첫 질문 무료"를 주제 하나 풀이로 */}
+      <SectionCard form={form} onOpen={onOpenSection} />
+
+      {/* v13: 궁합 유료화(The Pattern·Co-Star)를 50대 이상에 맞게 가족 신년운세로 */}
+      <FamilyCard onOpen={onOpenFamily} />
 
       {gate.needsAd ? (
         <section className="card reward">

@@ -1,4 +1,4 @@
-import { IAP } from "@apps-in-toss/web-framework";
+import { IAP, getAnonymousKey } from "@apps-in-toss/web-framework";
 import type { SajuInput } from "@saju/types";
 
 // 인앱 결제(나 사용설명서 6장). 결제는 토스가 처리하고, 우리 서버는 토스에 주문 상태를 직접 확인한 뒤 리포트 접근 토큰을 준다.
@@ -6,15 +6,34 @@ import type { SajuInput } from "@saju/types";
 export const IAP_SKU = import.meta.env.VITE_IAP_SKU as string | undefined;
 // v11(2026-10-26): 상품이 둘이 됐다. manual = 나 사용설명서(위 SKU), newYear = 2027 신년운세(VITE_IAP_SKU_NEWYEAR, 콘솔 등록 SKU).
 // 어떤 상품인지는 서버가 토스에서 받은 sku로 정하므로 앱은 "기기에 어느 칸에 저장할지"만 구분한다.
-export type Product = "manual" | "newYear";
+// v13(2026-11-05): newYearFirst = 신년운세 첫 구매 특가(같은 리포트, 낮은 가격 SKU, 이 기기에서 신년운세를 산 적 없을 때만),
+// section = 궁금한 것 하나 풀이(주제 1가지, 첫 질문 무료). 둘 다 SKU가 없으면 화면에 나오지 않는다.
+export type Product = "manual" | "newYear" | "newYearFirst" | "section";
 export const IAP_SKU_NEWYEAR = import.meta.env.VITE_IAP_SKU_NEWYEAR as string | undefined;
-const SKU_OF: Record<Product, string | undefined> = { manual: IAP_SKU, newYear: IAP_SKU_NEWYEAR };
+const IAP_SKU_NEWYEAR_FIRST = import.meta.env.VITE_IAP_SKU_NEWYEAR_FIRST as string | undefined;
+const IAP_SKU_SECTION = import.meta.env.VITE_IAP_SKU_SECTION as string | undefined;
+const SKU_OF: Record<Product, string | undefined> = { manual: IAP_SKU, newYear: IAP_SKU_NEWYEAR, newYearFirst: IAP_SKU_NEWYEAR_FIRST, section: IAP_SKU_SECTION };
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "https://saju-app-three-dusky.vercel.app";
+// 첫 구매 특가로 산 신년운세도 같은 칸(newYear)에 저장한다 — 화면에서는 똑같은 신년운세다.
 const KEY_PURCHASES_OF: Record<Product, string> = {
   manual: "sajulab:iap:purchases:v2",
   newYear: "sajulab:iap:purchases:newyear:v1",
+  newYearFirst: "sajulab:iap:purchases:newyear:v1",
+  section: "sajulab:iap:purchases:section:v1",
 };
 const KEY_PENDING = "sajulab:iap:pending:v1";
+const KEY_LAST_SECTION = "sajulab:iap:lastSection";
+const KEY_FREE_SECTION = "sajulab:free-section:v1";
+
+/** 궁금한 것 하나 풀이 주제(서버 single_section과 같은 키). 50대 이상이 많이 찾는 순서로 둔다. */
+export type SectionTopic = "wealth" | "relationship" | "career" | "yearly" | "love";
+export const SECTION_TOPICS: { key: SectionTopic; label: string; ask: string }[] = [
+  { key: "wealth", label: "재물·돈", ask: "돈이 모이는 때와 새는 때가 궁금해요" },
+  { key: "relationship", label: "가족·사람", ask: "가족·주변 사람과의 관계가 궁금해요" },
+  { key: "career", label: "일·사업", ask: "일과 사업을 넓힐 때인지 궁금해요" },
+  { key: "yearly", label: "올해 흐름", ask: "올해 무엇을 하고 무엇을 미룰지 궁금해요" },
+  { key: "love", label: "연애·부부", ask: "연애·부부 사이가 궁금해요" },
+];
 const T0 = Date.now();
 
 interface LocalPending {
@@ -22,6 +41,8 @@ interface LocalPending {
   input: SajuInput;
   /** v11부터 기록. 없으면(v10까지 저장된 미결 주문) 사용설명서. */
   product?: Product;
+  /** v13 궁금한 것 하나 풀이에서 고른 주제 */
+  sectionKey?: SectionTopic;
 }
 
 function readPending(): LocalPending[] {
@@ -120,20 +141,35 @@ function readPurchases(product: Product): Record<string, Purchase> {
   }
 }
 
-export function savedPurchaseFor(input: SajuInput, product: Product = "manual"): Purchase | null {
-  const p = readPurchases(product)[birthKey(input)];
+/** 저장 칸 안의 키. 풀이(section)는 생일 + 주제마다 따로 산다. */
+function slotKey(input: SajuInput, sectionKey?: SectionTopic): string {
+  return sectionKey ? `${birthKey(input)}|${sectionKey}` : birthKey(input);
+}
+
+export function savedPurchaseFor(input: SajuInput, product: Product = "manual", sectionKey?: SectionTopic): Purchase | null {
+  const p = readPurchases(product)[slotKey(input, product === "section" ? sectionKey : undefined)];
   return p && p.paymentId && p.token ? p : null;
 }
 
-function savePurchase(input: SajuInput, purchase: Purchase, product: Product) {
+function savePurchase(input: SajuInput, purchase: Purchase, product: Product, sectionKey?: SectionTopic) {
   const all = readPurchases(product);
-  all[birthKey(input)] = purchase;
+  all[slotKey(input, product === "section" ? sectionKey : undefined)] = purchase;
   write(KEY_PURCHASES_OF[product], JSON.stringify(all));
+}
+
+/** 이 기기에서 신년운세를 한 번도 산 적이 없으면 첫 구매 특가를 보여 준다(특가 SKU가 있을 때만). */
+export function firstNewYearOfferAvailable(): boolean {
+  return iapAvailable("newYearFirst") && Object.keys(readPurchases("newYear")).length === 0;
+}
+
+/** 첫 질문 무료를 이미 받았는지(기기 기준. 서버도 토스 사용자 식별키로 한 번만 준다). */
+export function freeSectionUsed(): boolean {
+  return read(KEY_FREE_SECTION) === "used";
 }
 
 export function iapAvailable(product: Product = "manual"): boolean {
   // 개발 화면 전용: ?ny=1 이면 토스 밖에서도 신년운세가 켜진 화면을 미리 본다(배포 번들에는 영향 없음, 결제는 안 됨).
-  if (import.meta.env.DEV && product === "newYear" && new URLSearchParams(location.search).get("ny") === "1") return true;
+  if (import.meta.env.DEV && product !== "manual" && new URLSearchParams(location.search).get("ny") === "1") return true;
   try {
     return !!SKU_OF[product] && IAP.createOneTimePurchaseOrder.isSupported();
   } catch {
@@ -145,24 +181,26 @@ export function iapAvailable(product: Product = "manual"): boolean {
 function productOfSku(sku: string | undefined): Product | null {
   if (sku && sku === IAP_SKU) return "manual";
   if (sku && sku === IAP_SKU_NEWYEAR) return "newYear";
+  if (sku && sku === IAP_SKU_NEWYEAR_FIRST) return "newYearFirst";
+  if (sku && sku === IAP_SKU_SECTION) return "section";
   return null;
 }
 
 /** 서버에 주문 번호를 보내 지급(접근 토큰 발급)을 요청한다. 성공해야만 true를 돌려 토스 주문이 "지급 완료"가 된다. */
-async function grant(orderId: string, input: SajuInput, product: Product = "manual"): Promise<Purchase> {
+async function grant(orderId: string, input: SajuInput, product: Product = "manual", sectionKey?: SectionTopic): Promise<Purchase> {
   const started = Date.now();
   trace("grant_http_start");
   // text/plain은 브라우저의 사전 확인(OPTIONS) 요청 없이 바로 보낼 수 있다(서버는 본문을 JSON으로 읽는다).
   const res = await fetch(`${API_BASE}/api/toss/iap/grant`, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({ orderId, birthInput: input }),
+    body: JSON.stringify({ orderId, birthInput: input, ...(product === "section" ? { sectionKey } : {}) }),
   });
   const data = (await res.json().catch(() => ({}))) as Partial<Purchase> & { error?: string };
   trace("grant_http_done", { status: res.status, took: Date.now() - started });
   if (!res.ok || !data.paymentId || !data.token) throw new Error(data.error ?? "지급하지 못했어요.");
   const purchase = { paymentId: data.paymentId, token: data.token };
-  savePurchase(input, purchase, product);
+  savePurchase(input, purchase, product, sectionKey);
   return purchase;
 }
 
@@ -176,14 +214,16 @@ export function buyProduct(
   product: Product,
   input: SajuInput,
   handlers: { onSuccess: (p: Purchase) => void; onError: (message: string) => void },
+  sectionKey?: SectionTopic,
 ): () => void {
   trace("buy_start", product === "manual" ? {} : { product });
+  if (product === "section" && sectionKey) write(KEY_LAST_SECTION, sectionKey);
   try {
     const cleanup = IAP.createOneTimePurchaseOrder({
       options: {
         sku: SKU_OF[product] as string,
         processProductGrant: ({ orderId }) => {
-          addPending({ orderId, input, product });
+          addPending({ orderId, input, product, sectionKey });
           trace("grant_enter_saved", { orderTail: orderId.slice(-6) });
           return true;
         },
@@ -192,7 +232,7 @@ export function buyProduct(
         trace("event", { type: e.type });
         if (e.type !== "success") return;
         const orderId = e.data.orderId;
-        grant(orderId, input, product)
+        grant(orderId, input, product, sectionKey)
           .then((p) => {
             removePending(orderId);
             trace("grant_after_success_ok");
@@ -200,7 +240,7 @@ export function buyProduct(
           })
           .catch((err) => {
             trace("grant_after_success_fail", { error: describeError(err) });
-            handlers.onError(`결제는 끝났어요. ${product === "newYear" ? "신년운세" : "사용설명서"}를 여는 중이에요. 잠시 후 앱을 다시 열면 이어져요.`);
+            handlers.onError(`결제는 끝났어요. ${PRODUCT_NAME[product]}를 여는 중이에요. 잠시 후 앱을 다시 열면 이어져요.`);
           });
       },
       onError: (e) => {
@@ -216,6 +256,8 @@ export function buyProduct(
   }
 }
 
+const PRODUCT_NAME: Record<Product, string> = { manual: "사용설명서", newYear: "신년운세", newYearFirst: "신년운세", section: "풀이" };
+
 /** v10까지의 호출을 그대로 쓰는 사용설명서 구매. */
 export function buyManual(
   input: SajuInput,
@@ -229,13 +271,13 @@ export function buyManual(
  * 서버는 같은 주문을 두 번 만들지 않으므로 여러 번 불러도 안전하다.
  */
 export async function recoverPendingOrders(input: SajuInput | null): Promise<Purchase | null> {
-  if (!IAP_SKU && !IAP_SKU_NEWYEAR) return null;
+  if (!IAP_SKU && !IAP_SKU_NEWYEAR && !IAP_SKU_NEWYEAR_FIRST && !IAP_SKU_SECTION) return null;
   let recovered: Purchase | null = null;
 
   // 1) 기기에 남겨 둔 미결 주문(결제는 끝났지만 서버 지급이 안 끝난 것). 상품 기록이 없는 옛 미결은 사용설명서.
   for (const item of readPending()) {
     try {
-      recovered = await grant(item.orderId, item.input, item.product ?? "manual");
+      recovered = await grant(item.orderId, item.input, item.product ?? "manual", item.sectionKey);
       removePending(item.orderId);
       trace("recover_local_ok", { orderTail: item.orderId.slice(-6) });
     } catch (e) {
@@ -252,7 +294,9 @@ export async function recoverPendingOrders(input: SajuInput | null): Promise<Pur
         const product = productOfSku(order.sku);
         if (!product) continue;
         try {
-          recovered = await grant(order.orderId, input, product);
+          // 토스 미결 목록에는 주제가 없어 마지막으로 고른 주제로 지급한다(기기 미결 목록이 있으면 위 1)에서 이미 처리됨).
+          const lastSection = (read(KEY_LAST_SECTION) as SectionTopic | null) ?? "yearly";
+          recovered = await grant(order.orderId, input, product, product === "section" ? lastSection : undefined);
           if (IAP.completeProductGrant.isSupported()) {
             const done = await IAP.completeProductGrant({ params: { orderId: order.orderId } });
             trace("recover_complete", { done });
@@ -320,4 +364,55 @@ export async function loadManual(
     done += 1;
     onChapter(key, text, { done, total: keys.length });
   }
+}
+
+/**
+ * 첫 질문 무료(v13): 토스 사용자 식별키로 서버에 0원 풀이를 한 번 받는다. 이미 받은 사람이면 처음 받은 주제의 풀이를 돌려준다.
+ * 식별키를 못 받는 옛 토스 버전이면 무료 없이 유료 구매만 보인다.
+ */
+export async function claimFreeSection(input: SajuInput, sectionKey: SectionTopic): Promise<{ purchase: Purchase; sectionKey: SectionTopic }> {
+  let anonKey = "";
+  try {
+    if (getAnonymousKey.isSupported()) {
+      const r = await getAnonymousKey();
+      if (r && typeof r === "object" && r.hash) anonKey = r.hash;
+    }
+  } catch {
+    /* 아래에서 안내 */
+  }
+  if (!anonKey) throw new Error("이 토스 버전에서는 무료 풀이를 받을 수 없어요.");
+  const res = await fetch(`${API_BASE}/api/toss/section/free`, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ anonKey, birthInput: input, sectionKey }),
+  });
+  const data = (await res.json().catch(() => ({}))) as Partial<Purchase> & { error?: string; sectionKey?: SectionTopic };
+  if (!res.ok || !data.paymentId || !data.token) throw new Error(data.error ?? "무료 풀이를 받지 못했어요.");
+  const got = data.sectionKey ?? sectionKey;
+  const purchase = { paymentId: data.paymentId, token: data.token };
+  savePurchase(input, purchase, "section", got);
+  write(KEY_FREE_SECTION, "used");
+  return { purchase, sectionKey: got };
+}
+
+export function freeSectionAvailable(): boolean {
+  try {
+    return !freeSectionUsed() && getAnonymousKey.isSupported();
+  } catch {
+    return false;
+  }
+}
+
+/** 주제 하나 풀이 글(20~45초 생성). 실패하면 두 번 더 시도한다. */
+export async function loadSection(purchase: Purchase, sectionKey: SectionTopic): Promise<string> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const data = await getJson(purchase, `section=${encodeURIComponent(sectionKey)}`);
+      const text = data.sections?.[sectionKey] ?? "";
+      if (text) return text;
+    } catch {
+      /* 아래에서 다시 시도 */
+    }
+  }
+  throw new Error("풀이 글을 아직 불러오지 못했어요. 잠시 후 다시 열어 주세요.");
 }

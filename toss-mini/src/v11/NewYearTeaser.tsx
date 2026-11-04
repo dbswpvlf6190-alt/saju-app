@@ -18,9 +18,13 @@ export interface NewYearTeaserProps {
   busy: boolean;
   error?: string | null;
   onOpen: () => void; // 구매(이미 샀으면 신년운세 화면 열기)
+  /** v13 첫 구매 특가일 때의 판매가(없으면 정가). 정가는 실제 판매가 그대로 함께 적는다(가짜 정가 금지). */
+  priceKrw?: number;
+  offerNote?: string;
 }
 
-export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen }: NewYearTeaserProps) {
+export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen, priceKrw = NY_PRICE_KRW, offerNote }: NewYearTeaserProps) {
+  const priceLabel = `${priceKrw.toLocaleString("ko-KR")}원`;
   const hook = useMemo(() => buildNewYearHook(result, NY_YEAR), [result]);
   const { year, top, best, freeDay, flow } = hook;
   const bestSet = new Set(best.map((m) => m.month));
@@ -39,7 +43,7 @@ export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen 
     ? `${year}년 신년운세 다시 보기`
     : busy
       ? "결제 준비 중이에요…"
-      : `${variant === "B" ? `좋은 날 ${hook.totalGoodDays}일 확인하기` : "열두 달 풀이 열기"} · ${NY_PRICE_LABEL}`;
+      : `${variant === "B" ? `좋은 날 ${hook.totalGoodDays}일 확인하기` : "열두 달 풀이 열기"} · ${priceKrw === NY_PRICE_KRW ? NY_PRICE_LABEL : priceLabel}`;
 
   return (
     <section className="card ny-card" aria-label={`${year}년 신년운세 미리보기`}>
@@ -119,6 +123,7 @@ export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen 
         </ul>
       )}
 
+      {!purchased && offerNote && <p className="ny-offer">{offerNote}</p>}
       <button className="cta ny-cta" onClick={onOpen} disabled={busy}>
         {buttonText}
       </button>
@@ -128,7 +133,7 @@ export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen 
           토스로 <b>한 번만</b> 결제해요 · 자동 결제 없어요
           <br />
           {/* AI 작성 고지: 사는 물건 이름 바로 옆에 짧게 — 사장님 결정(10/23)으로 "(AI)" 표시 */}
-          열두 달 풀이<span className="ny-ai">(AI)</span> · {perDayLabel(NY_PRICE_KRW)}
+          열두 달 풀이<span className="ny-ai">(AI)</span> · {perDayLabel(priceKrw)}
           <br />
           산 풀이는 다시 열어볼 수 있어요
         </p>

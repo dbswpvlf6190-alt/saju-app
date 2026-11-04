@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Analytics, Notification, Review, Share, TossAds, getOperationalEnvironment, getSchemeUri, getTossAppVersion, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
+import { Analytics, Notification, Promotion, Review, Share, TossAds, getOperationalEnvironment, getSchemeUri, getTossAppVersion, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
 import { calculateSaju } from "@saju/engine";
 import type { SajuInput, SajuResult } from "@saju/types";
 import { generateFreeContent } from "@saju/content";
@@ -24,6 +24,12 @@ const REWARD_AD_ID = import.meta.env.VITE_AD_REWARDED as string | undefined;
 const PUSH_TEMPLATE = import.meta.env.VITE_PUSH_TEMPLATE as string | undefined;
 const KEY_REWARD_DAY = "sajulab:rewardDay:v3c";
 const KEY_PUSH = "sajulab:push";
+// v13 프로모션: "내 운세를 보면 포인트" 미션. 콘솔에서 만든 프로모션 코드와 1회 지급액을 빌드 때 넣는다. 없으면 지급 코드는 돌지 않는다.
+const PROMO_CODE = import.meta.env.VITE_PROMO_CODE as string | undefined;
+const PROMO_AMOUNT = Number(import.meta.env.VITE_PROMO_AMOUNT) || 0;
+const KEY_PROMO = "sajulab:promo";
+// 첫 화면의 방문자 수는 콘솔 누적 유저 수(2026-11-04 기준 4,131명)에서 내림한 실제 숫자만 쓴다. 누적이라 시간이 지나도 거짓이 되지 않는다.
+const VISITORS_LABEL = "4,100명";
 
 /** 사용자 행동 기록(토스 콘솔 분석). 토스 밖이거나 미지원 버전이면 조용히 무시된다. */
 function track(name: string, params: Record<string, string | number | boolean> = {}) {
@@ -63,8 +69,8 @@ function safeSupported(fn: { isSupported?: () => boolean }): boolean {
 }
 const WUXING_COLOR: Record<WuXing, string> = { 목: "#3fa66b", 화: "#e3543f", 토: "#c99a2e", 금: "#8a94a6", 수: "#3b6fd8" };
 const WUXING_ORDER: WuXing[] = ["목", "화", "토", "금", "수"];
-const YEARS = Array.from({ length: 2026 - 1930 + 1 }, (_, i) => 2026 - i);
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const MIN_YEAR = 1930;
+const MAX_YEAR = 2026;
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 type Form = { calendarType: "solar" | "lunar"; year: string; month: string; day: string; hour: string; unknownTime: boolean; gender: "" | "male" | "female" };
@@ -123,7 +129,7 @@ export default function App() {
     return saved?.result ?? null;
   });
   const [error, setError] = useState<string | null>(null);
-  const gate = useRewardGate();
+  const [showHour, setShowHour] = useState(() => !form.unknownTime);
   const formStarted = useRef(false);
   // 구매 기록은 생일별로 저장돼 있어, 지금 입력한 생일의 구매만 "열기"로 보인다(다른 생일은 새로 구매할 수 있다).
   const [purchaseTick, setPurchaseTick] = useState(0);
@@ -165,6 +171,11 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, [initialScreen]);
 
+  // v13: 입력 시작 비율의 분모(홈 화면을 본 횟수). 전에는 이게 없어 프로모션 포인트 지급 수로 짐작했다.
+  useEffect(() => {
+    if (screen === "form") track("home_view");
+  }, [screen]);
+
   /** 태어난 시간을 나중에 넣으면 같은 폰 안에서 바로 다시 계산한다(서버 불필요). 시주가 들어가 결과가 더 정확해진다. */
   function addHour(hour: string) {
     if (hour === "") return;
@@ -186,8 +197,21 @@ export default function App() {
     setScreen(next);
   }
 
-  const daysInMonth = form.year && form.month ? new Date(Number(form.year), Number(form.month), 0).getDate() : 31;
-  const ready = form.year && form.month && form.day && form.gender && (form.unknownTime || form.hour !== "");
+  const yearNum = Number(form.year);
+  const yearOk = form.year.length === 4 && yearNum >= MIN_YEAR && yearNum <= MAX_YEAR;
+  const monthOk = Number(form.month) >= 1 && Number(form.month) <= 12;
+  const daysInMonth = yearOk && monthOk ? new Date(yearNum, Number(form.month), 0).getDate() : 31;
+  const dayOk = Number(form.day) >= 1 && Number(form.day) <= daysInMonth;
+  const ready = yearOk && monthOk && dayOk && form.gender && (form.unknownTime || form.hour !== "");
+  const dateHint =
+    form.year.length === 4 && !yearOk
+      ? `태어난 해는 ${MIN_YEAR}~${MAX_YEAR} 사이로 넣어 주세요.`
+      : form.month !== "" && !monthOk
+        ? "월은 1~12 사이로 넣어 주세요."
+        : form.day.length === 2 && !dayOk
+          ? `${form.month}월은 ${daysInMonth}일까지 있어요.`
+          : null;
+  const nyOn = iapAvailable("newYear");
 
   function submit() {
     setError(null);
@@ -200,7 +224,8 @@ export default function App() {
       }
       setResult(r);
       track("form_submit");
-      gate.run(() => go("result"));
+      // v13: 결과 앞의 광고를 없앴다(앱인토스 가이드: 결과를 보기 전에 광고를 띄우지 않는다). 광고는 결과 화면의 "깊은 풀이" 앞으로 옮김.
+      go("result");
     } catch (e) {
       setError(e instanceof Error ? e.message : "입력값을 확인해 주세요.");
     }
@@ -229,7 +254,7 @@ export default function App() {
         onOther={() => go("form")}
       />
     );
-  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => gate.run(() => go("result"))} fullLabel={gate.label("내 사주 타입 전체 보기")} fullDisabled={gate.disabled} diag={gate.diag} nyPurchased={!!nyPurchase} onOther={() => go("form")} />;
+  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => go("result")} nyPurchased={!!nyPurchase} onOther={() => go("form")} />;
 
   const set = (patch: Partial<Form>) => {
     if (!formStarted.current) {
@@ -238,91 +263,81 @@ export default function App() {
     }
     setForm((f) => ({ ...f, ...patch }));
   };
+  // 숫자만 받는다(붙여넣기·한글 자판 대비). 년 4자리, 월·일 2자리.
+  const digits = (v: string, n: number) => v.replace(/\D/g, "").slice(0, n);
   return (
     <main className="page">
-      <header className="hero">
-        <div className="eyebrow">SAJU LAB</div>
+      {/* v13 첫 화면: 토스 손님은 50대 이상이 77% → "사주 타입" 대신 이 연령층이 찾는 신년운세를 앞에, 입력칸을 첫 화면 맨 위로, 글자 크게. */}
+      <header className="hero hero-big">
+        <div className="eyebrow">사주랩{nyOn ? ` · ${NY_YEAR} 신년운세` : ""}</div>
         <h1>
-          생일만 넣으면 30초,
-          <br />내 사주 타입
+          생년월일만 넣으면
+          <br />
+          {nyOn ? `${NY_YEAR}년 내 운세` : "내 사주풀이"}
         </h1>
-        <p>태어난 날로 보는 나의 일간 유형·오행·오늘의 운세{iapAvailable("newYear") ? `·${NY_YEAR}년 좋은 달` : ""}</p>
+        <p>{nyOn ? "가장 좋은 달과 좋은 날 하루를 무료로 알려드려요" : "타고난 성격·오행·오늘의 운세를 무료로 알려드려요"}</p>
       </header>
 
-      <SampleCard />
-
-      <section className="card">
+      <section className="card form-card">
         <div className="field">
-          <span>양력 / 음력</span>
-          <div className="row">
+          <span>생년월일</span>
+          <div className="date-row">
+            <input inputMode="numeric" pattern="[0-9]*" aria-label="태어난 해" placeholder="예) 1965" value={form.year} onChange={(e) => set({ year: digits(e.target.value, 4) })} />
+            <em>년</em>
+            <input inputMode="numeric" pattern="[0-9]*" aria-label="태어난 달" placeholder="월" value={form.month} onChange={(e) => set({ month: digits(e.target.value, 2) })} />
+            <em>월</em>
+            <input inputMode="numeric" pattern="[0-9]*" aria-label="태어난 날" placeholder="일" value={form.day} onChange={(e) => set({ day: digits(e.target.value, 2) })} />
+            <em>일</em>
+          </div>
+          {dateHint && <p className="hint">{dateHint}</p>}
+          <div className="row cal-row">
             {(["solar", "lunar"] as const).map((c) => (
-              <button key={c} type="button" className={`toggle ${form.calendarType === c ? "on" : ""}`} onClick={() => set({ calendarType: c })}>
+              <button key={c} type="button" className={`toggle small ${form.calendarType === c ? "on" : ""}`} onClick={() => set({ calendarType: c })}>
                 {c === "solar" ? "양력" : "음력"}
               </button>
             ))}
           </div>
         </div>
-        <div className="field">
-          <span>생년월일</span>
-          <div className="row">
-            <select value={form.year} onChange={(e) => set({ year: e.target.value })}>
-              <option value="">년</option>
-              {YEARS.map((y) => (
-                <option key={y} value={y}>{y}년</option>
-              ))}
-            </select>
-            <select value={form.month} onChange={(e) => set({ month: e.target.value })}>
-              <option value="">월</option>
-              {MONTHS.map((m) => (
-                <option key={m} value={m}>{m}월</option>
-              ))}
-            </select>
-            <select value={form.day} onChange={(e) => set({ day: e.target.value })}>
-              <option value="">일</option>
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (
-                <option key={d} value={d}>{d}일</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="field">
-          <span>태어난 시간 (선택)</span>
-          <select value={form.hour} disabled={form.unknownTime} onChange={(e) => set({ hour: e.target.value })}>
-            <option value="">시간 선택</option>
-            {HOURS.map((h) => (
-              <option key={h} value={h}>{String(h).padStart(2, "0")}시</option>
-            ))}
-          </select>
-          <label className="check">
-            <input type="checkbox" checked={form.unknownTime} onChange={(e) => set({ unknownTime: e.target.checked, hour: "" })} />
-            시간을 몰라요 (결과 화면에서 나중에 넣을 수 있어요)
-          </label>
-        </div>
         <div className="field" style={{ marginBottom: 0 }}>
           <span>성별</span>
           <div className="row">
             {(["female", "male"] as const).map((g) => (
-              <button key={g} type="button" className={`toggle ${form.gender === g ? "on" : ""}`} onClick={() => set({ gender: g })}>
+              <button key={g} type="button" className={`toggle big ${form.gender === g ? "on" : ""}`} onClick={() => set({ gender: g })}>
                 {g === "female" ? "여성" : "남성"}
               </button>
             ))}
           </div>
         </div>
+        {showHour ? (
+          <div className="field" style={{ margin: "14px 0 0" }}>
+            <span>태어난 시간 (몰라도 돼요)</span>
+            <select value={form.hour} onChange={(e) => set({ hour: e.target.value, unknownTime: e.target.value === "" })}>
+              <option value="">모름</option>
+              {HOURS.map((h) => (
+                <option key={h} value={h}>{String(h).padStart(2, "0")}시</option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <button type="button" className="link" style={{ marginTop: 10 }} onClick={() => setShowHour(true)}>
+            태어난 시간도 알면 넣기 (선택)
+          </button>
+        )}
       </section>
 
       {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f" }}>{error}</p>}
-      <button type="button" className="cta" disabled={!ready || gate.disabled} onClick={submit}>
-        {gate.label("내 사주 타입 보기")}
+      <button type="button" className="cta cta-big" disabled={!ready} onClick={submit}>
+        {nyOn ? `무료로 ${NY_YEAR}년 운세 보기` : "무료로 내 사주 보기"}
       </button>
-      {gate.diag && <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{gate.diag}</p>}
-      {gate.needsAd && <p className="muted" style={{ textAlign: "center", fontSize: 13 }}>광고를 끝까지 보면 내 사주를 무료로 볼 수 있어요. 오늘 한 번만 보면 돼요.</p>}
-      <p className="foot">입력한 생년월일은 이 기기에만 저장돼요.</p>
+      <p className="foot">입력한 생년월일은 이 기기에만 저장돼요 · 지금까지 {VISITORS_LABEL}이 넘게 다녀갔어요</p>
+
+      <SampleCard />
     </main>
   );
 }
 
 /** 다시 온 사람이 처음 보는 화면: 오늘의 운세 + 내 사주 타입 요약. 입력 없이 바로 보이게 한다. */
-function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, nyPurchased, onOther }: { result: SajuResult; onFull: () => void; fullLabel: string; fullDisabled: boolean; diag: string; nyPurchased: boolean; onOther: () => void }) {
+function TodayScreen({ result, onFull, nyPurchased, onOther }: { result: SajuResult; onFull: () => void; nyPurchased: boolean; onOther: () => void }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const daily = useMemo(() => getDailyFortuneDetail(result), [result]);
@@ -359,8 +374,7 @@ function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, nyPurchase
 
       <BannerAd />
 
-      <button type="button" className="cta" disabled={fullDisabled} onClick={onFull}>{fullLabel}</button>
-      {diag && <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all" }}>{diag}</p>}
+      <button type="button" className="cta" onClick={onFull}>내 사주 전체 보기</button>
       <button type="button" className="ghost" onClick={onOther}>다른 생일로 보기</button>
       <ReviewLink />
       <p className="foot">전통 명리학 해석을 쉽게 풀어 쓴 참고용 콘텐츠예요.</p>
@@ -369,7 +383,7 @@ function TodayScreen({ result, onFull, fullLabel, fullDisabled, diag, nyPurchase
 }
 
 /**
- * "광고 보고 내 사주 공짜로 보기": 보상형 광고를 끝까지 보면 결과 화면으로 넘어간다. 하루 한 번만 보면 그날은 다시 묻지 않는다.
+ * "광고 보고 깊은 풀이 열기"(v13, 전에는 결과 화면 앞에 있었다): 보상형 광고를 끝까지 보면 결과 화면 아래쪽 깊은 풀이가 열린다. 하루 한 번만 보면 그날은 다시 묻지 않는다.
  * 광고 미지원(옛 토스 버전·ID 없음)·로드 실패·표시 실패면 광고 없이 바로 결과를 보여 줘서 사용자를 막지 않는다.
  */
 function useRewardGate() {
@@ -468,8 +482,41 @@ function useRewardGate() {
     /** 광고를 거쳐야 하는 상태(버튼 문구·안내 표시용) */
     needsAd: !open,
     disabled: !open && state === "loading",
-    label: (base: string) => (open ? base : state === "ready" ? "광고 보고 내 사주 공짜로 보기" : "광고 준비 중..."),
+    label: (withAd: string) => (state === "ready" ? withAd : "광고 준비 중..."),
   };
+}
+
+/**
+ * v13 프로모션 미션 "내 운세 보면 포인트": 결과 화면이 처음 보일 때 한 번 토스 포인트를 지급한다(입력을 끝낸 사람에게만 돈이 나가게).
+ * 한 사람당 1회는 토스가 막고(실패 코드 4113), 이 기기에도 기록해 다시 요청하지 않는다. 테스트 QR(intoss-private)에서는 TEST_ 코드로 호출해 실제 포인트가 나가지 않는다.
+ * 첫 화면에는 포인트 약속을 쓰지 않는다 — 예산이 끝나 지급이 실패해도 거짓 약속이 되지 않게(안내는 혜택탭 배너 문구가 한다).
+ */
+let promoRequested = false;
+function usePromoReward(): string | null {
+  const [msg, setMsg] = useState<string | null>(null);
+  useEffect(() => {
+    if (promoRequested || !PROMO_CODE || PROMO_AMOUNT <= 0 || readStore(KEY_PROMO) === PROMO_CODE) return;
+    if (!safeSupported(Promotion.grantReward)) return;
+    promoRequested = true;
+    let test = false;
+    try {
+      test = String(getSchemeUri()).startsWith("intoss-private");
+    } catch {
+      /* 토스 밖이면 실제 코드로 두지만 isSupported에서 이미 걸러진다 */
+    }
+    Promotion.grantReward({ promotionCode: test ? `TEST_${PROMO_CODE}` : PROMO_CODE, amount: PROMO_AMOUNT })
+      .then(() => {
+        if (!test) writeStore(KEY_PROMO, PROMO_CODE);
+        track("promo_granted", { test });
+        setMsg(`토스 포인트 ${PROMO_AMOUNT}원이 지급됐어요${test ? " (테스트)" : ""}`);
+      })
+      .catch((e: unknown) => {
+        const code = String((e as { code?: string })?.code ?? "UNKNOWN");
+        if (code === "4113") writeStore(KEY_PROMO, PROMO_CODE); // 이미 받은 사람
+        track("promo_error", { code, test });
+      });
+  }, []);
+  return msg;
 }
 
 /** 사용자가 직접 신청한 "매일 오늘의 운세 도착" 알림(기능성 메시지). 템플릿 코드가 없거나 미지원이면 숨긴다. */
@@ -759,6 +806,8 @@ function ResultScreen({
   ];
 
   useEffect(() => track("screen_result"), []);
+  const gate = useRewardGate();
+  const promoMsg = usePromoReward();
 
   async function shareResult() {
     track("share_click");
@@ -772,6 +821,11 @@ function ResultScreen({
 
   return (
     <main className="page">
+      {promoMsg && <p className="promo-note">{promoMsg}</p>}
+
+      {/* v13: 첫 화면에서 "${NY_YEAR}년 내 운세"를 약속했으니 결과도 신년운세 카드부터(앱인토스 UX 원칙 ⑤: 소개한 내용이 결과에 보여야 함) */}
+      <NewYearCard result={result} form={form} purchase={nyPurchase} onPurchased={onNyPurchased} onOpen={onOpenNy} />
+
       <section className="card type-card">
         <div className="eyebrow">나의 사주 타입</div>
         <div className="type-name">{type.typeName}</div>
@@ -782,9 +836,6 @@ function ResultScreen({
           ))}
         </div>
       </section>
-
-      {/* v11: 결과를 열자마자 보이는 자리(광고 보고 결과가 열린 직후 처음 보이는 카드)에 내년 신년운세 */}
-      <NewYearCard result={result} form={form} purchase={nyPurchase} onPurchased={onNyPurchased} onOpen={onOpenNy} />
 
       <section className="card">
         <h2>타고난 성격</h2>
@@ -837,48 +888,61 @@ function ResultScreen({
       {/* v12: 알림 신청 카드가 '오늘의 운세' 화면(14일 45회)에만 있어서 신청 0명 → 결과 화면(385회)의 오늘 운세 바로 아래로 */}
       <PushCard place="result" title="이 운세, 매일 아침 받아보세요" />
 
-      <section className="card">
-        <h2>{page.hangul} 일간의 강점</h2>
-        <ul className="list">
-          {page.strengths.map((s) => (
-            <li key={s.title}><b>{s.title}</b> — {s.body}</li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="card">
-        <h2>이런 점은 조심하면 좋아요</h2>
-        <ul className="list">
-          {page.cautions.map((c) => (
-            <li key={c.title}><b>{c.title}</b> — {c.body}</li>
-          ))}
-        </ul>
-      </section>
-
-      {goodYears.length > 0 && (
+      {gate.needsAd ? (
+        <section className="card reward">
+          <h2>깊은 풀이 더 보기</h2>
+          <p className="muted" style={{ fontSize: 15 }}>타고난 강점·조심할 점·앞으로 좋은 해·연애·일과 돈 풀이가 있어요. 짧은 광고를 끝까지 보면 열리고, 오늘은 다시 묻지 않아요.</p>
+          <button type="button" className="cta" style={{ marginTop: 12 }} disabled={gate.disabled} onClick={() => gate.run(() => {})}>
+            {gate.label("광고 보고 깊은 풀이 열기")}
+          </button>
+          {gate.diag && <p className="muted" style={{ textAlign: "center", fontSize: 11, wordBreak: "break-all", marginTop: 8 }}>{gate.diag}</p>}
+        </section>
+      ) : (
+        <>
         <section className="card">
-          <h2>앞으로 흐름이 좋은 해</h2>
+          <h2>{page.hangul} 일간의 강점</h2>
           <ul className="list">
-            {goodYears.map((g) => (
-              <li key={g.year}><b>{g.year}년 {g.ganzhiKor} · {g.label}</b> — {g.line}</li>
+            {page.strengths.map((s) => (
+              <li key={s.title}><b>{s.title}</b> — {s.body}</li>
             ))}
           </ul>
         </section>
+
+        <section className="card">
+          <h2>이런 점은 조심하면 좋아요</h2>
+          <ul className="list">
+            {page.cautions.map((c) => (
+              <li key={c.title}><b>{c.title}</b> — {c.body}</li>
+            ))}
+          </ul>
+        </section>
+
+        {goodYears.length > 0 && (
+          <section className="card">
+            <h2>앞으로 흐름이 좋은 해</h2>
+            <ul className="list">
+              {goodYears.map((g) => (
+                <li key={g.year}><b>{g.year}년 {g.ganzhiKor} · {g.label}</b> — {g.line}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+        <section className="card">
+          <h2>연애 스타일</h2>
+          <p>{page.love}</p>
+        </section>
+        <section className="card">
+          <h2>일과 돈</h2>
+          <p>{page.work}</p>
+          <p style={{ marginTop: 10 }}>{page.money}</p>
+        </section>
+        <section className="card">
+          <h2>잘 맞는 기운 · 긴장되는 기운</h2>
+          <p>{type.synergyNote}</p>
+          <p style={{ marginTop: 10 }}>{type.tensionNote}</p>
+        </section>
+        </>
       )}
-      <section className="card">
-        <h2>연애 스타일</h2>
-        <p>{page.love}</p>
-      </section>
-      <section className="card">
-        <h2>일과 돈</h2>
-        <p>{page.work}</p>
-        <p style={{ marginTop: 10 }}>{page.money}</p>
-      </section>
-      <section className="card">
-        <h2>잘 맞는 기운 · 긴장되는 기운</h2>
-        <p>{type.synergyNote}</p>
-        <p style={{ marginTop: 10 }}>{type.tensionNote}</p>
-      </section>
 
 
       {form.unknownTime && (

@@ -132,6 +132,8 @@ function savePurchase(input: SajuInput, purchase: Purchase, product: Product) {
 }
 
 export function iapAvailable(product: Product = "manual"): boolean {
+  // 개발 화면 전용: ?ny=1 이면 토스 밖에서도 신년운세가 켜진 화면을 미리 본다(배포 번들에는 영향 없음, 결제는 안 됨).
+  if (import.meta.env.DEV && product === "newYear" && new URLSearchParams(location.search).get("ny") === "1") return true;
   try {
     return !!SKU_OF[product] && IAP.createOneTimePurchaseOrder.isSupported();
   } catch {

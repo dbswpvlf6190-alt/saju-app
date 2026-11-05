@@ -1,7 +1,5 @@
-- [스위트 박스 프로젝트](sweet-box-project.md) — 랜덤 숙소 박스 사업 저장소·배포 주소·진행 단계
-- [saju-app 공유 체크아웃 주의](saju-app-shared-checkout.md) — 자동 게시가 같은 폴더에서 pull/push, 변경 방치·로컬 커밋 금지
-- [사주랩 해외판](saju-global-launch.md) — 일·영 해외판 계획·PayPal·/ja /en 진행 상황
-- ["변경내용 가져와" 동기화](sync-phrase.md) — 다른 컴퓨터 변경 반영 절차를 묻지 않고 실행, 명령어 안내 대신 이 말로
+# Memory Index
+
 - [daily.factlab 쇼츠 자동화 프로젝트](project_shorts_auto.md) — 최신 정보는 C:\shorts_auto\CLAUDE.md 참고, 여긴 포인터만
 - [사주랩(saju-app) 운영 상태](project_saju_app.md) — 최신은 C:\saju-app\OPS_NOTES.md 끝부분, 결제 오픈 절차·백업 위치 포인터
 - [반복적 수동 동기화 싫어함](feedback_avoid_repetitive_manual_sync.md) — 여러 컴퓨터 워크플로우는 자동화 우선 제안할 것
@@ -9,7 +7,11 @@
 - [매일 PDF 일일 보고서](feedback_daily_pdf_report.md) — 영상·쓰레드·인스타·토스·결제 포함, 생성기 C:\saju-reports\make_daily_report.py
 - [자동화 저장소 main은 항상 깨끗하게](feedback_keep_automation_repos_clean.md) — 미커밋 변경이 스케줄러 pull을 조용히 막아 릴스가 멈춘 사고
 - [토스 프로모션 진행 중](project_toss_promo.md) — 10/21 승인, 소진율을 일일 보고서에 넣기로 함 (11/20 종료)
-- [2027 신년운세 v2 진행](project_newyear_fortune.md) — 10/22 추천안 확정, worktree C:\saju-app-newyear, 12/1 출시 목표
+- [2027 신년운세 v2 진행](project_newyear_fortune.md) — 11/3 토스 v11 출시 완료(실결제 테스트 생략, 첫 구매 DB 확인), worktree C:\saju-app-newyear
 - [해외판 외국인 결제 도입](project_global_payment.md) — 10/27 포트원+PayPal 결정, 코드는 원화 전용, 가격안·필요 절차
-- [롱폼 v5 한 달 시험](project_longform_v5_trial.md) — 11/1~11/30 경제해적단형(훅·썸네일 A/B·예고 쇼츠), 12월 첫 주 재판단
 - [두 컴퓨터 운영 모델](project_two_computer_ops.md) — 평일 기숙사 노트북·금 저녁~주말 본가 데스크톱, 한 대만 켜짐, 양쪽 작업 모두 사용
+- [스위트 박스 프로젝트](sweet-box-project.md) — 랜덤 숙소 박스 사업 저장소·배포 주소·진행 단계
+- [saju-app 공유 체크아웃 주의](saju-app-shared-checkout.md) — 자동 게시가 같은 폴더에서 pull/push, 변경 방치·로컬 커밋 금지
+- [사주랩 해외판](saju-global-launch.md) — 일·영 해외판 계획·PayPal·/ja /en 진행 상황
+- ["변경내용 가져와" 동기화](sync-phrase.md) — 다른 컴퓨터 변경 반영 절차를 묻지 않고 실행, 명령어 안내 대신 이 말로
+- [롱폼 v5 한 달 시험](project_longform_v5_trial.md) — 11/1~11/30 경제해적단형(훅·썸네일 A/B·예고 쇼츠), 12월 첫 주 재판단

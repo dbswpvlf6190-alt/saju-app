@@ -509,3 +509,9 @@
 - 대기: 토스 아침 알림(스마트 발송)은 v11 승인·출시 후 콘솔에서, 신년운세 할인은 출시 첫 주 반응 보고 사장님 결정, 해외판 LINE·TikTok은 11/1 합의대로 PayPal 승인 후(계정 생성은 사장님).
 - 사장님 할 일: 구글 서치콘솔·네이버 서치어드바이저에 사이트맵 다시 제출(로그인 필요).
 - **(11/2 밤) 노트북 무인 기상 후 14초 재절전 → 작업이 중간에 얼던 문제 수정.** 시스템 로그: 10/29·30 작업 스케줄러가 깨우면 약 14초 뒤 다시 절전. 쇼츠 76 2시간 멈춤, 노트북이 락만 남기고 멈춰 git 충돌로 이어진 근본 원인. `scripts/node_bin.py`(모든 자동화가 import)와 shorts `run_queue.py`가 실행 중에는 `SetThreadExecutionState(ES_CONTINUOUS|ES_SYSTEM_REQUIRED)`로 잠들지 않게 함(끝나면 자동 해제). 앞서 "그림 한도 때문"이라고 본 진단은 틀렸음(렌더 폴더에 그림 0장, 쇼츠는 한도에 걸려도 그라데이션으로 계속 진행).
+
+## 2026-11-05 토스 v13 서버 배포 — 궁금한 것 하나 풀이·신년운세 첫 구매 특가
+- 서버: 새 SKU 2개(`TOSS_IAP_SKU_SECTION` 단일 주제 풀이 990원, `TOSS_IAP_SKU_NEWYEAR_FIRST` 신년운세 첫 구매 특가 1,903원 — 같은 new_year_report), 토스 grant/report가 `single_section`(sectionKey) 지원, `POST /api/toss/section/free`(토스 익명 키당 첫 질문 무료 1회, 주문번호 `tfree-`·0원, IP 시간당 5회, 하루 상한 `TOSS_FREE_SECTION_DAILY_CAP` 기본 300).
+- 콘솔: 인앱 상품 2개 등록·노출(11/5). Vercel Production에 위 SKU 2개 추가. 상품 코드는 미니앱 `.env.production`(gitignore)에도 있음.
+- 참고: `toss_morning_check.py`는 `toss%`만 세므로 무료(`tfree-`) 주문은 매출에서 빠진다.
+- 다음: 미니앱 v13(브랜치 toss-v13) 빌드 → 콘솔 새 버전 → 사장님 QR 테스트(무료 질문·990원·첫 구매 특가·가족 운세) → 검토. 10원 미션 프로모션은 양식만 작성(비즈머니 충전·검토 요청은 사장님).

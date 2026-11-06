@@ -73,7 +73,7 @@ export function NewYearScreen({
   return (
     <main className="page ny-page">
       <header className="hero">
-        <div className="eyebrow">AI가 작성한 결과 · 내 사주 풀이</div>
+        <div className="eyebrow">명리학 계산 · AI 정리 · 내 사주 풀이</div>
         <h1>{hook.year}년 신년운세</h1>
         <p>
           {hook.label} · 흐름이 좋은 달 {monthList(hook.best.map((m) => m.month))}
@@ -194,7 +194,7 @@ export function NewYearScreen({
       <button type="button" className="ghost" onClick={onBack}>
         돌아가기
       </button>
-      <p className="foot">이 내용은 AI가 작성한 결과물이며, 전통 명리학 해석을 바탕으로 한 참고용이에요. 산 풀이는 다시 열어볼 수 있어요.</p>
+      <p className="foot">명리학 원리로 계산하고 AI가 정리한 풀이예요 · 참고용이에요. 산 풀이는 다시 열어볼 수 있어요.</p>
     </main>
   );
 }

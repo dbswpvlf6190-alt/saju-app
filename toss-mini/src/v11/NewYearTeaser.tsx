@@ -132,8 +132,8 @@ export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen,
         <p className="ny-trust">
           토스로 <b>한 번만</b> 결제해요 · 자동 결제 없어요
           <br />
-          {/* AI 작성 고지: 사는 물건 이름 바로 옆에 짧게 — 사장님 결정(10/23)으로 "(AI)" 표시 */}
-          열두 달 풀이<span className="ny-ai">(AI)</span> · {perDayLabel(priceKrw)}
+          {/* AI 고지(AI 기본법 사전 고지): 11/7 사장님 결정으로 "(AI)" 대신 "사주명리학 전문 AI" — 결과 화면에는 "명리학 계산 · AI 정리"로 사실대로 */}
+          사주명리학 전문 AI가 내 여덟 글자로 풀어 드려요 · {perDayLabel(priceKrw)}
           <br />
           산 풀이는 다시 열어볼 수 있어요
         </p>

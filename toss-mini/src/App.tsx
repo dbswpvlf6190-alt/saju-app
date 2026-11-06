@@ -723,7 +723,7 @@ function ManualBuyCard({
         {busy ? "결제 진행 중..." : "4,895원으로 나 사용설명서 열기"}
       </button>
       <p className="muted" style={{ fontSize: 11, marginTop: 8, textAlign: "center" }}>
-        한국 전통 사주 명리학을 바탕으로 AI가 작성해요 · 생성에 1~3분
+        사주명리학 전문 AI가 내 여덟 글자로 써 드려요 · 생성에 1~3분
       </p>
       {error && <p className="muted" style={{ color: "#e3543f", fontSize: 13, marginTop: 8 }}>{error}</p>}
     </section>
@@ -857,7 +857,7 @@ function SectionCard({ form, onOpen }: { form: Form; onOpen: (p: Purchase, topic
       <p className="foot" style={{ marginTop: 8 }}>
         {free ? "처음 한 번은 무료예요 · 다음부터 한 주제에 " + SECTION_PRICE_LABEL : "토스로 한 번만 결제해요 · 자동 결제 없어요"}
         <br />
-        풀이<span className="ny-ai">(AI)</span>는 전통 명리학을 바탕으로 한 참고용이에요
+        사주명리학 전문 AI가 풀어 드려요 · 참고용이에요
       </p>
     </section>
   );
@@ -880,7 +880,7 @@ function SectionScreen({ purchase, topic, onBack }: { purchase: Purchase; topic:
   return (
     <main className="page">
       <header className="hero">
-        <div className="eyebrow">AI가 작성한 결과</div>
+        <div className="eyebrow">명리학 계산 · AI 정리</div>
         <h1>{label} 풀이</h1>
         <p>{text ? "내 사주로 풀어 봤어요." : "내 사주로 풀고 있어요. 30초쯤 걸려요."}</p>
       </header>
@@ -889,7 +889,7 @@ function SectionScreen({ purchase, topic, onBack }: { purchase: Purchase; topic:
         {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f" }}>{error}</p>}
       </section>
       <button type="button" className="ghost" onClick={onBack}>다른 주제도 물어보기</button>
-      <p className="foot">이 내용은 AI가 작성한 결과물이며, 전통 명리학 해석을 바탕으로 한 참고용이에요.</p>
+      <p className="foot">명리학 원리로 계산하고 AI가 정리한 풀이예요 · 참고용이에요.</p>
     </main>
   );
 }
@@ -1029,7 +1029,7 @@ function ManualScreen({ purchase, onBack }: { purchase: Purchase; onBack: () => 
   return (
     <main className="page">
       <header className="hero">
-        <div className="eyebrow">AI가 작성한 결과</div>
+        <div className="eyebrow">명리학 계산 · AI 정리</div>
         <h1>나 사용설명서</h1>
         <p>{finished ? "6장이 모두 준비됐어요." : `작성 중이에요 (${progress.done}/${progress.total}장). 먼저 나온 장부터 읽어 보세요.`}</p>
       </header>
@@ -1045,7 +1045,7 @@ function ManualScreen({ purchase, onBack }: { purchase: Purchase; onBack: () => 
       {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f" }}>{error}</p>}
 
       <button type="button" className="ghost" onClick={onBack}>돌아가기</button>
-      <p className="foot">이 내용은 AI가 작성한 결과물이며, 전통 명리학 해석을 바탕으로 한 참고용이에요.</p>
+      <p className="foot">명리학 원리로 계산하고 AI가 정리한 풀이예요 · 참고용이에요.</p>
     </main>
   );
 }

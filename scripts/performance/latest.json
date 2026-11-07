@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T21:15:16",
+  "generated_at": "2026-11-07T09:05:06",
   "account": {
     "followers": 6,
     "media_count": 101,
@@ -22,7 +22,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 1668.2,
+      "age_hours": 1680.0,
       "metrics": {
         "reach": 147,
         "likes": 0,
@@ -51,7 +51,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1656.7,
+      "age_hours": 1668.6,
       "metrics": {
         "reach": 6,
         "likes": 0,
@@ -80,7 +80,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1633.1,
+      "age_hours": 1645.0,
       "metrics": {
         "reach": 123,
         "likes": 1,
@@ -109,7 +109,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1619.1,
+      "age_hours": 1630.9,
       "metrics": {
         "reach": 105,
         "likes": 1,
@@ -138,7 +138,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1609.1,
+      "age_hours": 1621.0,
       "metrics": {
         "reach": 19,
         "likes": 0,
@@ -167,7 +167,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1585.1,
+      "age_hours": 1597.0,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -196,7 +196,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1561.1,
+      "age_hours": 1573.0,
       "metrics": {
         "reach": 69,
         "likes": 1,
@@ -225,7 +225,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1560.6,
+      "age_hours": 1572.5,
       "metrics": {
         "reach": 8,
         "likes": 0,
@@ -254,7 +254,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1560.1,
+      "age_hours": 1572.0,
       "metrics": {
         "reach": 6,
         "likes": 1,
@@ -283,7 +283,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1537.1,
+      "age_hours": 1549.0,
       "metrics": {
         "reach": 25,
         "likes": 0,
@@ -312,7 +312,7 @@
       "ctaType": null,
       "durationSec": 20.3,
       "keywords": null,
-      "age_hours": 1526.3,
+      "age_hours": 1538.2,
       "metrics": {
         "reach": 49,
         "likes": 0,
@@ -341,7 +341,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 1474.1,
+      "age_hours": 1485.9,
       "metrics": {
         "reach": 103,
         "likes": 0,
@@ -370,7 +370,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 1343.1,
+      "age_hours": 1354.9,
       "metrics": {
         "reach": 24,
         "likes": 0,
@@ -399,7 +399,7 @@
       "ctaType": null,
       "durationSec": 27.3,
       "keywords": null,
-      "age_hours": 1318.5,
+      "age_hours": 1330.4,
       "metrics": {
         "reach": 128,
         "likes": 1,
@@ -428,7 +428,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 1297.1,
+      "age_hours": 1309.0,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -457,7 +457,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 1201.6,
+      "age_hours": 1213.4,
       "metrics": {
         "reach": 120,
         "likes": 2,
@@ -486,7 +486,7 @@
       "ctaType": null,
       "durationSec": 26.3,
       "keywords": null,
-      "age_hours": 1191.2,
+      "age_hours": 1203.1,
       "metrics": {
         "reach": 102,
         "likes": 1,
@@ -515,7 +515,7 @@
       "ctaType": null,
       "durationSec": 32.3,
       "keywords": null,
-      "age_hours": 1153.1,
+      "age_hours": 1165.0,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -550,7 +550,7 @@
         "소비습관",
         "돈관리"
       ],
-      "age_hours": 1129.1,
+      "age_hours": 1141.0,
       "metrics": {
         "reach": 16,
         "likes": 0,
@@ -585,7 +585,7 @@
         "일간",
         "연애성향"
       ],
-      "age_hours": 1105.1,
+      "age_hours": 1117.0,
       "metrics": {
         "reach": 136,
         "likes": 0,
@@ -620,7 +620,7 @@
         "일간",
         "성향"
       ],
-      "age_hours": 1081.1,
+      "age_hours": 1093.0,
       "metrics": {
         "reach": 111,
         "likes": 1,
@@ -655,7 +655,7 @@
         "연애",
         "성향차이"
       ],
-      "age_hours": 1057.1,
+      "age_hours": 1069.0,
       "metrics": {
         "reach": 141,
         "likes": 1,
@@ -690,7 +690,7 @@
         "일간",
         "사주해석"
       ],
-      "age_hours": 1020.0,
+      "age_hours": 1031.9,
       "metrics": {
         "reach": 108,
         "likes": 1,
@@ -725,7 +725,7 @@
         "비겁",
         "식상"
       ],
-      "age_hours": 1009.1,
+      "age_hours": 1021.0,
       "metrics": {
         "reach": 137,
         "likes": 1,
@@ -760,7 +760,7 @@
         "자기진단",
         "사주"
       ],
-      "age_hours": 937.1,
+      "age_hours": 949.0,
       "metrics": {
         "reach": 43,
         "likes": 0,
@@ -795,7 +795,7 @@
         "편안함",
         "사주"
       ],
-      "age_hours": 913.1,
+      "age_hours": 925.0,
       "metrics": {
         "reach": 42,
         "likes": 1,
@@ -830,7 +830,7 @@
         "자기이해",
         "결과확인"
       ],
-      "age_hours": 889.1,
+      "age_hours": 901.0,
       "metrics": {
         "reach": 103,
         "likes": 1,
@@ -865,7 +865,7 @@
         "댓글참여",
         "사주"
       ],
-      "age_hours": 865.1,
+      "age_hours": 877.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -900,7 +900,7 @@
         "자기진단",
         "사주"
       ],
-      "age_hours": 841.1,
+      "age_hours": 853.0,
       "metrics": {
         "reach": 15,
         "likes": 0,
@@ -935,7 +935,7 @@
         "반응",
         "사주"
       ],
-      "age_hours": 1009.7,
+      "age_hours": 1021.6,
       "metrics": {
         "reach": 116,
         "likes": 1,
@@ -970,7 +970,7 @@
         "사주",
         "성격"
       ],
-      "age_hours": 985.1,
+      "age_hours": 997.0,
       "metrics": {
         "reach": 102,
         "likes": 0,
@@ -1005,7 +1005,7 @@
         "사주",
         "성격"
       ],
-      "age_hours": 961.1,
+      "age_hours": 973.0,
       "metrics": {
         "reach": 134,
         "likes": 1,
@@ -1040,7 +1040,7 @@
         "사주",
         "성격"
       ],
-      "age_hours": 950.5,
+      "age_hours": 962.4,
       "metrics": {
         "reach": 108,
         "likes": 1,
@@ -1075,7 +1075,7 @@
         "수험생",
         "사주성향"
       ],
-      "age_hours": 793.1,
+      "age_hours": 805.0,
       "metrics": {
         "reach": 25,
         "likes": 1,
@@ -1110,7 +1110,7 @@
         "멘탈관리",
         "비교심리"
       ],
-      "age_hours": 745.1,
+      "age_hours": 757.0,
       "metrics": {
         "reach": 26,
         "likes": 0,
@@ -1144,7 +1144,7 @@
         "비겁",
         "성격"
       ],
-      "age_hours": 721.1,
+      "age_hours": 733.0,
       "metrics": {
         "reach": 111,
         "likes": 1,
@@ -1178,7 +1178,7 @@
         "수험생",
         "컨디션관리"
       ],
-      "age_hours": 697.1,
+      "age_hours": 709.0,
       "metrics": {
         "reach": 25,
         "likes": 0,
@@ -1213,7 +1213,7 @@
         "일간",
         "사주"
       ],
-      "age_hours": 625.1,
+      "age_hours": 637.0,
       "metrics": {
         "reach": 105,
         "likes": 0,
@@ -1248,7 +1248,7 @@
         "감정표현",
         "사주"
       ],
-      "age_hours": 553.0,
+      "age_hours": 564.8,
       "metrics": {
         "reach": 13,
         "likes": 1,
@@ -1283,7 +1283,7 @@
         "사주",
         "돈관리"
       ],
-      "age_hours": 481.1,
+      "age_hours": 493.0,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1318,7 +1318,7 @@
         "확신욕구",
         "관성"
       ],
-      "age_hours": 409.1,
+      "age_hours": 421.0,
       "metrics": {
         "reach": 4,
         "likes": 0,
@@ -1353,7 +1353,7 @@
         "편재",
         "사주재물"
       ],
-      "age_hours": 341.0,
+      "age_hours": 352.9,
       "metrics": {
         "reach": 107,
         "likes": 1,
@@ -1388,7 +1388,7 @@
         "식상",
         "자기진단"
       ],
-      "age_hours": 264.9,
+      "age_hours": 276.8,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1423,7 +1423,7 @@
         "표현방식",
         "커플"
       ],
-      "age_hours": 202.5,
+      "age_hours": 214.4,
       "metrics": {
         "reach": 107,
         "likes": 0,
@@ -1458,7 +1458,7 @@
         "관성",
         "인간관계"
       ],
-      "age_hours": 121.1,
+      "age_hours": 133.0,
       "metrics": {
         "reach": 48,
         "likes": 0,
@@ -1473,6 +1473,41 @@
       "interaction_rate": 0.0
     },
     {
+      "type": "릴스",
+      "day": 47,
+      "id": "R62",
+      "posted_at": "2026-11-04T11:01:15.016678+00:00",
+      "title": "싸운 뒤 먼저 연락하는 사람이 매번 같은 이유",
+      "category": "연애운",
+      "subcategory": "연애",
+      "topic": "다툰 뒤 늘 먼저 연락하고 화해를 시도하는 쪽이 정해져 있는 커플의 사주적 패턴",
+      "format": "상황형",
+      "exam": null,
+      "hook_first": "싸우고 나면",
+      "ctaType": "C",
+      "durationSec": 15.3,
+      "keywords": [
+        "연애패턴",
+        "화해",
+        "커플",
+        "비겁",
+        "연락"
+      ],
+      "age_hours": 61.0,
+      "metrics": {
+        "reach": 67,
+        "likes": 1,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 73,
+        "avg_watch_sec": 2.18
+      },
+      "watch_ratio": 0.142,
+      "interaction_rate": 0.0149
+    },
+    {
       "type": "카드뉴스",
       "day": 1,
       "id": "C01",
@@ -1485,7 +1520,7 @@
       "exam": null,
       "hook_first": "오행, 3분이면 완전히 이해돼요",
       "ctaType": null,
-      "age_hours": 1667.9,
+      "age_hours": 1679.7,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1510,7 +1545,7 @@
       "exam": null,
       "hook_first": "사주 용어, 헷갈리셨죠?",
       "ctaType": null,
-      "age_hours": 1666.1,
+      "age_hours": 1678.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1535,7 +1570,7 @@
       "exam": null,
       "hook_first": "재물운 좋은 사람들의 공통점",
       "ctaType": null,
-      "age_hours": 1642.1,
+      "age_hours": 1654.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1560,7 +1595,7 @@
       "exam": null,
       "hook_first": "연애할 때 나는 어떤 스타일일까?",
       "ctaType": null,
-      "age_hours": 1619.1,
+      "age_hours": 1630.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1585,7 +1620,7 @@
       "exam": null,
       "hook_first": "이직·승진 타이밍, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 1618.1,
+      "age_hours": 1630.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1610,7 +1645,7 @@
       "exam": null,
       "hook_first": "태어난 계절, 기운에 힌트를 준대요",
       "ctaType": null,
-      "age_hours": 1594.1,
+      "age_hours": 1606.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1635,7 +1670,7 @@
       "exam": null,
       "hook_first": "궁합 볼 때, 뭘 보는 건지 아세요?",
       "ctaType": null,
-      "age_hours": 1570.1,
+      "age_hours": 1582.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1660,7 +1695,7 @@
       "exam": null,
       "hook_first": "재물 그릇이 크다는 사주, 신호래요",
       "ctaType": null,
-      "age_hours": 1546.1,
+      "age_hours": 1558.0,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1685,7 +1720,7 @@
       "exam": null,
       "hook_first": "조직형 vs 자율형, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 1545.6,
+      "age_hours": 1557.5,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1710,7 +1745,7 @@
       "exam": null,
       "hook_first": "사주가 자기이해 도구인 이유",
       "ctaType": null,
-      "age_hours": 1545.1,
+      "age_hours": 1557.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1735,7 +1770,7 @@
       "exam": null,
       "hook_first": "내 인생 귀인, 사주에 신호가 있대요",
       "ctaType": null,
-      "age_hours": 1526.4,
+      "age_hours": 1538.3,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1760,7 +1795,7 @@
       "exam": null,
       "hook_first": "삼재, 무섭게만 알고 계셨나요",
       "ctaType": null,
-      "age_hours": 1474.1,
+      "age_hours": 1486.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1785,7 +1820,7 @@
       "exam": null,
       "hook_first": "정재 vs 편재, 나는 어느 쪽?",
       "ctaType": null,
-      "age_hours": 1474.1,
+      "age_hours": 1485.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1810,7 +1845,7 @@
       "exam": null,
       "hook_first": "짝사랑이 유독 긴 사람 특징",
       "ctaType": null,
-      "age_hours": 1343.0,
+      "age_hours": 1354.9,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -1835,7 +1870,7 @@
       "exam": null,
       "hook_first": "N잡·부업 체질, 신호가 있대요",
       "ctaType": null,
-      "age_hours": 1330.1,
+      "age_hours": 1342.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -1860,7 +1895,7 @@
       "exam": null,
       "hook_first": "맨날 나만 손해보는 관계, 신호 있나요",
       "ctaType": null,
-      "age_hours": 1306.1,
+      "age_hours": 1318.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1885,7 +1920,7 @@
       "exam": null,
       "hook_first": "이사 날짜, 아무 날이나 잡아도 될까",
       "ctaType": null,
-      "age_hours": 1173.6,
+      "age_hours": 1185.5,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1910,7 +1945,7 @@
       "exam": null,
       "hook_first": "십성이라는 말, 사실 어렵지 않아요",
       "ctaType": null,
-      "age_hours": 1162.1,
+      "age_hours": 1174.0,
       "metrics": {
         "reach": 3,
         "likes": 1,
@@ -1935,7 +1970,7 @@
       "exam": null,
       "hook_first": "태어난 시간, 왜 중요하다고 할까요",
       "ctaType": null,
-      "age_hours": 1138.1,
+      "age_hours": 1149.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1960,7 +1995,7 @@
       "exam": null,
       "hook_first": "거절 못하는 나, 거절 잘하는 쟤",
       "ctaType": "A",
-      "age_hours": 1057.3,
+      "age_hours": 1069.1,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -1985,7 +2020,7 @@
       "exam": null,
       "hook_first": "이 중 몇 개나 해당되나요",
       "ctaType": "B",
-      "age_hours": 994.1,
+      "age_hours": 1006.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -2010,7 +2045,7 @@
       "exam": null,
       "hook_first": "칭찬받아야 크는 사람, 알아서 크는 사람",
       "ctaType": "C",
-      "age_hours": 922.1,
+      "age_hours": 934.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -2035,7 +2070,7 @@
       "exam": null,
       "hook_first": "월급날마다 통장이 텅 비는 이유",
       "ctaType": "A",
-      "age_hours": 850.1,
+      "age_hours": 862.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -2060,7 +2095,7 @@
       "exam": null,
       "hook_first": "이 중 3개 이상이면 번아웃 위험군",
       "ctaType": "B",
-      "age_hours": 782.6,
+      "age_hours": 794.4,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -2085,7 +2120,7 @@
       "exam": null,
       "hook_first": "왜 유독 그 사람\n앞에서만 예민해질까",
       "ctaType": "C",
-      "age_hours": 706.1,
+      "age_hours": 717.9,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -2110,7 +2145,7 @@
       "exam": null,
       "hook_first": "N잡 체질\n성향 3가지",
       "ctaType": "A",
-      "age_hours": 672.7,
+      "age_hours": 684.5,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -2135,7 +2170,7 @@
       "exam": "suneung",
       "hook_first": "모의고사엔 강한데\n실전엔 약한 사람",
       "ctaType": "B",
-      "age_hours": 610.1,
+      "age_hours": 622.0,
       "metrics": {
         "reach": 2,
         "likes": 1,
@@ -2160,7 +2195,7 @@
       "exam": null,
       "hook_first": "단톡방에서\n혼자 말이 길어지는 사람",
       "ctaType": "C",
-      "age_hours": 538.1,
+      "age_hours": 549.9,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -2185,7 +2220,7 @@
       "exam": "imyong",
       "hook_first": "임용 스터디에서\n이런 모습이면 확인해보세요",
       "ctaType": "A",
-      "age_hours": 466.1,
+      "age_hours": 478.0,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -2210,7 +2245,7 @@
       "exam": null,
       "hook_first": "착한 사람이라서\n이용당하는 게 아니에요",
       "ctaType": "B",
-      "age_hours": 394.1,
+      "age_hours": 406.0,
       "metrics": {
         "reach": 4,
         "likes": 1,
@@ -2235,7 +2270,7 @@
       "exam": null,
       "hook_first": "연락 먼저 하는 쪽,\n항상 나였다면",
       "ctaType": "C",
-      "age_hours": 322.1,
+      "age_hours": 333.9,
       "metrics": {
         "reach": 3,
         "likes": 0,
@@ -2260,7 +2295,7 @@
       "exam": null,
       "hook_first": "왜 꼭 그런 사람만\n자꾸 좋아질까",
       "ctaType": "A",
-      "age_hours": 250.1,
+      "age_hours": 262.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -2285,7 +2320,7 @@
       "exam": null,
       "hook_first": "연락 안 오면\n괜히 불안해진다면",
       "ctaType": "B",
-      "age_hours": 178.1,
+      "age_hours": 190.0,
       "metrics": {
         "reach": 2,
         "likes": 0,
@@ -2296,23 +2331,41 @@
         "views": 4
       },
       "interaction_rate": 0.0
+    },
+    {
+      "type": "카드뉴스",
+      "day": 34,
+      "id": "C34",
+      "posted_at": "2026-11-03T02:01:06.433876+00:00",
+      "title": "회의만 하면\n말이 많아지는 사람",
+      "category": "직업운",
+      "subcategory": "직장",
+      "topic": "회의나 토론 자리에서 유독 적극적으로 말이 많아지는 사람의 직장 내 성향",
+      "format": "리스트형",
+      "exam": null,
+      "hook_first": "회의만 하면\n말이 많아지는 사람",
+      "ctaType": "C",
+      "age_hours": 94.0,
+      "metrics": {
+        "reach": 1,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 6
+      },
+      "interaction_rate": 0.0
     }
   ],
   "app": {
     "daily_events": {
-      "2026-10-07": {
-        "free_result_view": 4,
-        "landing_view": 5,
-        "premium_offer_seen": 4,
-        "saju_complete": 4,
-        "saju_start": 4
-      },
       "2026-10-08": {
-        "free_result_view": 4,
-        "landing_view": 9,
-        "premium_offer_seen": 3,
-        "saju_complete": 4,
-        "saju_start": 4
+        "free_result_view": 3,
+        "landing_view": 7,
+        "premium_offer_seen": 2,
+        "saju_complete": 3,
+        "saju_start": 3
       },
       "2026-10-09": {
         "checkout_start": 2,
@@ -2477,7 +2530,7 @@
         "landing_view": 1
       },
       "2026-11-06": {
-        "landing_view": 1
+        "landing_view": 3
       }
     },
     "coupons": {
@@ -2485,13 +2538,14 @@
       "used": 4
     },
     "landing_by_ref_30d": {
-      "(없음)": 183,
+      "(없음)": 178,
       "threads": 29,
       "threads_reply": 26,
       "ig_cardnews": 12,
-      "home_banner": 5,
       "ig_profile": 4,
-      "ig_reel": 3
+      "home_banner": 4,
+      "ig_reel": 3,
+      "claude_tracking_check": 1
     },
     "payments_by_src_30d": {}
   },
@@ -2619,7 +2673,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 268,
+          "views": 269,
           "likes": 6,
           "replies": 12,
           "reposts": 0,
@@ -2647,7 +2701,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 163,
+          "views": 164,
           "likes": 2,
           "replies": 4,
           "reposts": 0,
@@ -2759,7 +2813,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 820,
+          "views": 821,
           "likes": 31,
           "replies": 66,
           "reposts": 1,
@@ -2773,7 +2827,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 352,
+          "views": 353,
           "likes": 10,
           "replies": 18,
           "reposts": 0,
@@ -2787,7 +2841,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 325,
+          "views": 326,
           "likes": 8,
           "replies": 25,
           "reposts": 2,
@@ -2801,7 +2855,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 278,
+          "views": 279,
           "likes": 6,
           "replies": 12,
           "reposts": 1,
@@ -2829,7 +2883,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 398,
+          "views": 400,
           "likes": 11,
           "replies": 22,
           "reposts": 0,
@@ -2843,7 +2897,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 671,
+          "views": 672,
           "likes": 19,
           "replies": 42,
           "reposts": 2,
@@ -3291,7 +3345,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 74,
+          "views": 76,
           "likes": 5,
           "replies": 2,
           "reposts": 0,
@@ -3333,7 +3387,7 @@
         "topic": "사주",
         "exam": null,
         "metrics": {
-          "views": 50,
+          "views": 51,
           "likes": 0,
           "replies": 0,
           "reposts": 0,

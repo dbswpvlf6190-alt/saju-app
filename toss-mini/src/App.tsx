@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Analytics, Notification, Promotion, Review, Share, TossAds, getOperationalEnvironment, getSchemeUri, getTossAppVersion, loadFullScreenAd, showFullScreenAd } from "@apps-in-toss/web-framework";
 import { calculateSaju } from "@saju/engine";
 import type { SajuInput, SajuResult } from "@saju/types";
@@ -271,7 +271,42 @@ export default function App() {
   }
 
   if (screen === "manual" && purchase) return <ManualScreen purchase={purchase} onBack={() => window.history.back()} />;
-  if (screen === "section" && sectionView) return <SectionScreen purchase={sectionView.purchase} topic={sectionView.topic} onBack={() => window.history.back()} />;
+  if (screen === "section" && sectionView)
+    return (
+      <SectionScreen
+        purchase={sectionView.purchase}
+        topic={sectionView.topic}
+        onBack={() => window.history.back()}
+        extra={
+          <>
+            {/* v14: 무료 풀이를 다 읽은 순간이 가장 궁금할 때 — 전에는 "다른 주제도 물어보기"(결과 화면으로 돌아감)뿐이라 유료 0건이었다 */}
+            <SectionCard
+              key={sectionView.topic}
+              form={form}
+              exclude={sectionView.topic}
+              title="다른 것도 내 사주로 물어볼까요?"
+              place="section_end"
+              onOpen={(p, t) => {
+                setSectionView({ purchase: p, topic: t });
+                go("section");
+              }}
+            />
+            {result && !nyPurchase && iapAvailable("newYear") && (
+              <button
+                type="button"
+                className="cta"
+                onClick={() => {
+                  track("section_to_ny");
+                  go("result");
+                }}
+              >
+                {NY_YEAR}년 내게 좋은 날도 보기
+              </button>
+            )}
+          </>
+        }
+      />
+    );
   if (screen === "family" && familyMember) return <FamilyScreen member={familyMember} onBack={() => window.history.back()} />;
   if (screen === "newyear" && nyPurchase && result) return <NewYearScreen purchase={nyPurchase} result={result} onBack={() => window.history.back()} extra={<PushCard place="newyear" title="오늘의 운세도 매일 아침 받아보세요" />} />;
   if (screen === "result" && result)
@@ -327,11 +362,20 @@ export default function App() {
         <p>{nyOn ? "가장 좋은 달과 좋은 날 하루를 무료로 알려드려요" : "타고난 성격·오행·오늘의 운세를 무료로 알려드려요"}</p>
       </header>
 
+      <TtiPeek
+        onMore={() => {
+          track("tti_to_form");
+          const el = document.getElementById("birth-year");
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          (el as HTMLInputElement | null)?.focus();
+        }}
+      />
+
       <section className="card form-card">
         <div className="field">
           <span>생년월일</span>
           <div className="date-row">
-            <input inputMode="numeric" pattern="[0-9]*" aria-label="태어난 해" placeholder="예) 1965" value={form.year} onChange={(e) => set({ year: digits(e.target.value, 4) })} />
+            <input id="birth-year" inputMode="numeric" pattern="[0-9]*" aria-label="태어난 해" placeholder="예) 1965" value={form.year} onChange={(e) => set({ year: digits(e.target.value, 4) })} />
             <em>년</em>
             <input inputMode="numeric" pattern="[0-9]*" aria-label="태어난 달" placeholder="월" value={form.month} onChange={(e) => set({ month: digits(e.target.value, 2) })} />
             <em>월</em>
@@ -382,6 +426,64 @@ export default function App() {
 
       <SampleCard />
     </main>
+  );
+}
+
+/**
+ * v14 첫 화면 띠 원터치: 5원 프로모션 손님의 87%가 생년월일 입력을 시작하지 않고 나갔다(11/6, 50대 이상 77%).
+ * 입력 전에 띠 하나만 누르면 2027년(정미년, 未) 띠 운세 한 줄을 먼저 주고 "생일 넣으면 나만의 좋은 날"로 잇는다.
+ * 문구는 띠와 未의 합·충 관계로 썼다(亥卯未 삼합·午未 합 / 丑未 충 / 丑戌未 형 / 子未 원진). 건강·단정 예언은 쓰지 않는다(토스 검수).
+ */
+const TTI_2027: { key: string; emoji: string; name: string; line: string }[] = [
+  { key: "rat", emoji: "🐭", name: "쥐", line: "말 한마디가 오해로 번지기 쉬운 해예요. 서운한 일은 바로 풀고 넘어가면 사람 복이 다시 돌아와요." },
+  { key: "ox", emoji: "🐮", name: "소", line: "자리나 계획이 바뀌기 쉬운 해예요. 큰 결정은 서두르지 말고 한 번 더 따져 보면 오히려 기회가 돼요." },
+  { key: "tiger", emoji: "🐯", name: "호랑이", line: "미뤄 둔 일을 다시 시작하기 좋은 해예요. 혼자보다 믿는 사람과 함께할 때 일이 잘 풀려요." },
+  { key: "rabbit", emoji: "🐰", name: "토끼", line: "도와주는 사람이 많은 해예요. 주변에 먼저 손을 내밀면 생각보다 큰 도움으로 돌아와요." },
+  { key: "dragon", emoji: "🐲", name: "용", line: "준비해 둔 일이 하나씩 모양을 갖추는 해예요. 욕심을 줄이고 하나에 집중하면 결과가 보여요." },
+  { key: "snake", emoji: "🐍", name: "뱀", line: "차분히 쌓아 온 것이 인정받는 해예요. 돈은 크게 벌리기보다 지키는 쪽이 이득이에요." },
+  { key: "horse", emoji: "🐴", name: "말", line: "좋은 인연과 손잡기 좋은 해예요. 함께하자는 제안이 오면 반갑게 들어 보세요." },
+  { key: "goat", emoji: "🐑", name: "양", line: "내 띠의 해라 변화가 많은 한 해예요. 새로 벌이기보다 지금 가진 것을 다듬으면 든든해져요." },
+  { key: "monkey", emoji: "🐵", name: "원숭이", line: "재주가 빛나는 해예요. 배운 것을 나누거나 가르치면 그만큼 돈과 사람이 따라와요." },
+  { key: "rooster", emoji: "🐔", name: "닭", line: "꼼꼼함이 힘이 되는 해예요. 서류와 약속을 잘 챙기면 작은 일이 큰 결실로 이어져요." },
+  { key: "dog", emoji: "🐶", name: "개", line: "말과 서류를 꼼꼼히 봐야 하는 해예요. 계약 전에 한 번 더 확인하면 걱정할 일이 줄어요." },
+  { key: "pig", emoji: "🐷", name: "돼지", line: "사람이 모여드는 해예요. 가족·친구와 함께하는 일에서 기쁜 소식이 생기기 쉬워요." },
+];
+
+function TtiPeek({ onMore }: { onMore: () => void }) {
+  const [picked, setPicked] = useState<string | null>(null);
+  const t = TTI_2027.find((x) => x.key === picked);
+  return (
+    <section className="card tti-card">
+      <h2>{NY_YEAR}년 내 띠 운세, 눌러 보세요</h2>
+      <div className="tti-grid">
+        {TTI_2027.map((x) => (
+          <button
+            key={x.key}
+            type="button"
+            className={`toggle tti-btn ${picked === x.key ? "on" : ""}`}
+            onClick={() => {
+              setPicked(x.key);
+              track("tti_click", { tti: x.key });
+            }}
+          >
+            <span className="tti-emoji">{x.emoji}</span>
+            {x.name}
+          </button>
+        ))}
+      </div>
+      {t && (
+        <div className="tti-result">
+          <p className="tti-head">
+            {t.emoji} {t.name}띠의 {NY_YEAR}년
+          </p>
+          <p className="tti-line">{t.line}</p>
+          <button type="button" className="cta" onClick={onMore}>
+            생년월일 넣고 나만의 좋은 날 보기
+          </button>
+          <p className="foot" style={{ marginTop: 8 }}>띠 운세는 띠마다 같아요 · 생년월일을 넣으면 내 사주로 따로 풀어요</p>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -788,8 +890,21 @@ function NewYearCard({
 }
 
 /** 궁금한 것 하나 풀이: 주제를 고르면 내 사주로 그 주제만 깊게 풀어 준다(AI 작성, 첫 질문 무료 → 다음부터 한 주제씩 구매). */
-function SectionCard({ form, onOpen }: { form: Form; onOpen: (p: Purchase, topic: SectionTopic) => void }) {
-  const [topic, setTopic] = useState<SectionTopic>("wealth");
+function SectionCard({
+  form,
+  onOpen,
+  exclude,
+  title = "궁금한 것 하나, 내 사주로 물어보세요",
+  place = "result",
+}: {
+  form: Form;
+  onOpen: (p: Purchase, topic: SectionTopic) => void;
+  /** 방금 본 주제(풀이 화면 끝에서 쓸 때) — 다른 주제가 먼저 골라져 있게 한다. */
+  exclude?: SectionTopic;
+  title?: string;
+  place?: "result" | "section_end";
+}) {
+  const [topic, setTopic] = useState<SectionTopic>(() => SECTION_TOPICS.find((t) => t.key !== exclude)?.key ?? "wealth");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const free = freeSectionAvailable();
@@ -800,7 +915,7 @@ function SectionCard({ form, onOpen }: { form: Form; onOpen: (p: Purchase, topic
   const chosen = SECTION_TOPICS.find((t) => t.key === topic)!;
 
   function go() {
-    track("section_click", { topic, owned: !!owned, free });
+    track("section_click", { topic, owned: !!owned, free, place });
     setError(null);
     if (owned) {
       onOpen(owned, topic);
@@ -840,7 +955,7 @@ function SectionCard({ form, onOpen }: { form: Form; onOpen: (p: Purchase, topic
 
   return (
     <section className="card section-card">
-      <h2>궁금한 것 하나, 내 사주로 물어보세요</h2>
+      <h2>{title}</h2>
       <p className="muted" style={{ fontSize: 15 }}>주제를 고르면 그 이야기만 깊게 풀어 드려요.</p>
       <div className="topic-grid">
         {SECTION_TOPICS.map((t) => (
@@ -863,7 +978,7 @@ function SectionCard({ form, onOpen }: { form: Form; onOpen: (p: Purchase, topic
   );
 }
 
-function SectionScreen({ purchase, topic, onBack }: { purchase: Purchase; topic: SectionTopic; onBack: () => void }) {
+function SectionScreen({ purchase, topic, onBack, extra }: { purchase: Purchase; topic: SectionTopic; onBack: () => void; extra?: ReactNode }) {
   const [text, setText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const label = SECTION_TOPICS.find((t) => t.key === topic)?.label ?? "풀이";
@@ -888,7 +1003,8 @@ function SectionScreen({ purchase, topic, onBack }: { purchase: Purchase; topic:
         {text ? <p style={{ whiteSpace: "pre-line" }}>{text}</p> : !error && <p className="muted" style={{ textAlign: "center" }}>풀이를 쓰고 있어요...</p>}
         {error && <p className="muted" style={{ textAlign: "center", color: "#e3543f" }}>{error}</p>}
       </section>
-      <button type="button" className="ghost" onClick={onBack}>다른 주제도 물어보기</button>
+      {text && extra}
+      <button type="button" className="ghost" onClick={onBack}>돌아가기</button>
       <p className="foot">명리학 원리로 계산하고 AI가 정리한 풀이예요 · 참고용이에요.</p>
     </main>
   );

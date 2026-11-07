@@ -78,6 +78,13 @@ function trace(stage: string, extra: Record<string, unknown> = {}) {
   }
 }
 
+/** 손님에게 보이는 결제 오류 문구(11/7 v14). 토스 SDK가 준 한국어 문구는 그대로, 영어 오류 코드는 쉬운 문장으로 바꾼다. */
+const FRIENDLY_PAY_ERROR = "결제창을 열지 못했어요. 토스 앱을 최신 버전으로 업데이트한 뒤 다시 눌러 주세요.";
+function friendlyPayError(e: unknown): string {
+  const msg = e instanceof Error ? e.message : "";
+  return /[가-힣]/.test(msg) ? msg : FRIENDLY_PAY_ERROR;
+}
+
 function describeError(e: unknown): string {
   try {
     if (e instanceof Error) return `${e.name}: ${e.message}`;
@@ -245,13 +252,13 @@ export function buyProduct(
       },
       onError: (e) => {
         trace("event_error", { error: describeError(e) });
-        handlers.onError(e instanceof Error && e.message ? e.message : `결제를 마치지 못했어요. (${describeError(e).slice(0, 80)})`);
+        handlers.onError(friendlyPayError(e));
       },
     });
     return cleanup;
   } catch (e) {
     trace("buy_throw", { error: describeError(e) });
-    handlers.onError(e instanceof Error ? e.message : "결제를 시작하지 못했어요.");
+    handlers.onError(friendlyPayError(e));
     return () => {};
   }
 }

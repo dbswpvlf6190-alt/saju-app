@@ -96,3 +96,12 @@ select {
 .family-item b { color: var(--primary); margin-right: 6px; }
 .family-add { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
 .ny-offer { margin: 0; text-align: center; font-size: 16px; font-weight: 700; color: #b0701a; }
+
+/* v14 첫 화면 띠 원터치 */
+.tti-card h2 { font-size: 19px; }
+.tti-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.tti-btn { padding: 10px 2px; font-size: 15px; color: var(--text); }
+.tti-emoji { display: block; font-size: 26px; line-height: 1.2; }
+.tti-result { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.tti-head { font-size: 18px; font-weight: 700; }
+.tti-line { font-size: 17px; line-height: 1.7; margin: 8px 0 12px; word-break: keep-all; }

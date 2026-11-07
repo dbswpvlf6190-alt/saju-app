@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { corsHeaders } from "@/lib/toss/iap";
 
@@ -17,6 +18,8 @@ export async function POST(req: NextRequest) {
   try {
     const raw = (await req.text()).slice(0, 1000);
     console.log("[toss-trace]", raw);
+    // 11/7: Vercel 무료 로그는 1시간만 남아 "버튼은 눌렀는데 결제창이 안 뜬" 원인을 못 봤다 → DB에도 남긴다(개인정보 없음, 단계·시간·오류 문구뿐).
+    await prisma.analyticsEvent.create({ data: { name: "toss_trace", metaJson: raw } }).catch(() => {});
   } catch {
     /* 기록 실패는 무시 */
   }

@@ -47,7 +47,7 @@ export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
   },
   premium_bundle: {
     amount: 29990,
-    name: "평생·신년운세 + 가족 2명 + 30일 무제한 상담",
+    name: "평생·신년운세 + 가족 2명 + 30일 상담",
     credits: null,
     unlimitedDays: 30,
     validDays: 30,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { corsPreflight, withCors } from "@/lib/consult/cors";
 import { prisma } from "@/lib/db/prisma";
 import { calculateSaju, type SajuInput } from "@/lib/saju";
 import { generateFreeContent } from "@/lib/saju/content";
@@ -8,7 +9,7 @@ import { rateLimit } from "@/lib/security/rateLimit";
 import { AI_NOTICE } from "@/lib/consult/safety";
 
 /** 상담권 화면 첫 로딩: 주인·가족 요약, 남은 횟수, 대화 기록, 함께 열린 리포트. 링크 토큰(k)으로만 연다. */
-export async function GET(req: NextRequest, { params }: { params: Promise<{ passId: string }> }) {
+async function handle(req: NextRequest, { params }: { params: Promise<{ passId: string }> }) {
   const { ok } = rateLimit(req, "consult:get", { limit: 60, windowMs: 60_000 });
   if (!ok) return NextResponse.json({ error: "요청이 너무 많습니다." }, { status: 429 });
 
@@ -71,4 +72,12 @@ function summarize(input: SajuInput) {
     metaphor: free.dayMasterMetaphor,
     birth: `${input.year}.${input.month}.${input.day}${input.calendarType === "lunar" ? " (음력)" : ""}`,
   };
+}
+
+export function OPTIONS(req: NextRequest) {
+  return corsPreflight(req);
+}
+
+export async function GET(req: NextRequest, ctx: { params: Promise<{ passId: string }> }) {
+  return withCors(req, await handle(req, ctx));
 }

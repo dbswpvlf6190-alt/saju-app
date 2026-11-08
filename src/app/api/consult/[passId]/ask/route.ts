@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { corsPreflight, withCors } from "@/lib/consult/cors";
 import { prisma } from "@/lib/db/prisma";
 import type { SajuInput } from "@/lib/saju";
 import { checkQuota, tokenMatches, type FamilyProfile } from "@/lib/consult/pass";
@@ -18,7 +19,7 @@ interface AskBody {
 }
 
 /** 상담권으로 질문 하나에 답한다. 횟수·하루 상한·AI 비용 상한을 지키고, 위기 신호에는 상담 전화를 먼저 안내한다(차감 없음). */
-export async function POST(req: NextRequest, { params }: { params: Promise<{ passId: string }> }) {
+async function handle(req: NextRequest, { params }: { params: Promise<{ passId: string }> }) {
   const { ok } = rateLimit(req, "consult:ask", { limit: 10, windowMs: 60_000 });
   if (!ok) return NextResponse.json({ error: "잠시 후 다시 물어봐 주세요." }, { status: 429 });
 
@@ -109,4 +110,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pas
 
   const after = await prisma.consultPass.findUnique({ where: { id: pass.id } });
   return NextResponse.json({ answer, charged: true, quota: after ? await checkQuota(after) : null });
+}
+
+export function OPTIONS(req: NextRequest) {
+  return corsPreflight(req);
+}
+
+export async function POST(req: NextRequest, ctx: { params: Promise<{ passId: string }> }) {
+  return withCors(req, await handle(req, ctx));
 }

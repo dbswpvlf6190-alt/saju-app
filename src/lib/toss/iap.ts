@@ -129,10 +129,19 @@ export const TOSS_NEWYEAR_PRICE_KRW = 3894;
 export const TOSS_NEWYEAR_FIRST_PRICE_KRW = 1903;
 export const TOSS_SECTION_PRICE_KRW = 990;
 
+// v15(2026-11-08) AI 사주 상담 3종. 웹(끝자리 990원)과 같은 상담권을 주되, 토스 판매가는 공급가(10원 단위) × 1.1이라 따로 둔다.
+// 공급가 4,500 → 4,950원 / 13,500 → 14,850원 / 27,000 → 29,700원. 콘솔 등록가와 다르면 환경변수로 맞춘다.
+export const TOSS_CONSULT_PRICES_KRW = { consult_5: 4950, newyear_plus: 14850, premium_bundle: 29700 } as const;
+const CONSULT_SKU_ENV = {
+  consult_5: ["TOSS_IAP_SKU_CONSULT5", "TOSS_IAP_PRICE_CONSULT5"],
+  newyear_plus: ["TOSS_IAP_SKU_CONSULT_NY", "TOSS_IAP_PRICE_CONSULT_NY"],
+  premium_bundle: ["TOSS_IAP_SKU_CONSULT_BUNDLE", "TOSS_IAP_PRICE_CONSULT_BUNDLE"],
+} as const;
+
 export interface TossProduct {
-  kind: "manual" | "newYear" | "newYearFirst" | "section";
+  kind: "manual" | "newYear" | "newYearFirst" | "section" | "consult";
   /** 우리 주문(Order)의 상품 타입. 웹과 같은 타입을 써서 기존 리포트 생성·조회 코드를 그대로 쓴다. */
-  productType: "premium_report" | "new_year_report" | "single_section";
+  productType: "premium_report" | "new_year_report" | "single_section" | "consult_5" | "newyear_plus" | "premium_bundle";
   amount: number;
 }
 
@@ -166,6 +175,12 @@ export function resolveTossProduct(sku: string | undefined | null): TossProduct 
   const sectionSku = process.env.TOSS_IAP_SKU_SECTION?.trim();
   if (sectionSku && value === sectionSku) {
     return { kind: "section", productType: "single_section", amount: priceFromEnv("TOSS_IAP_PRICE_SECTION", TOSS_SECTION_PRICE_KRW) };
+  }
+  for (const [productType, [skuEnv, priceEnv]] of Object.entries(CONSULT_SKU_ENV) as [keyof typeof CONSULT_SKU_ENV, readonly [string, string]][]) {
+    const consultSku = process.env[skuEnv]?.trim();
+    if (consultSku && value === consultSku) {
+      return { kind: "consult", productType, amount: priceFromEnv(priceEnv, TOSS_CONSULT_PRICES_KRW[productType]) };
+    }
   }
   return null;
 }

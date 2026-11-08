@@ -1,3 +1,5 @@
+import { CONSULT_PLANS, type ConsultProductType } from "@/lib/consult/plans";
+
 // 카드사 심사가 끝나기 전에는 실연동 MID에서 카드 결제가 "[V104] NO MPI SET 미사용 설정 지불수단"으로 실패한다
 // (10/4·10/6·10/9 결제 시도 전부 실패 확인). 그동안 결제 버튼 대신 "결제 오픈 알림 받기"(이메일)를 보여준다.
 // 2026-10-14 카드사 심사가 끝나 false로 열었다(결제 오픈). WaitlistSignup 오픈 안내 메일은 /admin에서 복사해 보내고 목록을 삭제할 것.
@@ -28,7 +30,9 @@ export type ProductType =
   | "compatibility_report"
   | "new_year_report"
   | "single_section"
-  | "section_upgrade";
+  | "section_upgrade"
+  // AI 사주 상담소(2026-11-08) — 상담권 상품. 가격·구성은 src/lib/consult/plans.ts
+  | ConsultProductType;
 
 /** 상품 가격/이름은 오직 이 카탈로그(서버)만이 결정한다. 클라이언트가 보낸 금액은 절대
  * 신뢰하지 않는다 — 개발자 도구로 금액을 조작해도 여기 정의된 값 외에는 결제가 생성되지 않는다. */
@@ -38,6 +42,9 @@ export const PRODUCT_CATALOG: Record<ProductType, { amount: number; name: string
   new_year_report: { amount: NEW_YEAR_REPORT_PRICE_KRW, name: NEW_YEAR_REPORT_NAME },
   single_section: { amount: SINGLE_SECTION_PRICE_KRW, name: SINGLE_SECTION_NAME },
   section_upgrade: { amount: SECTION_UPGRADE_PRICE_KRW, name: SECTION_UPGRADE_NAME },
+  consult_5: { amount: CONSULT_PLANS.consult_5.amount, name: CONSULT_PLANS.consult_5.name },
+  newyear_plus: { amount: CONSULT_PLANS.newyear_plus.amount, name: CONSULT_PLANS.newyear_plus.name },
+  premium_bundle: { amount: CONSULT_PLANS.premium_bundle.amount, name: CONSULT_PLANS.premium_bundle.name },
 };
 
 export function isProductType(value: unknown): value is ProductType {

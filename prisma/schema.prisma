@@ -183,3 +183,47 @@ model WaitlistSignup {
 
   @@unique([email, productType])
 }
+
+// AI 사주 상담소(2026-11-08): 상담 이용권(consult_5)·신년운세+상담(newyear_plus)·묶음(premium_bundle) 결제 후 발급하는 상담권.
+// 로그인 없이 링크(id + token)와 결제 브라우저 쿠키로 연다. 횟수형은 creditsLeft, 기간형은 unlimitedUntil + dailyCap.
+// 상담 내용은 만료(expiresAt) 후 90일이 지나면 매일 도는 정리 작업이 통째로 지운다.
+model ConsultPass {
+  id             String    @id @default(cuid())
+  // 링크 토큰(무작위). 상담권 링크 /consult/{id}?k={token}
+  token          String
+  orderPaymentId String    @unique
+  productType    String
+  // 주인 생년월일(Order.birthInputJson과 같은 형식). 선물이면 받는 분이 처음 열 때 채운다(null 허용).
+  ownerInputJson String?
+  ownerName      String?
+  // 가족 프로필 [{key, rel, name, input}] JSON
+  familyJson     String    @default("[]")
+  familyMax      Int       @default(0)
+  creditsLeft    Int?
+  unlimitedUntil DateTime?
+  dailyCap       Int       @default(20)
+  // 선물로 보냈을 때 보낸 사람 이름(표시용)
+  giftFrom       String?
+  // AI 비용 상한(원). 넘으면 그날은 멈춘다.
+  costCapKrw     Int
+  costUsedKrw    Int       @default(0)
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime
+  messages       ConsultMessage[]
+
+  @@index([expiresAt])
+}
+
+model ConsultMessage {
+  id         String      @id @default(cuid())
+  passId     String
+  pass       ConsultPass @relation(fields: [passId], references: [id], onDelete: Cascade)
+  // "owner" 또는 가족 프로필 key
+  profileKey String      @default("owner")
+  role       String
+  content    String
+  costKrw    Int         @default(0)
+  createdAt  DateTime    @default(now())
+
+  @@index([passId, createdAt])
+}

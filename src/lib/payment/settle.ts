@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import type { PortOnePayment } from "@/lib/payment/verify";
 import { describeFailure } from "@/lib/payment/failure";
 import { sendPaymentFailureKakaoNotification, sendPaymentKakaoNotification } from "@/lib/kakao/notify";
+import { ensureConsultPass } from "@/lib/consult/pass";
 
 type OrderRow = Awaited<ReturnType<typeof prisma.order.findUnique>>;
 
@@ -41,6 +42,9 @@ export async function finalizeOrderFromPortOnePayment(
     where: { paymentId: order.paymentId },
     data: { status: "PAID", paidAt: new Date() },
   });
+
+  // AI 상담 상품이면 상담권(+묶음 리포트용 0원 내부 주문)을 발급한다. 멱등이라 reconcile에서 다시 불려도 안전하다.
+  await ensureConsultPass(updated);
 
   // 카카오톡 알림은 결제 완료 자체와 무관한 부가 기능이므로, 실패해도 판정 결과에는 영향을 주지 않는다.
   try {

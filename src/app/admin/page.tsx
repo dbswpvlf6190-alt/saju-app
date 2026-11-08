@@ -55,6 +55,7 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   global_landing_view: "해외판 랜딩 조회",
   global_saju_complete: "해외판 무료 결과",
   global_waitlist_signup: "해외판 오픈 알림 신청",
+  consult_ask: "AI 상담 질문",
 };
 
 function pct(numerator: number, denominator: number): string {

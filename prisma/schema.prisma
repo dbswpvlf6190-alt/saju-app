@@ -207,6 +207,9 @@ model ConsultPass {
   // AI 비용 상한(원). 넘으면 그날은 멈춘다.
   costCapKrw     Int
   costUsedKrw    Int       @default(0)
+  // 사용 시작 증빙(환불 기준: 전자상거래법 제17조 제5항 사업자 증명책임). 상담방을 처음 연 시각, 리포트별 처음 연 시각 {"ny":ISO,"pr":ISO}
+  openedAt          DateTime?
+  reportsOpenedJson String    @default("{}")
   createdAt      DateTime  @default(now())
   expiresAt      DateTime
   messages       ConsultMessage[]

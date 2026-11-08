@@ -18,6 +18,8 @@ export interface ConsultPlan {
   costCapKrw: number;
   /** 결제와 함께 열리는 리포트(기존 리포트 생성기를 0원 내부 주문으로 재사용) */
   includes: ("new_year_report" | "premium_report")[];
+  /** 환불 계산용 리포트 몫(원, 리포트별). 열람한 리포트는 이 금액이 환불에서 빠진다(/refund 표와 같은 값). */
+  reportValueKrw: number;
 }
 
 export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
@@ -30,6 +32,7 @@ export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
     familyMax: 0,
     costCapKrw: 300,
     includes: [],
+    reportValueKrw: 0,
   },
   newyear_plus: {
     amount: 14990,
@@ -40,6 +43,7 @@ export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
     familyMax: 0,
     costCapKrw: 1000,
     includes: ["new_year_report"],
+    reportValueKrw: 4990,
   },
   premium_bundle: {
     amount: 29990,
@@ -50,6 +54,7 @@ export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
     familyMax: 2,
     costCapKrw: 3000,
     includes: ["premium_report", "new_year_report"],
+    reportValueKrw: 4990,
   },
 };
 
@@ -58,4 +63,33 @@ export const UNLIMITED_DAILY_CAP = 20;
 
 export function isConsultProductType(value: unknown): value is ConsultProductType {
   return typeof value === "string" && value in CONSULT_PLANS;
+}
+
+/** 환불 가능 금액(원) — 전자상거래법 제17조 제2항 제5호 단서, 콘텐츠이용자 보호지침 제25조, 소비자분쟁해결기준(인터넷콘텐츠업).
+ * - 열람한 리포트 몫은 빼고, 횟수권은 남은 질문 × (질문 몫 ÷ 총 질문 수), 결제 후 7일 이내만.
+ * - 기간권은 이용일수 몫을 빼고, 7일이 지난 해지면 남은 금액의 10%도 뺀다.
+ * - 상담방을 한 번도 열지 않았으면(선물 미개봉 포함) 7일 이내 전액.
+ * 결제오류·중복·미제공·회사 장애는 이 계산과 관계없이 전액(사장님이 직접 판단). */
+export function refundableKrw(
+  plan: ConsultPlan,
+  state: { paidAt: Date; creditsLeft: number | null; reportsOpened: number; opened: boolean },
+  now: Date = new Date(),
+): number {
+  const day = 24 * 60 * 60 * 1000;
+  const elapsedDays = Math.max(0, Math.ceil((now.getTime() - state.paidAt.getTime()) / day));
+  const reportsPart = plan.reportValueKrw * plan.includes.length;
+  const servicePart = plan.amount - reportsPart;
+  const unopenedReports = plan.reportValueKrw * Math.max(0, plan.includes.length - state.reportsOpened);
+  // 한 번도 열지 않았으면(선물을 받는 분이 아직 안 연 경우 포함) 7일 이내 전액
+  if (!state.opened && elapsedDays <= 7) return plan.amount;
+  if (plan.credits !== null) {
+    if (elapsedDays > 7) return 0;
+    const unused = Math.max(0, state.creditsLeft ?? 0);
+    return Math.floor(unopenedReports + (servicePart * unused) / plan.credits);
+  }
+  const days = plan.unlimitedDays ?? plan.validDays;
+  const usedDays = Math.min(days, Math.max(1, elapsedDays));
+  const remaining = (servicePart * (days - usedDays)) / days;
+  const penalty = elapsedDays > 7 ? remaining * 0.1 : 0;
+  return Math.max(0, Math.floor(unopenedReports + remaining - penalty));
 }

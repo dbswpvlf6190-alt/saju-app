@@ -101,6 +101,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pas
       where: { id: pass.id },
       data: {
         costUsedKrw: { increment: costKrw },
+        ...(pass.openedAt ? {} : { openedAt: new Date() }),
         ...(pass.creditsLeft !== null ? { creditsLeft: { decrement: 1 } } : {}),
       },
     }),

@@ -37,6 +37,7 @@ export const ANALYTICS_EVENT_NAMES = [
   "global_landing_view",
   "global_saju_complete",
   "global_waitlist_signup",
+  "consult_ask",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

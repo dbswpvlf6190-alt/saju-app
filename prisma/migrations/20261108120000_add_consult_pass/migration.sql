@@ -14,6 +14,8 @@ CREATE TABLE "ConsultPass" (
     "giftFrom" TEXT,
     "costCapKrw" INTEGER NOT NULL,
     "costUsedKrw" INTEGER NOT NULL DEFAULT 0,
+    "openedAt" TIMESTAMP(3),
+    "reportsOpenedJson" TEXT NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "ConsultPass_pkey" PRIMARY KEY ("id")

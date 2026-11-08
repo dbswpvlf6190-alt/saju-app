@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { SESSION_COOKIE_NAME, verifySessionCookie } from "@/lib/auth/session";
 import { PRODUCT_CATALOG, type ProductType } from "@/lib/payment/config";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { isConsultProductType } from "@/lib/consult/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,12 @@ export default async function MyPage() {
     where: { userId, status: "PAID" },
     orderBy: { paidAt: "desc" },
   });
+  // AI 상담권은 리포트가 아니라 상담방으로 보낸다(계정에 연결된 주문이라 링크 토큰을 여기서 붙여 준다).
+  const passes = await prisma.consultPass.findMany({
+    where: { orderPaymentId: { in: orders.filter((o) => isConsultProductType(o.productType)).map((o) => o.paymentId) } },
+    select: { id: true, token: true, orderPaymentId: true },
+  });
+  const passUrl = new Map(passes.map((p) => [p.orderPaymentId, `/consult/${p.id}?k=${encodeURIComponent(p.token)}`]));
 
   return (
     <div className="flex w-full max-w-md flex-col gap-4 px-5 py-10">
@@ -56,7 +63,7 @@ export default async function MyPage() {
             return (
               <Link
                 key={order.id}
-                href={`/my/report/${order.paymentId}`}
+                href={passUrl.get(order.paymentId) ?? `/my/report/${order.paymentId}`}
                 className="flex items-center justify-between rounded-2xl border border-border-subtle bg-background-card/70 px-4 py-3.5 transition-colors hover:border-accent-gold"
               >
                 <div className="flex flex-col gap-0.5">

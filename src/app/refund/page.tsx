@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
 import { CONTACT_EMAIL } from "@/lib/business";
+import { CONSULT_PLANS } from "@/lib/consult/plans";
 
 export const metadata: Metadata = { title: "환불정책 | 사주랩" };
 
 export default function RefundPage() {
   return (
     <LegalPage title="환불정책">
-      <p>시행일자: 2026년 8월 23일</p>
+      <p>시행일자: 2026년 8월 23일 · AI 사주 상담(3항) 추가 2026년 11월</p>
 
       <section>
         <h2>1. 상품의 특성</h2>
@@ -40,7 +41,35 @@ export default function RefundPage() {
       </section>
 
       <section>
-        <h2>3. 환불 절차</h2>
+        <h2>3. AI 사주 상담 상품</h2>
+        <p>
+          AI 사주 상담 상품({CONSULT_PLANS.consult_5.name}, {CONSULT_PLANS.newyear_plus.name},{" "}
+          {CONSULT_PLANS.premium_bundle.name})은 결제 즉시 제공이 시작되는 디지털 콘텐츠입니다. 제공(열람·사용)이
+          시작된 부분은 전자상거래법 제17조 제2항 제5호에 따라 청약철회가 제한되며, 결제 전 상품 화면에서 상담 예시와
+          무료 사주 풀이를 미리 보실 수 있습니다.
+        </p>
+        <ul>
+          <li>상담방과 리포트를 <strong>한 번도 열지 않은 경우</strong>(선물을 받는 분이 아직 열지 않은 경우 포함), 결제 후 7일 이내 전액 환불합니다.</li>
+          <li><strong>열어 본 리포트</strong>는 환불되지 않습니다. 묶음 상품의 리포트 몫은 리포트 1개당 {CONSULT_PLANS.newyear_plus.reportValueKrw.toLocaleString()}원으로 계산합니다.</li>
+          <li>
+            <strong>질문권</strong>: 사용한 질문은 환불되지 않습니다. 결제 후 7일 이내에는 사용하지 않은 질문을
+            (결제금액 − 리포트 몫) ÷ 총 질문 수로 계산해 환불합니다.
+          </li>
+          <li>
+            <strong>30일 이용권</strong>: 결제 후 7일 이내 해지하면 이용한 날수만큼만 빼고 환불합니다. 7일이 지난 뒤
+            해지하면 이용한 날수만큼과 남은 금액의 10%를 빼고 환불합니다.
+          </li>
+          <li>
+            다음 경우에는 사용 여부와 관계없이 환불하거나 보상합니다: 중복·오류 결제, 상담·리포트 미제공 또는 생성 실패,
+            회사 책임의 서비스 장애, 표시·광고와 다른 내용(받은 날부터 3개월 이내, 그 사실을 안 날부터 30일 이내),
+            법정대리인 동의 없는 미성년자 결제.
+          </li>
+          <li>사용 여부는 상담방·리포트를 처음 연 시각과 질문 기록으로 확인합니다.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. 환불 절차</h2>
         <p>
           환불을 원하시는 경우 결제 시 사용하신 이메일 또는 결제 정보(결제일시, 결제 금액)와
           함께 서비스 내 안내된 연락처로 문의해 주세요. 요청 확인 후 영업일 기준 3일 이내
@@ -49,7 +78,7 @@ export default function RefundPage() {
       </section>
 
       <section>
-        <h2>4. 결제 오류 및 취소</h2>
+        <h2>5. 결제 오류 및 취소</h2>
         <p>
           결제 진행 중 오류가 발생했거나 결제가 중복으로 시도된 경우, 실제 결제(승인)가 완료되지
           않은 건에 대해서는 별도 환불 절차 없이 자동으로 무효 처리됩니다. 결제대행사(PortOne)를
@@ -58,7 +87,7 @@ export default function RefundPage() {
       </section>
 
       <section>
-        <h2>5. 문의</h2>
+        <h2>6. 문의</h2>
         <p>
           상호: 대국민스토어 · 대표자: 윤제필 · 사업자등록번호: 717-04-02822
           <br />

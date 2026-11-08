@@ -8,19 +8,40 @@ export const IAP_SKU = import.meta.env.VITE_IAP_SKU as string | undefined;
 // 어떤 상품인지는 서버가 토스에서 받은 sku로 정하므로 앱은 "기기에 어느 칸에 저장할지"만 구분한다.
 // v13(2026-11-05): newYearFirst = 신년운세 첫 구매 특가(같은 리포트, 낮은 가격 SKU, 이 기기에서 신년운세를 산 적 없을 때만),
 // section = 궁금한 것 하나 풀이(주제 1가지, 첫 질문 무료). 둘 다 SKU가 없으면 화면에 나오지 않는다.
-export type Product = "manual" | "newYear" | "newYearFirst" | "section";
+// v15(2026-11-08): AI 사주 상담 3종(consult5 4,950원 · consultNy 14,850원 · consultBundle 29,700원). 상담권은 서버(웹과 같은 상담방)에 있고,
+// 묶음 리포트(신년운세·사용설명서)는 지급 응답의 토큰으로 기존 화면에서 연다.
+export type Product = "manual" | "newYear" | "newYearFirst" | "section" | ConsultProduct;
+export type ConsultProduct = "consult5" | "consultNy" | "consultBundle";
+export const CONSULT_PRODUCTS: ConsultProduct[] = ["consultNy", "consultBundle", "consult5"];
 export const IAP_SKU_NEWYEAR = import.meta.env.VITE_IAP_SKU_NEWYEAR as string | undefined;
 const IAP_SKU_NEWYEAR_FIRST = import.meta.env.VITE_IAP_SKU_NEWYEAR_FIRST as string | undefined;
 const IAP_SKU_SECTION = import.meta.env.VITE_IAP_SKU_SECTION as string | undefined;
-const SKU_OF: Record<Product, string | undefined> = { manual: IAP_SKU, newYear: IAP_SKU_NEWYEAR, newYearFirst: IAP_SKU_NEWYEAR_FIRST, section: IAP_SKU_SECTION };
+const SKU_OF: Record<Product, string | undefined> = {
+  manual: IAP_SKU,
+  newYear: IAP_SKU_NEWYEAR,
+  newYearFirst: IAP_SKU_NEWYEAR_FIRST,
+  section: IAP_SKU_SECTION,
+  consult5: import.meta.env.VITE_IAP_SKU_CONSULT5 as string | undefined,
+  consultNy: import.meta.env.VITE_IAP_SKU_CONSULT_NY as string | undefined,
+  consultBundle: import.meta.env.VITE_IAP_SKU_CONSULT_BUNDLE as string | undefined,
+};
+export function isConsultProduct(p: Product): p is ConsultProduct {
+  return p === "consult5" || p === "consultNy" || p === "consultBundle";
+}
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "https://saju-app-three-dusky.vercel.app";
+export const API_BASE_URL = API_BASE;
 // 첫 구매 특가로 산 신년운세도 같은 칸(newYear)에 저장한다 — 화면에서는 똑같은 신년운세다.
 const KEY_PURCHASES_OF: Record<Product, string> = {
   manual: "sajulab:iap:purchases:v2",
   newYear: "sajulab:iap:purchases:newyear:v1",
   newYearFirst: "sajulab:iap:purchases:newyear:v1",
   section: "sajulab:iap:purchases:section:v1",
+  // 상담 상품은 생일별 칸 대신 상담권 목록(KEY_CONSULT_PASSES)에 저장한다. 이 칸은 쓰지 않는다.
+  consult5: "sajulab:iap:purchases:consult:v1",
+  consultNy: "sajulab:iap:purchases:consult:v1",
+  consultBundle: "sajulab:iap:purchases:consult:v1",
 };
+const KEY_CONSULT_PASSES = "sajulab:consult:passes:v1";
 const KEY_PENDING = "sajulab:iap:pending:v1";
 const KEY_LAST_SECTION = "sajulab:iap:lastSection";
 const KEY_FREE_SECTION = "sajulab:free-section:v1";
@@ -43,6 +64,27 @@ interface LocalPending {
   product?: Product;
   /** v13 궁금한 것 하나 풀이에서 고른 주제 */
   sectionKey?: SectionTopic;
+  /** v15 상담 상품: 결제 전 확인 단계에서 환불 안내를 확인함 */
+  refundConsent?: boolean;
+}
+
+/** v15 이 기기에 저장한 상담권(상담방 주소 값). 최근 것이 앞. */
+export interface ConsultPassRef {
+  passId: string;
+  k: string;
+  product: ConsultProduct;
+  savedAt: string;
+}
+export function savedConsultPasses(): ConsultPassRef[] {
+  try {
+    const arr = JSON.parse(read(KEY_CONSULT_PASSES) ?? "[]") as ConsultPassRef[];
+    return Array.isArray(arr) ? arr.filter((p) => p && p.passId && p.k) : [];
+  } catch {
+    return [];
+  }
+}
+function saveConsultPass(ref: ConsultPassRef) {
+  write(KEY_CONSULT_PASSES, JSON.stringify([ref, ...savedConsultPasses().filter((p) => p.passId !== ref.passId)].slice(0, 20)));
 }
 
 function readPending(): LocalPending[] {
@@ -97,6 +139,8 @@ function describeError(e: unknown): string {
 export interface Purchase {
   paymentId: string;
   token: string;
+  /** v15 상담 상품을 샀을 때만: 상담방 주소 값 */
+  consult?: { passId: string; k: string };
 }
 
 export const CHAPTER_TITLES: Record<string, string> = {
@@ -190,23 +234,41 @@ function productOfSku(sku: string | undefined): Product | null {
   if (sku && sku === IAP_SKU_NEWYEAR) return "newYear";
   if (sku && sku === IAP_SKU_NEWYEAR_FIRST) return "newYearFirst";
   if (sku && sku === IAP_SKU_SECTION) return "section";
+  for (const c of CONSULT_PRODUCTS) if (sku && sku === SKU_OF[c]) return c;
   return null;
 }
 
 /** 서버에 주문 번호를 보내 지급(접근 토큰 발급)을 요청한다. 성공해야만 true를 돌려 토스 주문이 "지급 완료"가 된다. */
-async function grant(orderId: string, input: SajuInput, product: Product = "manual", sectionKey?: SectionTopic): Promise<Purchase> {
+async function grant(orderId: string, input: SajuInput, product: Product = "manual", sectionKey?: SectionTopic, refundConsent?: boolean): Promise<Purchase> {
   const started = Date.now();
   trace("grant_http_start");
   // text/plain은 브라우저의 사전 확인(OPTIONS) 요청 없이 바로 보낼 수 있다(서버는 본문을 JSON으로 읽는다).
   const res = await fetch(`${API_BASE}/api/toss/iap/grant`, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({ orderId, birthInput: input, ...(product === "section" ? { sectionKey } : {}) }),
+    body: JSON.stringify({
+      orderId,
+      birthInput: input,
+      ...(product === "section" ? { sectionKey } : {}),
+      ...(isConsultProduct(product) ? { refundConsent: refundConsent === true } : {}),
+    }),
   });
-  const data = (await res.json().catch(() => ({}))) as Partial<Purchase> & { error?: string };
+  const data = (await res.json().catch(() => ({}))) as Partial<Purchase> & {
+    error?: string;
+    consult?: { passId: string; k: string };
+    reports?: { newYear?: Purchase; manual?: Purchase };
+  };
   trace("grant_http_done", { status: res.status, took: Date.now() - started });
   if (!res.ok || !data.paymentId || !data.token) throw new Error(data.error ?? "지급하지 못했어요.");
-  const purchase = { paymentId: data.paymentId, token: data.token };
+  const purchase: Purchase = { paymentId: data.paymentId, token: data.token };
+  if (isConsultProduct(product)) {
+    if (!data.consult) throw new Error("상담방을 만들지 못했어요. 잠시 후 앱을 다시 열면 이어져요.");
+    saveConsultPass({ passId: data.consult.passId, k: data.consult.k, product, savedAt: new Date().toISOString() });
+    // 묶음 리포트는 기존 신년운세·사용설명서 칸에 넣어, 결과 화면의 "열기" 버튼이 그대로 동작하게 한다.
+    if (data.reports?.newYear) savePurchase(input, data.reports.newYear, "newYear");
+    if (data.reports?.manual) savePurchase(input, data.reports.manual, "manual");
+    return { ...purchase, consult: data.consult };
+  }
   savePurchase(input, purchase, product, sectionKey);
   return purchase;
 }
@@ -222,6 +284,7 @@ export function buyProduct(
   input: SajuInput,
   handlers: { onSuccess: (p: Purchase) => void; onError: (message: string) => void },
   sectionKey?: SectionTopic,
+  refundConsent?: boolean,
 ): () => void {
   trace("buy_start", product === "manual" ? {} : { product });
   if (product === "section" && sectionKey) write(KEY_LAST_SECTION, sectionKey);
@@ -230,7 +293,7 @@ export function buyProduct(
       options: {
         sku: SKU_OF[product] as string,
         processProductGrant: ({ orderId }) => {
-          addPending({ orderId, input, product, sectionKey });
+          addPending({ orderId, input, product, sectionKey, refundConsent });
           trace("grant_enter_saved", { orderTail: orderId.slice(-6) });
           return true;
         },
@@ -239,7 +302,7 @@ export function buyProduct(
         trace("event", { type: e.type });
         if (e.type !== "success") return;
         const orderId = e.data.orderId;
-        grant(orderId, input, product, sectionKey)
+        grant(orderId, input, product, sectionKey, refundConsent)
           .then((p) => {
             removePending(orderId);
             trace("grant_after_success_ok");
@@ -263,7 +326,15 @@ export function buyProduct(
   }
 }
 
-const PRODUCT_NAME: Record<Product, string> = { manual: "사용설명서", newYear: "신년운세", newYearFirst: "신년운세", section: "풀이" };
+const PRODUCT_NAME: Record<Product, string> = {
+  manual: "사용설명서",
+  newYear: "신년운세",
+  newYearFirst: "신년운세",
+  section: "풀이",
+  consult5: "상담방",
+  consultNy: "상담방",
+  consultBundle: "상담방",
+};
 
 /** v10까지의 호출을 그대로 쓰는 사용설명서 구매. */
 export function buyManual(
@@ -278,13 +349,13 @@ export function buyManual(
  * 서버는 같은 주문을 두 번 만들지 않으므로 여러 번 불러도 안전하다.
  */
 export async function recoverPendingOrders(input: SajuInput | null): Promise<Purchase | null> {
-  if (!IAP_SKU && !IAP_SKU_NEWYEAR && !IAP_SKU_NEWYEAR_FIRST && !IAP_SKU_SECTION) return null;
+  if (!Object.values(SKU_OF).some(Boolean)) return null;
   let recovered: Purchase | null = null;
 
   // 1) 기기에 남겨 둔 미결 주문(결제는 끝났지만 서버 지급이 안 끝난 것). 상품 기록이 없는 옛 미결은 사용설명서.
   for (const item of readPending()) {
     try {
-      recovered = await grant(item.orderId, item.input, item.product ?? "manual", item.sectionKey);
+      recovered = await grant(item.orderId, item.input, item.product ?? "manual", item.sectionKey, item.refundConsent);
       removePending(item.orderId);
       trace("recover_local_ok", { orderTail: item.orderId.slice(-6) });
     } catch (e) {

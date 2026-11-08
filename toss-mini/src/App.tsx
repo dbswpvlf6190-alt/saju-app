@@ -21,13 +21,20 @@ import {
   loadManual,
   loadSection,
   recoverPendingOrders,
+  savedConsultPasses,
   savedPurchaseFor,
+  type ConsultPassRef,
+  type ConsultProduct,
   type Purchase,
   type SectionTopic,
 } from "./iap";
 import { NewYearMini, NewYearTeaser } from "./v11/NewYearTeaser";
 import { NewYearScreen } from "./v11/NewYearScreen";
 import { NY_PRICE_LABEL, NY_YEAR, getVariant, nyTrack } from "./v11/ny";
+import { ConsultOffer, consultAvailable } from "./consult/ConsultOffer";
+import { ConsultScreen } from "./consult/ConsultScreen";
+import { CONSULT_PRICE } from "./consult/api";
+import "./consult/consult.css";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
 // (앱인토스 정책: 외부 링크·자사 서비스 이동 유도 금지, SSR 금지). 수익은 인앱 광고(배너)로 — 광고 그룹 ID는
@@ -130,7 +137,7 @@ function toInput(f: Form): SajuInput {
   };
 }
 
-type Screen = "today" | "form" | "result" | "manual" | "newyear" | "section" | "family";
+type Screen = "today" | "form" | "result" | "manual" | "newyear" | "section" | "family" | "consult" | "consultBuy";
 
 /** 가족 생일은 이 기기에만 저장한다(서버로 보내는 건 가족 신년운세를 살 때 그 생일 하나뿐). */
 function loadFamily(): FamilyMember[] {
@@ -169,6 +176,9 @@ export default function App() {
   const [showHour, setShowHour] = useState(() => !form.unknownTime);
   const [sectionView, setSectionView] = useState<{ purchase: Purchase; topic: SectionTopic } | null>(null);
   const [familyMember, setFamilyMember] = useState<FamilyMember | null>(null);
+  // v15 AI 상담: 지금 연 상담방, 상담 구매 화면에서 먼저 골라 둘 상품
+  const [consultPass, setConsultPass] = useState<ConsultPassRef | null>(() => savedConsultPasses()[0] ?? null);
+  const [consultInitial, setConsultInitial] = useState<ConsultProduct>("consultNy");
   const formStarted = useRef(false);
   // 구매 기록은 생일별로 저장돼 있어, 지금 입력한 생일의 구매만 "열기"로 보인다(다른 생일은 새로 구매할 수 있다).
   const [purchaseTick, setPurchaseTick] = useState(0);
@@ -270,6 +280,34 @@ export default function App() {
     }
   }
 
+  function openConsultBuy(product: ConsultProduct) {
+    setConsultInitial(product);
+    go("consultBuy");
+  }
+  function onConsultPurchased() {
+    setPurchaseTick((n) => n + 1);
+    setConsultPass(savedConsultPasses()[0] ?? null);
+    go("consult");
+  }
+
+  if (screen === "consult" && consultPass)
+    return (
+      <ConsultScreen
+        pass={consultPass}
+        onBack={() => window.history.back()}
+        onOpenReport={(kind) => {
+          if (kind === "ny" && nyPurchase) go("newyear");
+          else if (kind === "pr" && purchase) go("manual");
+        }}
+      />
+    );
+  if (screen === "consultBuy" && result)
+    return (
+      <main className="page">
+        <ConsultOffer input={toInput(form)} initial={consultInitial} place="buy_screen" onPurchased={onConsultPurchased} />
+        <button type="button" className="ghost" onClick={() => window.history.back()}>돌아가기</button>
+      </main>
+    );
   if (screen === "manual" && purchase) return <ManualScreen purchase={purchase} onBack={() => window.history.back()} />;
   if (screen === "section" && sectionView)
     return (
@@ -280,18 +318,22 @@ export default function App() {
         extra={
           <>
             {/* v14: 무료 풀이를 다 읽은 순간이 가장 궁금할 때 — 전에는 "다른 주제도 물어보기"(결과 화면으로 돌아감)뿐이라 유료 0건이었다 */}
-            <SectionCard
-              key={sectionView.topic}
-              form={form}
-              exclude={sectionView.topic}
-              title="다른 것도 내 사주로 물어볼까요?"
-              place="section_end"
-              onOpen={(p, t) => {
-                setSectionView({ purchase: p, topic: t });
-                go("section");
-              }}
-            />
-            {result && !nyPurchase && iapAvailable("newYear") && (
+            {consultAvailable() ? (
+              <ConsultOffer input={toInput(form)} title="더 궁금한 건, 내 사주로 계속 물어보세요" place="section_end" onPurchased={onConsultPurchased} />
+            ) : (
+              <SectionCard
+                key={sectionView.topic}
+                form={form}
+                exclude={sectionView.topic}
+                title="다른 것도 내 사주로 물어볼까요?"
+                place="section_end"
+                onOpen={(p, t) => {
+                  setSectionView({ purchase: p, topic: t });
+                  go("section");
+                }}
+              />
+            )}
+            {result && !nyPurchase && iapAvailable("newYear") && !consultAvailable() && (
               <button
                 type="button"
                 className="cta"
@@ -307,7 +349,7 @@ export default function App() {
         }
       />
     );
-  if (screen === "family" && familyMember) return <FamilyScreen member={familyMember} onBack={() => window.history.back()} />;
+  if (screen === "family" && familyMember) return <FamilyScreen member={familyMember} onBack={() => window.history.back()} onConsult={() => openConsultBuy("consultBundle")} />;
   if (screen === "newyear" && nyPurchase && result) return <NewYearScreen purchase={nyPurchase} result={result} onBack={() => window.history.back()} extra={<PushCard place="newyear" title="오늘의 운세도 매일 아침 받아보세요" />} />;
   if (screen === "result" && result)
     return (
@@ -336,9 +378,14 @@ export default function App() {
           setFamilyMember(m);
           go("family");
         }}
+        onConsult={openConsultBuy}
+        onConsultPurchased={onConsultPurchased}
+        hasConsult={!!consultPass}
+        onOpenConsult={() => go("consult")}
       />
     );
-  if (screen === "today" && result) return <TodayScreen result={result} onFull={() => go("result")} nyPurchased={!!nyPurchase} onOther={() => go("form")} />;
+  if (screen === "today" && result)
+    return <TodayScreen result={result} onFull={() => go("result")} nyPurchased={!!nyPurchase} onOther={() => go("form")} onOpenConsult={consultPass ? () => go("consult") : undefined} />;
 
   const set = (patch: Partial<Form>) => {
     if (!formStarted.current) {
@@ -363,6 +410,15 @@ export default function App() {
       </header>
 
       <TtiPeek
+        onPickYear={(y) => {
+          track("tti_year_pick", { year: y });
+          set({ year: String(y) });
+          window.setTimeout(() => {
+            const el = document.getElementById("birth-month") as HTMLInputElement | null;
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+            el?.focus();
+          }, 50);
+        }}
         onMore={() => {
           track("tti_to_form");
           const el = document.getElementById("birth-year");
@@ -377,7 +433,7 @@ export default function App() {
           <div className="date-row">
             <input id="birth-year" inputMode="numeric" pattern="[0-9]*" aria-label="태어난 해" placeholder="예) 1965" value={form.year} onChange={(e) => set({ year: digits(e.target.value, 4) })} />
             <em>년</em>
-            <input inputMode="numeric" pattern="[0-9]*" aria-label="태어난 달" placeholder="월" value={form.month} onChange={(e) => set({ month: digits(e.target.value, 2) })} />
+            <input id="birth-month" inputMode="numeric" pattern="[0-9]*" aria-label="태어난 달" placeholder="월" value={form.month} onChange={(e) => set({ month: digits(e.target.value, 2) })} />
             <em>월</em>
             <input inputMode="numeric" pattern="[0-9]*" aria-label="태어난 날" placeholder="일" value={form.day} onChange={(e) => set({ day: digits(e.target.value, 2) })} />
             <em>일</em>
@@ -449,7 +505,15 @@ const TTI_2027: { key: string; emoji: string; name: string; line: string }[] = [
   { key: "pig", emoji: "🐷", name: "돼지", line: "사람이 모여드는 해예요. 가족·친구와 함께하는 일에서 기쁜 소식이 생기기 쉬워요." },
 ];
 
-function TtiPeek({ onMore }: { onMore: () => void }) {
+/** 띠(子=쥐 …)의 태어난 해 후보. 50~80대가 대부분이라 1940~2005년만 보여 준다(1월생은 띠가 앞 해일 수 있어 연도만 채운다). */
+function ttiYears(key: string): number[] {
+  const idx = TTI_2027.findIndex((x) => x.key === key);
+  const out: number[] = [];
+  for (let y = 2005; y >= 1940; y--) if ((((y - 4) % 12) + 12) % 12 === idx) out.push(y);
+  return out;
+}
+
+function TtiPeek({ onMore, onPickYear }: { onMore: () => void; onPickYear: (year: number) => void }) {
   const [picked, setPicked] = useState<string | null>(null);
   const t = TTI_2027.find((x) => x.key === picked);
   return (
@@ -477,8 +541,17 @@ function TtiPeek({ onMore }: { onMore: () => void }) {
             {t.emoji} {t.name}띠의 {NY_YEAR}년
           </p>
           <p className="tti-line">{t.line}</p>
-          <button type="button" className="cta" onClick={onMore}>
-            생년월일 넣고 나만의 좋은 날 보기
+          {/* v15: 띠 → 태어난 해 버튼. 누르면 연도가 채워지고 월 칸으로 바로 간다(입력 시작 10% → 15% 목표) */}
+          <p className="muted" style={{ fontSize: 14, marginTop: 10 }}>태어난 해를 누르면 바로 채워져요</p>
+          <div className="tti-years">
+            {ttiYears(t.key).map((y) => (
+              <button key={y} type="button" className="toggle" onClick={() => onPickYear(y)}>
+                {y}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="ghost" style={{ marginTop: 10 }} onClick={onMore}>
+            직접 입력할게요
           </button>
           <p className="foot" style={{ marginTop: 8 }}>띠 운세는 띠마다 같아요 · 생년월일을 넣으면 내 사주로 따로 풀어요</p>
         </div>
@@ -488,7 +561,19 @@ function TtiPeek({ onMore }: { onMore: () => void }) {
 }
 
 /** 다시 온 사람이 처음 보는 화면: 오늘의 운세 + 내 사주 타입 요약. 입력 없이 바로 보이게 한다. */
-function TodayScreen({ result, onFull, nyPurchased, onOther }: { result: SajuResult; onFull: () => void; nyPurchased: boolean; onOther: () => void }) {
+function TodayScreen({
+  result,
+  onFull,
+  nyPurchased,
+  onOther,
+  onOpenConsult,
+}: {
+  result: SajuResult;
+  onFull: () => void;
+  nyPurchased: boolean;
+  onOther: () => void;
+  onOpenConsult?: () => void;
+}) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
   const daily = useMemo(() => getDailyFortuneDetail(result), [result]);
@@ -500,6 +585,12 @@ function TodayScreen({ result, onFull, nyPurchased, onOther }: { result: SajuRes
         <h1>오늘의 운세</h1>
         <p>{daily.dateLabel} · {type.typeName} ({free.dayMasterLabel})</p>
       </header>
+
+      {onOpenConsult && (
+        <button type="button" className="cta" onClick={onOpenConsult}>
+          💬 내 상담방 열기
+        </button>
+      )}
 
       <section className="card">
         <h2>오늘의 한 줄</h2>
@@ -769,6 +860,8 @@ function ManualBuyCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   if (!iapAvailable()) return null;
+  // v15: 옛 저가 상품은 새로 팔지 않는다(산 사람은 계속 열 수 있음). 평생 사용설명서는 상담 묶음에 들어 있다.
+  if (!purchase && consultAvailable()) return null;
 
   if (purchase) {
     return (
@@ -840,24 +933,34 @@ function NewYearCard({
   purchase,
   onPurchased,
   onOpen,
+  onConsult,
+  consultProduct = "consultNy",
 }: {
   result: SajuResult;
   form: Form;
   purchase: Purchase | null;
   onPurchased: (p: Purchase) => void;
   onOpen: () => void;
+  /** v15: 상담 상품이 켜져 있으면 신년운세 단품 대신 상담 묶음 구매 화면으로 보낸다 */
+  onConsult?: () => void;
+  consultProduct?: ConsultProduct;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const variant = useMemo(() => getVariant(), []);
   // 이 기기에서 신년운세를 처음 사는 경우에만 특가 상품으로 판다(해외 상위 서비스의 "첫 상담 할인"을 옮긴 것, 1회 한정).
-  const firstOffer = useMemo(() => !purchase && firstNewYearOfferAvailable(), [purchase]);
-  if (!iapAvailable("newYear")) return null;
+  const viaConsult = !purchase && !!onConsult && consultAvailable();
+  const firstOffer = useMemo(() => !purchase && !viaConsult && firstNewYearOfferAvailable(), [purchase, viaConsult]);
+  if (!iapAvailable("newYear") && !viaConsult) return null;
 
   function open() {
-    nyTrack("ny_open_click", { variant, purchased: !!purchase, first: firstOffer });
+    nyTrack("ny_open_click", { variant, purchased: !!purchase, first: firstOffer, consult: viaConsult });
     if (purchase) {
       onOpen();
+      return;
+    }
+    if (viaConsult) {
+      onConsult?.();
       return;
     }
     setError(null);
@@ -883,8 +986,16 @@ function NewYearCard({
       busy={busy}
       error={error}
       onOpen={open}
-      priceKrw={firstOffer ? NY_FIRST_PRICE_KRW : undefined}
-      offerNote={firstOffer ? `처음 사는 분만 한 번, ${NY_FIRST_PRICE_KRW.toLocaleString("ko-KR")}원이에요 (정가 ${NY_PRICE_LABEL})` : undefined}
+      priceKrw={viaConsult ? CONSULT_PRICE[consultProduct] : firstOffer ? NY_FIRST_PRICE_KRW : undefined}
+      offerNote={
+        viaConsult
+          ? consultProduct === "consultBundle"
+            ? "가족 2명까지 함께 상담하는 묶음으로 열어요 (평생·신년운세 + 30일 상담)"
+            : "열두 달 풀이에 AI 상담 15번까지 함께 드려요"
+          : firstOffer
+            ? `처음 사는 분만 한 번, ${NY_FIRST_PRICE_KRW.toLocaleString("ko-KR")}원이에요 (정가 ${NY_PRICE_LABEL})`
+            : undefined
+      }
     />
   );
 }
@@ -908,7 +1019,8 @@ function SectionCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const free = freeSectionAvailable();
-  const paid = iapAvailable("section");
+  // v15: 990원 주제 풀이는 새로 팔지 않는다(첫 질문 무료는 체험으로 남긴다). 다음 질문은 상담으로.
+  const paid = iapAvailable("section") && !consultAvailable();
   if (!free && !paid) return null;
   const input = toInput(form);
   const owned = savedPurchaseFor(input, "section", topic);
@@ -1091,7 +1203,7 @@ function FamilyCard({ onOpen }: { onOpen: (m: FamilyMember) => void }) {
 }
 
 /** 가족 한 사람의 2027 신년운세: 무료 미리보기 카드 → 구매하면 그 자리에서 열두 달 풀이. */
-function FamilyScreen({ member, onBack }: { member: FamilyMember; onBack: () => void }) {
+function FamilyScreen({ member, onBack, onConsult }: { member: FamilyMember; onBack: () => void; onConsult: () => void }) {
   const result = useMemo(() => calculateSaju(toInput(member.form)), [member]);
   const [tick, setTick] = useState(0);
   const [open, setOpen] = useState(false);
@@ -1115,6 +1227,8 @@ function FamilyScreen({ member, onBack }: { member: FamilyMember; onBack: () => 
           setOpen(true);
         }}
         onOpen={() => setOpen(true)}
+        onConsult={onConsult}
+        consultProduct="consultBundle"
       />
       <button type="button" className="ghost" onClick={onBack}>돌아가기</button>
     </main>
@@ -1179,6 +1293,10 @@ function ResultScreen({
   onOther,
   onOpenSection,
   onOpenFamily,
+  onConsult,
+  onConsultPurchased,
+  hasConsult,
+  onOpenConsult,
 }: {
   result: SajuResult;
   form: Form;
@@ -1192,6 +1310,10 @@ function ResultScreen({
   onOther: () => void;
   onOpenSection: (p: Purchase, topic: SectionTopic) => void;
   onOpenFamily: (m: FamilyMember) => void;
+  onConsult: (product: ConsultProduct) => void;
+  onConsultPurchased: () => void;
+  hasConsult: boolean;
+  onOpenConsult: () => void;
 }) {
   const free = useMemo(() => generateFreeContent(result), [result]);
   const type = useMemo(() => getTypeProfile(result.dayPillar.ganKor), [result]);
@@ -1224,7 +1346,13 @@ function ResultScreen({
       {promoMsg && <p className="promo-note">{promoMsg}</p>}
 
       {/* v13: 첫 화면에서 "${NY_YEAR}년 내 운세"를 약속했으니 결과도 신년운세 카드부터(앱인토스 UX 원칙 ⑤: 소개한 내용이 결과에 보여야 함) */}
-      <NewYearCard result={result} form={form} purchase={nyPurchase} onPurchased={onNyPurchased} onOpen={onOpenNy} />
+      {hasConsult && (
+        <button type="button" className="cta" onClick={onOpenConsult}>
+          💬 내 상담방 열기
+        </button>
+      )}
+
+      <NewYearCard result={result} form={form} purchase={nyPurchase} onPurchased={onNyPurchased} onOpen={onOpenNy} onConsult={() => onConsult("consultNy")} />
 
       <section className="card type-card">
         <div className="eyebrow">나의 사주 타입</div>
@@ -1289,7 +1417,17 @@ function ResultScreen({
       <PushCard place="result" title="이 운세, 매일 아침 받아보세요" />
 
       {/* v13: 해외 상위 서비스(Co-Star·Astrotalk·LINE占い)의 "질문 하나씩 + 첫 질문 무료"를 주제 하나 풀이로 */}
-      <SectionCard form={form} onOpen={onOpenSection} />
+      <div id="section-card">
+        <SectionCard form={form} onOpen={onOpenSection} />
+      </div>
+
+      {/* v15: AI 사주 상담(결제 전 확인 단계 포함). 결제를 그만두면 무료 첫 질문으로 안내한다 */}
+      <ConsultOffer
+        input={toInput(form)}
+        place="result"
+        onPurchased={onConsultPurchased}
+        onFree={() => document.getElementById("section-card")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+      />
 
       {/* v13: 궁합 유료화(The Pattern·Co-Star)를 50대 이상에 맞게 가족 신년운세로 */}
       <FamilyCard onOpen={onOpenFamily} />

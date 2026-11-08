@@ -1,0 +1,42 @@
+/* v15 AI 사주 상담(토스). 50대 이상이 77% → 본문 17px 이상, 버튼 크게. */
+.consult-card { display: flex; flex-direction: column; gap: 12px; border: 1.5px solid var(--primary-soft); }
+.consult-card h2 { font-size: 19px; margin: 0; line-height: 1.4; }
+.consult-price { font-size: 30px !important; font-weight: 800; color: var(--primary); text-align: center; margin: 4px 0 !important; }
+.consult-checks { list-style: none; margin: 0; padding: 12px 14px; background: #f7f5fd; border-radius: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 16px; line-height: 1.5; }
+.consult-agree { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.55; color: var(--muted); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.consult-agree input { width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px; accent-color: var(--primary); }
+.consult-agree b { color: var(--text); }
+.consult-fallback { text-align: center; display: flex; flex-direction: column; gap: 6px; }
+.consult-fallback p { color: #e3543f; font-size: 14px; }
+.consult-sample { background: #f7f5fd; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.consult-sample .q { align-self: flex-end; background: var(--primary-soft); color: var(--primary); border-radius: 12px 12px 2px 12px; padding: 8px 12px; font-size: 15px; font-weight: 600; }
+.consult-sample .a { background: #fff; border-radius: 12px 12px 12px 2px; padding: 10px 12px; font-size: 15px; }
+.consult-sample span { font-size: 11px; color: var(--muted); }
+.consult-options { display: flex; flex-direction: column; gap: 8px; }
+.consult-option { text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff; color: var(--text); font-size: 15px; }
+.consult-option.on { border-color: var(--primary); background: var(--primary-soft); }
+.consult-option .row-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.consult-option .row-top b { font-size: 16px; line-height: 1.4; }
+.consult-option .row-top em { font-style: normal; font-weight: 800; color: var(--primary); font-size: 17px; white-space: nowrap; }
+.consult-option .badge { align-self: flex-start; font-size: 11px; font-weight: 700; color: #fff; background: var(--gold); border-radius: 999px; padding: 2px 8px; }
+.consult-option .pts { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+.consult-room .hero p { font-size: 15px; }
+.consult-reports { display: flex; gap: 8px; }
+.consult-reports .ghost { font-size: 14px; padding: 12px 8px; }
+.consult-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.consult-tabs .toggle { flex: 0 0 auto; }
+.consult-msgs { display: flex; flex-direction: column; gap: 10px; }
+.bubble { margin: 0; white-space: pre-line; line-height: 1.7; font-size: 17px; padding: 12px 14px; border-radius: 16px; }
+.bubble.q { align-self: flex-end; max-width: 85%; background: var(--primary-soft); color: var(--text); border-bottom-right-radius: 4px; font-size: 16px; }
+.bubble.a { background: #fff; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.consult-chips { display: flex; flex-direction: column; gap: 6px; }
+.consult-chips .ghost { text-align: left; color: var(--primary); border-color: var(--primary-soft); font-size: 16px; }
+.consult-input { position: sticky; bottom: 0; background: var(--bg); padding: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+.consult-input textarea { width: 100%; resize: none; font-size: 17px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); font-family: inherit; }
+.consult-input .row-between { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.consult-input .cta { width: auto; padding: 13px 26px; }
+
+/* v15 띠 → 태어난 해 버튼 */
+.tti-years { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.tti-years .toggle { font-size: 17px; font-weight: 700; color: var(--text); }

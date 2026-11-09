@@ -5,6 +5,7 @@ import type { PremiumSection, PremiumSectionKey } from "@/lib/saju";
 import { PREMIUM_REPORT_PRICE_KRW, SINGLE_SECTION_PRICE_KRW } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 import { MANUAL_CHAPTER_META, reportV2Enabled } from "@/lib/reports/manualChapters";
+import { Icon } from "@/components/ui/Icon";
 
 export type OfferChoice = { kind: "full" } | { kind: "single"; section: PremiumSectionKey };
 
@@ -80,7 +81,7 @@ export function PremiumOffer({
         <p className="mt-2 text-sm leading-relaxed text-foreground">{manual && bridgeLine ? bridgeLine : first.previewSnippet}</p>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background-card to-transparent" />
         <p className="relative mt-3 text-center text-xs text-foreground-muted">
-          {manual ? "🔒 이어서 6장 · 6,000자 이상 · 결제 후 바로 열려요" : "🔒 이어서 1,200자 이상 · 결제 후 바로 열려요"}
+          <Icon name="lock" /> {manual ? "이어서 6장 · 6,000자 이상 · 결제 후 바로 열려요" : "이어서 1,200자 이상 · 결제 후 바로 열려요"}
         </p>
       </div>
 
@@ -94,7 +95,7 @@ export function PremiumOffer({
                 <span className="text-sm font-medium text-foreground">{chapter.title}</span>
                 <p className="mt-0.5 text-xs leading-relaxed text-foreground-muted">{chapter.promise}</p>
               </div>
-              <span className="shrink-0 text-xs text-accent-gold-soft">🔒</span>
+              <span className="shrink-0 text-xs text-accent-gold-soft"><Icon name="lock" /></span>
             </div>
           ))}
         {!manual && rest.map((section) => (
@@ -105,7 +106,7 @@ export function PremiumOffer({
                 {section.previewSnippet}
               </p>
             </div>
-            <span className="shrink-0 text-xs text-accent-gold-soft">🔒</span>
+            <span className="shrink-0 text-xs text-accent-gold-soft"><Icon name="lock" /></span>
           </div>
         ))}
       </div>
@@ -119,7 +120,7 @@ export function PremiumOffer({
             mode === "full" ? "border-accent-gold bg-accent-gold/10" : "border-border-subtle bg-background-card/60"
           }`}
         >
-          <span className="absolute -top-2.5 left-4 rounded-full bg-accent-gold px-2 py-0.5 text-[11px] font-semibold text-[#1a1430]">
+          <span className="absolute -top-2.5 left-4 rounded-full bg-cta px-2 py-0.5 text-[11px] font-semibold text-cta-ink">
             추천
           </span>
           <span className="flex flex-col">
@@ -157,7 +158,7 @@ export function PremiumOffer({
                   onClick={() => setSingle(s.key)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                     single === s.key
-                      ? "border-accent-gold bg-accent-gold text-[#1a1430]"
+                      ? "border-accent-gold bg-cta text-cta-ink"
                       : "border-border-subtle text-foreground-muted"
                   }`}
                 >
@@ -179,7 +180,7 @@ export function PremiumOffer({
           });
           onChoose(choice);
         }}
-        className="min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
+        className="min-h-14 rounded-xl bg-cta px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90"
       >
         {mode === "full"
           ? manual
@@ -213,13 +214,13 @@ export function StickyPremiumBar({ name, targetId }: { name: string; targetId: s
       <a
         href={`#${targetId}`}
         onClick={() => trackEvent("premium_sticky_click", { productType: "premium_report" })}
-        className="flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border border-accent-gold/50 bg-[#1a1430]/95 px-4 py-3 shadow-lg backdrop-blur"
+        className="flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border border-accent-gold/50 bg-background-elevated/95 px-4 py-3 shadow-lg backdrop-blur"
       >
         <span className="text-sm text-foreground">
-          🔒 {name ? `${name}님` : "내"} {reportV2Enabled() ? "나 사용설명서" : "상세 풀이 5가지"}
+          <Icon name="lock" /> {name ? `${name}님` : "내"} {reportV2Enabled() ? "나 사용설명서" : "상세 풀이 5가지"}
           <span className="ml-1 text-xs text-foreground-muted">1,900원부터</span>
         </span>
-        <span className="shrink-0 rounded-lg bg-accent-gold px-3 py-1.5 text-xs font-semibold text-[#1a1430]">보기</span>
+        <span className="shrink-0 rounded-lg bg-cta px-3 py-1.5 text-xs font-semibold text-cta-ink">보기</span>
       </a>
     </div>
   );

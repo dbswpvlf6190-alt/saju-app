@@ -26,6 +26,7 @@ import { SectionUpgradeCard } from "./SectionUpgradeCard";
 import { ReportSections } from "./ReportSections";
 import { ReportProgress } from "./ReportProgress";
 import { PurchaseConsent } from "./PurchaseConsent";
+import { Icon } from "@/components/ui/Icon";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -333,7 +334,7 @@ export function PremiumUnlock({
             아래 5개 섹션은 각자 이 정보를 처음부터 다시 설명하지 않도록 프롬프트를 바꿔뒀다
             (interpretSaju.ts) — 5번 반복되던 도입부를 없애서 실제 분석 밀도를 높이기 위함이다. */}
         <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-          <h4 className="text-sm font-medium text-foreground-muted">📜 나의 사주 기본 정보</h4>
+          <h4 className="text-sm font-medium text-foreground-muted">나의 사주 기본 정보</h4>
           <div className="flex flex-col items-center gap-1 text-center">
             <span className="font-serif text-xl text-accent-gold-soft">{free.dayMasterLabel}</span>
             <span className="text-sm text-foreground-muted">{free.dayMasterMetaphor}</span>
@@ -392,7 +393,7 @@ export function PremiumUnlock({
 
         {missingSections.length > 0 && (
           <>
-            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
               {errorMessage ?? "일부 항목을 불러오지 못했어요."}
             </p>
             <button
@@ -416,7 +417,7 @@ export function PremiumUnlock({
             href={`/api/auth/kakao/start?state=${encodeURIComponent(activePaymentId)}`}
             className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
           >
-            🔒 로그인하고 계정에 저장하기
+            <Icon name="lock" /> 로그인하고 계정에 저장하기
           </a>
         )}
 
@@ -496,7 +497,7 @@ export function PremiumUnlock({
                   {couponStatus === "redeeming" ? "확인 중..." : "코드 사용하기"}
                 </button>
               </div>
-              {couponError && <p className="text-xs text-red-300">{couponError}</p>}
+              {couponError && <p className="text-xs text-red-700">{couponError}</p>}
             </div>
           ) : (
             <button
@@ -504,7 +505,7 @@ export function PremiumUnlock({
               onClick={() => setShowCouponInput(true)}
               className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle px-4 py-3 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
             >
-              🎟️ 쿠폰 코드가 있으신가요?
+              쿠폰 코드가 있으신가요?
             </button>
           )}
         </div>
@@ -606,7 +607,7 @@ export function PremiumUnlock({
           </div>
 
           {errorMessage && (
-            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
               {errorMessage}
             </p>
           )}
@@ -617,7 +618,7 @@ export function PremiumUnlock({
             type="button"
             onClick={() => void handlePurchase()}
             disabled={status === "processing" || !agreed}
-            className="mt-1 min-h-14 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="mt-1 min-h-14 rounded-xl bg-cta px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {status === "processing"
               ? "처리 중..."

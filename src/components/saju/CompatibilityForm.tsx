@@ -72,7 +72,7 @@ export function CompatibilityForm({
       <span className="text-sm font-medium text-foreground">
         {title}
         {recommended && (
-          <span className="ml-1.5 rounded-full bg-accent-gold-soft px-1.5 py-0.5 align-middle text-[10px] font-bold text-[#1a1430]">
+          <span className="ml-1.5 rounded-full bg-accent-gold-soft px-1.5 py-0.5 align-middle text-[10px] font-bold text-cta-ink">
             추천
           </span>
         )}
@@ -122,7 +122,7 @@ export function CompatibilityForm({
       )}
 
       {errorMessage && (
-        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
           {errorMessage}
         </p>
       )}
@@ -130,7 +130,7 @@ export function CompatibilityForm({
       <button
         type="submit"
         disabled={submitting || !canSubmit}
-        className="rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="rounded-xl bg-cta px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {submitting
           ? partnerMode === "link"

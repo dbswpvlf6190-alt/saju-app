@@ -6,6 +6,7 @@ import { resultToInput } from "@/lib/saju/types";
 import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 import { PurchaseConsent } from "./PurchaseConsent";
+import { Icon } from "@/components/ui/Icon";
 
 type Status = "teaser" | "processing" | "unlocked" | "error";
 
@@ -135,16 +136,16 @@ export function NewYearUpsellCard({
 
   if (status === "unlocked" && text) {
     return (
-      <div className="flex flex-col gap-3 rounded-2xl border border-[rgba(200,98,63,0.4)] bg-[rgba(200,98,63,0.1)] p-4">
-        <h3 className="font-medium text-[#e8a37f]">🎍 {NEW_YEAR_REPORT_NAME}</h3>
+      <div className="flex flex-col gap-3 rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4">
+        <h3 className="font-medium text-accent-gold-soft"><Icon name="star" /> {NEW_YEAR_REPORT_NAME}</h3>
         <p className="whitespace-pre-line leading-relaxed text-foreground">{text}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-[rgba(200,98,63,0.4)] bg-[rgba(200,98,63,0.1)] p-4 text-center">
-      <strong className="text-sm text-[#e8a37f]">{NEW_YEAR_REPORT_NAME}도 궁금하다면</strong>
+    <div className="flex flex-col gap-3 rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4 text-center">
+      <strong className="text-sm text-accent-gold-soft">{NEW_YEAR_REPORT_NAME}도 궁금하다면</strong>
       <span className="text-xs text-foreground-muted">
         지금 리포트에 이어서, 새해 흐름만 따로 더 자세히 — 상반기·하반기 흐름과 조심할 시기까지
       </span>
@@ -155,21 +156,21 @@ export function NewYearUpsellCard({
             type="text" autoComplete="name" value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="결제자 이름"
-            className="w-full rounded-lg border border-[rgba(200,98,63,0.3)] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#c8623f]"
+            className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#b8955a]"
           />
           <input
             type="email" autoComplete="email" inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-[rgba(200,98,63,0.3)] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#c8623f]"
+            className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#b8955a]"
           />
           <input
             type="tel" autoComplete="tel" inputMode="tel"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="01012345678"
-            className="w-full rounded-lg border border-[rgba(200,98,63,0.3)] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#c8623f]"
+            className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#b8955a]"
           />
         </div>
       )}
@@ -185,8 +186,8 @@ export function NewYearUpsellCard({
             onClick={() => setPayMethod(value)}
             className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
               payMethod === value
-                ? "border-[#c8623f] bg-[rgba(200,98,63,0.2)] text-[#e8a37f]"
-                : "border-[rgba(200,98,63,0.3)] text-foreground-muted"
+                ? "border-[#b8955a] bg-[#f3eee4] text-accent-gold-soft"
+                : "border-[#dccba6] text-foreground-muted"
             }`}
           >
             {label}
@@ -194,7 +195,7 @@ export function NewYearUpsellCard({
         ))}
       </div>
 
-      {errorMessage && <p className="text-xs text-red-300">{errorMessage}</p>}
+      {errorMessage && <p className="text-xs text-red-700">{errorMessage}</p>}
 
       <PurchaseConsent checked={agreed} onChange={setAgreed} />
 
@@ -202,7 +203,7 @@ export function NewYearUpsellCard({
         type="button"
         onClick={() => void handlePurchase()}
         disabled={status === "processing" || !agreed}
-        className="rounded-xl bg-[#c8623f] px-4 py-2.5 text-center text-sm font-semibold text-[#1a0f0a] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="rounded-xl bg-cta px-4 py-2.5 text-center text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing" ? "처리 중..." : `+${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원으로 신년운세 추가`}
       </button>

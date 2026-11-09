@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/analytics/track";
 import { isPushSupported, subscribeBrowserPush } from "@/lib/push/client";
+import { Icon } from "@/components/ui/Icon";
 
 const DISMISS_KEY = "saju:pushOptInDismissed";
 
@@ -69,7 +70,7 @@ export function PushOptIn() {
 
   return (
     <div className="flex flex-col gap-2 rounded-2xl border border-border-subtle bg-background-card/70 p-4 text-center">
-      <p className="text-sm font-medium text-foreground">🔔 매일 아침, 오늘의 운세를 알림으로 받아볼래요?</p>
+      <p className="text-sm font-medium text-foreground"><Icon name="bell" /> 매일 아침, 오늘의 운세를 알림으로 받아볼래요?</p>
       <p className="text-xs text-foreground-muted">
         {status === "error" ? "알림 등록에 실패했어요. 잠시 후 다시 시도해 주세요." : "언제든 브라우저 설정에서 끌 수 있어요."}
       </p>
@@ -85,7 +86,7 @@ export function PushOptIn() {
           type="button"
           onClick={() => void handleEnable()}
           disabled={status === "subscribing"}
-          className="rounded-xl bg-accent-gold px-3 py-2.5 text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="rounded-xl bg-cta px-3 py-2.5 text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {status === "subscribing" ? "등록 중..." : "알림 받기"}
         </button>

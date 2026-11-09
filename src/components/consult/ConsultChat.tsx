@@ -11,6 +11,7 @@ import {
   personToSajuInput,
   type PersonFormValues,
 } from "@/components/saju/PersonBirthFields";
+import { Icon } from "@/components/ui/Icon";
 
 interface Summary {
   label: string;
@@ -181,7 +182,7 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
       <header className="flex flex-col gap-1">
         <span className="text-sm text-accent-gold-soft">{view.productName}</span>
         <h1 className="font-serif text-xl text-foreground">AI 사주 상담방</h1>
-        {view.giftFrom && <p className="text-base text-foreground">🎁 {view.giftFrom} 님이 보낸 상담이에요.</p>}
+        {view.giftFrom && <p className="text-base text-foreground">{view.giftFrom} 님이 보낸 상담이에요.</p>}
         <p className="text-sm text-foreground-muted">
           {view.quota.ok ? view.quota.remainingLabel : view.quota.message} · {new Date(view.expiresAt).toLocaleDateString("ko-KR")}까지
         </p>
@@ -196,12 +197,12 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
             링크만 있으면 언제든 다시 들어올 수 있어요. 카카오로 저장하면 휴대폰을 바꿔도 내 구매내역에서 찾을 수 있어요.
           </span>
           <div className="flex gap-2">
-            <button type="button" onClick={() => void copyLink()} className="flex-1 rounded-xl bg-accent-gold px-3 py-2.5 font-semibold text-[#1a1430]">
+            <button type="button" onClick={() => void copyLink()} className="flex-1 rounded-xl bg-cta px-3 py-2.5 font-semibold text-cta-ink">
               {view.giftFrom ? "링크 보내기" : copied ? "복사했어요" : "링크 복사"}
             </button>
             <a
               href={`/api/auth/kakao/start?state=${encodeURIComponent(view.orderPaymentId)}`}
-              className="flex-1 rounded-xl bg-[#fee500] px-3 py-2.5 text-center font-semibold text-[#1a1430]"
+              className="flex-1 rounded-xl bg-[#fee500] px-3 py-2.5 text-center font-semibold text-cta-ink"
             >
               카카오로 저장
             </a>
@@ -217,7 +218,7 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
               href={`/consult/${passId}/report/${r.kind}?k=${k}`}
               className="flex-1 rounded-xl border border-accent-gold/40 bg-background-card/70 px-3 py-3 text-center text-sm font-medium text-accent-gold-soft"
             >
-              📜 {r.title} 보기
+              <Icon name="book" /> {r.title} 보기
             </Link>
           ))}
         </div>
@@ -265,12 +266,12 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
           </select>
           <PersonBirthFields idPrefix="fam" title="가족 생년월일" nameOptionalLabel="이름 (선택)" value={famPerson} onChange={setFamPerson} />
           <p className="text-xs text-foreground-muted">가족 본인이 동의한 경우에만 등록해 주세요.</p>
-          {famError && <p className="text-sm text-red-300">{famError}</p>}
+          {famError && <p className="text-sm text-red-700">{famError}</p>}
           <button
             type="button"
             onClick={() => void addFamily()}
             disabled={!isPersonComplete(famPerson)}
-            className="rounded-xl bg-accent-gold px-3 py-2.5 font-semibold text-[#1a1430] disabled:opacity-50"
+            className="rounded-xl bg-cta px-3 py-2.5 font-semibold text-cta-ink disabled:opacity-50"
           >
             등록하기
           </button>
@@ -321,7 +322,7 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
         </div>
       )}
 
-      {sendError && <p className="text-sm text-red-300">{sendError}</p>}
+      {sendError && <p className="text-sm text-red-700">{sendError}</p>}
 
       {view.quota.ok ? (
         <div className="sticky bottom-0 flex flex-col gap-2 bg-background pb-3 pt-2">
@@ -341,7 +342,7 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
               type="button"
               onClick={() => void ask(question)}
               disabled={sending || !question.trim()}
-              className="rounded-xl bg-accent-gold px-6 py-3 text-base font-bold text-[#1a1430] disabled:opacity-50"
+              className="rounded-xl bg-cta px-6 py-3 text-base font-bold text-cta-ink disabled:opacity-50"
             >
               물어보기
             </button>

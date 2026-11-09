@@ -302,7 +302,7 @@ export function CompatibilityFlow() {
             <button
               type="button"
               onClick={() => setInvitee(null)}
-              className="rounded-xl bg-accent-gold px-4 py-3 text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
+              className="rounded-xl bg-cta px-4 py-3 text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90"
             >
               내 궁합 새로 보기
             </button>

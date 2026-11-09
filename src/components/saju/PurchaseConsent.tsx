@@ -11,7 +11,7 @@ export function PurchaseConsent({ checked, onChange }: { checked: boolean; onCha
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]"
+        className="mt-0.5 h-4 w-4 shrink-0 accent-[#7a5a1f]"
       />
       <span>
         <strong className="text-foreground">(필수)</strong> 결제 즉시 제공되는 디지털 콘텐츠예요. 리포트를 열람하기 전에는 결제 후 7일 안에 환불할 수 있고,

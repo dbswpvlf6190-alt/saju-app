@@ -16,6 +16,7 @@ import {
   type GlobalLocale,
 } from "@/lib/global/dayMasters";
 import { GLOBAL_MESSAGES } from "@/lib/global/messages";
+import { Icon } from "@/components/ui/Icon";
 
 const WUXING_ORDER: WuXing[] = ["목", "화", "토", "금", "수"];
 const MIN_LOADING_MS = 1200;
@@ -175,12 +176,12 @@ export function GlobalSajuFlow({ locale }: { locale: GlobalLocale }) {
             </div>
           </fieldset>
 
-          {error && <p className="text-center text-sm text-red-300">{error}</p>}
+          {error && <p className="text-center text-sm text-red-700">{error}</p>}
 
           <button
             type="submit"
             disabled={submitting}
-            className="min-h-12 rounded-xl bg-accent-gold px-4 py-3 text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="min-h-12 rounded-xl bg-cta px-4 py-3 text-base font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {submitting ? t.loading : t.submit}
           </button>
@@ -330,7 +331,7 @@ function LaunchWaitlist({ locale }: { locale: GlobalLocale }) {
 
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-accent-gold/50 bg-accent-gold/10 p-4">
-      <h3 className="text-center text-sm font-semibold text-accent-gold-soft">🔒 {t.lockedTitle}</h3>
+      <h3 className="text-center text-sm font-semibold text-accent-gold-soft"><Icon name="lock" /> {t.lockedTitle}</h3>
       <ul className="grid grid-cols-2 gap-2">
         {t.lockedItems.map((item) => (
           <li key={item} className="rounded-xl bg-background-card/70 px-3 py-2 text-center text-xs text-foreground">
@@ -361,12 +362,12 @@ function LaunchWaitlist({ locale }: { locale: GlobalLocale }) {
               </Link>
             </span>
           </label>
-          {error && <p className="text-center text-xs text-red-300">{error}</p>}
+          {error && <p className="text-center text-xs text-red-700">{error}</p>}
           <button
             type="button"
             onClick={() => void submit()}
             disabled={status === "saving"}
-            className="min-h-12 rounded-xl bg-accent-gold px-4 py-3 text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="min-h-12 rounded-xl bg-cta px-4 py-3 text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {status === "saving" ? t.saving : t.notifyButton}
           </button>

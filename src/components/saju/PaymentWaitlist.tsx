@@ -50,7 +50,7 @@ export function PaymentWaitlist({ productType, title }: { productType: ProductTy
   if (status === "done") {
     return (
       <div className="flex flex-col gap-1 rounded-2xl border border-accent-gold/50 bg-accent-gold/10 p-4 text-center">
-        <strong className="text-sm text-accent-gold-soft">알림 신청 완료 🔔</strong>
+        <strong className="text-sm text-accent-gold-soft">알림 신청 완료</strong>
         <p className="text-xs text-foreground-muted">결제가 열리면 {email.trim()}로 가장 먼저 알려드릴게요.</p>
       </div>
     );
@@ -83,14 +83,14 @@ export function PaymentWaitlist({ productType, title }: { productType: ProductTy
           </Link>
         </span>
       </label>
-      {error && <p className="text-center text-xs text-red-300">{error}</p>}
+      {error && <p className="text-center text-xs text-red-700">{error}</p>}
       <button
         type="button"
         onClick={() => void submit()}
         disabled={status === "saving"}
-        className="min-h-12 rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="min-h-12 rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {status === "saving" ? "신청 중..." : "🔔 결제 열리면 알림 받기"}
+        {status === "saving" ? "신청 중..." : "결제 열리면 알림 받기"}
       </button>
     </div>
   );

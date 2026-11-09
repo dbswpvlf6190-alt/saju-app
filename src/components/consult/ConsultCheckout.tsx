@@ -14,7 +14,9 @@ import {
 } from "@/components/saju/PersonBirthFields";
 import { ConsultConsent } from "./ConsultConsent";
 
-const ORDER: ConsultProductType[] = ["newyear_plus", "premium_bundle", "consult_5"];
+// 토스 v16과 같은 순서: 가장 큰 상품을 먼저 보여 주고(가격 기준점), 가운데 상품을 추천으로 고른 상태에서 시작한다.
+const ORDER: ConsultProductType[] = ["premium_bundle", "newyear_plus", "consult_5"];
+const RECOMMENDED: ConsultProductType = "newyear_plus";
 
 const PLAN_POINTS: Record<ConsultProductType, string[]> = {
   consult_5: ["궁금한 것 5가지를 내 사주로 바로 물어보기", "1년 안에 나눠서 써도 돼요"],
@@ -32,7 +34,7 @@ type Status = "idle" | "processing" | "confirming" | "error";
  * 모바일 결제창이 리디렉션으로 돌아오면(?paymentId=) 결제 확인부터 이어서 한다. */
 export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultProductType }) {
   const router = useRouter();
-  const [product, setProduct] = useState<ConsultProductType>(initialProduct ?? "newyear_plus");
+  const [product, setProduct] = useState<ConsultProductType>(initialProduct ?? RECOMMENDED);
   const [forGift, setForGift] = useState(false);
   const [person, setPerson] = useState<PersonFormValues>(DEFAULT_PERSON_VALUES);
   const [giftFrom, setGiftFrom] = useState("");
@@ -161,7 +163,14 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
               }`}
             >
               <span className="flex items-baseline justify-between gap-2">
-                <span className="text-base font-semibold text-foreground">{p.name}</span>
+                <span className="text-base font-semibold text-foreground">
+                  {key === RECOMMENDED && (
+                    <span className="mr-1.5 inline-block rounded-full bg-cta px-2 py-0.5 align-middle text-[11px] font-bold tracking-wide text-cta-ink">
+                      추천
+                    </span>
+                  )}
+                  {p.name}
+                </span>
                 <span className="shrink-0 text-lg font-bold text-accent-gold-soft">{p.amount.toLocaleString()}원</span>
               </span>
               <ul className="flex flex-col gap-0.5 text-sm leading-relaxed text-foreground-muted">
@@ -253,14 +262,14 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
 
       <ConsultConsent checked={agreed} onChange={setAgreed} />
 
-      {errorMessage && <p className="text-sm text-red-300">{errorMessage}</p>}
+      {errorMessage && <p className="text-sm text-red-700">{errorMessage}</p>}
       {PAYMENTS_PAUSED && <p className="text-sm text-foreground-muted">지금은 결제를 잠시 멈췄어요. 곧 다시 열게요.</p>}
 
       <button
         type="button"
         onClick={() => void handlePurchase()}
         disabled={!canPay}
-        className="rounded-2xl bg-accent-gold px-4 py-4 text-center text-lg font-bold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="rounded-2xl bg-cta px-4 py-4 text-center text-lg font-bold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing" ? "처리 중..." : `${plan.amount.toLocaleString()}원 결제하고 상담 시작`}
       </button>

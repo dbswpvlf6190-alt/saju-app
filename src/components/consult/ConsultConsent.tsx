@@ -11,7 +11,7 @@ export function ConsultConsent({ checked, onChange }: { checked: boolean; onChan
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-5 w-5 shrink-0 accent-[#d4af37]"
+        className="mt-1 h-5 w-5 shrink-0 accent-[#7a5a1f]"
       />
       <span>
         <strong className="text-foreground">(필수)</strong> 결제 즉시 제공이 시작되는 디지털 콘텐츠예요.{" "}

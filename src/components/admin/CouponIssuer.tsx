@@ -69,7 +69,7 @@ export function CouponIssuer() {
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-300">{error}</p>}
+      {error && <p className="text-sm text-red-700">{error}</p>}
 
       {issuedCodes && issuedCodes.length > 0 && (
         <div className="flex flex-col gap-2">

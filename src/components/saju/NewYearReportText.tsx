@@ -8,7 +8,7 @@ export function NewYearReportText({ text }: { text: string }) {
       {blocks.map((b, i) => {
         if (b.kind === "heading") {
           return (
-            <h4 key={i} className="mt-3 text-sm font-semibold text-[#e8a37f] first:mt-0">
+            <h4 key={i} className="mt-3 text-sm font-semibold text-accent-gold-soft first:mt-0">
               {b.text}
             </h4>
           );
@@ -16,7 +16,7 @@ export function NewYearReportText({ text }: { text: string }) {
         if (b.kind === "month") {
           return (
             <p key={i} className="flex gap-3 text-sm leading-relaxed text-foreground">
-              <span className="w-9 shrink-0 font-medium text-[#e8a37f]">{b.month}월</span>
+              <span className="w-9 shrink-0 font-medium text-accent-gold-soft">{b.month}월</span>
               <span>{b.text}</span>
             </p>
           );

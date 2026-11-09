@@ -88,7 +88,7 @@ export function AdminPreviewTool() {
         </button>
       </div>
 
-      {errorMessage && <p className="text-sm text-red-300">{errorMessage}</p>}
+      {errorMessage && <p className="text-sm text-red-700">{errorMessage}</p>}
 
       {text && (
         <div className="whitespace-pre-line rounded-2xl border border-border-subtle bg-background-card/70 p-4 text-sm leading-relaxed text-foreground">

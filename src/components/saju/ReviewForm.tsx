@@ -113,7 +113,7 @@ export function ReviewForm({ paymentId }: { paymentId: string }) {
           />
 
           {errorMessage && (
-            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
               {errorMessage}
             </p>
           )}
@@ -121,7 +121,7 @@ export function ReviewForm({ paymentId }: { paymentId: string }) {
           <button
             type="submit"
             disabled={status === "submitting"}
-            className="rounded-xl bg-accent-gold px-4 py-2.5 text-center text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="rounded-xl bg-cta px-4 py-2.5 text-center text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {status === "submitting" ? "등록 중..." : "후기 남기기"}
           </button>

@@ -37,7 +37,7 @@ export function ExamLanding({
         {cheerFrom !== null && (
           <p className="w-full rounded-2xl border border-sky-300/40 bg-sky-300/10 px-4 py-3 text-left text-sm leading-relaxed text-foreground">
             📚{" "}
-            <strong className="text-sky-200">
+            <strong className="text-sky-800">
               {cheerFrom ? `${cheerFrom}님이` : "친구가"} 보낸 {season.noun} 응원이 도착했어요.
             </strong>{" "}
             30초면 내 합격운 흐름을 볼 수 있어요.
@@ -51,7 +51,7 @@ export function ExamLanding({
                 key={s.event.label}
                 className="inline-flex items-baseline gap-2 rounded-full border border-sky-300/50 bg-sky-300/10 px-3.5 py-1.5"
               >
-                <strong className="font-serif text-base tabular-nums text-sky-200">
+                <strong className="font-serif text-base tabular-nums text-sky-800">
                   {s.event.label} {s.kind === "today" ? "D-DAY" : `D-${s.daysLeft}`}
                 </strong>
                 <span className="text-xs text-foreground-muted">
@@ -77,7 +77,7 @@ export function ExamLanding({
         <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
           <a
             href="#saju-form"
-            className="rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430]"
+            className="rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink"
           >
             📚 내 합격운 흐름 확인하기
           </a>
@@ -85,7 +85,7 @@ export function ExamLanding({
             href="/"
             className="rounded-xl border border-border-subtle px-4 py-2.5 text-center text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
           >
-            🔮 정식 사주풀이로 바로 가기
+            정식 사주풀이로 바로 가기 →
           </Link>
         </div>
         {season.audienceNote && <p className="text-xs text-foreground-muted">{season.audienceNote}</p>}

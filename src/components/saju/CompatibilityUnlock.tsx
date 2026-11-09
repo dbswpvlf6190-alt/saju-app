@@ -8,6 +8,7 @@ import { PaymentWaitlist } from "./PaymentWaitlist";
 import { trackEvent } from "@/lib/analytics/track";
 import { ReviewForm } from "./ReviewForm";
 import { PurchaseConsent } from "./PurchaseConsent";
+import { Icon } from "@/components/ui/Icon";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -203,7 +204,7 @@ export function CompatibilityUnlock({
 
         {missingSections.length > 0 && (
           <>
-            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
               {errorMessage ?? "일부 항목을 불러오지 못했어요."}
             </p>
             <button
@@ -232,7 +233,7 @@ export function CompatibilityUnlock({
         >
           <div className="flex items-center justify-between">
             <h4 className="font-medium text-foreground">{section.title}</h4>
-            <span className="text-xs text-accent-gold-soft">🔒 잠금</span>
+            <span className="text-xs text-accent-gold-soft"><Icon name="lock" /> 잠금</span>
           </div>
           <p className="mt-2 text-sm text-foreground-muted">{section.teaser}</p>
           <p className="mt-3 select-none text-sm leading-relaxed text-foreground-muted/40 blur-[3px]">
@@ -312,7 +313,7 @@ export function CompatibilityUnlock({
       </div>
 
       {errorMessage && (
-        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
           {errorMessage}
         </p>
       )}
@@ -326,7 +327,7 @@ export function CompatibilityUnlock({
           void handlePurchase();
         }}
         disabled={status === "processing" || !agreed}
-        className="mt-1 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-1 rounded-xl bg-cta px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing"
           ? "처리 중..."

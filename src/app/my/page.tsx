@@ -25,7 +25,7 @@ export default async function MyPage() {
         </p>
         <a
           href="/api/auth/kakao/start"
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#fee500] px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#fee500] px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90"
         >
           카카오로 로그인
         </a>

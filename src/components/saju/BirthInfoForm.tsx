@@ -260,7 +260,7 @@ export function BirthInfoForm({
       </div>
 
       {errorMessage && (
-        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
           {errorMessage}
         </p>
       )}
@@ -268,7 +268,7 @@ export function BirthInfoForm({
       <button
         type="submit"
         disabled={submitting || !canSubmit}
-        className="mt-2 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-2 rounded-xl bg-cta px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {submitting ? "사주를 풀이하는 중..." : canSubmit ? "무료로 사주 보기" : dateComplete ? "성별을 선택해주세요" : "생년월일시를 선택해주세요"}
       </button>

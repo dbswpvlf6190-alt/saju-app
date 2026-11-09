@@ -264,6 +264,7 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
             ))}
           </select>
           <PersonBirthFields idPrefix="fam" title="가족 생년월일" nameOptionalLabel="이름 (선택)" value={famPerson} onChange={setFamPerson} />
+          <p className="text-xs text-foreground-muted">가족 본인이 동의한 경우에만 등록해 주세요.</p>
           {famError && <p className="text-sm text-red-300">{famError}</p>}
           <button
             type="button"
@@ -331,6 +332,7 @@ export function ConsultChat({ passId, token, justPaid }: { passId: string; token
             placeholder="궁금한 것을 편하게 적어 주세요"
             className="w-full resize-none rounded-xl border border-border-subtle bg-background-elevated px-3.5 py-3 text-base text-foreground outline-none focus:border-accent-gold"
           />
+          <p className="text-xs text-foreground-muted">병명·계좌번호 같은 민감한 정보는 적지 말아 주세요.</p>
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs text-foreground-muted">
               {question.length}/{MAX_QUESTION_CHARS}

@@ -18,7 +18,7 @@ export const CONSULT_INFO: Record<ConsultProduct, { name: string; points: string
   consultNy: {
     name: "2027 신년운세 + AI 상담 15회",
     points: ["열두 달 신년운세 리포트(좋은 날·조심할 달)", "궁금한 것 15번 물어보기 · 1년 안에 나눠서"],
-    badge: "가장 많이 골라요",
+    badge: "사주랩 추천",
   },
   consultBundle: {
     name: "평생·신년운세 + 가족 2명 + 30일 상담",

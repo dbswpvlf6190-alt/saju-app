@@ -186,6 +186,7 @@ export function ConsultScreen({
       {view.quota.ok ? (
         <div className="consult-input">
           <textarea value={question} rows={3} placeholder="궁금한 것을 편하게 적어 주세요" onChange={(e) => setQuestion(e.target.value.slice(0, MAX_CHARS))} />
+          <p className="muted" style={{ fontSize: 12 }}>병명·계좌번호 같은 민감한 정보는 적지 말아 주세요.</p>
           <div className="row-between">
             <span className="muted" style={{ fontSize: 12 }}>
               {question.length}/{MAX_CHARS}
@@ -223,6 +224,7 @@ function FamilyForm({ onSubmit }: { onSubmit: (rel: string, input: SajuInput, na
   return (
     <section className="card">
       <h2>가족 등록</h2>
+      <p className="muted" style={{ fontSize: 12 }}>가족 본인이 동의한 경우에만 등록해 주세요.</p>
       <select value={rel} onChange={(e) => setRel(e.target.value)} style={{ width: "100%", marginBottom: 10 }}>
         {RELS.map((r) => (
           <option key={r}>{r}</option>

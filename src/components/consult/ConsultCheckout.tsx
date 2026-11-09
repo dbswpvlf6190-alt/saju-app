@@ -18,7 +18,7 @@ const ORDER: ConsultProductType[] = ["newyear_plus", "premium_bundle", "consult_
 
 const PLAN_POINTS: Record<ConsultProductType, string[]> = {
   consult_5: ["궁금한 것 5가지를 내 사주로 바로 물어보기", "1년 안에 나눠서 써도 돼요"],
-  newyear_plus: ["2027 신년운세 리포트(달별 흐름·조심할 시기)", "AI 상담 15회 · 1년 안에 나눠서", "가장 많이 고르는 구성"],
+  newyear_plus: ["2027 신년운세 리포트(달별 흐름·조심할 시기)", "AI 상담 15회 · 1년 안에 나눠서", "신년운세와 상담을 함께 쓰는 구성"],
   premium_bundle: [
     "평생 사용설명서 6장 + 2027 신년운세",
     "가족 2명까지 함께 상담(배우자·자녀 등)",

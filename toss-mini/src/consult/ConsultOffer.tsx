@@ -3,6 +3,7 @@ import { Analytics } from "@apps-in-toss/web-framework";
 import type { SajuInput } from "@saju/types";
 import { CONSULT_PRODUCTS, buyProduct, iapAvailable, type ConsultProduct, type Purchase } from "../iap";
 import { CONSULT_INFO, CONSULT_PRICE, won } from "./api";
+import { Icon } from "../Icon";
 export { consultAvailable } from "./api";
 
 function track(name: string, params: Record<string, string | number | boolean> = {}) {
@@ -87,9 +88,12 @@ export function ConsultOffer({
         <h2>{info.name}</h2>
         <p className="consult-price">{won(price)}</p>
         <ul className="consult-checks">
-          <li>✓ 한 번만 결제해요 · 자동 결제 없어요</li>
-          <li>✓ 결제하면 바로 상담방이 열려요</li>
-          <li>✓ {storeLabel()}</li>
+          <li className="lockline">
+            <Icon name="lock" /> 안전한 앱 결제 · 한 번만
+          </li>
+          <li><b className="tick">✓</b> 한 번만 결제해요 · 자동 결제 없어요</li>
+          <li><b className="tick">✓</b> 결제하면 바로 상담방이 열려요</li>
+          <li><b className="tick">✓</b> {storeLabel()}</li>
         </ul>
         <label className="consult-agree">
           <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
@@ -133,7 +137,7 @@ export function ConsultOffer({
       <div className="consult-sample">
         <p className="q">“내년에 가게를 넓혀도 될까요?”</p>
         <p className="a">늦봄(5~6월)에 사람과 기회가 함께 들어오는 흐름이 보여요. 다만 초겨울엔 돈이 나가는 기운이 겹쳐…</p>
-        <span>실제 답변 예시</span>
+        <span>답변 예시</span>
       </div>
       <div className="consult-options">
         {products.map((p) => (

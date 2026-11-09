@@ -35,6 +35,8 @@ import { ConsultOffer, consultAvailable } from "./consult/ConsultOffer";
 import { ConsultScreen } from "./consult/ConsultScreen";
 import { CONSULT_PRICE } from "./consult/api";
 import "./consult/consult.css";
+import "./theme.css";
+import { Icon } from "./Icon";
 
 // 토스 미니앱용 사주랩(무료 버전). 사이트와 같은 계산·문구를 쓰고, 사이트로 내보내는 링크는 넣지 않는다
 // (앱인토스 정책: 외부 링크·자사 서비스 이동 유도 금지, SSR 금지). 수익은 인앱 광고(배너)로 — 광고 그룹 ID는
@@ -124,6 +126,18 @@ function savedResult(): { form: Form; result: SajuResult } | null {
   } catch {
     return null;
   }
+}
+
+function fromInput(i: SajuInput): Form {
+  return {
+    calendarType: i.calendarType,
+    gender: i.gender,
+    year: String(i.year),
+    month: String(i.month),
+    day: String(i.day),
+    hour: i.hour === undefined ? "" : String(i.hour),
+    unknownTime: i.hour === undefined,
+  };
 }
 
 function toInput(f: Form): SajuInput {
@@ -296,8 +310,20 @@ export default function App() {
         pass={consultPass}
         onBack={() => window.history.back()}
         onOpenReport={(kind) => {
-          if (kind === "ny" && nyPurchase) go("newyear");
-          else if (kind === "pr" && purchase) go("manual");
+          const product = kind === "ny" ? "newYear" : "manual";
+          if (kind === "ny" ? nyPurchase : purchase) {
+            go(kind === "ny" ? "newyear" : "manual");
+            return true;
+          }
+          // 다른 생일을 조회한 뒤라면 상담권을 산 생일로 돌아가 연다(v16).
+          const owner = consultPass.input;
+          if (!owner || !savedPurchaseFor(owner, product)) return false;
+          const next = fromInput(owner);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+          setForm(next);
+          setResult(calculateSaju(owner));
+          go(kind === "ny" ? "newyear" : "manual");
+          return true;
         }}
       />
     );
@@ -588,7 +614,7 @@ function TodayScreen({
 
       {onOpenConsult && (
         <button type="button" className="cta" onClick={onOpenConsult}>
-          💬 내 상담방 열기
+          <Icon name="chat" /> 내 상담방 열기
         </button>
       )}
 
@@ -1348,7 +1374,7 @@ function ResultScreen({
       {/* v13: 첫 화면에서 "${NY_YEAR}년 내 운세"를 약속했으니 결과도 신년운세 카드부터(앱인토스 UX 원칙 ⑤: 소개한 내용이 결과에 보여야 함) */}
       {hasConsult && (
         <button type="button" className="cta" onClick={onOpenConsult}>
-          💬 내 상담방 열기
+          <Icon name="chat" /> 내 상담방 열기
         </button>
       )}
 

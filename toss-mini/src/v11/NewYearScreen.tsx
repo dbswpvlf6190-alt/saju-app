@@ -6,6 +6,7 @@ import { groupNewYearBlocks, parseNewYearText } from "@newyear/format";
 import { loadNewYear, type Purchase } from "../iap";
 import { NY_YEAR, nyTrack } from "./ny";
 import "./v11.css";
+import { Icon } from "../Icon";
 
 // 신년운세를 산 사람이 보는 화면(2026-10-26).
 // 결제 직후 AI 글은 20~45초 걸리므로, 기다리는 동안 빈 화면이 되지 않게 **달별 카드는 기기에서 바로 계산해 즉시 보여 준다**
@@ -93,7 +94,7 @@ export function NewYearScreen({
         )}
         {state === "done" && (
           <>
-            <span>✅ 총평이 준비됐어요.</span>
+            <span><Icon name="check" /> 총평이 준비됐어요.</span>
             <button type="button" className="ny-link" onClick={() => aiRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
               총평 보러 가기 ↓
             </button>

@@ -3,6 +3,7 @@ import { Analytics } from "@apps-in-toss/web-framework";
 import type { SajuInput } from "@saju/types";
 import type { ConsultPassRef } from "../iap";
 import { addFamilyMember, askQuestion, fetchPass, splitFollowUps, type PassView } from "./api";
+import { Icon } from "../Icon";
 
 const MAX_CHARS = 300;
 const STARTERS = [
@@ -29,7 +30,8 @@ export function ConsultScreen({
 }: {
   pass: ConsultPassRef;
   onBack: () => void;
-  onOpenReport?: (kind: "ny" | "pr") => void;
+  /** 열었으면 true. 이 기기에 리포트가 없으면 false → 안내 문구를 보인다. */
+  onOpenReport?: (kind: "ny" | "pr") => boolean;
 }) {
   const [view, setView] = useState<PassView | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -38,6 +40,7 @@ export function ConsultScreen({
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [reportMissing, setReportMissing] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const tmpSeq = useRef(0);
 
@@ -116,12 +119,13 @@ export function ConsultScreen({
       {view.reports.length > 0 && onOpenReport && (
         <div className="consult-reports">
           {view.reports.map((r) => (
-            <button key={r.kind} type="button" className="ghost" onClick={() => onOpenReport(r.kind)}>
-              📜 {r.title} 보기
+            <button key={r.kind} type="button" className="ghost" onClick={() => setReportMissing(!onOpenReport(r.kind))}>
+              <Icon name="book" /> {r.title} 보기
             </button>
           ))}
         </div>
       )}
+      {reportMissing && <p className="muted" style={{ fontSize: 14, textAlign: "center" }}>리포트는 결제한 기기에서 열 수 있어요. 결제한 폰에서 다시 열어 주세요.</p>}
 
       {(view.familyMax > 0 || view.family.length > 0) && (
         <div className="consult-tabs">

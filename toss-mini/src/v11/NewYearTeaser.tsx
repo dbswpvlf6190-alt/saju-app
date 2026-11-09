@@ -3,6 +3,7 @@ import type { SajuResult } from "@saju/types";
 import { buildNewYearHook, formatDay, monthList, perDayLabel } from "@saju/newYearHook";
 import { NY_PRICE_KRW, NY_PRICE_LABEL, NY_YEAR, nyTrack, yearWord, type TeaserVariant } from "./ny";
 import "./v11.css";
+import { Icon } from "../Icon";
 
 // v11 결과 화면 맨 위 카드("나의 2027년 미리보기").
 // 목표: 결과를 본 사람이 이 카드에서 "내 이야기다, 열어 보고 싶다"고 느끼게 한다(구매 클릭 0.3% → 1%↑).
@@ -47,7 +48,7 @@ export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen,
 
   return (
     <section className="card ny-card" aria-label={`${year}년 신년운세 미리보기`}>
-      <div className="ny-eyebrow">🎍 {year}년 {hook.ganzhiKor}년 · 나의 신년운세</div>
+      <div className="ny-eyebrow"><Icon name="star" /> {year}년 {hook.ganzhiKor}년 · 나의 신년운세</div>
       <h2 className="ny-head">
         {yearWord(year)} {year}년은
         <br />
@@ -70,15 +71,15 @@ export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen,
               Array.from({ length: hook.lockedInTop }, (_, i) => (
                 <div key={i} className="ny-day locked">
                   <small>열면 보여요</small>
-                  <b>🔒</b>
+                  <b><Icon name="lock" /></b>
                 </div>
               ))}
           </div>
         )}
-        <p className="ny-tip">💡 {top.tip}</p>
+        <p className="ny-tip"><Icon name="bulb" /> <span>{top.tip}</span></p>
         {!purchased && (
           <p className="ny-reveal-note">
-            🔒 {top.month}월의 재물·가족 이야기와 나머지 날짜는 열두 달 풀이에서 알려드려요
+            <Icon name="lock" /> {top.month}월의 재물·가족 이야기와 나머지 날짜는 열두 달 풀이에서 알려드려요
           </p>
         )}
       </div>
@@ -101,7 +102,7 @@ export function NewYearTeaser({ result, variant, purchased, busy, error, onOpen,
         </p>
         {hook.moneyMonths.length > 0 && (
           <p className="ny-money">
-            💰 재물이 들어오는 달은 <b>{monthList(hook.moneyMonths)}</b>이에요
+            <Icon name="coin" /> 재물이 들어오는 달은 <b>{monthList(hook.moneyMonths)}</b>이에요
           </p>
         )}
       </div>
@@ -154,7 +155,7 @@ export function NewYearMini({ result, purchased, onGo }: { result: SajuResult; p
   }, []);
   return (
     <section className="card ny-mini" aria-label={`${hook.year}년 신년운세`}>
-      <div className="ny-eyebrow">🎍 {hook.year}년 신년운세</div>
+      <div className="ny-eyebrow"><Icon name="star" /> {hook.year}년 신년운세</div>
       <p className="ny-mini-line">
         {yearWord(hook.year)}은 <b>{hook.label}</b>로 봐요.
         <br />

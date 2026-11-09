@@ -12,7 +12,8 @@ export const IAP_SKU = import.meta.env.VITE_IAP_SKU as string | undefined;
 // 묶음 리포트(신년운세·사용설명서)는 지급 응답의 토큰으로 기존 화면에서 연다.
 export type Product = "manual" | "newYear" | "newYearFirst" | "section" | ConsultProduct;
 export type ConsultProduct = "consult5" | "consultNy" | "consultBundle";
-export const CONSULT_PRODUCTS: ConsultProduct[] = ["consultNy", "consultBundle", "consult5"];
+// 화면 순서(11/9 사장님): 비싼 묶음을 먼저 보여 주고, 가운데 신년운세+상담 15회를 추천·기본 선택으로 둔다.
+export const CONSULT_PRODUCTS: ConsultProduct[] = ["consultBundle", "consultNy", "consult5"];
 export const IAP_SKU_NEWYEAR = import.meta.env.VITE_IAP_SKU_NEWYEAR as string | undefined;
 const IAP_SKU_NEWYEAR_FIRST = import.meta.env.VITE_IAP_SKU_NEWYEAR_FIRST as string | undefined;
 const IAP_SKU_SECTION = import.meta.env.VITE_IAP_SKU_SECTION as string | undefined;
@@ -74,6 +75,8 @@ export interface ConsultPassRef {
   k: string;
   product: ConsultProduct;
   savedAt: string;
+  /** 산 사람의 생일(v16). 다른 생일을 조회한 뒤에도 상담방의 묶음 리포트를 이 생일로 연다. */
+  input?: SajuInput;
 }
 export function savedConsultPasses(): ConsultPassRef[] {
   try {
@@ -263,7 +266,7 @@ async function grant(orderId: string, input: SajuInput, product: Product = "manu
   const purchase: Purchase = { paymentId: data.paymentId, token: data.token };
   if (isConsultProduct(product)) {
     if (!data.consult) throw new Error("상담방을 만들지 못했어요. 잠시 후 앱을 다시 열면 이어져요.");
-    saveConsultPass({ passId: data.consult.passId, k: data.consult.k, product, savedAt: new Date().toISOString() });
+    saveConsultPass({ passId: data.consult.passId, k: data.consult.k, product, savedAt: new Date().toISOString(), input });
     // 묶음 리포트는 기존 신년운세·사용설명서 칸에 넣어, 결과 화면의 "열기" 버튼이 그대로 동작하게 한다.
     if (data.reports?.newYear) savePurchase(input, data.reports.newYear, "newYear");
     if (data.reports?.manual) savePurchase(input, data.reports.manual, "manual");

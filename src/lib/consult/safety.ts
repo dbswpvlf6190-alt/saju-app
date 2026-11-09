@@ -20,8 +20,16 @@ const BANNED_OUTPUT_PATTERNS = [
   /반드시\s*(돈|성공|이혼|결혼|합격)/, /100\s*%/, /로또\s*번호/, /(종목|코인)\s*(추천|사세요|매수)/,
 ];
 
+// "수명은 사주로 말씀드리지 않아요"처럼 거절하는 문장은 금지어가 들어 있어도 괜찮다. 전에는 이 문장까지 걸려
+// 다시 쓰기(비용 2배)와 문장 빼기가 일어났다(11/9 품질 점검 Q9).
+const REFUSAL = /(말씀드리지|다루지|답하지|알려\s*드리지|봐\s*드리지)\s*않/;
+
 export function findBannedOutput(text: string): string[] {
-  return BANNED_OUTPUT_PATTERNS.filter((re) => re.test(text)).map((re) => re.source);
+  const checked = text
+    .split(/(?<=[.!?요])\s+|\n+/)
+    .filter((s) => !REFUSAL.test(s))
+    .join(" ");
+  return BANNED_OUTPUT_PATTERNS.filter((re) => re.test(checked)).map((re) => re.source);
 }
 
 export const AI_NOTICE = "명리학 원리로 계산하고 AI가 정리한 풀이예요 · 참고용";

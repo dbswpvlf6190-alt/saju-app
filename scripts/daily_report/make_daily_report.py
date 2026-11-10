@@ -11,6 +11,17 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (BaseDocTemplate, Frame, KeepTogether, PageTemplate, Paragraph, Spacer, Table, TableStyle)
 
+
+def _desktop():
+    """윈도우가 아는 진짜 바탕 화면(레지스트리). OneDrive를 끄면 ~/OneDrive/바탕 화면이 더는 바탕 화면이 아니다(11/10 사장님: OneDrive 안 씀)."""
+    try:
+        import winreg
+        k = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders")
+        p, _ = winreg.QueryValueEx(k, "Desktop")
+        return os.path.expandvars(p)
+    except Exception:
+        return os.path.join(os.path.expanduser("~"), "Desktop")
+
 pdfmetrics.registerFont(TTFont("KR", r"C:\Windows\Fonts\malgun.ttf"))
 pdfmetrics.registerFont(TTFont("KRB", r"C:\Windows\Fonts\malgunbd.ttf"))
 
@@ -155,7 +166,7 @@ def build(d, out_path):
 if __name__ == "__main__":
     src = sys.argv[1]
     data = json.load(open(src, encoding="utf-8"))
-    out_dir = os.path.join(os.path.expanduser("~"), "OneDrive", "바탕 화면", "사주랩_보고서")
+    out_dir = os.path.join(_desktop(), "사주랩_보고서")
     os.makedirs(out_dir, exist_ok=True)
     out = os.path.join(out_dir, f"{data['date']}_일일보고서.pdf")
     build(data, out)

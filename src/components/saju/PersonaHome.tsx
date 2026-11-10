@@ -156,6 +156,18 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
             </div>
 
             <Link
+              href="/consult?product=newyear_plus&ref=home"
+              className="flex w-full items-center gap-3 rounded-2xl border border-accent-gold/50 bg-background-card px-4 py-3.5 text-left transition-colors hover:border-accent-gold"
+            >
+              <span className="text-2xl text-accent-gold-soft"><Icon name="chat" /></span>
+              <span className="flex flex-1 flex-col gap-0.5">
+                <span className="text-base font-semibold text-foreground">2027 신년운세 · AI 사주 상담</span>
+                <span className="text-xs text-foreground-muted">내 사주로 한 해 흐름을 보고, 궁금한 건 바로 물어보세요</span>
+              </span>
+              <span className="text-sm text-accent-gold-soft">→</span>
+            </Link>
+
+            <Link
               href="/compatibility"
               className="mt-1 text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
             >

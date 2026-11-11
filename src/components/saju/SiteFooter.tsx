@@ -5,6 +5,8 @@ import {
   PREMIUM_REPORT_NAME,
   PREMIUM_REPORT_PRICE_KRW,
   SECTION_UPGRADE_NAME,
+  NEW_YEAR_REPORT_NAME,
+  NEW_YEAR_REPORT_PRICE_KRW,
   SECTION_UPGRADE_PRICE_KRW,
   SINGLE_SECTION_NAME,
   SINGLE_SECTION_PRICE_KRW,
@@ -18,10 +20,14 @@ export function SiteFooter() {
         판매 상품: {PREMIUM_REPORT_NAME} · {PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원 /{" "}
         {COMPATIBILITY_REPORT_NAME} · {COMPATIBILITY_REPORT_PRICE_KRW.toLocaleString()}원 /{" "}
         {SINGLE_SECTION_NAME} · {SINGLE_SECTION_PRICE_KRW.toLocaleString()}원 /{" "}
-        {SECTION_UPGRADE_NAME} · {SECTION_UPGRADE_PRICE_KRW.toLocaleString()}원
+        {SECTION_UPGRADE_NAME} · {SECTION_UPGRADE_PRICE_KRW.toLocaleString()}원 /{" "}
+        {NEW_YEAR_REPORT_NAME} · {NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원
         (결제 즉시 제공되는 디지털 콘텐츠)
       </p>
-      <nav className="flex gap-4">
+      <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+        <Link href="/2027" className="underline underline-offset-4">
+          2027 띠별 운세
+        </Link>
         <Link href="/ilgan" className="underline underline-offset-4">
           일간별 성격
         </Link>

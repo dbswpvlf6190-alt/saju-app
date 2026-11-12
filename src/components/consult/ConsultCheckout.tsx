@@ -13,6 +13,19 @@ import {
   type PersonFormValues,
 } from "@/components/saju/PersonBirthFields";
 import { ConsultConsent } from "./ConsultConsent";
+import { useUserAgent } from "@/lib/hooks/useUserAgent";
+import {
+  clipForLog,
+  detectInAppBrowser,
+  friendlyPaymentError,
+  inAppHint,
+  isValidEmail,
+  isValidPhone,
+  needsFullContact,
+  normalizePhone,
+} from "@/lib/payment/checkoutEnv";
+import { parseNewYearReturn } from "@/lib/newYear/returnParams";
+import { clearConsultDraft, loadConsultDraft, saveConsultDraft } from "@/lib/consult/checkoutDraft";
 
 // 토스 v16과 같은 순서: 가장 큰 상품을 먼저 보여 주고(가격 기준점), 가운데 상품을 추천으로 고른 상태에서 시작한다.
 const ORDER: ConsultProductType[] = ["premium_bundle", "newyear_plus", "consult_5"];
@@ -46,6 +59,23 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const resumed = useRef(false);
+  const userAgent = useUserAgent();
+  // 이니시스 모바일 결제창은 이름만 필수다(checkoutEnv.ts). 휴대폰에서는 휴대폰·이메일 칸을 보여주지 않는다.
+  const fullContact = needsFullContact(userAgent);
+  const hint = inAppHint(detectInAppBrowser(userAgent));
+
+  /** 결제 실패·취소를 기록하고, 서버가 PortOne에 실제 상태를 물어 주문을 정리·실패 사유를 남기게 한다. */
+  function recordFailure(paymentId: string | null, where: string, code?: string | null, message?: string | null, pgCode?: string | null) {
+    const msg = clipForLog(message);
+    trackEvent("payment_fail", {
+      productType: product,
+      where,
+      ...(code && { code }),
+      ...(pgCode && { pgCode }),
+      ...(msg && { msg }),
+    });
+    if (paymentId) fetch(`/api/orders/${encodeURIComponent(paymentId)}/complete`, { method: "POST" }).catch(() => {});
+  }
 
   async function complete(paymentId: string) {
     setStatus("confirming");
@@ -53,6 +83,7 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
     const data = await res.json();
     if (!res.ok || !data.consultUrl) throw new Error(data.error ?? "결제 확인에 실패했어요. 잠시 후 새로고침해 주세요.");
     trackEvent("payment_success", { productType: data.productType ?? product });
+    clearConsultDraft();
     try {
       const saved = JSON.parse(localStorage.getItem("saju:consultPasses") ?? "[]") as string[];
       localStorage.setItem("saju:consultPasses", JSON.stringify([data.consultUrl, ...saved.filter((u) => u !== data.consultUrl)].slice(0, 10)));
@@ -65,20 +96,34 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
   // 모바일 리디렉션 결제에서 돌아온 경우
   useEffect(() => {
     if (resumed.current) return;
-    const params = new URLSearchParams(window.location.search);
-    const paymentId = params.get("paymentId");
-    if (!paymentId) return;
+    const ret = parseNewYearReturn(window.location.search);
+    if (!ret.paymentId && !ret.failed) return;
     resumed.current = true;
-    if (params.get("code")) {
-      // 결제창에서 취소하고 돌아온 경우: 돌아온 주소의 값으로 한 번만 안내한다.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (ret.failed) {
+      // 결제창에서 실패·취소하고 돌아온 경우: 넣었던 값을 되살려 버튼만 다시 누르면 되게 한다(동의는 다시 받는다).
+      const draft = loadConsultDraft();
+      /* eslint-disable react-hooks/set-state-in-effect -- 돌아온 주소·브라우저 저장소(외부 상태)를 처음 한 번 읽어 오는 것 */
+      if (draft) {
+        setProduct(draft.product);
+        setForGift(draft.forGift);
+        setPerson(draft.person);
+        setGiftFrom(draft.giftFrom);
+        setFullName(draft.fullName);
+        setPayMethod(draft.payMethod);
+      }
       setStatus("error");
-      setErrorMessage(params.get("message") ?? "결제가 취소되었어요.");
+      setErrorMessage(
+        friendlyPaymentError(ret.message) + (draft ? " 넣으신 내용은 그대로 두었어요. 동의에 체크하고 다시 눌러 주세요." : ""),
+      );
+      /* eslint-enable react-hooks/set-state-in-effect */
+      recordFailure(ret.paymentId, "return", ret.code, ret.message, ret.pgCode);
       return;
     }
-    complete(paymentId).catch((e) => {
+    complete(ret.paymentId!).catch((e) => {
+      const msg = e instanceof Error ? e.message : "결제 확인 중 오류가 발생했어요.";
+      recordFailure(null, "return_verify", null, msg);
       setStatus("error");
-      setErrorMessage(e instanceof Error ? e.message : "결제 확인 중 오류가 발생했어요.");
+      setErrorMessage(msg);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -92,13 +137,19 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
       setErrorMessage(m);
     };
     if (!storeId || !channelKey) return fail("결제 연동 준비중이에요.");
-    if (!fullName.trim()) return fail("결제하시는 분 이름을 넣어 주세요.");
-    if (!/^\S+@\S+\.\S+$/.test(email)) return fail("결제 확인 메일을 받을 이메일 주소를 넣어 주세요.");
-    if (!/^01[0-9]{8,9}$/.test(phoneNumber.replace(/-/g, ""))) return fail("휴대폰 번호를 '-' 없이 정확히 넣어 주세요. (예: 01012345678)");
+    const name = fullName.trim();
+    const phone = normalizePhone(phoneNumber);
+    const mail = email.trim();
+    if (!name) return fail("결제하시는 분 이름을 넣어 주세요.");
+    if (fullContact) {
+      if (!isValidPhone(phone)) return fail("휴대폰 번호를 다시 확인해 주세요. (예: 010 1234 5678)");
+      if (!isValidEmail(mail)) return fail("이메일 주소를 다시 확인해 주세요. (예: hong@naver.com)");
+    }
 
     trackEvent("checkout_start", { productType: product });
     setStatus("processing");
     setErrorMessage(null);
+    let paymentId: string | null = null;
     try {
       const orderRes = await fetch("/api/orders", {
         method: "POST",
@@ -113,6 +164,9 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
       });
       const order = await orderRes.json();
       if (!orderRes.ok) throw new Error(order.error ?? "주문을 만들지 못했어요.");
+      paymentId = order.paymentId as string;
+      // 모바일 결제창은 다른 페이지로 갔다가 돌아온다. 실패·취소로 돌아와도 다시 입력하지 않게 지금 값을 저장해 둔다.
+      saveConsultDraft({ product, forGift, person, giftFrom, fullName: name, payMethod });
 
       const { requestPayment } = await import("@portone/browser-sdk/v2");
       const response = await requestPayment({
@@ -124,14 +178,23 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
         currency: "KRW",
         payMethod,
         ...(payMethod === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
-        customer: { email, phoneNumber: phoneNumber.replace(/-/g, ""), fullName: fullName.trim() },
+        // 휴대폰·이메일은 PC에서만 필수다. 모바일에서 비어 있으면 보내지 않는다.
+        customer: {
+          fullName: name,
+          ...(isValidPhone(phone) && { phoneNumber: phone }),
+          ...(isValidEmail(mail) && { email: mail }),
+        },
         redirectUrl: `${window.location.origin}/consult?product=${product}`,
       });
-      if (!response || response.code) throw new Error(response?.message ?? "결제가 취소되었어요.");
+      if (!response || response.code) {
+        recordFailure(paymentId, "card", response?.code, response?.message, response?.pgCode);
+        return fail(friendlyPaymentError(response?.message));
+      }
       await complete(response.paymentId);
     } catch (e) {
-      fail(e instanceof Error ? e.message : "결제 중 오류가 발생했어요.");
-      trackEvent("payment_fail", { productType: product });
+      const msg = e instanceof Error ? e.message : "결제 중 오류가 발생했어요.";
+      recordFailure(paymentId, "card_error", null, msg);
+      fail(msg);
     }
   }
 
@@ -226,21 +289,22 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-foreground">결제하시는 분</span>
-        {[
-          { v: fullName, set: setFullName, ph: "이름", type: "text", ac: "name" },
-          { v: email, set: setEmail, ph: "이메일 (결제 확인용)", type: "email", ac: "email" },
-          { v: phoneNumber, set: setPhoneNumber, ph: "휴대폰 번호 (01012345678)", type: "tel", ac: "tel" },
-        ].map((f) => (
-          <input
-            key={f.ph}
-            type={f.type}
-            autoComplete={f.ac}
-            value={f.v}
-            onChange={(e) => f.set(e.target.value)}
-            placeholder={f.ph}
-            className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
-          />
-        ))}
+        <label className="flex flex-col gap-1 text-sm text-foreground-muted">
+          이름
+          <input type="text" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="홍길동" className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-base text-foreground outline-none focus:border-accent-gold" />
+        </label>
+        {fullContact && (
+          <>
+            <label className="flex flex-col gap-1 text-sm text-foreground-muted">
+              휴대폰 번호
+              <input type="tel" autoComplete="tel" inputMode="numeric" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="010 1234 5678" className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-base text-foreground outline-none focus:border-accent-gold" />
+            </label>
+            <label className="flex flex-col gap-1 text-sm text-foreground-muted">
+              이메일 (결제 영수증 받는 곳)
+              <input type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="hong@naver.com" className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-base text-foreground outline-none focus:border-accent-gold" />
+            </label>
+          </>
+        )}
         <div className="flex gap-2">
           {([
             ["CARD", "카드"],
@@ -262,7 +326,12 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
 
       <ConsultConsent checked={agreed} onChange={setAgreed} />
 
-      {errorMessage && <p className="text-sm text-red-700">{errorMessage}</p>}
+      {errorMessage && (
+        <div className="flex flex-col gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
+          <p className="text-sm text-red-700">{errorMessage}</p>
+          {hint && <p className="text-xs leading-relaxed text-foreground-muted">{hint}</p>}
+        </div>
+      )}
       {PAYMENTS_PAUSED && <p className="text-sm text-foreground-muted">지금은 결제를 잠시 멈췄어요. 곧 다시 열게요.</p>}
 
       <button

@@ -6,12 +6,14 @@ import { parseNewYearReturn } from "@/lib/newYear/returnParams";
 import { trackEvent } from "@/lib/analytics/track";
 import { NEW_YEAR_REPORT_NAME } from "@/lib/payment/config";
 import { NewYearReportText } from "./NewYearReportText";
+import { clipForLog, detectInAppBrowser, friendlyPaymentError, inAppHint } from "@/lib/payment/checkoutEnv";
+import { clearNewYearPending, loadNewYearPending } from "@/lib/newYear/pending";
 
 type State =
   | { step: "checking" }
   | { step: "writing" }
   | { step: "done"; text: string }
-  | { step: "failed"; message: string }
+  | { step: "failed"; message: string; canRetry: boolean; hint: string | null }
   | { step: "retry"; paymentId: string; message: string };
 
 /**
@@ -47,16 +49,32 @@ export function NewYearReturn() {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    const { paymentId, failed, message } = parseNewYearReturn(window.location.search);
+    const { paymentId, failed, message, code, pgCode } = parseNewYearReturn(window.location.search);
+    // 실패해도 생일을 다시 넣지 않고 바로 다시 결제할 수 있는지(결제 직전에 이 탭에 저장해 둔 결과가 있는지).
+    const canRetry = loadNewYearPending() !== null;
+    const hint = inAppHint(detectInAppBrowser(navigator.userAgent));
+
+    function recordFailure(where: string, msg?: string | null) {
+      const clipped = clipForLog(msg);
+      trackEvent("payment_fail", {
+        productType: "new_year_report",
+        where,
+        ...(code && { code }),
+        ...(pgCode && { pgCode }),
+        ...(clipped && { msg: clipped }),
+      });
+    }
 
     (async () => {
       if (failed) {
-        trackEvent("payment_fail", { productType: "new_year_report" });
-        setState({ step: "failed", message: message ?? "결제가 완료되지 않았어요." });
+        recordFailure("return", message);
+        // 서버가 PortOne에 실제 상태를 물어 주문을 정리하고 실패 사유를 남긴다(결과는 기다리지 않는다).
+        if (paymentId) fetch(`/api/orders/${encodeURIComponent(paymentId)}/complete`, { method: "POST" }).catch(() => {});
+        setState({ step: "failed", message: friendlyPaymentError(message), canRetry, hint });
         return;
       }
       if (!paymentId) {
-        setState({ step: "failed", message: "결제 정보를 찾지 못했어요." });
+        setState({ step: "failed", message: "결제 정보를 찾지 못했어요. 다시 결제해 주세요.", canRetry, hint });
         return;
       }
       try {
@@ -65,10 +83,12 @@ export function NewYearReturn() {
         if (!res.ok) throw new Error(data.error ?? "결제 확인에 실패했어요.");
         if (data.status !== "PAID") throw new Error("결제가 완료되지 않았어요.");
         trackEvent("payment_success", { productType: "new_year_report" });
+        clearNewYearPending();
         await load(paymentId);
       } catch (e) {
-        trackEvent("payment_fail", { productType: "new_year_report" });
-        setState({ step: "failed", message: e instanceof Error ? e.message : "결제 확인 중 오류가 발생했어요." });
+        const msg = e instanceof Error ? e.message : "결제 확인 중 오류가 발생했어요.";
+        recordFailure("return_verify", msg);
+        setState({ step: "failed", message: msg, canRetry, hint });
       }
     })();
   }, []);
@@ -119,13 +139,15 @@ export function NewYearReturn() {
 
       {state.step === "failed" && (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-border-subtle bg-background-card/70 px-5 py-6 text-center">
-          <p className="text-sm text-foreground">{state.message}</p>
+          <p className="text-base text-foreground">{state.message}</p>
+          {state.hint && <p className="text-sm leading-relaxed text-foreground-muted">{state.hint}</p>}
           <Link
-            href="/new-year"
-            className="rounded-xl border border-border-subtle px-4 py-2.5 text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
+            href={state.canRetry ? "/new-year?retry=1" : "/new-year"}
+            className="w-full rounded-xl bg-cta px-4 py-3 text-base font-semibold text-cta-ink transition-opacity hover:opacity-90"
           >
-            신년운세 처음으로
+            {state.canRetry ? "다시 결제하기" : "신년운세 처음으로"}
           </Link>
+          {state.canRetry && <p className="text-xs text-foreground-muted">생일은 다시 넣지 않아도 돼요.</p>}
         </div>
       )}
     </div>

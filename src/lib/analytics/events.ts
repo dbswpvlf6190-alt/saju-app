@@ -39,6 +39,9 @@ export const ANALYTICS_EVENT_NAMES = [
   "global_saju_complete",
   "global_waitlist_signup",
   "consult_ask",
+  // 결제 실패를 줄이기 위한 기록(2026-11-12): 결제 실패 후 '다시 결제하기'로 돌아온 화면, 서버가 PortOne에서 확인한 실패 사유
+  "checkout_retry_view",
+  "payment_fail_detail",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

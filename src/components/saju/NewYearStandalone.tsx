@@ -7,6 +7,7 @@ import { trackEvent } from "@/lib/analytics/track";
 import { rememberSource } from "@/lib/analytics/source";
 import { BirthInfoForm, type BirthInfoFormValues } from "./BirthInfoForm";
 import { NewYearUpsellCard } from "./NewYearUpsellCard";
+import { loadNewYearPending } from "@/lib/newYear/pending";
 
 /**
  * /new-year 단독 구매 흐름(2026-10-22): 생년월일 입력 → 내 일주 확인 → 신년운세 결제.
@@ -22,7 +23,19 @@ export function NewYearStandalone() {
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ref = new URLSearchParams(window.location.search).get("ref") ?? undefined;
+    const params = new URLSearchParams(window.location.search);
+    // 결제창에서 실패·취소하고 "다시 결제하기"로 온 경우: 결제 직전에 저장해 둔 결과를 되살려 생일 재입력 없이 바로 결제 카드로 간다.
+    if (params.get("retry") === "1") {
+      const pending = loadNewYearPending();
+      if (pending) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- 브라우저 저장소(외부 상태)를 처음 한 번 읽어 오는 것
+        setName(pending.name);
+        setResult(pending.result);
+        trackEvent("checkout_retry_view", { productType: "new_year_report" });
+        return;
+      }
+    }
+    const ref = params.get("ref") ?? undefined;
     rememberSource(ref);
     trackEvent("landing_view", { entry: "newYear", ...(ref && { ref }) });
   }, []);

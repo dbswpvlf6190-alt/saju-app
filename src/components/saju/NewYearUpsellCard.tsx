@@ -8,6 +8,18 @@ import { trackEvent } from "@/lib/analytics/track";
 import { PurchaseConsent } from "./PurchaseConsent";
 import { NewYearReportText } from "./NewYearReportText";
 import { Icon } from "@/components/ui/Icon";
+import { useUserAgent } from "@/lib/hooks/useUserAgent";
+import {
+  clipForLog,
+  detectInAppBrowser,
+  friendlyPaymentError,
+  inAppHint,
+  isValidEmail,
+  isValidPhone,
+  needsFullContact,
+  normalizePhone,
+} from "@/lib/payment/checkoutEnv";
+import { clearNewYearPending, saveNewYearPending } from "@/lib/newYear/pending";
 
 type Status = "teaser" | "processing" | "unlocked" | "error";
 
@@ -45,7 +57,12 @@ export function NewYearUpsellCard({
   const [fullName, setFullName] = useState(initialFullName);
   const [email, setEmail] = useState(initialEmail);
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber);
-  const needsContactInfo = !initialEmail || !initialPhoneNumber || !initialFullName.trim();
+  const userAgent = useUserAgent();
+  // 이니시스 모바일 결제창은 이름만 필수다(checkoutEnv.ts). 휴대폰에서는 휴대폰·이메일 칸을 아예 보여주지 않는다(11/12 첫 손님이 여기서 막힘).
+  const fullContact = needsFullContact(userAgent);
+  const inApp = detectInAppBrowser(userAgent);
+  const askName = !initialFullName.trim();
+  const askContact = fullContact && (!initialEmail || !initialPhoneNumber);
 
   async function fetchReport(paymentId: string) {
     const res = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
@@ -58,34 +75,45 @@ export function NewYearUpsellCard({
     throw new Error(data.error ?? "신년운세를 불러오지 못했습니다.");
   }
 
+  function fail(message: string) {
+    setStatus("error");
+    setErrorMessage(message);
+  }
+
+  /** 결제창 실패·취소를 기록하고, 서버가 PortOne에 실제 상태를 물어 주문을 정리하게 한다(실패 사유가 서버 기록에 남는다). */
+  function recordFailure(paymentId: string | null, where: string, code?: string, message?: string, pgCode?: string) {
+    const msg = clipForLog(message);
+    trackEvent("payment_fail", {
+      productType: "new_year_report",
+      where,
+      ...(code && { code }),
+      ...(pgCode && { pgCode }),
+      ...(msg && { msg }),
+    });
+    if (paymentId) {
+      fetch(`/api/orders/${encodeURIComponent(paymentId)}/complete`, { method: "POST" }).catch(() => {});
+    }
+  }
+
   async function handlePurchase() {
     if (!agreed) return;
     trackEvent("checkout_start", { productType: "new_year_report" });
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
-    if (!storeId || !channelKey) {
-      setStatus("error");
-      setErrorMessage("결제 연동 준비중이에요.");
-      return;
-    }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setStatus("error");
-      setErrorMessage("결제 확인 메일을 받을 이메일 주소를 입력해 주세요.");
-      return;
-    }
-    if (!/^01[0-9]{8,9}$/.test(phoneNumber.replace(/-/g, ""))) {
-      setStatus("error");
-      setErrorMessage("휴대폰 번호를 '-' 없이 정확히 입력해 주세요. (예: 01012345678)");
-      return;
-    }
-    if (!fullName.trim()) {
-      setStatus("error");
-      setErrorMessage("결제자 이름을 입력해 주세요.");
-      return;
+    if (!storeId || !channelKey) return fail("결제 연동 준비중이에요.");
+
+    const name = fullName.trim();
+    const phone = normalizePhone(phoneNumber);
+    const mail = email.trim();
+    if (!name) return fail("결제하시는 분 이름을 넣어 주세요.");
+    if (fullContact) {
+      if (!isValidPhone(phone)) return fail("휴대폰 번호를 다시 확인해 주세요. (예: 010 1234 5678)");
+      if (!isValidEmail(mail)) return fail("이메일 주소를 다시 확인해 주세요. (예: hong@naver.com)");
     }
 
     setStatus("processing");
     setErrorMessage(null);
+    let paymentId: string | null = null;
 
     try {
       const orderRes = await fetch("/api/orders", {
@@ -95,14 +123,14 @@ export function NewYearUpsellCard({
       });
       const order = await orderRes.json();
       if (!orderRes.ok) {
-        throw new Error(order.error ?? "주문 생성에 실패했습니다.");
+        throw new Error(order.error ?? "주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.");
       }
+      paymentId = order.paymentId as string;
 
-      // 참고: 기본 리포트 구매(PremiumUnlock)와 달리 이 업셀은 모바일 리디렉션 결제창 복귀를
-      // 지원하지 않는다 — SajuFlow의 복귀 로직이 "saju:pendingPurchase" 키 하나로 기본
-      // 리포트 재개만 처리하고, 이 카드가 뜨는 시점엔 그 키가 이미 지워져 있어 안전하게
-      // no-op으로 끝난다(잘못된 데이터를 보여주진 않지만, 리디렉션이 필요한 결제수단에서는
-      // 결제 후 자동으로 열리지 않을 수 있다).
+      // 모바일 결제창은 다른 페이지로 넘어갔다가 /new-year/return으로 돌아온다. 실패·취소로 돌아와도
+      // 생일을 다시 넣지 않게 지금 결과를 이 탭에 잠깐 저장해 둔다(pending.ts).
+      if (variant === "standalone") saveNewYearPending(result, name);
+
       const { requestPayment } = await import("@portone/browser-sdk/v2");
       const response = await requestPayment({
         storeId,
@@ -113,12 +141,18 @@ export function NewYearUpsellCard({
         currency: "KRW",
         payMethod,
         ...(payMethod === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
-        customer: { email, phoneNumber: phoneNumber.replace(/-/g, ""), fullName: fullName.trim() },
+        // 휴대폰·이메일은 PC에서만 필수다. 모바일에서 비어 있으면 아예 보내지 않는다(빈 값은 형식 오류가 날 수 있다).
+        customer: {
+          fullName: name,
+          ...(isValidPhone(phone) && { phoneNumber: phone }),
+          ...(isValidEmail(mail) && { email: mail }),
+        },
         redirectUrl: redirectPath ? `${window.location.origin}${redirectPath}` : window.location.href.split("?")[0],
       });
 
       if (!response || response.code) {
-        throw new Error(response?.message ?? "결제가 취소되었습니다.");
+        recordFailure(paymentId, "card", response?.code, response?.message, response?.pgCode);
+        return fail(friendlyPaymentError(response?.message));
       }
 
       const completeRes = await fetch(`/api/orders/${encodeURIComponent(response.paymentId)}/complete`, {
@@ -126,15 +160,16 @@ export function NewYearUpsellCard({
       });
       const completeData = await completeRes.json();
       if (!completeRes.ok) {
-        throw new Error(completeData.error ?? "결제 확인에 실패했습니다.");
+        throw new Error(completeData.error ?? "결제 확인에 실패했어요.");
       }
       trackEvent("payment_success", { productType: "new_year_report" });
+      clearNewYearPending();
 
       await fetchReport(response.paymentId);
     } catch (e) {
-      setStatus("error");
-      setErrorMessage(e instanceof Error ? e.message : "결제 중 오류가 발생했습니다.");
-      trackEvent("payment_fail", { productType: "new_year_report" });
+      const message = e instanceof Error ? e.message : "결제 중 오류가 발생했어요.";
+      recordFailure(paymentId, "card_error", undefined, message);
+      fail(message);
     }
   }
 
@@ -161,28 +196,43 @@ export function NewYearUpsellCard({
           : "지금 리포트에 이어서, 새해 흐름만 따로 더 자세히 — 월별 흐름과 조심할 달·기회의 달까지"}
       </span>
 
-      {needsContactInfo && (
-        <div className="flex flex-col gap-2 text-left">
-          <input
-            type="text" autoComplete="name" value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="결제자 이름"
-            className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#b8955a]"
-          />
-          <input
-            type="email" autoComplete="email" inputMode="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#b8955a]"
-          />
-          <input
-            type="tel" autoComplete="tel" inputMode="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="01012345678"
-            className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2 text-sm text-foreground outline-none focus:border-[#b8955a]"
-          />
+      {(askName || askContact) && (
+        <div className="flex flex-col gap-2.5 text-left">
+          {askName && (
+            <label className="flex flex-col gap-1 text-sm text-foreground-muted">
+              결제하시는 분 이름
+              <input
+                type="text" autoComplete="name" value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="홍길동"
+                className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2.5 text-base text-foreground outline-none focus:border-[#b8955a]"
+              />
+            </label>
+          )}
+          {askContact && (
+            <>
+              <label className="flex flex-col gap-1 text-sm text-foreground-muted">
+                휴대폰 번호
+                <input
+                  type="tel" autoComplete="tel" inputMode="numeric"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="010 1234 5678"
+                  className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2.5 text-base text-foreground outline-none focus:border-[#b8955a]"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm text-foreground-muted">
+                이메일 (결제 영수증 받는 곳)
+                <input
+                  type="email" autoComplete="email" inputMode="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="hong@naver.com"
+                  className="w-full rounded-lg border border-[#dccba6] bg-background-elevated px-3 py-2.5 text-base text-foreground outline-none focus:border-[#b8955a]"
+                />
+              </label>
+            </>
+          )}
         </div>
       )}
 
@@ -195,7 +245,7 @@ export function NewYearUpsellCard({
             key={value}
             type="button"
             onClick={() => setPayMethod(value)}
-            className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`min-w-24 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
               payMethod === value
                 ? "border-[#b8955a] bg-[#f3eee4] text-accent-gold-soft"
                 : "border-[#dccba6] text-foreground-muted"
@@ -206,7 +256,12 @@ export function NewYearUpsellCard({
         ))}
       </div>
 
-      {errorMessage && <p className="text-xs text-red-700">{errorMessage}</p>}
+      {errorMessage && (
+        <div className="flex flex-col gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-left">
+          <p className="text-sm text-red-700">{errorMessage}</p>
+          {inAppHint(inApp) && <p className="text-xs leading-relaxed text-foreground-muted">{inAppHint(inApp)}</p>}
+        </div>
+      )}
 
       <PurchaseConsent checked={agreed} onChange={setAgreed} />
 

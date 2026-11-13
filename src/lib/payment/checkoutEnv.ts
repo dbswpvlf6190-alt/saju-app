@@ -40,6 +40,15 @@ export function inAppHint(app: InAppBrowser): string | null {
 }
 
 /**
+ * 카카오페이 버튼을 보여줘도 되는가. PC 결제창에서 카카오페이를 고르면 이니시스가
+ * "[V104] [NO MPI SET] 미사용 설정 지불수단"으로 거절한다(11/13 사장님 PC 시험, 계약에 PC 카카오페이가 꺼져 있음).
+ * 휴대폰 결제창에서는 열린다(11/12 손님이 카카오페이 창까지 감). 이니시스에서 PC를 켜 주면 이 함수를 true로 바꾼다.
+ */
+export function kakaoPayAvailable(ua: string): boolean {
+  return !needsFullContact(ua);
+}
+
+/**
  * 결제 버튼을 누르기 '전'에 보여줄 안내. 11/12 네이버 앱 손님 3명이 모두 결제창에서 끝내지 못해(취소 1·창만 열고 이탈 2),
  * 실패 뒤에만 나오던 안내를 미리 보여준다. 앱 밖이면 null.
  */

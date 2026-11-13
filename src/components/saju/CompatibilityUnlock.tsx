@@ -6,6 +6,8 @@ import type { SajuInput } from "@/lib/saju/types";
 import { COMPATIBILITY_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { PaymentWaitlist } from "./PaymentWaitlist";
 import { trackEvent } from "@/lib/analytics/track";
+import { useUserAgent } from "@/lib/hooks/useUserAgent";
+import { kakaoPayAvailable } from "@/lib/payment/checkoutEnv";
 import { ReviewForm } from "./ReviewForm";
 import { PurchaseConsent } from "./PurchaseConsent";
 import { Icon } from "@/components/ui/Icon";
@@ -43,6 +45,10 @@ export function CompatibilityUnlock({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState(selfName);
   const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  const userAgent = useUserAgent();
+  // PC 결제창은 카카오페이가 꺼져 있어(kakaoPayAvailable) 카드로만 받는다.
+  const kakaoOk = kakaoPayAvailable(userAgent);
+  const method = kakaoOk ? payMethod : "CARD";
 
   const fetchReport = useCallback(async (paymentId: string) => {
     const reportRes = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
@@ -164,8 +170,8 @@ export function CompatibilityUnlock({
         orderName: order.orderName,
         totalAmount: order.amount,
         currency: "KRW",
-        payMethod,
-        ...(payMethod === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
+        payMethod: method,
+        ...(method === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
         customer: { email, phoneNumber: phoneNumber.replace(/-/g, ""), fullName: fullName.trim() },
         redirectUrl: window.location.href.split("?")[0],
       });
@@ -254,13 +260,13 @@ export function CompatibilityUnlock({
           {([
             ["CARD", "카드"],
             ["EASY_PAY", "카카오페이"],
-          ] as const).map(([value, label]) => (
+          ] as const).filter(([value]) => kakaoOk || value !== "EASY_PAY").map(([value, label]) => (
             <button
               key={value}
               type="button"
               onClick={() => setPayMethod(value)}
               className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
-                payMethod === value
+                method === value
                   ? "border-accent-gold bg-accent-gold/15 text-accent-gold-soft"
                   : "border-border-subtle text-foreground-muted"
               }`}

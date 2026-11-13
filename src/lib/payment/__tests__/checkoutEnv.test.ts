@@ -4,6 +4,7 @@ import {
   friendlyPaymentError,
   inAppHint,
   inAppPrepayHint,
+  kakaoPayAvailable,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -93,5 +94,13 @@ describe("모바일 결제창 복귀 주소 해석", () => {
 
   it("이상한 값은 버린다", () => {
     expect(parseNewYearReturn("?paymentId=../../x&code=<script>")).toMatchObject({ paymentId: null, failed: true, code: null });
+  });
+});
+
+describe("카카오페이 버튼", () => {
+  it("PC에서는 숨기고(이니시스 V104) 휴대폰에서는 보여준다", () => {
+    expect(kakaoPayAvailable(IPHONE_SAFARI)).toBe(true);
+    expect(kakaoPayAvailable(NAVER_ANDROID)).toBe(true);
+    expect(kakaoPayAvailable("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36")).toBe(false);
   });
 });

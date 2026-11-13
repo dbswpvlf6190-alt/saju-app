@@ -20,6 +20,7 @@ import {
   friendlyPaymentError,
   inAppHint,
   inAppPrepayHint,
+  kakaoPayAvailable,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -63,6 +64,9 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
   const userAgent = useUserAgent();
   // 이니시스 모바일 결제창은 이름만 필수다(checkoutEnv.ts). 휴대폰에서는 휴대폰·이메일 칸을 보여주지 않는다.
   const fullContact = needsFullContact(userAgent);
+  // PC 결제창은 카카오페이가 꺼져 있어(kakaoPayAvailable) 카드로만 받는다.
+  const kakaoOk = kakaoPayAvailable(userAgent);
+  const method = kakaoOk ? payMethod : "CARD";
   const inApp = detectInAppBrowser(userAgent);
   const hint = inAppHint(inApp);
 
@@ -178,8 +182,8 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
         orderName: order.orderName,
         totalAmount: order.amount,
         currency: "KRW",
-        payMethod,
-        ...(payMethod === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
+        payMethod: method,
+        ...(method === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
         // 휴대폰·이메일은 PC에서만 필수다. 모바일에서 비어 있으면 보내지 않는다.
         customer: {
           fullName: name,
@@ -311,13 +315,13 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
           {([
             ["CARD", "카드"],
             ["EASY_PAY", "카카오페이"],
-          ] as const).map(([value, label]) => (
+          ] as const).filter(([value]) => kakaoOk || value !== "EASY_PAY").map(([value, label]) => (
             <button
               key={value}
               type="button"
               onClick={() => setPayMethod(value)}
               className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium ${
-                payMethod === value ? "border-accent-gold bg-accent-gold/10 text-accent-gold-soft" : "border-border-subtle text-foreground-muted"
+                method === value ? "border-accent-gold bg-accent-gold/10 text-accent-gold-soft" : "border-border-subtle text-foreground-muted"
               }`}
             >
               {label}

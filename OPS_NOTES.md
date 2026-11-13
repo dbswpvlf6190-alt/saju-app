@@ -581,3 +581,4 @@
 - **블로그 도구를 OneDrive로 옮김(두 컴퓨터 공유)**: `사주랩_블로그_초안\00_도구`(fetch_2027.py·make_blog_images.py·queue.json·README.txt). 노트북 `C:\saju-reports\blog`는 옛 사본(쓰지 말 것). 데스크톱에서 OneDrive 폴더가 안 보이면 사장님께 OneDrive 동기화부터 확인.
 - 다른 컴퓨터에 없는 것: 없음(코드는 main, 메모리는 docs/claude-memory). 이직 준비 메모는 개인 정보라 이 공개 저장소에 넣지 않음.
 - **블로그 보조 사본(af0bb75)**: OneDrive가 안 될 때를 대비해 `docs/blog-backup/`(00_도구 + 2026-11-14 초안·사진)에도 둠. 데스크톱에서 OneDrive 폴더가 안 보이면 `C:\saju-app\docs\blog-backup\2026-11-14`에서 소띠 글을 열면 된다.
+- **(11/13 사장님 "앞으로 2번 경로로") 블로그 초안 기본 위치를 GitHub `docs/blog-backup/`으로 바꿈.** 두 컴퓨터 모두 `C:\saju-app\docs\blog-backup\<날짜>`에서 연다. 만들기·[올림] 표시는 worktree → main 푸시 → `git -C C:\saju-app pull --ff-only`. OneDrive 사본은 더는 갱신 안 함. 데스크톱 바탕 화면에 `C:\saju-app\docs\blog-backup` 바로가기가 없으면 만들어 줄 것.

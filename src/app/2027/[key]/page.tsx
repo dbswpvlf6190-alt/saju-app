@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DEFAULT_OG_IMAGE } from "@/lib/og/defaults";
 import { SiteFooter } from "@/components/saju/SiteFooter";
+import { Y2027View } from "@/components/saju/Y2027View";
 import {
   BIRTH_YEAR_MAX,
   BIRTH_YEAR_MIN,
@@ -166,6 +167,7 @@ export default async function Year2027Page({ params }: { params: Promise<{ key: 
 
   return (
     <div className="bg-starfield flex flex-1 flex-col items-center bg-background px-5 py-12">
+      <Y2027View page={key} />
       <main className="flex w-full max-w-md flex-col gap-5">
         <nav aria-label="breadcrumb" className="text-sm text-foreground-muted">
           <Link href="/" className="underline underline-offset-4">사주랩</Link>

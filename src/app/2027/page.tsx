@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DEFAULT_OG_IMAGE } from "@/lib/og/defaults";
 import { SiteFooter } from "@/components/saju/SiteFooter";
+import { Y2027View } from "@/components/saju/Y2027View";
 import { TTI, Y2027, birthYearsOf, isSamjae2027, yearRelationLabel, yearTheme } from "@/lib/saju/year2027";
 
 const TITLE = "2027년 띠별 운세 · 나이별 운세 | 정미년 신년운세 - 사주랩";
@@ -20,6 +21,7 @@ export default function Year2027Index() {
   const section = "flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-5";
   return (
     <div className="bg-starfield flex flex-1 flex-col items-center bg-background px-5 py-12">
+      <Y2027View page="index" />
       <main className="flex w-full max-w-md flex-col gap-5">
         <header className="flex flex-col items-center gap-2 text-center">
           <span className="text-sm font-medium tracking-[0.15em] text-accent-gold-soft">2027 정미년(丁未年)</span>

@@ -19,6 +19,7 @@ import {
   detectInAppBrowser,
   friendlyPaymentError,
   inAppHint,
+  inAppPrepayHint,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -62,7 +63,8 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
   const userAgent = useUserAgent();
   // 이니시스 모바일 결제창은 이름만 필수다(checkoutEnv.ts). 휴대폰에서는 휴대폰·이메일 칸을 보여주지 않는다.
   const fullContact = needsFullContact(userAgent);
-  const hint = inAppHint(detectInAppBrowser(userAgent));
+  const inApp = detectInAppBrowser(userAgent);
+  const hint = inAppHint(inApp);
 
   /** 결제 실패·취소를 기록하고, 서버가 PortOne에 실제 상태를 물어 주문을 정리·실패 사유를 남기게 한다. */
   function recordFailure(paymentId: string | null, where: string, code?: string | null, message?: string | null, pgCode?: string | null) {
@@ -331,6 +333,11 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
           <p className="text-sm text-red-700">{errorMessage}</p>
           {hint && <p className="text-xs leading-relaxed text-foreground-muted">{hint}</p>}
         </div>
+      )}
+      {!errorMessage && inAppPrepayHint(inApp) && (
+        <p className="rounded-xl border border-[#dccba6] bg-[#f8f4ec] px-3 py-2.5 text-left text-xs leading-relaxed text-foreground-muted">
+          {inAppPrepayHint(inApp)}
+        </p>
       )}
       {PAYMENTS_PAUSED && <p className="text-sm text-foreground-muted">지금은 결제를 잠시 멈췄어요. 곧 다시 열게요.</p>}
 

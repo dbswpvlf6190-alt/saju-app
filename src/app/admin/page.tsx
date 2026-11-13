@@ -59,6 +59,7 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   consult_ask: "AI 상담 질문",
   checkout_retry_view: "결제 실패 → 다시 결제하기",
   payment_fail_detail: "결제 실패 사유(서버 확인)",
+  y2027_view: "2027 띠·나이 페이지 방문",
 };
 
 function pct(numerator: number, denominator: number): string {

@@ -3,6 +3,7 @@ import {
   detectInAppBrowser,
   friendlyPaymentError,
   inAppHint,
+  inAppPrepayHint,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -44,6 +45,12 @@ describe("앱 안 브라우저 안내", () => {
   it("일반 브라우저면 안내하지 않는다", () => {
     expect(detectInAppBrowser(IPHONE_SAFARI)).toBeNull();
     expect(inAppHint(null)).toBeNull();
+    expect(inAppPrepayHint(null)).toBeNull();
+  });
+
+  it("결제 버튼 전에 미리 다른 브라우저 안내를 보여준다", () => {
+    expect(inAppPrepayHint("naver")).toContain("네이버 앱");
+    expect(inAppPrepayHint("naver")).toContain("다른 브라우저로 열기");
   });
 });
 

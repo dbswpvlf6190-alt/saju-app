@@ -14,6 +14,7 @@ import {
   detectInAppBrowser,
   friendlyPaymentError,
   inAppHint,
+  inAppPrepayHint,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -261,6 +262,12 @@ export function NewYearUpsellCard({
           <p className="text-sm text-red-700">{errorMessage}</p>
           {inAppHint(inApp) && <p className="text-xs leading-relaxed text-foreground-muted">{inAppHint(inApp)}</p>}
         </div>
+      )}
+
+      {!errorMessage && inAppPrepayHint(inApp) && (
+        <p className="rounded-xl border border-[#dccba6] bg-[#f8f4ec] px-3 py-2.5 text-left text-xs leading-relaxed text-foreground-muted">
+          {inAppPrepayHint(inApp)}
+        </p>
       )}
 
       <PurchaseConsent checked={agreed} onChange={setAgreed} />

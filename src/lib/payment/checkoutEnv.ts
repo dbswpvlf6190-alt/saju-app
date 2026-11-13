@@ -36,7 +36,16 @@ const IN_APP_NAME: Record<Exclude<InAppBrowser, null>, string> = {
 /** 앱 안 브라우저일 때 결제가 안 되면 보여줄 한 줄 안내. 앱 밖이면 null. */
 export function inAppHint(app: InAppBrowser): string | null {
   if (!app) return null;
-  return `${IN_APP_NAME[app]} 안에서는 결제창이 열리지 않을 때가 있어요. 오른쪽 위 메뉴(⋮ 또는 ···)에서 '다른 브라우저로 열기'를 누른 뒤 다시 결제해 주세요.`;
+  return `${IN_APP_NAME[app]} 안에서는 결제창이 열리지 않을 때가 있어요. 화면 오른쪽 위나 아래의 메뉴(⋮ 또는 ···)에서 '다른 브라우저로 열기'를 누른 뒤 다시 결제해 주세요.`;
+}
+
+/**
+ * 결제 버튼을 누르기 '전'에 보여줄 안내. 11/12 네이버 앱 손님 3명이 모두 결제창에서 끝내지 못해(취소 1·창만 열고 이탈 2),
+ * 실패 뒤에만 나오던 안내를 미리 보여준다. 앱 밖이면 null.
+ */
+export function inAppPrepayHint(app: InAppBrowser): string | null {
+  if (!app) return null;
+  return `${IN_APP_NAME[app]}에서는 결제창이 멈추거나 카드·카카오페이 앱으로 넘어가지 않을 때가 있어요. 그럴 땐 메뉴(⋮ 또는 ···)의 '다른 브라우저로 열기'에서 결제하면 잘 돼요.`;
 }
 
 /** 휴대폰 번호는 사람마다 010-1234-5678, 010 1234 5678처럼 다르게 쓴다 — 숫자만 남긴다. */

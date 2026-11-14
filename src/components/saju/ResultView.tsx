@@ -26,6 +26,7 @@ import type { ExamKind } from "@/lib/exam/seasons";
 import { WuxingMascot } from "./WuxingMascot";
 import { ReviewList, type ReviewItem } from "./ReviewList";
 import { trackEvent } from "@/lib/analytics/track";
+import { Icon } from "@/components/ui/Icon";
 
 // 홈 화면에서 "돈 문제/연애가 궁금해요"를 먼저 고르고 들어온 경우, 그 관심사를 잠금
 // 미리보기 맨 앞으로 올린다 — 같은 계산 결과를 다시 하는 게 아니라 보여주는 순서만 바꾸는 것이다.
@@ -168,7 +169,7 @@ export function ResultView({
         {/* 블러 문단은 궁금증만 걸면 되므로 3줄까지만 보여준다. 잠금 표시는 잘리지 않게 앞에 둔다. */}
         <p className="line-clamp-3 leading-relaxed text-foreground">
           {free.personalityHook.visible}{" "}
-          <span className="text-xs text-accent-gold-soft">🔒</span>{" "}
+          <span className="text-xs text-accent-gold-soft"><Icon name="lock" /></span>{" "}
           <span className="select-none text-foreground-muted/40 blur-[3px]">
             {free.personalityHook.blind}
           </span>

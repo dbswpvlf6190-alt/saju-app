@@ -14,4 +14,6 @@
 - [saju-app 공유 체크아웃 주의](saju-app-shared-checkout.md) — 자동 게시가 같은 폴더에서 pull/push, 변경 방치·로컬 커밋 금지
 - [사주랩 해외판](saju-global-launch.md) — 일·영 해외판 계획·PayPal·/ja /en 진행 상황
 - ["변경내용 가져와" 동기화](sync-phrase.md) — 다른 컴퓨터 변경 반영 절차를 묻지 않고 실행, 명령어 안내 대신 이 말로
-- [롱폼 v5 한 달 시험](project_longform_v5_trial.md) — 11/1~11/30 경제해적단형(훅·썸네일 A/B·예고 쇼츠), 12월 첫 주 재판단
+- [롱폼 v5 한 달 시험](project_longform_v5_trial.md) — 11/1~11/30 경제해적단형, 18~22분, 정기 공개 화·금 18:00(11/11 변경), 12월 첫 주 재판단
+- [2027 검색 손님 잡기(A안)](project_y2027_seo.md) — /2027 페이지·블로그(하루 2편)·결제 개선·이니시스 간편결제 신청(11/13, 11월 말 승인 예상)
+- [파일 넘기기·블로그 글 스타일](feedback_blog_and_handoff_style.md) — 경로 먼저+탐색기 열기, 칸마다 값 하나씩, 블로그는 AI 말투 금지·짧은 줄

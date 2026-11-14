@@ -48,6 +48,7 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   waitlist_signup: "결제 오픈 알림 신청",
   good_year_view: "좋은 해 카드 봄",
   good_year_cta_click: "좋은 해 → 시기 사용법 클릭",
+  new_year_result_view: "신년운세 단독 → 무료 결과 보기",
   compat_invite_create: "궁합 링크 생성",
   compat_invite_open: "궁합 링크 열람(받은 사람)",
   compat_invite_complete: "궁합 링크 완성",
@@ -55,6 +56,10 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   global_landing_view: "해외판 랜딩 조회",
   global_saju_complete: "해외판 무료 결과",
   global_waitlist_signup: "해외판 오픈 알림 신청",
+  consult_ask: "AI 상담 질문",
+  checkout_retry_view: "결제 실패 → 다시 결제하기",
+  payment_fail_detail: "결제 실패 사유(서버 확인)",
+  y2027_view: "2027 띠·나이 페이지 방문",
 };
 
 function pct(numerator: number, denominator: number): string {

@@ -81,7 +81,7 @@ export default async function TtiPairPage({ params }: { params: Promise<{ pair: 
   const section = "flex flex-col gap-2 rounded-2xl border border-border-subtle bg-background-card/70 p-4";
   const h2 = "font-serif text-lg text-accent-gold-soft";
   const body = "text-sm leading-relaxed text-foreground";
-  const toneClass = { good: "border-accent-gold/50 text-accent-gold-soft", neutral: "border-border-subtle text-foreground-muted", care: "border-red-300/40 text-red-200" };
+  const toneClass = { good: "border-accent-gold/50 text-accent-gold-soft", neutral: "border-border-subtle text-foreground-muted", care: "border-red-300/40 text-red-700" };
 
   return (
     <div className="bg-starfield flex flex-1 flex-col items-center bg-background px-5 py-12">
@@ -114,7 +114,7 @@ export default async function TtiPairPage({ params }: { params: Promise<{ pair: 
 
         <p className={body}>{p.summary}</p>
 
-        <Link href="/compatibility" className="rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430]">
+        <Link href="/compatibility" className="rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink">
           💞 두 사람 생년월일로 진짜 궁합 무료로 보기
         </Link>
 

@@ -43,7 +43,7 @@ export default async function TypeTestPage() {
         <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
           <a
             href="#saju-form"
-            className="rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430]"
+            className="rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink"
           >
             🧪 30초 유형 테스트 시작하기
           </a>
@@ -51,7 +51,7 @@ export default async function TypeTestPage() {
             href="/"
             className="rounded-xl border border-border-subtle px-4 py-2.5 text-center text-sm font-medium text-foreground-muted transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
           >
-            🔮 정식 사주풀이로 바로 가기
+            정식 사주풀이로 바로 가기 →
           </Link>
         </div>
       </main>

@@ -83,12 +83,12 @@ export function CompatibilityResultView({
       {buyerIsPartner && (
         <div className="flex flex-col gap-2 rounded-2xl border border-accent-gold/40 bg-accent-gold/10 p-4 text-center">
           <p className="text-sm text-foreground">
-            🔮 궁합 말고 <strong className="text-accent-gold-soft">내 사주</strong>도 궁금하다면? 방금 넣은 정보로 바로
+            궁합 말고 <strong className="text-accent-gold-soft">내 사주</strong>도 궁금하다면? 방금 넣은 정보로 바로
             볼 수 있어요.
           </p>
           <Link
             href="/#saju-form"
-            className="rounded-xl bg-accent-gold px-4 py-3 text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
+            className="rounded-xl bg-cta px-4 py-3 text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90"
           >
             내 사주 무료로 보기
           </Link>

@@ -7,6 +7,7 @@ import { EXAM_SEASONS, getSeasonStatus, type ExamKind } from "@/lib/exam/seasons
 import type { PremiumSection } from "@/lib/saju/content";
 import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
+import { Icon } from "@/components/ui/Icon";
 
 /** /exam-luck 진입자에게만 보여주는 "합격운 흐름" 카드. 특정 대학명이나 숫자 확률은
  * 절대 쓰지 않는다(examLuck.ts 참고) — 강점과 주의할 점을 함께 담은 정성적 흐름만
@@ -78,7 +79,7 @@ function ExamPremiumPromo({
 
   return (
     <div className="mt-1 flex w-full flex-col gap-3 rounded-2xl border border-accent-gold/60 bg-background-card/80 p-4 text-left">
-      <span className="text-xs font-semibold tracking-[0.15em] text-accent-gold-soft">🔒 여기까지가 무료예요</span>
+      <span className="text-xs font-semibold tracking-[0.15em] text-accent-gold-soft"><Icon name="lock" /> 여기까지가 무료예요</span>
       <p className="font-serif text-lg leading-snug text-foreground">
         {who} 사주에서 아직 못 본 분석이
         <br />
@@ -110,9 +111,9 @@ function ExamPremiumPromo({
       <a
         href="#premium-unlock"
         onClick={() => trackEvent("exam_promo_click", { exam: examKind })}
-        className="rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90"
+        className="rounded-xl bg-cta px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90"
       >
-        🔓 남은 5개 분석 바로 열기
+        <Icon name="unlock" /> 남은 5개 분석 바로 열기
       </a>
       <p className="-mt-1 text-center text-xs text-foreground-muted">
         {price}원

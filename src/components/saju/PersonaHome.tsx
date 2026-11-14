@@ -6,6 +6,7 @@ import { SajuFlow } from "./SajuFlow";
 import type { ReviewItem } from "./ReviewList";
 import { focusBannerParts } from "@/lib/saju/focusCopy";
 import { reportV2Enabled } from "@/lib/reports/manualChapters";
+import { Icon } from "@/components/ui/Icon";
 
 type Focus = "wealth" | "love";
 
@@ -70,7 +71,7 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
             <button
               type="button"
               onClick={() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              className="mt-1 w-full max-w-xs rounded-xl bg-accent-gold px-4 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+              className="mt-1 w-full max-w-xs rounded-xl bg-cta px-4 py-3 text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90"
             >
               생일 넣고 바로 보기 ↓
             </button>
@@ -88,7 +89,7 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
                 길이 없었다 — 시즌 동안은 두 시험을 맨 위에서 바로 고르게 한다. */}
             {examBadges.length > 0 && (
               <div className="flex w-full max-w-xs flex-col gap-2 rounded-2xl border border-sky-300/40 bg-sky-300/10 p-3">
-                <span className="text-xs font-medium text-sky-200">📚 시험 시즌 · 무료 합격운 흐름</span>
+                <span className="text-xs font-medium text-sky-800"><Icon name="book" /> 시험 시즌 · 무료 합격운 흐름</span>
                 <div className="grid grid-cols-2 gap-2">
                   {examBadges.map((b) => (
                     <Link
@@ -96,7 +97,7 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
                       href={b.href}
                       className="flex flex-col items-center gap-0.5 rounded-xl border border-sky-300/50 bg-background/40 px-2 py-2.5 transition-colors hover:border-sky-300"
                     >
-                      <strong className="font-serif text-base tabular-nums text-sky-200">{b.dday}</strong>
+                      <strong className="font-serif text-base tabular-nums text-sky-800">{b.dday}</strong>
                       <span className="text-xs font-medium text-foreground">{b.label} →</span>
                     </Link>
                   ))}
@@ -119,7 +120,7 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
                 onClick={() => choose("wealth")}
                 className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border-subtle px-3 py-5 text-sm font-medium text-foreground transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
               >
-                <span className="text-xl">💰</span>
+                <span className="text-2xl text-accent-gold-soft"><Icon name="coin" /></span>
                 돈 문제가
                 <br />
                 궁금해요
@@ -129,7 +130,7 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
                 onClick={() => choose("love")}
                 className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border-subtle px-3 py-5 text-sm font-medium text-foreground transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
               >
-                <span className="text-xl">❤️</span>
+                <span className="text-2xl text-accent-gold-soft"><Icon name="heart" /></span>
                 연애가
                 <br />
                 궁금해요
@@ -138,7 +139,7 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
                 href="/type-test"
                 className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border-subtle px-3 py-5 text-sm font-medium text-foreground transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
               >
-                <span className="text-xl">😂</span>
+                <span className="text-2xl text-accent-gold-soft"><Icon name="smile" /></span>
                 그냥
                 <br />
                 재미로요
@@ -147,12 +148,24 @@ export function PersonaHome({ reviews, examBadges = [] }: { reviews: ReviewItem[
                 href="/exam-luck"
                 className="flex flex-col items-center justify-center gap-1 rounded-xl border border-border-subtle px-3 py-5 text-sm font-medium text-foreground transition-colors hover:border-accent-gold hover:text-accent-gold-soft"
               >
-                <span className="text-xl">📚</span>
+                <span className="text-2xl text-accent-gold-soft"><Icon name="book" /></span>
                 수험생
                 <br />
                 이에요
               </Link>
             </div>
+
+            <Link
+              href="/consult?product=newyear_plus&ref=home"
+              className="flex w-full items-center gap-3 rounded-2xl border border-accent-gold/50 bg-background-card px-4 py-3.5 text-left transition-colors hover:border-accent-gold"
+            >
+              <span className="text-2xl text-accent-gold-soft"><Icon name="chat" /></span>
+              <span className="flex flex-1 flex-col gap-0.5">
+                <span className="text-base font-semibold text-foreground">2027 신년운세 · AI 사주 상담</span>
+                <span className="text-xs text-foreground-muted">내 사주로 한 해 흐름을 보고, 궁금한 건 바로 물어보세요</span>
+              </span>
+              <span className="text-sm text-accent-gold-soft">→</span>
+            </Link>
 
             <Link
               href="/compatibility"

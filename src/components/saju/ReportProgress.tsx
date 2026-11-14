@@ -18,13 +18,13 @@ export function ReportProgress({ total, done }: { total: number; done: number })
       <div className="flex items-center gap-3">
         <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-accent-gold/30 border-t-accent-gold" aria-hidden />
         <div className="flex min-w-0 flex-col">
-          <span className="text-sm font-semibold text-foreground">결제가 완료됐어요. 리포트를 쓰고 있어요 ✍️</span>
+          <span className="text-sm font-semibold text-foreground">결제가 완료됐어요. 리포트를 쓰고 있어요</span>
           <span className="text-xs text-foreground-muted">보통 30~60초 걸려요. 이 화면을 닫지 말고 잠시만 기다려 주세요.</span>
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
         <div className="h-2 overflow-hidden rounded-full bg-background-elevated">
-          <div className="h-full rounded-full bg-accent-gold transition-all duration-700" style={{ width: `${percent}%` }} />
+          <div className="h-full rounded-full bg-cta transition-all duration-700" style={{ width: `${percent}%` }} />
         </div>
         <span className="text-right text-xs text-accent-gold-soft">
           {done}/{total}장 완성

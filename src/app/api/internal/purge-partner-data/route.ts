@@ -90,6 +90,16 @@ export async function GET(req: NextRequest) {
   const waitlistCutoff = new Date(Date.now() - 92 * 24 * 60 * 60 * 1000);
   const expiredWaitlist = await prisma.waitlistSignup.deleteMany({ where: { createdAt: { lt: waitlistCutoff } } });
 
+  // AI 상담(ConsultPass): 상담권이 끝나고 90일이 지나면 대화 내용과 가족(제3자) 생년월일을 지운다
+  // (docs/ai-consult-design.md 사장님 결정 4번, 개인정보처리방침 4번). 상담권 행과 주인 정보는 주문 기록처럼 남겨
+  // 이미 열린 리포트 링크와 환불·분쟁 확인에 쓴다.
+  const consultCutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const expiredConsultMessages = await prisma.consultMessage.deleteMany({ where: { pass: { expiresAt: { lt: consultCutoff } } } });
+  const purgedConsultFamilies = await prisma.consultPass.updateMany({
+    where: { expiresAt: { lt: consultCutoff }, familyJson: { not: "[]" } },
+    data: { familyJson: "[]" },
+  });
+
   return NextResponse.json({
     ok: true,
     checked: candidates.length,
@@ -98,5 +108,7 @@ export async function GET(req: NextRequest) {
     skippedCorrupt,
     expiredInvitesDeleted: expiredInvites.count,
     expiredWaitlistDeleted: expiredWaitlist.count,
+    expiredConsultMessagesDeleted: expiredConsultMessages.count,
+    purgedConsultFamilies: purgedConsultFamilies.count,
   });
 }

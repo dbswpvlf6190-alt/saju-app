@@ -6,8 +6,11 @@ import type { SajuInput } from "@/lib/saju/types";
 import { COMPATIBILITY_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { PaymentWaitlist } from "./PaymentWaitlist";
 import { trackEvent } from "@/lib/analytics/track";
+import { useUserAgent } from "@/lib/hooks/useUserAgent";
+import { kakaoPayAvailable } from "@/lib/payment/checkoutEnv";
 import { ReviewForm } from "./ReviewForm";
 import { PurchaseConsent } from "./PurchaseConsent";
+import { Icon } from "@/components/ui/Icon";
 
 type Status = "locked" | "processing" | "unlocked" | "error";
 
@@ -42,6 +45,10 @@ export function CompatibilityUnlock({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState(selfName);
   const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  const userAgent = useUserAgent();
+  // PC 결제창은 카카오페이가 꺼져 있어(kakaoPayAvailable) 카드로만 받는다.
+  const kakaoOk = kakaoPayAvailable(userAgent);
+  const method = kakaoOk ? payMethod : "CARD";
 
   const fetchReport = useCallback(async (paymentId: string) => {
     const reportRes = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
@@ -163,8 +170,8 @@ export function CompatibilityUnlock({
         orderName: order.orderName,
         totalAmount: order.amount,
         currency: "KRW",
-        payMethod,
-        ...(payMethod === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
+        payMethod: method,
+        ...(method === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
         customer: { email, phoneNumber: phoneNumber.replace(/-/g, ""), fullName: fullName.trim() },
         redirectUrl: window.location.href.split("?")[0],
       });
@@ -203,7 +210,7 @@ export function CompatibilityUnlock({
 
         {missingSections.length > 0 && (
           <>
-            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+            <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
               {errorMessage ?? "일부 항목을 불러오지 못했어요."}
             </p>
             <button
@@ -232,7 +239,7 @@ export function CompatibilityUnlock({
         >
           <div className="flex items-center justify-between">
             <h4 className="font-medium text-foreground">{section.title}</h4>
-            <span className="text-xs text-accent-gold-soft">🔒 잠금</span>
+            <span className="text-xs text-accent-gold-soft"><Icon name="lock" /> 잠금</span>
           </div>
           <p className="mt-2 text-sm text-foreground-muted">{section.teaser}</p>
           <p className="mt-3 select-none text-sm leading-relaxed text-foreground-muted/40 blur-[3px]">
@@ -253,13 +260,13 @@ export function CompatibilityUnlock({
           {([
             ["CARD", "카드"],
             ["EASY_PAY", "카카오페이"],
-          ] as const).map(([value, label]) => (
+          ] as const).filter(([value]) => kakaoOk || value !== "EASY_PAY").map(([value, label]) => (
             <button
               key={value}
               type="button"
               onClick={() => setPayMethod(value)}
               className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
-                payMethod === value
+                method === value
                   ? "border-accent-gold bg-accent-gold/15 text-accent-gold-soft"
                   : "border-border-subtle text-foreground-muted"
               }`}
@@ -312,7 +319,7 @@ export function CompatibilityUnlock({
       </div>
 
       {errorMessage && (
-        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+        <p className="rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">
           {errorMessage}
         </p>
       )}
@@ -326,7 +333,7 @@ export function CompatibilityUnlock({
           void handlePurchase();
         }}
         disabled={status === "processing" || !agreed}
-        className="mt-1 rounded-xl bg-accent-gold px-4 py-3.5 text-center text-base font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-1 rounded-xl bg-cta px-4 py-3.5 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing"
           ? "처리 중..."

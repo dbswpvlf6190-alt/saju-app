@@ -1,0 +1,341 @@
+{
+ "note": "사주랩 블로그 초안 순서. done=초안 만든 날짜. 예약 작업 sajulab-blog-drafts가 위에서부터 2개씩 처리.",
+ "items": [
+  {
+   "key": "hub_age",
+   "done": "2026-11-15"
+  },
+  {
+   "key": "hub_samjae",
+   "done": "2026-11-15"
+  },
+  {
+   "key": "yang",
+   "done": "2026-11-12"
+  },
+  {
+   "key": "mal",
+   "done": "2026-11-13"
+  },
+  {
+   "key": "tokki",
+   "done": "2026-11-13"
+  },
+  {
+   "key": "dwaeji",
+   "done": "2026-11-14"
+  },
+  {
+   "key": "so",
+   "done": "2026-11-14"
+  },
+  {
+   "key": "jwi",
+   "done": null
+  },
+  {
+   "key": "gae",
+   "done": null
+  },
+  {
+   "key": "horangi",
+   "done": null
+  },
+  {
+   "key": "yong",
+   "done": null
+  },
+  {
+   "key": "baem",
+   "done": null
+  },
+  {
+   "key": "wonsungi",
+   "done": null
+  },
+  {
+   "key": "dak",
+   "done": null
+  },
+  {
+   "key": "1963",
+   "done": null
+  },
+  {
+   "key": "1967",
+   "done": null
+  },
+  {
+   "key": "1965",
+   "done": null
+  },
+  {
+   "key": "1966",
+   "done": null
+  },
+  {
+   "key": "1964",
+   "done": null
+  },
+  {
+   "key": "1968",
+   "done": null
+  },
+  {
+   "key": "1962",
+   "done": null
+  },
+  {
+   "key": "1961",
+   "done": null
+  },
+  {
+   "key": "1960",
+   "done": null
+  },
+  {
+   "key": "1959",
+   "done": null
+  },
+  {
+   "key": "1958",
+   "done": null
+  },
+  {
+   "key": "1957",
+   "done": null
+  },
+  {
+   "key": "1969",
+   "done": null
+  },
+  {
+   "key": "1970",
+   "done": null
+  },
+  {
+   "key": "1971",
+   "done": null
+  },
+  {
+   "key": "1972",
+   "done": null
+  },
+  {
+   "key": "1956",
+   "done": null
+  },
+  {
+   "key": "1955",
+   "done": null
+  },
+  {
+   "key": "1954",
+   "done": null
+  },
+  {
+   "key": "1953",
+   "done": null
+  },
+  {
+   "key": "1973",
+   "done": null
+  },
+  {
+   "key": "1974",
+   "done": null
+  },
+  {
+   "key": "1975",
+   "done": null
+  },
+  {
+   "key": "1976",
+   "done": null
+  },
+  {
+   "key": "1952",
+   "done": null
+  },
+  {
+   "key": "1951",
+   "done": null
+  },
+  {
+   "key": "1950",
+   "done": null
+  },
+  {
+   "key": "1977",
+   "done": null
+  },
+  {
+   "key": "1978",
+   "done": null
+  },
+  {
+   "key": "1979",
+   "done": null
+  },
+  {
+   "key": "1980",
+   "done": null
+  },
+  {
+   "key": "1981",
+   "done": null
+  },
+  {
+   "key": "1982",
+   "done": null
+  },
+  {
+   "key": "1983",
+   "done": null
+  },
+  {
+   "key": "1984",
+   "done": null
+  },
+  {
+   "key": "1985",
+   "done": null
+  },
+  {
+   "key": "1986",
+   "done": null
+  },
+  {
+   "key": "1987",
+   "done": null
+  },
+  {
+   "key": "1988",
+   "done": null
+  },
+  {
+   "key": "1989",
+   "done": null
+  },
+  {
+   "key": "1990",
+   "done": null
+  },
+  {
+   "key": "1991",
+   "done": null
+  },
+  {
+   "key": "1992",
+   "done": null
+  },
+  {
+   "key": "1993",
+   "done": null
+  },
+  {
+   "key": "1994",
+   "done": null
+  },
+  {
+   "key": "1995",
+   "done": null
+  },
+  {
+   "key": "1996",
+   "done": null
+  },
+  {
+   "key": "1997",
+   "done": null
+  },
+  {
+   "key": "1998",
+   "done": null
+  },
+  {
+   "key": "1999",
+   "done": null
+  },
+  {
+   "key": "2000",
+   "done": null
+  },
+  {
+   "key": "1949",
+   "done": null
+  },
+  {
+   "key": "2001",
+   "done": null
+  },
+  {
+   "key": "1948",
+   "done": null
+  },
+  {
+   "key": "2002",
+   "done": null
+  },
+  {
+   "key": "1947",
+   "done": null
+  },
+  {
+   "key": "2003",
+   "done": null
+  },
+  {
+   "key": "1946",
+   "done": null
+  },
+  {
+   "key": "2004",
+   "done": null
+  },
+  {
+   "key": "1945",
+   "done": null
+  },
+  {
+   "key": "2005",
+   "done": null
+  },
+  {
+   "key": "1944",
+   "done": null
+  },
+  {
+   "key": "2006",
+   "done": null
+  },
+  {
+   "key": "1943",
+   "done": null
+  },
+  {
+   "key": "2007",
+   "done": null
+  },
+  {
+   "key": "1942",
+   "done": null
+  },
+  {
+   "key": "2008",
+   "done": null
+  },
+  {
+   "key": "1941",
+   "done": null
+  },
+  {
+   "key": "2009",
+   "done": null
+  },
+  {
+   "key": "1940",
+   "done": null
+  }
+ ]
+}

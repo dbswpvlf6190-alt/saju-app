@@ -46,7 +46,7 @@ export default function IlganIndexPage() {
 
         <Link
           href="/type-test"
-          className="rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430]"
+          className="rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink"
         >
           🧪 내 일간이 뭔지 30초 무료로 확인하기
         </Link>

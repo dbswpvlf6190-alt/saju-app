@@ -1,0 +1,100 @@
+/* v16 고급 테마(2026-11-09 사장님 "적용해" — 3차 시안). 기존 styles·v11·consult 위에 덮어쓴다(App.tsx에서 마지막에 import).
+   원칙: 색은 아이보리 60 · 남색 30 · 금색 10, 금색 글씨는 밝은 바탕에서 진한 청동(대비), 명조는 제목·가격·달 숫자에만,
+   그림자 대신 톤 차이와 얇은 선, 간격은 8의 배수, 50대 이상 손님을 위해 본문 16px↑·누르는 칸 48px↑. 라이트 모드 전용. */
+@font-face {
+  font-family: "Saju Serif";
+  src: url("./fonts/NotoSerifKR-Bold-subset.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+:root {
+  --bg: #f5f1ea; --card: #fffefb; --text: #1b1828; --muted: #5e5869; --line: #e7e0d3;
+  --primary: #231d3d; --primary-soft: #f3eee4; --gold: #7a5a1f;
+  --gold-hi: #d8bd82; --gold-mid: #b8955a; --night1: #221c3c; --night2: #15122a;
+  --serif: "Saju Serif", "Noto Serif KR", serif;
+}
+body { background: var(--bg); }
+.page { gap: 24px; padding-top: 32px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: none; padding: 24px 20px; }
+.card h2 { font-size: 17px; letter-spacing: -0.01em; }
+.eyebrow { color: var(--gold); letter-spacing: 0.28em; font-size: 11px; font-weight: 700; }
+.hero h1, .hero-big h1 { font-family: var(--serif); font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.hero p { color: var(--muted); }
+.toggle { background: var(--card); border-color: var(--line); min-height: 48px; }
+.toggle.on { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+.date-row input { background: var(--card); border-color: var(--line); }
+.date-row input:focus { border-color: var(--gold-mid); }
+.cta { background: var(--night1); color: #f1e3c0; border-radius: 14px; letter-spacing: 0.01em; box-shadow: none; min-height: 56px; transition: transform 0.15s; }
+.cta:active { transform: scale(0.98); }
+.cta:disabled { opacity: 0.3; }
+.ghost { background: transparent; border-color: var(--line); color: var(--text); min-height: 52px; }
+.chip { background: var(--primary-soft); color: var(--gold); }
+.fortune-grid { gap: 0; border-top: 1px solid var(--line); }
+.fortune-grid div { background: transparent; border-radius: 0; border-bottom: 1px solid var(--line); padding: 16px 8px; }
+.fortune-grid div:nth-child(odd) { border-right: 1px solid var(--line); }
+.fortune-grid b { color: var(--gold); letter-spacing: 0.12em; }
+.foot { color: var(--muted); }
+.reward { background: var(--card); border-color: var(--line); }
+.type-card { background: var(--card); }
+.type-sub { color: var(--gold); }
+
+/* 선 아이콘(Icon.tsx) */
+.ico { display: inline-flex; width: 1.1em; height: 1.1em; vertical-align: -0.18em; flex-shrink: 0; }
+.ico svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 신년운세: 금색은 강조 숫자·선·막대 하나에만 */
+.ny-card, .ny-mini { background: var(--card); border: 1px solid #dccba6; box-shadow: none; }
+.ny-eyebrow { color: var(--gold); letter-spacing: 0.04em; display: flex; align-items: center; gap: 8px; }
+.ny-card .ny-head { font-family: var(--serif); font-weight: 700; color: var(--text); }
+.ny-card .ny-head em, .ny-mini-line b, .ny-reveal-kicker, .ny-reveal-month span, .ny-day.free small, .ny-bar.best .ny-mon { color: var(--gold); }
+.ny-reveal { background: #fbf7ef; border: 1px solid #dccba6; box-shadow: none; }
+.ny-reveal-month { font-family: var(--serif); }
+.ny-day.free { background: var(--card); border: 1px solid var(--gold-mid); }
+.ny-day.locked { background: #f6f1e7; border: 1px dashed #d8ccb4; color: #8a7f6c; }
+.ny-day.locked .ico { width: 22px; height: 22px; color: #a08f6c; }
+.ny-card p.ny-tip { background: transparent; border-left: 2px solid var(--gold-mid); border-radius: 0; padding: 4px 0 4px 12px; display: flex; gap: 8px; align-items: flex-start; }
+.ny-card p.ny-tip .ico { margin-top: 0.25em; color: var(--gold); }
+.ny-flow { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 16px 0 0; }
+.ny-fill { background: #e9e2d4; }
+.ny-bar.best .ny-fill { background: var(--gold-mid); }
+.ny-star { color: var(--gold-mid); }
+/* 한 화면에 강한 버튼은 하나: 신년운세 작은 카드 버튼은 테두리형 */
+.ny-mini-btn { background: transparent; color: var(--gold); border: 1.5px solid var(--gold-mid); min-height: 52px; }
+
+/* AI 상담 판매 카드: 밤하늘 단색 + 금빛 강조 */
+.consult-card { background: linear-gradient(180deg, var(--night1) 0%, var(--night2) 100%); border: 1px solid rgba(216, 189, 130, 0.35); color: #efe7d6; padding: 32px 24px 24px; gap: 16px; }
+.consult-card .eyebrow { color: var(--gold-hi); display: flex; align-items: center; gap: 12px; }
+.consult-card .eyebrow::after { content: ""; flex: 1; height: 1px; background: rgba(216, 189, 130, 0.35); }
+.consult-card h2 { font-family: var(--serif); font-weight: 700; font-size: 24px; line-height: 1.45; color: #faf4e6; word-break: keep-all; }
+.consult-card .muted { color: rgba(239, 231, 214, 0.82) !important; font-size: 16px !important; }
+.consult-sample { background: transparent; border: 0; border-top: 1px solid rgba(239, 231, 214, 0.14); border-bottom: 1px solid rgba(239, 231, 214, 0.14); border-radius: 0; padding: 16px 0; gap: 8px; }
+.consult-sample .q { background: rgba(216, 189, 130, 0.16); color: var(--gold-hi); font-weight: 600; font-size: 16px; }
+.consult-sample .a { background: rgba(255, 255, 255, 0.07); color: #f3ecdd; line-height: 1.7; font-size: 16px; }
+.consult-sample span { color: rgba(239, 231, 214, 0.6); font-size: 12px; }
+/* 요금제: 선으로 나눈 목록 + 라디오, 추천은 글자 배지 + 은은한 바탕(색만으로 구분하지 않음) */
+.consult-options { gap: 0; border-top: 1px solid rgba(239, 231, 214, 0.14); }
+.consult-option { position: relative; background: transparent; border: 0; border-bottom: 1px solid rgba(239, 231, 214, 0.14); border-radius: 0; padding: 20px 8px 20px 44px; color: #efe7d6; transition: background 0.15s; }
+.consult-option::before { content: ""; position: absolute; left: 8px; top: 23px; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(239, 231, 214, 0.45); box-sizing: border-box; }
+.consult-option.on { background: rgba(216, 189, 130, 0.08); border-radius: 12px; border-bottom-color: transparent; }
+.consult-option.on::before { border: 7px solid var(--gold-hi); }
+.consult-option .row-top b { color: #faf4e6; font-size: 17px; word-break: keep-all; }
+.consult-option .row-top em { color: var(--gold-hi); font-family: var(--serif); font-size: 20px; }
+.consult-option .pts { color: rgba(239, 231, 214, 0.78); font-size: 15px; line-height: 1.55; }
+.consult-option .badge { order: -1; color: var(--night2); background: var(--gold-hi); border: 0; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.06em; font-size: 12px; font-weight: 800; }
+.consult-card .cta { background: linear-gradient(180deg, #e2c992 0%, #c4a161 100%); color: var(--night2); font-weight: 800; }
+.consult-card .cta:disabled { opacity: 0.35; }
+.consult-card .ghost { color: rgba(239, 231, 214, 0.85); border-color: rgba(239, 231, 214, 0.25); }
+.consult-card .foot { color: rgba(239, 231, 214, 0.62); font-size: 13px; }
+/* 결제 전 확인: 금액은 크게 한 번, 결제 정보는 한 상자에 자물쇠 하나 */
+.consult-price { font-family: var(--serif); color: var(--gold-hi) !important; font-size: 40px !important; font-weight: 700; }
+.consult-checks { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(216, 189, 130, 0.32); color: #f3ecdd; padding: 16px; gap: 8px; }
+.consult-checks .lockline { display: flex; align-items: center; gap: 6px; font-size: 13px; letter-spacing: 0.06em; color: var(--gold-hi); }
+.consult-checks .tick { color: var(--gold-hi); margin-right: 6px; }
+.consult-agree { border-color: rgba(239, 231, 214, 0.2); color: rgba(239, 231, 214, 0.8); font-size: 15px; }
+.consult-agree b { color: var(--gold-hi); }
+.consult-agree input { accent-color: #c4a161; }
+
+/* 상담방 */
+.bubble.q { background: var(--primary-soft); }
+.bubble.a { background: var(--card); border: 1px solid var(--line); box-shadow: none; }
+.consult-chips .ghost { color: var(--gold); border-color: #dccba6; }

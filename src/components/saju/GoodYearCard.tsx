@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import type { SajuResult } from "@/lib/saju";
 import { currentYearKst, getGoodYears } from "@/lib/saju/goodYears";
 import { trackEvent } from "@/lib/analytics/track";
+import { Icon } from "@/components/ui/Icon";
 
 /**
  * 무료 결과의 "앞으로 흐름이 좋은 해" 카드. 가장 가까운 좋은 해 하나는 크게, 다음 하나는 작게 보여주고
@@ -20,7 +21,7 @@ export function GoodYearCard({ result }: { result: SajuResult }) {
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-accent-gold/40 bg-accent-gold/10 p-4">
-      <h3 className="text-sm font-medium text-foreground-muted">🌟 앞으로 흐름이 좋은 해</h3>
+      <h3 className="text-sm font-medium text-foreground-muted"><Icon name="star" /> 앞으로 흐름이 좋은 해</h3>
       <div className="flex flex-col gap-1">
         <span className="font-serif text-2xl text-accent-gold-soft">
           {first.year}년 <span className="text-base">{first.ganzhiKor}년</span>

@@ -5,6 +5,8 @@ import { signOrderAccessToken } from "@/lib/payment/orderAccess";
 import { rateLimit } from "@/lib/security/rateLimit";
 import { warmReportCache } from "@/lib/reports/warm";
 import { isPremiumTopicKey } from "@/lib/reports/layout";
+import { ensureConsultPass } from "@/lib/consult/pass";
+import { isConsultProductType } from "@/lib/consult/plans";
 import {
   TossIapError,
   corsHeaders,
@@ -27,6 +29,22 @@ interface GrantBody {
   birthInput?: SajuInput;
   /** "궁금한 것 하나 풀이"(single_section)에서 고른 주제. 가격이 주제와 무관해 클라이언트 값을 쓰되 목록에 있는 값만 받는다. */
   sectionKey?: string;
+  /** v15 상담 상품: 결제 전 환불 제한 안내를 확인했는지(미니앱 확인 단계에서 체크) */
+  refundConsent?: boolean;
+  /** v15 상담 상품: 상담방에서 부를 이름(선택) */
+  name?: string;
+}
+
+/** v15 상담 상품이면 상담방 링크 값과 묶음 리포트(0원 내부 주문)의 접근 토큰을 함께 돌려준다. 미니앱은 리포트를 기존 화면(신년운세·사용설명서)으로 연다. */
+async function consultExtras(paymentId: string) {
+  const pass = await prisma.consultPass.findUnique({ where: { orderPaymentId: paymentId } });
+  if (!pass) return {};
+  const reports: Record<string, { paymentId: string; token: string }> = {};
+  for (const [suffix, key] of [["ny", "newYear"], ["pr", "manual"]] as const) {
+    const internal = await prisma.order.findUnique({ where: { paymentId: `${paymentId}-${suffix}` }, select: { paymentId: true } });
+    if (internal) reports[key] = { paymentId: internal.paymentId, token: await signOrderAccessToken(internal.paymentId) };
+  }
+  return { consult: { passId: pass.id, k: pass.token }, reports };
 }
 
 function json(req: NextRequest, body: unknown, status = 200, extra: Record<string, string> = {}) {
@@ -76,6 +94,10 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       if (existing.status !== "PAID") return json(req, { error: "이 주문은 사용할 수 없습니다." }, 409);
+      if (isConsultProductType(existing.productType)) {
+        await ensureConsultPass(existing); // 상담권 발급 전에 끊긴 경우 이어서 발급(멱등)
+        return json(req, { paymentId, token: await signOrderAccessToken(paymentId), ...(await consultExtras(paymentId)) });
+      }
       return json(req, { paymentId, token: await signOrderAccessToken(paymentId) });
     }
 
@@ -94,6 +116,12 @@ export async function POST(req: NextRequest) {
       return json(req, { error: "풀이 주제가 올바르지 않습니다." }, 400);
     }
 
+    const isConsult = product.kind === "consult";
+    if (isConsult && body.refundConsent !== true) {
+      // 결제는 이미 끝났으므로 막지 않는다(확인 단계를 거치지 않은 옛 화면·복구 경로). 기록만 남긴다.
+      console.warn(`토스 상담 상품 지급: 환불 안내 확인값 없음 (orderId=${orderId})`);
+    }
+    const name = typeof body.name === "string" ? body.name.replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 20) || undefined : undefined;
     let order;
     try {
       order = await prisma.order.create({
@@ -102,7 +130,9 @@ export async function POST(req: NextRequest) {
           status: "PAID",
           amount: product.amount,
           productType: product.productType,
-          birthInputJson,
+          birthInputJson: isConsult
+            ? JSON.stringify({ input: body.birthInput, name, ...(body.refundConsent === true ? { refundConsentAt: new Date().toISOString() } : {}) })
+            : birthInputJson,
           sectionKey,
           paidAt: new Date(),
         },
@@ -110,9 +140,19 @@ export async function POST(req: NextRequest) {
     } catch (e) {
       // 같은 orderId가 동시에 두 번 들어온 경우: 먼저 만든 주문을 그대로 쓴다.
       if ((e as { code?: string }).code === "P2002") {
-        return json(req, { paymentId, token: await signOrderAccessToken(paymentId) });
+        return json(req, { paymentId, token: await signOrderAccessToken(paymentId), ...(isConsult ? await consultExtras(paymentId) : {}) });
       }
       throw e;
+    }
+
+    if (isConsult) {
+      await ensureConsultPass(order);
+      // 묶음 리포트는 미리 만들어 둔다(상담권 자체는 만들 것이 없다).
+      after(async () => {
+        const internals = await prisma.order.findMany({ where: { parentPaymentId: paymentId, amount: 0 } });
+        for (const o of internals) await warmReportCache(o);
+      });
+      return json(req, { paymentId, token: await signOrderAccessToken(paymentId), ...(await consultExtras(paymentId)) });
     }
 
     after(() => warmReportCache(order));

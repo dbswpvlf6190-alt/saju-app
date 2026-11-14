@@ -19,11 +19,11 @@ export default function AdminLoginPage() {
           autoFocus
           className="w-full rounded-xl border border-border-subtle bg-background-elevated px-3 py-2.5 text-foreground outline-none focus:border-accent-gold"
         />
-        {state.error && <p className="text-sm text-red-300">{state.error}</p>}
+        {state.error && <p className="text-sm text-red-700">{state.error}</p>}
         <button
           type="submit"
           disabled={pending}
-          className="rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430] disabled:opacity-50"
+          className="rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink disabled:opacity-50"
         >
           {pending ? "확인 중..." : "로그인"}
         </button>

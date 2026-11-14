@@ -216,7 +216,7 @@ export function SajuFlow({
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className="loading-dot h-2.5 w-2.5 rounded-full bg-accent-gold"
+                  className="loading-dot h-2.5 w-2.5 rounded-full bg-cta"
                   style={{ animationDelay: `${i * 0.15}s` }}
                 />
               ))}
@@ -227,7 +227,7 @@ export function SajuFlow({
           <>
             {!result && invited && (
               <p className="w-full max-w-md rounded-2xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-foreground">
-                🎁 <strong className="text-emerald-300">친구가 보낸 링크로 왔어요.</strong> 30초면 무료로 내
+                🎁 <strong className="text-emerald-700">친구가 보낸 링크로 왔어요.</strong> 30초면 무료로 내
                 사주를 볼 수 있어요.
               </p>
             )}

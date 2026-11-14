@@ -36,7 +36,7 @@ export default function TtiIndexPage() {
           가볍게 참고하기 좋지만, 사주 여덟 글자 중 한 글자만 본 것이라 진짜 궁합은 두 사람의 생년월일로 함께 보는 게 좋아요.
         </p>
 
-        <Link href="/compatibility" className="rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430]">
+        <Link href="/compatibility" className="rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink">
           💞 두 사람 생년월일로 진짜 궁합 무료로 보기
         </Link>
 

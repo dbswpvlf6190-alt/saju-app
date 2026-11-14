@@ -60,7 +60,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0e0b1f",
+  themeColor: "#f5f1ea",
 };
 
 // 검색엔진이 브랜드/사이트 자체를 이해하도록 돕는 전역 구조화 데이터. 페이지별 내용과

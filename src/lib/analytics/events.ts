@@ -33,10 +33,17 @@ export const ANALYTICS_EVENT_NAMES = [
   "waitlist_signup",
   "good_year_view",
   "good_year_cta_click",
+  "new_year_result_view",
   // 해외판(/ja, /en)은 국내 퍼널 집계에 섞이지 않도록 이름을 따로 둔다. meta.locale로 언어를 구분한다.
   "global_landing_view",
   "global_saju_complete",
   "global_waitlist_signup",
+  "consult_ask",
+  // 결제 실패를 줄이기 위한 기록(2026-11-12): 결제 실패 후 '다시 결제하기'로 돌아온 화면, 서버가 PortOne에서 확인한 실패 사유
+  "checkout_retry_view",
+  "payment_fail_detail",
+  // /2027 띠·나이 페이지 방문과 들어온 곳(blog·naver_search 등, pageFrom.ts) — 블로그 효과 측정(2026-11-13)
+  "y2027_view",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

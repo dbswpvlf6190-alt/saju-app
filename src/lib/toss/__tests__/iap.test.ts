@@ -134,3 +134,18 @@ describe("환경 설정", () => {
     expect(miniAppOrigins()).toEqual(["https://a.example", "https://b.example"]);
   });
 });
+
+describe("v15 AI 상담 상품", () => {
+  it("상담 SKU를 상담 상품으로 읽고, 콘솔 판매가를 쓴다", () => {
+    vi.stubEnv("TOSS_IAP_SKU_CONSULT5", "ait.x.c5");
+    vi.stubEnv("TOSS_IAP_SKU_CONSULT_NY", "ait.x.cny");
+    vi.stubEnv("TOSS_IAP_SKU_CONSULT_BUNDLE", "ait.x.cb");
+    expect(resolveTossProduct("ait.x.c5")).toEqual({ kind: "consult", productType: "consult_5", amount: 4950 });
+    expect(resolveTossProduct("ait.x.cny")).toEqual({ kind: "consult", productType: "newyear_plus", amount: 14850 });
+    expect(resolveTossProduct("ait.x.cb")).toEqual({ kind: "consult", productType: "premium_bundle", amount: 29700 });
+  });
+
+  it("환경변수가 없으면 상담 상품을 지급하지 않는다", () => {
+    expect(resolveTossProduct("ait.x.c5")).toBeNull();
+  });
+});

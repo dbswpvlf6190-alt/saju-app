@@ -15,3 +15,5 @@ metadata:
 **How to apply:** 코드 작업 중 main에서 파일을 수정했다면 바로 커밋·푸시하거나 브랜치로 옮긴다. 작업 폴더를 non-main 브랜치에 둔 채 끝내지 말 것(스케줄러가 그 브랜치에서 돈다). 자동화가 멈췄다고 하면 키 문제 전에 `git status -sb`(ahead/behind)부터 확인.
 
 관련: 데스크톱은 본가에 있고 평일엔 꺼져 있다. 노트북 C:\saju-app\.env.local에 ANTHROPIC_API_KEY(키 이름 saju-laptop, 만료 없음)를 2026-10-06에 설정함. 대기열 소진 시 ntfy 알림 추가됨.
+
+**2026-11-09 재발(세 번째):** 11/5 노트북에 '스테이징된 락 삭제'가 남아 pull이 4일간 거부 → 노트북이 로컬 락으로 계속 게시 + 주말에 데스크톱도 켜져 있어 IG13·RD12·EN11·JA11 중복 게시. 수정(5c4255f): `pull --rebase --autostash`, 동기화 실패 시 게시 건너뜀+ntfy. 노트북 `C:\saju-app`은 11/9 06:5x 사장님 "맞춰"로 origin/main에 재정렬 완료(백업 `backup/laptop-diverged-20261109`). "변경내용 가져와" 때는 **ahead/behind 숫자부터** 볼 것. 두 컴퓨터가 동시에 켜져 있을 수 있다(주말에 노트북도 켜져 있었음).

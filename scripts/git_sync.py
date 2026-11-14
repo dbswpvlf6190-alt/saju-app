@@ -57,12 +57,26 @@ def recover_stuck_rebase(cwd):
 
 
 def git_pull(cwd):
+    """원격 main을 받아온다. 성공하면 True.
+    --autostash: 2026-11-05 노트북에서 락 해제 커밋이 반쯤 끝나 '삭제가 스테이징된 락 파일'이 남자, 그 뒤 모든
+    pull --rebase가 "index contains uncommitted changes"로 거부돼 4일간 원격과 갈라졌다(11/9 복구). 남은 변경은
+    잠시 치워 두고 받는다."""
     recover_stuck_rebase(cwd)  # 지난 실행이 남긴 멈춘 rebase부터 정리
-    result = git(["pull", "--rebase", "origin", "main"], cwd)
+    result = git(["pull", "--rebase", "--autostash", "origin", "main"], cwd)
     if result.returncode != 0:
         print(f"  git pull 실패(무시하고 로컬 상태로 계속): {result.stderr[-500:]}")
         if recover_stuck_rebase(cwd):
             print("  멈춘 rebase 정리함")
+        return False
+    return True
+
+
+def _alert_out_of_sync(cwd, lock_rel_path):
+    import notify  # 순환 import 방지로 여기서
+
+    notify.notify("⚠️ git 동기화 실패 — 게시 건너뜀", f"{os.path.basename(cwd)}: {lock_rel_path} 락을 원격에 올리지도, "
+                  "원격을 받아오지도 못해 중복 게시를 막으려고 이번 게시를 건너뜀. 사람 확인 필요(git status)",
+                  priority=4, tags=["warning"])
 
 
 def git_commit_push(cwd, paths, message):
@@ -102,7 +116,11 @@ def try_acquire_lock(cwd, lock_rel_path):
 
     if not git_commit_push(cwd, [lock_rel_path], f"lock: {lock_rel_path} by {me}"):
         # push 거부됨 -> 다른 컴퓨터가 먼저 뭔가를 올렸다는 뜻. 최신 상태를 받아와서 재확인.
-        git_pull(cwd)
+        if not git_pull(cwd):
+            # 원격을 받지도 올리지도 못하면 다른 컴퓨터가 이미 게시했는지 알 수 없다. 예전에는 "로컬 락으로 진행"해서
+            # 2026-11-05~08 노트북·데스크톱이 같은 글(IG13·RD12·EN11·JA11)을 두 번씩 올렸다 → 건너뛰고 알린다.
+            _alert_out_of_sync(cwd, lock_rel_path)
+            return False, "원격 동기화 실패"
         if os.path.exists(lock_path):
             with open(lock_path, "r", encoding="utf-8") as f:
                 current = f.read().strip()

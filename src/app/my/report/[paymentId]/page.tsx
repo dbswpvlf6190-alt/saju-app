@@ -2,15 +2,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db/prisma";
 import { SESSION_COOKIE_NAME, verifySessionCookie } from "@/lib/auth/session";
-import { calculateSaju, type SajuInput } from "@/lib/saju";
-import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
-import { getPremiumReport, getNewYearReport, getReportLayout } from "@/lib/reports/generate";
-import { MANUAL_CHAPTER_META } from "@/lib/reports/manualChapters";
-import { PRODUCT_CATALOG, type ProductType } from "@/lib/payment/config";
-import { PillarCard } from "@/components/saju/PillarCard";
-import { NewYearReportText } from "@/components/saju/NewYearReportText";
-import { WuxingBar } from "@/components/saju/WuxingBar";
-import { WuxingMascot } from "@/components/saju/WuxingMascot";
+import { OrderReportView } from "@/components/report/OrderReportView";
 
 export const dynamic = "force-dynamic";
 
@@ -26,107 +18,5 @@ export default async function MyReportPage({ params }: { params: Promise<{ payme
   const order = await prisma.order.findUnique({ where: { paymentId } });
   if (!order || order.userId !== userId || order.status !== "PAID") notFound();
 
-  const productName = PRODUCT_CATALOG[order.productType as ProductType]?.name ?? order.productType;
-
-  if (order.productType === "compatibility_report") {
-    return (
-      <div className="flex w-full max-w-md flex-col items-center gap-3 px-5 py-16 text-center">
-        <h1 className="font-serif text-xl text-accent-gold-soft">{productName}</h1>
-        <p className="text-sm text-foreground-muted">
-          궁합 리포트 다시보기는 아직 준비 중이에요. 곧 지원할게요.
-        </p>
-      </div>
-    );
-  }
-
-  const birthInput = JSON.parse(order.birthInputJson) as SajuInput;
-  const result = calculateSaju(birthInput);
-  const free = generateFreeContent(result);
-
-  if (order.productType === "new_year_report") {
-    const res = await getNewYearReport(order.paymentId, order.birthInputJson, order.aiResultJson);
-    const data = await res.json();
-    const text: string | undefined = data.sections?.newYear;
-    return (
-      <div className="flex w-full max-w-md flex-col gap-6 px-5 py-10">
-        <ReportHeader productName={productName} free={free} result={result} />
-        <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-          <h3 className="text-sm font-medium text-foreground-muted">{productName}</h3>
-          {text ? (
-            <NewYearReportText text={text} />
-          ) : (
-            <p className="whitespace-pre-line leading-relaxed text-foreground">
-              리포트를 준비 중이에요. 잠시 후 다시 확인해 주세요.
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // premium_report / section_upgrade(차액으로 5가지 전체) / single_section(산 1가지만)
-  const isSingle = order.productType === "single_section";
-  const cached = (order.aiResultJson ? JSON.parse(order.aiResultJson) : {}) as Record<string, string>;
-  const layout = getReportLayout(cached, order.productType);
-  // 새 주문은 6장 "나 사용설명서", 기존 결제 고객·1가지·차액 주문은 결제 당시 주제 방식 그대로.
-  const premiumSections: { key: string; title: string }[] =
-    !isSingle && layout.layout === "manual"
-      ? MANUAL_CHAPTER_META.map((c) => ({ key: c.key, title: c.title }))
-      : getPremiumSections(result)
-          .filter((s) => !isSingle || s.key === order.sectionKey)
-          .map((s) => ({ key: s.key, title: s.title }));
-  const res = await getPremiumReport(
-    order.paymentId,
-    order.birthInputJson,
-    order.aiResultJson,
-    premiumSections.map((s) => s.key) as Parameters<typeof getPremiumReport>[3],
-    order.productType,
-  );
-  const data = await res.json();
-  const sections: Record<string, string> = data.sections ?? {};
-
-  return (
-    <div className="flex w-full max-w-md flex-col gap-6 px-5 py-10">
-      <ReportHeader productName={productName} free={free} result={result} />
-
-      <div className="grid grid-cols-4 gap-2">
-        <PillarCard label="년주" pillar={result.yearPillar} />
-        <PillarCard label="월주" pillar={result.monthPillar} />
-        <PillarCard label="일주" pillar={result.dayPillar} />
-        <PillarCard label="시주" pillar={result.timePillar} />
-      </div>
-
-      <WuxingBar percent={result.wuxingPercent} />
-
-      <div className="flex flex-col gap-3">
-        {premiumSections.map((section) => (
-          <div key={section.key} className="rounded-2xl border border-border-subtle bg-background-card/70 p-4">
-            <h4 className="font-medium text-accent-gold-soft">{section.title}</h4>
-            <p className="mt-2 whitespace-pre-line leading-relaxed text-foreground">
-              {sections[section.key] ?? "리포트를 준비 중이에요. 잠시 후 다시 확인해 주세요."}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ReportHeader({
-  productName,
-  free,
-  result,
-}: {
-  productName: string;
-  free: ReturnType<typeof generateFreeContent>;
-  result: ReturnType<typeof calculateSaju>;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2 text-center">
-      <span className="text-xs text-foreground-muted">{productName}</span>
-      <WuxingMascot wuxing={result.dayPillar.ganWuxing} size={88} />
-      <h1 className="font-serif text-xl text-accent-gold-soft">{free.dayMasterLabel}</h1>
-      <p className="text-sm text-foreground-muted">{free.dayMasterMetaphor}</p>
-    </div>
-  );
+  return <OrderReportView order={order} />;
 }

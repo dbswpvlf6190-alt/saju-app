@@ -17,6 +17,17 @@ sys.path.insert(0, HERE)
 import make_daily_report as R  # noqa: E402
 
 
+def _desktop():
+    """윈도우가 아는 진짜 바탕 화면(레지스트리). OneDrive를 끄면 ~/OneDrive/바탕 화면이 더는 바탕 화면이 아니다(11/10 사장님: OneDrive 안 씀)."""
+    try:
+        import winreg
+        k = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders")
+        p, _ = winreg.QueryValueEx(k, "Desktop")
+        return os.path.expandvars(p)
+    except Exception:
+        return os.path.join(os.path.expanduser("~"), "Desktop")
+
+
 def run(cmd, cwd=None, timeout=150):
     try:
         return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="ignore", timeout=timeout).stdout
@@ -230,7 +241,7 @@ def main():
         "decisions": static["decisions"],
         "unknown": unknown,
     }
-    out_dir = os.path.join(os.path.expanduser("~"), "OneDrive", "바탕 화면", "사주랩_보고서")
+    out_dir = os.path.join(_desktop(), "사주랩_보고서")
     os.makedirs(out_dir, exist_ok=True)
     pdf = os.path.join(out_dir, f"{ds}_일일보고서_자동.pdf")
     json.dump(data, open(os.path.join(HERE, f"data_{ds}_auto.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)

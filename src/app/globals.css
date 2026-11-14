@@ -1,20 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0e0b1f;
-  --background-elevated: #171331;
-  --background-card: #1d1840;
-  --foreground: #f3efe8;
-  --foreground-muted: #b9b3d6;
-  --accent-gold: #d4af6a;
-  --accent-gold-soft: #e8cf9c;
-  --border-subtle: rgba(212, 175, 106, 0.18);
+  /* 2026-11 토스 v16과 같은 고급 테마: 아이보리 60 · 남색 30 · 금색 10. 금색 글씨는 밝은 바탕에서 읽히도록 진한 청동,
+     그림자 대신 얇은 선. 라이트 모드 전용(50대 이상 손님이 많아 대비를 우선). */
+  --background: #f5f1ea;
+  --background-elevated: #fffefb;
+  --background-card: #fffefb;
+  --foreground: #1b1828;
+  --foreground-muted: #5e5869;
+  --accent-gold: #b8955a;
+  --accent-gold-soft: #7a5a1f;
+  --border-subtle: #e7e0d3;
+  /* 강한 버튼은 밤하늘 남색 + 금빛 글씨(예전 금색 버튼 + 진남색 글씨를 대신함) */
+  --cta: #221c3c;
+  --cta-ink: #f1e3c0;
 
   --wuxing-wood: #4caf6e;
   --wuxing-fire: #e2604f;
-  --wuxing-earth: #d3a04a;
-  --wuxing-metal: #cfc9b8;
+  --wuxing-earth: #c9963c;
+  --wuxing-metal: #9a927c;
   --wuxing-water: #5b86d6;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -26,6 +32,8 @@
   --color-accent-gold: var(--accent-gold);
   --color-accent-gold-soft: var(--accent-gold-soft);
   --color-border-subtle: var(--border-subtle);
+  --color-cta: var(--cta);
+  --color-cta-ink: var(--cta-ink);
 
   --color-wuxing-wood: var(--wuxing-wood);
   --color-wuxing-fire: var(--wuxing-fire);
@@ -43,12 +51,9 @@ body {
   font-family: var(--font-sans-kr), Arial, Helvetica, sans-serif;
 }
 
-/* 별빛 텍스처: 은은한 방사형 그라디언트 반복으로 고급스러운 밤하늘 느낌 연출 */
+/* 예전 별빛 배경 자리: 밝은 테마에서는 위쪽에만 아주 옅은 금빛을 깐다(클래스 이름은 그대로 둬서 쓰는 곳을 안 바꿈). */
 .bg-starfield {
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(212, 175, 106, 0.10) 0, transparent 45%),
-    radial-gradient(circle at 80% 0%, rgba(91, 134, 214, 0.12) 0, transparent 40%),
-    radial-gradient(circle at 50% 100%, rgba(212, 175, 106, 0.08) 0, transparent 50%);
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(184, 149, 90, 0.10) 0, transparent 60%);
 }
 
 /* 결과 화면이 뜨는 순간을 "풀이 결과가 펼쳐지는" 느낌으로 만들기 위한 등장 애니메이션.
@@ -97,4 +102,22 @@ body {
 
 .loading-dot {
   animation: loading-dot-pulse 1s ease-in-out infinite;
+}
+
+/* 선 아이콘(components/ui/Icon.tsx) — 글자 크기를 따라가고 색은 글자색 그대로 */
+.ico {
+  display: inline-flex;
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.18em;
+  flex-shrink: 0;
+}
+.ico svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

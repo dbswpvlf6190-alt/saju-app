@@ -5,6 +5,7 @@ import type { PremiumSection } from "@/lib/saju";
 import { SECTION_UPGRADE_PRICE_KRW } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 import { PurchaseConsent } from "./PurchaseConsent";
+import { Icon } from "@/components/ui/Icon";
 
 type Status = "idle" | "processing" | "error";
 
@@ -116,7 +117,7 @@ export function SectionUpgradeCard({
       <ul className="flex flex-wrap justify-center gap-1.5">
         {lockedSections.map((s) => (
           <li key={s.key} className="rounded-full border border-border-subtle px-3 py-1 text-xs text-foreground-muted">
-            🔒 {s.title}
+            <Icon name="lock" /> {s.title}
           </li>
         ))}
       </ul>
@@ -150,7 +151,7 @@ export function SectionUpgradeCard({
         ))}
       </div>
 
-      {errorMessage && <p className="text-center text-xs text-red-300">{errorMessage}</p>}
+      {errorMessage && <p className="text-center text-xs text-red-700">{errorMessage}</p>}
 
       <PurchaseConsent checked={agreed} onChange={setAgreed} />
 
@@ -158,7 +159,7 @@ export function SectionUpgradeCard({
         type="button"
         onClick={() => void handlePurchase()}
         disabled={status === "processing" || !agreed}
-        className="min-h-12 rounded-xl bg-accent-gold px-4 py-3 text-center text-sm font-semibold text-[#1a1430] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="min-h-12 rounded-xl bg-cta px-4 py-3 text-center text-sm font-semibold text-cta-ink transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {status === "processing" ? "처리 중..." : `+${SECTION_UPGRADE_PRICE_KRW.toLocaleString()}원으로 나머지 ${lockedSections.length}가지 열기`}
       </button>

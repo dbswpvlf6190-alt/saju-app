@@ -210,7 +210,7 @@ export function ShareButton({
               <a
                 href={storyPreviewUrl}
                 download="saju-lab.png"
-                className="flex-1 rounded-xl bg-accent-gold px-4 py-2.5 text-sm font-semibold text-[#1a1430]"
+                className="flex-1 rounded-xl bg-cta px-4 py-2.5 text-sm font-semibold text-cta-ink"
               >
                 이미지 저장
               </a>

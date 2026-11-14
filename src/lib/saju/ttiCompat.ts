@@ -191,3 +191,17 @@ export const TTI_PAIR_BY_SLUG: Record<string, TtiPair> = Object.fromEntries(TTI_
 export function ttiPairSlug(x: Tti, y: Tti): string {
   return TTI.indexOf(x) <= TTI.indexOf(y) ? `${x.slug}-${y.slug}` : `${y.slug}-${x.slug}`;
 }
+
+/** 두 지지(한자 한 글자) 사이의 관계 종류. 강한 순서(육합 → 파)로 정렬. 2027 운세 페이지처럼 사람끼리가 아닌 "해·달과 내 띠" 관계를 볼 때 쓴다. */
+export function branchRelationKinds(a: string, b: string): RelationKind[] {
+  const A = BY_BRANCH[a];
+  const B = BY_BRANCH[b];
+  if (!A || !B) return [];
+  return relationNotes(A, B)
+    .sort((x, y) => PRIORITY.indexOf(x.kind) - PRIORITY.indexOf(y.kind))
+    .map((r) => r.kind);
+}
+
+export function ttiByBranch(branch: string): Tti | undefined {
+  return BY_BRANCH[branch];
+}

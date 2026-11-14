@@ -7,8 +7,19 @@ from reportlab.platypus import BaseDocTemplate, Frame, PageTemplate, Spacer
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_daily_report as R
 
+
+def _desktop():
+    """윈도우가 아는 진짜 바탕 화면(레지스트리). OneDrive를 끄면 ~/OneDrive/바탕 화면이 더는 바탕 화면이 아니다(11/10 사장님: OneDrive 안 씀)."""
+    try:
+        import winreg
+        k = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders")
+        p, _ = winreg.QueryValueEx(k, "Desktop")
+        return os.path.expandvars(p)
+    except Exception:
+        return os.path.join(os.path.expanduser("~"), "Desktop")
+
 W = A4[0] / mm - 36
-DESK = os.path.join(os.path.expanduser("~"), "OneDrive", "바탕 화면", "사주랩_보고서")
+DESK = os.path.join(_desktop(), "사주랩_보고서")
 os.makedirs(DESK, exist_ok=True)
 OUT = os.path.join(DESK, "2026-10-20_나사용설명서_제작원가_분석.pdf")
 

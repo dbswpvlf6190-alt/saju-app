@@ -6,6 +6,7 @@ import { rateLimit } from "@/lib/security/rateLimit";
 import { warmReportCache } from "@/lib/reports/warm";
 import { isPremiumTopicKey } from "@/lib/reports/layout";
 import { ensureConsultPass } from "@/lib/consult/pass";
+import { notifyPaid } from "@/lib/notify/ntfy";
 import { isConsultProductType } from "@/lib/consult/plans";
 import {
   TossIapError,
@@ -144,6 +145,9 @@ export async function POST(req: NextRequest) {
       }
       throw e;
     }
+
+    // 결제 알림(폰 푸시)은 응답 뒤에 보낸다. 같은 orderId 재요청(P2002)은 위에서 이미 돌아가 중복 알림이 없다.
+    after(() => notifyPaid(order));
 
     if (isConsult) {
       await ensureConsultPass(order);

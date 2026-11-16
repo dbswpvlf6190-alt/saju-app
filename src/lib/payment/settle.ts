@@ -3,6 +3,7 @@ import type { PortOnePayment } from "@/lib/payment/verify";
 import { describeFailure } from "@/lib/payment/failure";
 import { sendPaymentFailureKakaoNotification, sendPaymentKakaoNotification } from "@/lib/kakao/notify";
 import { ensureConsultPass } from "@/lib/consult/pass";
+import { notifyPaid, notifyPaymentFailed } from "@/lib/notify/ntfy";
 
 type OrderRow = Awaited<ReturnType<typeof prisma.order.findUnique>>;
 
@@ -51,6 +52,7 @@ export async function finalizeOrderFromPortOnePayment(
       } catch (e) {
         console.error(`카카오 결제 실패 알림 전송 실패 (paymentId=${order.paymentId}):`, e);
       }
+      await notifyPaymentFailed(order, describeFailure(payment, isAmountValid));
     }
     return { status: "FAILED", amountValid: isAmountValid };
   }
@@ -69,6 +71,8 @@ export async function finalizeOrderFromPortOnePayment(
   } catch (e) {
     console.error(`카카오 결제 알림 전송 실패 (paymentId=${order.paymentId}):`, e);
   }
+  // 폰 푸시(ntfy). 카카오와 별개로 보내며, 실패해도 판정에 영향 없다.
+  await notifyPaid(updated);
 
   return { status: "PAID", amountValid: true };
 }

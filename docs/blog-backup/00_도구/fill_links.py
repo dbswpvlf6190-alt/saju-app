@@ -1,7 +1,7 @@
 """블로그 초안에 내 블로그 글 주소를 채워 '바로 복사용' 파일을 만든다.
 
 공개 저장소라 블로그 주소(아이디 포함)는 초안에 넣지 않고 [[주소:제목 일부]] 자리표시만 둔다.
-이 스크립트가 OneDrive '사주랩 블로그 글 주소.txt'(바탕화면 아님, OneDrive 맨 위)를 RSS로 새로 고친 뒤,
+이 스크립트가 블로그 초안 폴더의 '사주랩 블로그 글 주소.txt'(사장님이 둔 자리, gitignore)를 RSS로 새로 고친 뒤,
 자리표시를 실제 주소로 바꾼 '★바로복사_...txt'를 같은 폴더에 만든다(.gitignore로 저장소에는 안 올라감).
 
 사용법:  python fill_links.py <날짜 폴더>        예) python fill_links.py ..\\2026-11-18
@@ -15,7 +15,8 @@ import urllib.request
 sys.stdout.reconfigure(encoding="utf-8")
 
 ONEDRIVE = os.path.join(os.path.expanduser("~"), "OneDrive")
-ADDR = os.path.join(ONEDRIVE, "사주랩 블로그 글 주소.txt")
+# 사장님이 11/17 초안 폴더(docs/blog-backup)로 옮긴 자리. .gitignore로 저장소에는 안 올라감.
+ADDR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "사주랩 블로그 글 주소.txt")
 # 주소 파일이 없을 때 블로그 아이디를 읽어 올 바탕화면 바로가기(아이디를 코드에 두지 않기 위해)
 SHORTCUT = os.path.join(ONEDRIVE, "바탕 화면", "사주랩 운세연구소 블로그.url")
 TOKEN = re.compile(r"\[\[주소:([^\]]+)\]\]")

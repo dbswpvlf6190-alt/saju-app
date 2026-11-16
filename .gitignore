@@ -59,3 +59,6 @@ next-env.d.ts
 /.agents/
 /.claude/skills/
 skills-lock.json
+
+# 블로그 초안에 내 블로그 주소를 채운 복사용 파일(공개 저장소에 아이디를 올리지 않기 위해 로컬 전용, fill_links.py가 만듦)
+docs/blog-backup/**/★바로복사_*

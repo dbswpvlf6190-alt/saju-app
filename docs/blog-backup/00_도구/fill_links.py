@@ -1,7 +1,7 @@
 """블로그 초안에 내 블로그 글 주소를 채워 '바로 복사용' 파일을 만든다.
 
 공개 저장소라 블로그 주소(아이디 포함)는 초안에 넣지 않고 [[주소:제목 일부]] 자리표시만 둔다.
-이 스크립트가 바탕화면(OneDrive) '사주랩 블로그 글 주소.txt'를 RSS로 새로 고친 뒤,
+이 스크립트가 OneDrive '사주랩 블로그 글 주소.txt'(바탕화면 아님, OneDrive 맨 위)를 RSS로 새로 고친 뒤,
 자리표시를 실제 주소로 바꾼 '★바로복사_...txt'를 같은 폴더에 만든다(.gitignore로 저장소에는 안 올라감).
 
 사용법:  python fill_links.py <날짜 폴더>        예) python fill_links.py ..\\2026-11-18
@@ -14,12 +14,17 @@ import urllib.request
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-ADDR = os.path.join(os.path.expanduser("~"), "OneDrive", "바탕 화면", "사주랩 블로그 글 주소.txt")
+ONEDRIVE = os.path.join(os.path.expanduser("~"), "OneDrive")
+ADDR = os.path.join(ONEDRIVE, "사주랩 블로그 글 주소.txt")
+# 주소 파일이 없을 때 블로그 아이디를 읽어 올 바탕화면 바로가기(아이디를 코드에 두지 않기 위해)
+SHORTCUT = os.path.join(ONEDRIVE, "바탕 화면", "사주랩 운세연구소 블로그.url")
 TOKEN = re.compile(r"\[\[주소:([^\]]+)\]\]")
 PREFIX = "★바로복사_"
 
 
 def read_addr():
+    if not os.path.exists(ADDR):
+        return []
     lines = [l.strip() for l in open(ADDR, encoding="utf-8").read().splitlines()]
     pairs = []
     for i, l in enumerate(lines[:-1]):
@@ -33,7 +38,10 @@ def refresh_addr():
     try:
         old = read_addr()
         m = re.match(r"https://blog\.naver\.com/([^/]+)/", old[0][1]) if old else None
+        if not m and os.path.exists(SHORTCUT):
+            m = re.search(r"URL=https://blog\.naver\.com/([A-Za-z0-9_\-]+)", open(SHORTCUT, encoding="utf-8", errors="ignore").read())
         if not m:
+            print("블로그 아이디를 찾지 못함(주소 파일·바로가기 둘 다 없음)")
             return
         x = urllib.request.urlopen(f"https://rss.blog.naver.com/{m.group(1)}.xml", timeout=20).read().decode("utf-8")
         clean = lambda v: v.replace("<![CDATA[", "").replace("]]>", "").strip()

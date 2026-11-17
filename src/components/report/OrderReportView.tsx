@@ -2,7 +2,8 @@ import { calculateSaju, type SajuInput } from "@/lib/saju";
 import { generateFreeContent, getPremiumSections } from "@/lib/saju/content";
 import { getPremiumReport, getNewYearReport, getReportLayout } from "@/lib/reports/generate";
 import { MANUAL_CHAPTER_META } from "@/lib/reports/manualChapters";
-import { PRODUCT_CATALOG, type ProductType } from "@/lib/payment/config";
+import { NEW_YEAR_REPORT_TARGET_YEAR, PRODUCT_CATALOG, type ProductType } from "@/lib/payment/config";
+import { buildNewYearMonthCards } from "@/lib/newYear/preview";
 import { PillarCard } from "@/components/saju/PillarCard";
 import { NewYearReportText } from "@/components/saju/NewYearReportText";
 import { WuxingBar } from "@/components/saju/WuxingBar";
@@ -39,7 +40,7 @@ export async function OrderReportView({ order }: { order: OrderRow }) {
         <div className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-background-card/70 p-4">
           <h3 className="text-sm font-medium text-foreground-muted">{productName}</h3>
           {text ? (
-            <NewYearReportText text={text} />
+            <NewYearReportText text={text} cards={buildNewYearMonthCards(result, NEW_YEAR_REPORT_TARGET_YEAR)} />
           ) : (
             <p className="whitespace-pre-line leading-relaxed text-foreground">
               리포트를 준비 중이에요. 잠시 후 다시 확인해 주세요.

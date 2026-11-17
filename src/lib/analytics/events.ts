@@ -44,6 +44,8 @@ export const ANALYTICS_EVENT_NAMES = [
   "payment_fail_detail",
   // /2027 띠·나이 페이지 방문과 들어온 곳(blog·naver_search 등, pageFrom.ts) — 블로그 효과 측정(2026-11-13)
   "y2027_view",
+  // 웹 /new-year 결제 전 미리보기 카드가 보인 횟수(2026-11-17) — new_year_result_view → ny_teaser_view → checkout_start
+  "ny_teaser_view",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

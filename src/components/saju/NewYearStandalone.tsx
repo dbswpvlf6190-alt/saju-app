@@ -2,21 +2,37 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { SajuInput, SajuResult } from "@/lib/saju";
+import { resultToInput } from "@/lib/saju/types";
 import { PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 import { rememberSource } from "@/lib/analytics/source";
+import type { NewYearTeaser } from "@/lib/newYear/preview";
 import { BirthInfoForm, type BirthInfoFormValues } from "./BirthInfoForm";
 import { NewYearUpsellCard } from "./NewYearUpsellCard";
+import { NewYearTeaserCard } from "./NewYearTeaserCard";
 import { loadNewYearPending } from "@/lib/newYear/pending";
 
 /**
- * /new-year 단독 구매 흐름(2026-10-22): 생년월일 입력 → 내 일주 확인 → 신년운세 결제.
- * 기본 리포트(4,900원)를 먼저 사지 않아도 신년운세만 살 수 있다. 계산은 서버(/api/saju/calculate)에서 하고,
+ * /new-year 단독 구매 흐름(2026-10-22): 생년월일 입력 → 결제 전 미리보기 → 신년운세 결제.
+ * 기본 리포트(4,900원)를 먼저 사지 않아도 신년운세만 살 수 있다. 계산은 서버(/api/new-year/preview)에서 하고,
  * 결제·리포트 조회는 기존 new_year_report 주문 경로를 그대로 쓴다. 모바일 결제창이 리디렉션으로 돌아오면
  * /new-year/return이 이어받는다.
+ * (2026-11-17) 예전엔 결제 전에 "○○일주" 한 줄만 보여 줘 웹 손님 약 42명 중 결제 0건 → 토스 v11식 미리보기(NewYearTeaserCard).
  */
+async function fetchPreview(birthInput: SajuInput): Promise<{ result: SajuResult; teaser: NewYearTeaser }> {
+  const res = await fetch("/api/new-year/preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ birthInput }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "입력값을 다시 확인해 주세요.");
+  return data;
+}
+
 export function NewYearStandalone() {
   const [result, setResult] = useState<SajuResult | null>(null);
+  const [teaser, setTeaser] = useState<NewYearTeaser | null>(null);
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +48,10 @@ export function NewYearStandalone() {
         setName(pending.name);
         setResult(pending.result);
         trackEvent("checkout_retry_view", { productType: "new_year_report" });
+        // 미리보기는 저장하지 않았으므로 다시 계산한다(실패해도 결제 카드는 그대로 보인다).
+        fetchPreview(resultToInput(pending.result))
+          .then((d) => setTeaser(d.teaser))
+          .catch(() => {});
         return;
       }
     }
@@ -54,15 +74,10 @@ export function NewYearStandalone() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("/api/saju/calculate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ birthInput }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "입력값을 다시 확인해 주세요.");
+      const data = await fetchPreview(birthInput);
       setName(values.name);
-      setResult(data.result as SajuResult);
+      setResult(data.result);
+      setTeaser(data.teaser);
       trackEvent("new_year_result_view", {});
       requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     } catch (e) {
@@ -78,11 +93,15 @@ export function NewYearStandalone() {
 
   return (
     <div ref={resultRef} className="flex w-full max-w-md flex-col gap-4">
-      <div className="flex flex-col items-center gap-1 rounded-2xl border border-border-subtle bg-background-card/70 px-4 py-5 text-center">
-        <span className="text-xs text-foreground-muted">{name ? `${name}님의 일주` : "나의 일주"}</span>
-        <strong className="font-serif text-2xl text-accent-gold-soft">{result.dayPillar.ganZhiKor}일주</strong>
-        <span className="text-xs text-foreground-muted">이 사주에 2027년 정미년 기운이 어떻게 들어오는지 풀어드려요</span>
-      </div>
+      {teaser ? (
+        <NewYearTeaserCard teaser={teaser} name={name} />
+      ) : (
+        <div className="flex flex-col items-center gap-1 rounded-2xl border border-border-subtle bg-background-card/70 px-4 py-5 text-center">
+          <span className="text-xs text-foreground-muted">{name ? `${name}님의 일주` : "나의 일주"}</span>
+          <strong className="font-serif text-2xl text-accent-gold-soft">{result.dayPillar.ganZhiKor}일주</strong>
+          <span className="text-xs text-foreground-muted">이 사주에 2027년 정미년 기운이 어떻게 들어오는지 풀어드려요</span>
+        </div>
+      )}
 
       {PAYMENTS_PAUSED ? (
         <p className="rounded-2xl border border-border-subtle bg-background-card/70 px-4 py-5 text-center text-sm text-foreground-muted">
@@ -96,12 +115,16 @@ export function NewYearStandalone() {
           phoneNumber=""
           variant="standalone"
           redirectPath="/new-year/return"
+          goodDays={teaser?.totalGoodDays}
         />
       )}
 
       <button
         type="button"
-        onClick={() => setResult(null)}
+        onClick={() => {
+          setResult(null);
+          setTeaser(null);
+        }}
         className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
       >
         다른 생년월일로 다시 보기

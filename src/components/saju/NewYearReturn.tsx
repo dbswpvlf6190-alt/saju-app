@@ -6,13 +6,14 @@ import { parseNewYearReturn } from "@/lib/newYear/returnParams";
 import { trackEvent } from "@/lib/analytics/track";
 import { NEW_YEAR_REPORT_NAME } from "@/lib/payment/config";
 import { NewYearReportText } from "./NewYearReportText";
+import type { NewYearMonthCard } from "@/lib/newYear/preview";
 import { clipForLog, detectInAppBrowser, friendlyPaymentError, inAppHint } from "@/lib/payment/checkoutEnv";
 import { clearNewYearPending, loadNewYearPending } from "@/lib/newYear/pending";
 
 type State =
   | { step: "checking" }
   | { step: "writing" }
-  | { step: "done"; text: string }
+  | { step: "done"; text: string; cards?: NewYearMonthCard[] }
   | { step: "failed"; message: string; canRetry: boolean; hint: string | null }
   | { step: "retry"; paymentId: string; message: string };
 
@@ -31,7 +32,7 @@ export function NewYearReturn() {
       const res = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
       const data = await res.json();
       if (data.sections?.newYear) {
-        setState({ step: "done", text: data.sections.newYear });
+        setState({ step: "done", text: data.sections.newYear, cards: data.months });
         // 풀이가 열린 뒤에만 주문번호를 주소창에서 지운다. 그 전에는 새로고침으로 다시 불러올 수 있게 남겨둔다.
         window.history.replaceState({}, "", window.location.pathname);
         return;
@@ -116,7 +117,7 @@ export function NewYearReturn() {
 
       {state.step === "done" && (
         <div className="rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4">
-          <NewYearReportText text={state.text} />
+          <NewYearReportText text={state.text} cards={state.cards} />
         </div>
       )}
 

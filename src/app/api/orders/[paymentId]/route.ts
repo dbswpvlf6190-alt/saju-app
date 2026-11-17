@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { PremiumSectionKey } from "@/lib/saju";
+import { calculateSaju, type PremiumSectionKey, type SajuInput } from "@/lib/saju";
+import { buildNewYearMonthCards, type NewYearMonthCard } from "@/lib/newYear/preview";
+import { NEW_YEAR_REPORT_TARGET_YEAR } from "@/lib/payment/config";
 import { prisma } from "@/lib/db/prisma";
 import { orderAccessCookieName, verifyOrderAccessToken } from "@/lib/payment/orderAccess";
 import {
@@ -51,7 +53,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ paym
     }
 
     if (order.productType === "new_year_report") {
-      return await getNewYearReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+      // 결제 전 화면이 약속한 달 카드(좋은 날짜·재물·가족·할 일)는 계산값이라 AI 글과 별개로 항상 함께 준다(2026-11-17).
+      const res = await getNewYearReport(order.paymentId, order.birthInputJson, order.aiResultJson);
+      const data = await res.json();
+      let months: NewYearMonthCard[] | undefined;
+      try {
+        months = buildNewYearMonthCards(calculateSaju(JSON.parse(order.birthInputJson) as SajuInput), NEW_YEAR_REPORT_TARGET_YEAR);
+      } catch (e) {
+        console.error(`신년운세 달 카드 계산 실패 (paymentId=${paymentId}):`, e);
+      }
+      return NextResponse.json({ ...data, ...(months && { months }) }, { status: res.status });
     }
 
     // premium_report. ?section=love 처럼 특정 항목 하나만 요청할 수도 있다 — 클라이언트가

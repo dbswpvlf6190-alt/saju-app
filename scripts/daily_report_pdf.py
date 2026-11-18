@@ -66,8 +66,8 @@ HUMAN_SINCE = "2026-10-19"  # 로봇 제외(ua 표시) 이후 첫 온전한 날
 PAID_SINCE = "2026-09-01"  # 8월 결제 4건은 출시 전 본인 시험
 TEST_ORDERS = ("toss-9f4e2019", "toss-3f1e76d2", "toss-4738803c",  # 10/20 토스 실결제 시험(사장님 아이폰, 환불 없음)
                "423ad36b",  # 8/28 웹 4,900원 실결제 — 사장님 본인 결제(11/7 확인)
-               "toss-d3a28528",  # 11/3 토스 신년운세 3,894원 — 사장님 본인 결제(11/7 확인)
-               "cd01b00a", "f8110881", "99fb2ca4")  # 11/13·11/15 웹 신년운세 3,900원 ×3 — 사장님 본인 결제(11/17 확인)
+               "toss-d3a28528")  # 11/3 토스 신년운세 3,894원 — 사장님 본인 결제(11/7 확인)
+# 11/13·11/15 웹 신년운세 3,900원 ×3(cd01b00a·f8110881·99fb2ca4)은 11/19 사장님 "내 결제 아니고 다 신규 결제" → 손님 매출로 센다.
 # 11/18 사장님 '보고서 고쳐': 블로그(네이버, 11/12~) 유입·결제 줄 추가. 블로그 글의 사이트 링크는 ?from=blog → /2027 페이지의
 # y2027_view meta.from='blog', 결제 흐름은 checkout_start·payment_success meta.src='blog_…'로 남는다.
 BLOG_SINCE = "2026-11-13"  # ?from=blog 링크를 넣기 시작한 날
@@ -335,7 +335,7 @@ def render(now, th, ig, site, health, notes, pages23="", blog=None):
             ("블로그", "블로그 → 사이트 (페이지 조회)", num(bv["t"], "회"), num(bv["y"], "회"), f"{bv['n']:,}회 ({BLOG_SINCE[5:].replace('-', '/')}~)",
              f"하루 {BLOG_VISIT_GOAL}회", "green" if max(bv["t"], bv["y"]) >= BLOG_VISIT_GOAL else "yellow" if max(bv["t"], bv["y"]) >= 20 else "red"),
             ("", "블로그 경유 결제창 · 결제", f"{bc['t']} · {bp['t']}건", f"{bc['y']} · {bp['y']}건", f"{bc['n']} · {bp['n']}건",
-             "본인 결제 분류분 포함", "green" if bp["n"] else "yellow" if bc["n"] else "red"),
+             "모두 손님 결제(11/19 확인)", "green" if bp["n"] else "yellow" if bc["n"] else "red"),
         ]
     rows += [
         ("토스", "사용자", num(toss.get("users_today"), "명"), num(toss.get("users_yesterday"), "명"), num(toss.get("users_total"), "명"), "", "yellow"),

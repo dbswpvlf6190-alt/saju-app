@@ -62,11 +62,40 @@ def refresh_addr():
         print("RSS 새로 고침 건너뜀:", e)
 
 
+def ensure_local_ignore():
+    """날짜 폴더의 완성본 txt(블로그 주소 포함)가 공개 저장소에 올라가지 않게 이 컴퓨터의 .git/info/exclude에 등록한다.
+    (.gitignore를 고치면 Vercel 빌드가 돌아서 여기에 둔다. 두 컴퓨터 모두 이 스크립트를 실행하면 자동으로 들어간다.)"""
+    try:
+        import subprocess
+        here = os.path.dirname(os.path.abspath(__file__))
+        common = subprocess.run(["git", "-C", here, "rev-parse", "--git-common-dir"], capture_output=True, text=True).stdout.strip()
+        if not common:
+            return
+        if not os.path.isabs(common):
+            common = os.path.join(here, common)
+        ex = os.path.join(common, "info", "exclude")
+        os.makedirs(os.path.dirname(ex), exist_ok=True)
+        cur = open(ex, encoding="utf-8").read() if os.path.exists(ex) else ""
+        line = "docs/blog-backup/20*/*.txt"
+        if line not in cur:
+            with open(ex, "a", encoding="utf-8") as fh:
+                fh.write(("" if not cur or cur.endswith("\n") else "\n") + line + "\n")
+    except Exception as e:
+        print("exclude 등록 건너뜀:", e)
+
+
 def main(folder):
+    """11/18~: 원본은 00_도구/원본/<날짜>/<N순위_제목>.txt(저장소), 완성본은 <날짜>/<N순위_제목>.txt(이 컴퓨터만).
+    사장님 폴더에는 완성본 txt와 _이미지 폴더만 보이게 한다(사장님 11/18 '바로복사 파일만 남기자', '파일명에 1순위').
+    원본 폴더가 없는 옛 날짜(~11/17)는 예전처럼 같은 폴더에 ★바로복사_ 파일을 만든다."""
+    folder = os.path.abspath(folder)
+    ensure_local_ignore()
     refresh_addr()
     pairs = read_addr()
+    src_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "원본", os.path.basename(folder))
+    new_style = os.path.isdir(src_dir)
     made = 0
-    for f in sorted(glob.glob(os.path.join(folder, "*.txt"))):
+    for f in sorted(glob.glob(os.path.join(src_dir if new_style else folder, "*.txt"))):
         name = os.path.basename(f)
         if name.startswith(PREFIX) or name.endswith("_올릴_순서.txt"):
             continue
@@ -83,9 +112,10 @@ def main(folder):
 
         t = TOKEN.sub(sub, s)
         t = re.sub(r"^\[링크\].*\n(?:  .*\n)*", "", t, flags=re.M)  # 붙여 넣기 안내 줄은 복사본에서 뺀다
-        open(os.path.join(folder, PREFIX + name), "w", encoding="utf-8").write(t)
+        out = name if new_style else PREFIX + name
+        open(os.path.join(folder, out), "w", encoding="utf-8").write(t)
         made += 1
-        print(("주소 못 찾음 " + ", ".join(missing) + " | ") if missing else "ok | ", PREFIX + name)
+        print(("주소 못 찾음 " + ", ".join(missing) + " | ") if missing else "ok | ", out)
     print(f"{made}개 만듦")
 
 

@@ -2,6 +2,10 @@
  "note": "사주랩 블로그 초안 순서. done=초안 만든 날짜. 예약 작업 sajulab-blog-drafts가 위에서부터 2개씩 처리.",
  "items": [
   {
+   "key": "hub_isa",
+   "done": "2026-11-19"
+  },
+  {
    "key": "hub_gunghap",
    "done": "2026-11-18"
   },
@@ -55,7 +59,7 @@
   },
   {
    "key": "wonsungi",
-   "done": null
+   "done": "2026-11-19"
   },
   {
    "key": "dak",

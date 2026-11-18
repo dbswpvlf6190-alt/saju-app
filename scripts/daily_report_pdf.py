@@ -68,6 +68,13 @@ TEST_ORDERS = ("toss-9f4e2019", "toss-3f1e76d2", "toss-4738803c",  # 10/20 토�
                "423ad36b",  # 8/28 웹 4,900원 실결제 — 사장님 본인 결제(11/7 확인)
                "toss-d3a28528",  # 11/3 토스 신년운세 3,894원 — 사장님 본인 결제(11/7 확인)
                "cd01b00a", "f8110881", "99fb2ca4")  # 11/13·11/15 웹 신년운세 3,900원 ×3 — 사장님 본인 결제(11/17 확인)
+# 11/18 사장님 '보고서 고쳐': 블로그(네이버, 11/12~) 유입·결제 줄 추가. 블로그 글의 사이트 링크는 ?from=blog → /2027 페이지의
+# y2027_view meta.from='blog', 결제 흐름은 checkout_start·payment_success meta.src='blog_…'로 남는다.
+BLOG_SINCE = "2026-11-13"  # ?from=blog 링크를 넣기 시작한 날
+BLOG_VISIT_GOAL = 50
+# 토스 콘솔 수치: 매일 아침 예약 작업(toss-morning-check, 노트북)이 크롬으로 읽어 이 파일에 남긴다(로그인 필요해 이 스크립트는 직접 못 읽음).
+# report_notes.json의 toss_console보다 날짜가 새로우면 이쪽을 쓴다. 없는 컴퓨터(데스크톱)는 notes 값을 그대로 쓴다.
+TOSS_LIVE = r"C:\saju-reports\toss_console_latest.json"
 THREADS_POST_GOAL = 300
 TOSS_BREAKEVEN = 15
 # 2·3쪽(10/24 사장님: 매일 20시 종합 보고 — 채널별 퍼널·토스 입점·해외판). 채널은 사이트 이벤트의 ua(앱 구분)와 ref(유입 링크)로 나눈다.
@@ -163,6 +170,23 @@ def collect_site(today):
 
     return {"t": by.get(t, {}), "y": by.get(y, {}), "cum": cum, "all_start": all_start,
             "ua_threads": ua_threads, "web": pay(web), "toss": pay(toss)}
+
+
+def collect_blog(today):
+    """블로그 → 사이트: /2027 페이지 조회(from=blog, 사람만)와 블로그 경유 결제 시작·성공(src가 blog로 시작). 날짜는 KST."""
+    t, y = today.isoformat(), (today - timedelta(days=1)).isoformat()
+    rows = neon_query(
+        f"select to_char({KDT},'YYYY-MM-DD') d, name, count(*)::int n from \"AnalyticsEvent\" where {KDT} >= '{BLOG_SINCE}' "
+        f"and \"metaJson\"::json->>'ua' is not null and ((name='y2027_view' and \"metaJson\"::json->>'from'='blog') "
+        f"or (name in ('checkout_start','payment_success') and \"metaJson\"::json->>'src' like 'blog%')) group by 1,2"
+    )
+    out = {k: {"t": 0, "y": 0, "n": 0} for k in ("y2027_view", "checkout_start", "payment_success")}
+    for r in rows:
+        o = out[r["name"]]
+        o["n"] += r["n"]
+        o["t"] += r["n"] if r["d"] == t else 0
+        o["y"] += r["n"] if r["d"] == y else 0
+    return out
 
 
 def channel_of(ua, ref):
@@ -281,7 +305,7 @@ def dot(light):
     return f'<span class="dot" style="background:{c}"></span><span class="lt" style="color:{c}">{label}</span>'
 
 
-def render(now, th, ig, site, health, notes, pages23=""):
+def render(now, th, ig, site, health, notes, pages23="", blog=None):
     today = now.date()
     yday = today - timedelta(days=1)
     toss = notes.get("toss") or notes.get("toss_console") or {}
@@ -304,6 +328,16 @@ def render(now, th, ig, site, health, notes, pages23=""):
         ("", "생일 입력 → 무료 결과", num(s_t.get("saju_start", 0), "명"), num(s_y.get("saju_start", 0), "명"), f"{site['all_start']:,}명 (전체)", "하루 5명", "green" if s_t.get("saju_start", 0) >= 5 else "yellow" if s_t.get("saju_start", 0) + s_y.get("saju_start", 0) >= 2 else "red"),
         ("", "상세 풀이 버튼", num(s_t.get("premium_cta_click", 0), "명"), num(s_y.get("premium_cta_click", 0), "명"), f"{s_c.get('premium_cta_click', 0):,}명 (10/19~)", "", "gray"),
         ("", "웹 결제", f"{web['t']}건", f"{web['y']}건", f"{web['n']}건 · {web['amt']:,}원", "첫 결제", "green" if web["n"] else "red"),
+    ]
+    if blog:
+        bv, bc, bp = blog["y2027_view"], blog["checkout_start"], blog["payment_success"]
+        rows += [
+            ("블로그", "블로그 → 사이트 (페이지 조회)", num(bv["t"], "회"), num(bv["y"], "회"), f"{bv['n']:,}회 ({BLOG_SINCE[5:].replace('-', '/')}~)",
+             f"하루 {BLOG_VISIT_GOAL}회", "green" if max(bv["t"], bv["y"]) >= BLOG_VISIT_GOAL else "yellow" if max(bv["t"], bv["y"]) >= 20 else "red"),
+            ("", "블로그 경유 결제창 · 결제", f"{bc['t']} · {bp['t']}건", f"{bc['y']} · {bp['y']}건", f"{bc['n']} · {bp['n']}건",
+             "본인 결제 분류분 포함", "green" if bp["n"] else "yellow" if bc["n"] else "red"),
+        ]
+    rows += [
         ("토스", "사용자", num(toss.get("users_today"), "명"), num(toss.get("users_yesterday"), "명"), num(toss.get("users_total"), "명"), "", "yellow"),
         ("", "인앱 결제", f"{tpay['t']}건", f"{tpay['y']}건", f"{tpay['n']}건 · {tpay['amt']:,}원", f"손익분기 {TOSS_BREAKEVEN}건", "green" if tpay["n"] >= TOSS_BREAKEVEN else "yellow" if tpay["n"] else "red"),
         ("", "광고 수익 · 프로모션 지출", "", "", f"{num(toss.get('ad_total'), '원')} · {num(toss.get('promo_spent'), '원')}", "광고 ≥ 지출", "red" if (toss.get("ad_total") or 0) < (toss.get("promo_spent") or 0) else "green"),
@@ -323,7 +357,7 @@ def render(now, th, ig, site, health, notes, pages23=""):
     posts = sorted(th["posts"], key=lambda p: p["at"], reverse=True)[:5]
     rows_po = "".join(f"<tr><td>{p['at']:%m/%d %H:%M}</td><td>{esc(p['title'])}</td><td class='n'>{p['views']:,}</td><td class='n'>{p['replies']}</td></tr>" for p in posts)
     summary = notes.get("summary") or f"Threads 어제 글 {yv:,}회 · 사이트 오늘 방문 {s_t.get('landing_view', 0)}명 · 실결제 누적 {web['n'] + tpay['n']}건"
-    toss_asof = f" · 토스 수치는 콘솔 {esc(toss.get('as_of'))} 기준(Claude 입력)" if toss.get("as_of") else " · 토스 사용자·광고는 Claude가 콘솔에서 옮겨 적을 때만 표시"
+    toss_asof = f" · 토스 수치는 콘솔 {esc(toss.get('as_of'))} 기준(아침 점검)" if toss.get("as_of") else " · 토스 사용자·광고는 Claude가 콘솔에서 옮겨 적을 때만 표시"
 
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
 @page {{ size: A4; margin: 13mm 13mm 11mm; }}
@@ -479,7 +513,7 @@ def render_pages23(now, th, ig, ch, gl, notes):
 <h2>핵심 질문</h2>
 {qa or '<div class="qa">–</div>'}
 <div class="foot">태그: <b style="color:#2f9e5b">확인</b> = 콘솔·DB·API로 확인한 사실, <b style="color:#d39b16">가설</b> = 데이터로 검증 전인 판단, <b style="color:#d6513a">확인 필요</b> = 아직 확인하지 못한 항목(추정하지 않음).
-토스 콘솔 수치는 로그인이 필요해 자동 수집되지 않고 Claude가 콘솔에서 옮겨 적는다(반영이 하루가량 늦음). 해외판 Threads 수치는 API 자동 수집.</div>"""
+토스 콘솔 수치는 로그인이 필요해 매일 아침 점검 작업(Claude, 크롬)이 읽어 남긴 값을 쓴다(콘솔 반영이 몇 시간~하루 늦음). 해외판 Threads 수치는 API 자동 수집.</div>"""
 
 
 CHECK_GROUPS = [("사장님", "사장님이 직접 할 일"), ("Claude에게 말하기", "Claude에게 말만 하면 되는 일"), ("예정", "예정 (날짜 되면 Claude가 챙김)")]
@@ -532,6 +566,9 @@ def fresh_notes(today):
     if notes.get("date") not in (today.isoformat(), (today - timedelta(days=1)).isoformat()):
         for k in ("summary", "meaning", "alerts", "toss"):
             notes.pop(k, None)
+    live = load_json(TOSS_LIVE, {})
+    if live.get("as_of_date") and live["as_of_date"] > (notes.get("toss_console") or {}).get("as_of_date", ""):
+        notes["toss_console"] = {**(notes.get("toss_console") or {}), **live}  # 못 읽은 값(None)은 옛 값을 남기지 않고 "–"로
     return notes
 
 
@@ -547,6 +584,11 @@ def main():
     ig = collect_instagram(today)
     site = collect_site(today)
     health = collect_health()
+    try:
+        blog = collect_blog(today)
+    except Exception as e:  # 블로그 줄이 실패해도 보고는 나가야 한다
+        print(f"블로그 집계 실패: {e}")
+        blog = None
     # 2·3쪽은 실패해도 1쪽 보고는 나가야 하므로 따로 감싼다.
     try:
         pages23 = render_pages23(now, th, ig, collect_channels(today), collect_global(), notes)
@@ -559,7 +601,7 @@ def main():
         print(f"체크리스트 생성 실패: {e}")
     os.makedirs(OUT_DIR, exist_ok=True)
     out = os.path.join(OUT_DIR, f"{now:%Y-%m-%d_%H%M}_사주랩_일일보고.pdf")
-    to_pdf(render(now, th, ig, site, health, notes, pages23), out)
+    to_pdf(render(now, th, ig, site, health, notes, pages23, blog), out)
     try:
         shutil.copyfile(out, LATEST)
     except OSError as e:

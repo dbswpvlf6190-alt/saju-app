@@ -21,6 +21,7 @@ import reel_rules  # noqa: E402
 import cardnews_rules  # noqa: E402
 import exam_season  # noqa: E402
 import node_bin  # noqa: E402
+import git_sync  # noqa: E402
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -146,6 +147,33 @@ def _call_claude_raw_once(system_prompt, user_content):
         return json.loads(text[start:end + 1])
 
 
+class QueueChanged(Exception):
+    """생성하는 사이 다른 컴퓨터가 대기열을 바꿈 — 이번 생성분은 버린다."""
+
+
+def sync_remote():
+    """원격을 받아온다. 못 받으면 생성하지 않는다(옛 목록으로 번호를 매기면 다른 컴퓨터가 만든 항목을 덮어쓴다).
+    2026-11-20 데스크톱: 켜자마자 옛 목록(C40까지)으로 C41·C42를 만들어, 노트북이 11/18에 만든 C41~C44를 덮어쓰고 C43·C44를 지웠다."""
+    return git_sync.git_pull(PROJECT_ROOT)
+
+
+def merge_entries(path, entries, *, first_write):
+    """디스크에 있는 최신 목록을 다시 읽고 내 항목만 넣어 저장한다. 다른 작업이 그사이 pull로 받아 둔 내용을 지우지 않는다.
+    first_write=True면 같은 id가 이미 있을 때(다른 컴퓨터가 먼저 만듦) QueueChanged, 아니면 내 항목을 id로 바꿔 넣는다."""
+    latest = load_json(path)
+    index = {e["id"]: i for i, e in enumerate(latest)}
+    clash = [e["id"] for e in entries if e["id"] in index]
+    if first_write and clash:
+        raise QueueChanged(f"{os.path.basename(path)}에 {clash}가 이미 있음 — 다른 컴퓨터가 먼저 만들었으니 이번 생성분은 버림")
+    for e in entries:
+        if e["id"] in index:
+            latest[index[e["id"]]] = e
+        else:
+            latest.append(e)
+    save_json(path, latest)
+    return latest
+
+
 def next_id(existing_ids, prefix):
     nums = [int(i[len(prefix):]) for i in existing_ids if i.startswith(prefix) and i[len(prefix):].isdigit()]
     return max(nums, default=0) + 1
@@ -213,6 +241,9 @@ def generate_reel_items(reels, need):
 
 
 def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
+    if not sync_remote():
+        log("원격을 받지 못해 릴스 자동 생성을 건너뜀(옛 목록으로 만들면 다른 컴퓨터 것과 번호가 겹침)")
+        return
     manifest = load_json(REEL_MANIFEST)
     posted_dir = os.path.join(SCRIPTS_DIR, "posted_state", "reel")
     unposted = [e for e in manifest if not os.path.exists(os.path.join(posted_dir, f"{e['day']:02d}.json"))]
@@ -230,6 +261,18 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     if len(new_items) < need:
         log(f"목표 {need}개 중 {len(new_items)}개만 검증 통과 — 그대로 진행")
 
+    # 대본 생성(수 분) 사이 다른 컴퓨터가 채웠을 수 있다 — 다시 받아 최신 목록 기준으로 번호를 매긴다.
+    if not sync_remote():
+        log("원격을 받지 못해 생성한 릴스 대본을 버림")
+        return
+    manifest = load_json(REEL_MANIFEST)
+    reels = load_json(REELS_JSON)
+    unposted = [e for e in manifest if not os.path.exists(os.path.join(posted_dir, f"{e['day']:02d}.json"))]
+    if len(unposted) >= min_buffer:
+        log(f"그사이 다른 컴퓨터가 릴스 대기열을 채움({len(unposted)}개) — 생성분 버림")
+        return
+    new_items = new_items[: target_buffer - len(unposted)]
+
     next_num = next_id([r["id"] for r in reels], "R")
     next_order = max((r["order"] for r in reels), default=-1) + 1
     next_day = max((e["day"] for e in manifest), default=0) + 1
@@ -237,6 +280,7 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
 
     new_ids = []
     new_entries = []
+    new_manifest = []
     for item in new_items:
         rid = f"R{next_num:02d}"
         cta_type = reel_rules.next_cta_type(reels)
@@ -267,7 +311,7 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
         }
         reels.append(entry)
         new_entries.append(entry)
-        manifest.append({
+        new_manifest.append({
             "day": next_day,
             "id": rid,
             "category": entry["categoryLabel"],
@@ -282,21 +326,21 @@ def ensure_reel_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
         next_order += 1
         next_day += 1
 
-    save_json(REELS_JSON, reels)
+    merge_entries(REELS_JSON, new_entries, first_write=True)
     log(f"reels.json에 {len(new_items)}개 추가: {new_ids}")
 
     for rid in new_ids:
         subprocess.run([node_bin.find_node(), os.path.join(REEL_TEMPLATE_DIR, "build.mjs"), rid], cwd=PROJECT_ROOT, check=True)
 
-    for entry, m in zip(new_entries, manifest[-len(new_ids):]):
+    for entry, m in zip(new_entries, new_manifest):
         entry["durationSec"] = probe_duration(os.path.join(PROJECT_ROOT, m["video"]))
         if entry["durationSec"] and entry["durationSec"] > 40:
             log(f"경고: {entry['id']} 길이 {entry['durationSec']}초 (40초 초과)")
-    save_json(REELS_JSON, reels)
-    save_json(REEL_MANIFEST, manifest)
+    merge_entries(REELS_JSON, new_entries, first_write=False)
+    merge_entries(REEL_MANIFEST, new_manifest, first_write=True)
 
     ok = git_commit_push(
-        ["scripts/reel-template/reels.json", "scripts/reel_manifest.json"] + [f"reels/{r['video'].split('/')[-1]}" for r in manifest[-len(new_ids):]],
+        ["scripts/reel-template/reels.json", "scripts/reel_manifest.json"] + [f"reels/{r['video'].split('/')[-1]}" for r in new_manifest],
         f"content: 릴스 {len(new_ids)}개 자동 생성 (대기열 소진 방지, {', '.join(new_ids)})",
     )
     log(f"git push {'성공' if ok else '실패'}")
@@ -335,6 +379,9 @@ def generate_card_items(cardsets, need):
 
 
 def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
+    if not sync_remote():
+        log("원격을 받지 못해 카드뉴스 자동 생성을 건너뜀(옛 목록으로 만들면 다른 컴퓨터 것과 번호가 겹침)")
+        return
     manifest = load_json(CARDNEWS_MANIFEST)
     posted_dir = os.path.join(SCRIPTS_DIR, "posted_state", "cardnews")
     unposted = [e for e in manifest if not os.path.exists(os.path.join(posted_dir, f"{e['day']:02d}.json"))]
@@ -352,12 +399,26 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     if len(new_items) < need:
         log(f"목표 {need}개 중 {len(new_items)}개만 검증 통과 — 그대로 진행")
 
+    # 대본 생성(수 분) 사이 다른 컴퓨터가 채웠을 수 있다 — 다시 받아 최신 목록 기준으로 번호를 매긴다.
+    if not sync_remote():
+        log("원격을 받지 못해 생성한 카드뉴스 대본을 버림")
+        return
+    manifest = load_json(CARDNEWS_MANIFEST)
+    cardsets = load_json(CARDSETS_JSON)
+    unposted = [e for e in manifest if not os.path.exists(os.path.join(posted_dir, f"{e['day']:02d}.json"))]
+    if len(unposted) >= min_buffer:
+        log(f"그사이 다른 컴퓨터가 카드뉴스 대기열을 채움({len(unposted)}개) — 생성분 버림")
+        return
+    new_items = new_items[: target_buffer - len(unposted)]
+
     next_num = next_id([c["id"] for c in cardsets], "C")
     next_order = max((c["order"] for c in cardsets), default=-1) + 1
     next_day = max((e["day"] for e in manifest), default=0) + 1
     created_at = datetime.now().strftime("%Y-%m-%d")
 
     new_ids = []
+    new_sets = []
+    new_manifest = []
     for item in new_items:
         cid = f"C{next_num:02d}"
         cta_type = reel_rules.next_cta_type(cardsets)
@@ -383,8 +444,9 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
             "createdAt": created_at,
         }
         cardsets.append(entry)
+        new_sets.append(entry)
         dir_name = f"{next_order + 1:02d}_{cid}"
-        manifest.append({
+        new_manifest.append({
             "day": next_day,
             "id": cid,
             "category": item["category"],
@@ -399,14 +461,14 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
         next_order += 1
         next_day += 1
 
-    save_json(CARDSETS_JSON, cardsets)
+    merge_entries(CARDSETS_JSON, new_sets, first_write=True)
     log(f"cardsets.json에 {len(new_items)}개 추가: {new_ids}")
 
     subprocess.run([node_bin.find_node(), os.path.join(CARDNEWS_TEMPLATE_DIR, "build.mjs")], cwd=PROJECT_ROOT, check=True)
 
-    save_json(CARDNEWS_MANIFEST, manifest)
+    merge_entries(CARDNEWS_MANIFEST, new_manifest, first_write=True)
 
-    new_dirs = [f"cardnews/{m['dir'].split('/')[-1]}" for m in manifest[-len(new_ids):]]
+    new_dirs = [f"cardnews/{m['dir'].split('/')[-1]}" for m in new_manifest]
     ok = git_commit_push(
         ["scripts/cardnews-template/cardsets.json", "scripts/cardnews_manifest.json"] + new_dirs,
         f"content: 카드뉴스 {len(new_ids)}개 자동 생성 (대기열 소진 방지, {', '.join(new_ids)})",
@@ -414,9 +476,19 @@ def ensure_cardnews_buffer(min_buffer=MIN_BUFFER, target_buffer=TARGET_BUFFER):
     log(f"git push {'성공' if ok else '실패'}")
 
 
+def run_safely(fn, json_paths, output_dirs):
+    """다른 컴퓨터가 먼저 만들었으면(QueueChanged) 오류가 아니라 정상 종료. 이번에 쓴 목록·결과물은 되돌려 작업 트리를 깨끗하게 둔다."""
+    try:
+        fn()
+    except QueueChanged as e:
+        log(f"{e}")
+        git(["checkout", "--"] + [os.path.relpath(p, PROJECT_ROOT) for p in json_paths])
+        git(["clean", "-fdq", "--"] + output_dirs)
+
+
 if __name__ == "__main__":
     target = sys.argv[1] if len(sys.argv) > 1 else "all"
     if target in ("reel", "all"):
-        ensure_reel_buffer()
+        run_safely(ensure_reel_buffer, [REELS_JSON, REEL_MANIFEST], ["reels"])
     if target in ("cardnews", "all"):
-        ensure_cardnews_buffer()
+        run_safely(ensure_cardnews_buffer, [CARDSETS_JSON, CARDNEWS_MANIFEST], ["cardnews"])

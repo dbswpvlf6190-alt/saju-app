@@ -39,8 +39,14 @@ def refresh_addr():
     try:
         old = read_addr()
         m = re.match(r"https://blog\.naver\.com/([^/]+)/", old[0][1]) if old else None
-        if not m and os.path.exists(SHORTCUT):
-            m = re.search(r"URL=https://blog\.naver\.com/([A-Za-z0-9_\-]+)", open(SHORTCUT, encoding="utf-8", errors="ignore").read())
+        if not m:
+            # 바로가기 이름·위치가 컴퓨터마다 달라서(노트북 OneDrive '사주랩 운세연구소 블로그.url', 데스크톱 바탕 화면 '사주랩 운세연구소 - 네이버 블로그.url') 여러 곳을 본다
+            cands = [SHORTCUT] + glob.glob(os.path.join(os.path.expanduser("~"), "Desktop", "*블로그*.url")) + glob.glob(os.path.join(ONEDRIVE, "바탕 화면", "*블로그*.url"))
+            for sc in cands:
+                if os.path.exists(sc):
+                    m = re.search(r"URL=https://blog\.naver\.com/([A-Za-z0-9_\-]+)", open(sc, encoding="utf-8", errors="ignore").read())
+                    if m:
+                        break
         if not m:
             print("블로그 아이디를 찾지 못함(주소 파일·바로가기 둘 다 없음)")
             return

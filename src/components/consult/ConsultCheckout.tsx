@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { CONSULT_PLANS, type ConsultProductType } from "@/lib/consult/plans";
 import { PAYMENTS_PAUSED } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
+import { loadConsultPrefill, prefillToPerson } from "@/lib/consult/prefill";
+import { rememberSource } from "@/lib/analytics/source";
 import {
   DEFAULT_PERSON_VALUES,
   PersonBirthFields,
@@ -103,12 +105,25 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
   useEffect(() => {
     if (resumed.current) return;
     const ret = parseNewYearReturn(window.location.search);
-    if (!ret.paymentId && !ret.failed) return;
+    if (!ret.paymentId && !ret.failed) {
+      // 처음 들어온 경우: 들어온 경로 기록, 신년운세를 막 산 손님이면 생일을 그대로 채운다(2026-11-21 C3).
+      const ref = new URLSearchParams(window.location.search).get("ref") ?? undefined;
+      rememberSource(ref);
+      trackEvent("landing_view", { entry: "consult", ...(ref && { ref }) });
+      const pre = loadConsultPrefill();
+      if (pre) {
+        /* eslint-disable react-hooks/set-state-in-effect -- 같은 탭 저장소(외부 상태)를 처음 한 번 읽어 오는 것 */
+        setPerson(prefillToPerson(pre));
+        if (pre.name) setFullName(pre.name);
+        /* eslint-enable react-hooks/set-state-in-effect */
+      }
+      return;
+    }
     resumed.current = true;
     if (ret.failed) {
       // 결제창에서 실패·취소하고 돌아온 경우: 넣었던 값을 되살려 버튼만 다시 누르면 되게 한다(동의는 다시 받는다).
       const draft = loadConsultDraft();
-      /* eslint-disable react-hooks/set-state-in-effect -- 돌아온 주소·브라우저 저장소(외부 상태)를 처음 한 번 읽어 오는 것 */
+       
       if (draft) {
         setProduct(draft.product);
         setForGift(draft.forGift);
@@ -121,7 +136,7 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
       setErrorMessage(
         friendlyPaymentError(ret.message) + (draft ? " 넣으신 내용은 그대로 두었어요. 동의에 체크하고 다시 눌러 주세요." : ""),
       );
-      /* eslint-enable react-hooks/set-state-in-effect */
+       
       recordFailure(ret.paymentId, "return", ret.code, ret.message, ret.pgCode);
       return;
     }

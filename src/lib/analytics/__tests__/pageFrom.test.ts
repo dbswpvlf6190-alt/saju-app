@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyPageFrom } from "../pageFrom";
+import { blogPostTag, classifyPageFrom } from "../pageFrom";
 
 const OWN = "saju-app-three-dusky.vercel.app";
 
@@ -21,5 +21,18 @@ describe("공개 페이지 유입 분류", () => {
     expect(classifyPageFrom(`https://${OWN}/2027`, null, OWN)).toBe("internal");
     expect(classifyPageFrom("", null, OWN)).toBe("direct");
     expect(classifyPageFrom("not a url", null, OWN)).toBe("other");
+  });
+});
+
+describe("blogPostTag (2026-11-21 글별 기록)", () => {
+  it("영문·숫자·하이픈 이름표만 받는다", () => {
+    expect(blogPostTag("1123-sonnal")).toBe("1123-sonnal");
+    expect(blogPostTag(" 1124-ISA ")).toBe("1124-isa");
+  });
+  it("이상한 값·너무 긴 값은 버린다", () => {
+    expect(blogPostTag(null)).toBeUndefined();
+    expect(blogPostTag("홍길동")).toBeUndefined();
+    expect(blogPostTag("a@b.com")).toBeUndefined();
+    expect(blogPostTag("x".repeat(25))).toBeUndefined();
   });
 });

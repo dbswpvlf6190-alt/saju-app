@@ -56,6 +56,10 @@ export default function Year2027Index() {
           </ul>
         </section>
 
+        <Link href="/new-year?ref=y2027_index_mid" className="rounded-2xl border border-accent-gold/60 bg-accent-gold/10 px-4 py-3.5 text-center text-base font-semibold text-foreground">
+          같은 띠라도 생일마다 달라요 — 내 생일로 좋은 날짜 보기 (무료) →
+        </Link>
+
         <section className={section}>
           <h2 className="font-serif text-xl text-accent-gold-soft">태어난 해로 찾기</h2>
           {TTI.map((t) => (

@@ -57,6 +57,8 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   global_saju_complete: "해외판 무료 결과",
   global_waitlist_signup: "해외판 오픈 알림 신청",
   consult_ask: "AI 상담 질문",
+  consult_upsell_view: "신년운세 뒤 상담 카드 노출",
+  consult_upsell_click: "신년운세 뒤 상담 카드 클릭",
   checkout_retry_view: "결제 실패 → 다시 결제하기",
   payment_fail_detail: "결제 실패 사유(서버 확인)",
   y2027_view: "2027 띠·나이 페이지 방문",

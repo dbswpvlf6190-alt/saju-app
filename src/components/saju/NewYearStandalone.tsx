@@ -36,6 +36,7 @@ export function NewYearStandalone() {
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialYear, setInitialYear] = useState<number | undefined>(undefined);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,6 +57,10 @@ export function NewYearStandalone() {
       }
     }
     const ref = params.get("ref") ?? undefined;
+    // /2027 출생연도 페이지에서 왔으면 그 연도를 미리 채운다(2026-11-21 C2 — /2027 → 신년운세 입장 19%를 올리려고 입력 한 칸 줄임).
+    const y = Number(params.get("y"));
+     
+    if (Number.isInteger(y) && y >= 1930 && y <= 2015) setInitialYear(y);
     rememberSource(ref);
     trackEvent("landing_view", { entry: "newYear", ...(ref && { ref }) });
   }, []);
@@ -88,7 +93,7 @@ export function NewYearStandalone() {
   }
 
   if (!result) {
-    return <BirthInfoForm onSubmit={handleSubmit} submitting={submitting} errorMessage={error} />;
+    return <BirthInfoForm key={initialYear ?? 0} onSubmit={handleSubmit} submitting={submitting} errorMessage={error} initialYear={initialYear} />;
   }
 
   return (

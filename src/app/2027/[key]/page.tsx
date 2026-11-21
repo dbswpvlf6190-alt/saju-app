@@ -106,7 +106,9 @@ export default async function Year2027Page({ params }: { params: Promise<{ key: 
   const years = birthYearsOf(t);
   const stem = r.kind === "year" ? stemNote(r.info.stem) : null;
   const age = r.kind === "year" ? ageTips(r.info.age2027) : null;
-  const cta = `/new-year?ref=y2027_${key}`;
+  const cta = `/new-year?ref=y2027_${key}${r.kind === "year" ? `&y=${r.info.year}` : ""}`;
+  // 버튼 문구를 그 페이지 손님에 맞춘다(2026-11-21 C2): "생일 넣고 내 2027년 운세 보기" → "75년생, 내 생일로 좋은 날짜 보기"
+  const who = r.kind === "year" ? `${shortYear(r.info.year)}년생` : `${t.animal}띠`;
 
   const section = "flex flex-col gap-2.5 rounded-2xl border border-border-subtle bg-background-card/70 p-5";
   const h2 = "font-serif text-xl text-accent-gold-soft";
@@ -223,9 +225,11 @@ export default async function Year2027Page({ params }: { params: Promise<{ key: 
         <p className={body}>{theme.summary}</p>
 
         <Link href={cta} className="rounded-2xl bg-cta px-4 py-4 text-center text-lg font-bold text-cta-ink">
-          생일 넣고 내 2027년 운세 보기
+          {who}, 내 생일로 좋은 날짜 보기
         </Link>
-        <p className="-mt-3 text-center text-sm text-foreground-muted">띠는 사주 여덟 글자 중 한 글자예요. 생일을 넣으면 내 사주 전체로 봐 드려요.</p>
+        <p className="-mt-3 text-center text-sm text-foreground-muted">
+          무료 · 1분 · {r.kind === "year" ? "태어난 해는 채워 둘게요" : "띠는 여덟 글자 중 한 글자, 생일로 보면 내 날짜가 나와요"}
+        </p>
 
         <section className={section}>
           <h2 className={h2}>{t.animal}띠와 2027년의 만남</h2>
@@ -258,6 +262,10 @@ export default async function Year2027Page({ params }: { params: Promise<{ key: 
               </li>
             ))}
           </ul>
+          {/* 달별 흐름을 다 읽은 순간이 '내 날짜'가 가장 궁금한 때 — 여기서 바로 넘어가게 버튼을 하나 더 둔다(C2). */}
+          <Link href={cta} className="mt-1 rounded-xl border border-accent-gold/60 bg-accent-gold/10 px-4 py-3 text-center text-base font-semibold text-foreground">
+            띠로는 여기까지 — 내 생일로 보면 달마다 좋은 날짜가 나와요 →
+          </Link>
         </section>
 
         <section className={section}>

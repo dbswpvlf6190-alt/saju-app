@@ -7,6 +7,7 @@ import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from
 import { trackEvent } from "@/lib/analytics/track";
 import { PurchaseConsent } from "./PurchaseConsent";
 import { NewYearReportText } from "./NewYearReportText";
+import { ConsultAfterNewYear } from "@/components/consult/ConsultAfterNewYear";
 import type { NewYearMonthCard } from "@/lib/newYear/preview";
 import { Icon } from "@/components/ui/Icon";
 import { useUserAgent } from "@/lib/hooks/useUserAgent";
@@ -194,6 +195,7 @@ export function NewYearUpsellCard({
       <div className="flex flex-col gap-3 rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4">
         <h3 className="font-medium text-accent-gold-soft"><Icon name="star" /> {NEW_YEAR_REPORT_NAME}</h3>
         <NewYearReportText text={text} cards={cards} />
+        <ConsultAfterNewYear input={resultToInput(result)} name={fullName} place={variant === "standalone" ? "standalone" : "report"} />
       </div>
     );
   }

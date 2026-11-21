@@ -186,6 +186,20 @@ def collect_blog(today):
         o["n"] += r["n"]
         o["t"] += r["n"] if r["d"] == t else 0
         o["y"] += r["n"] if r["d"] == y else 0
+    # 2026-11-21: 블로그 글별(링크의 ?post=) 최근 7일 조회·결제. 결제는 src 'blog_<page>~<post>'의 ~ 뒤.
+    since7 = (today - timedelta(days=6)).isoformat()
+    posts = {}
+    for r in neon_query(
+        f"select \"metaJson\"::json->>'post' p, count(*)::int n from \"AnalyticsEvent\" where {KDT} >= '{since7}' "
+        f"and name='y2027_view' and \"metaJson\"::json->>'post' is not null group by 1"
+    ):
+        posts.setdefault(r["p"], [0, 0])[0] = r["n"]
+    for r in neon_query(
+        f"select split_part(\"metaJson\"::json->>'src', '~', 2) p, count(*)::int n from \"AnalyticsEvent\" where {KDT} >= '{since7}' "
+        f"and name='payment_success' and \"metaJson\"::json->>'src' like 'blog%~%' group by 1"
+    ):
+        posts.setdefault(r["p"], [0, 0])[1] = r["n"]
+    out["posts"] = sorted(posts.items(), key=lambda kv: (-kv[1][1], -kv[1][0]))[:5]
     return out
 
 
@@ -337,6 +351,9 @@ def render(now, th, ig, site, health, notes, pages23="", blog=None):
             ("", "블로그 경유 결제창 · 결제", f"{bc['t']} · {bp['t']}건", f"{bc['y']} · {bp['y']}건", f"{bc['n']} · {bp['n']}건",
              "모두 손님 결제(11/19 확인)", "green" if bp["n"] else "yellow" if bc["n"] else "red"),
         ]
+        if blog.get("posts"):
+            top = " / ".join(f"{p} {v}회·{n}건" for p, (v, n) in blog["posts"])
+            rows.append(("", "글별 7일 (조회·결제)", "", "", top, "결제 낸 글을 더 쓴다", "gray"))
     rows += [
         ("토스", "사용자", num(toss.get("users_today"), "명"), num(toss.get("users_yesterday"), "명"), num(toss.get("users_total"), "명"), "", "yellow"),
         ("", "인앱 결제", f"{tpay['t']}건", f"{tpay['y']}건", f"{tpay['n']}건 · {tpay['amt']:,}원", f"손익분기 {TOSS_BREAKEVEN}건", "green" if tpay["n"] >= TOSS_BREAKEVEN else "yellow" if tpay["n"] else "red"),

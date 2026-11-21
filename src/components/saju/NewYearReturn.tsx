@@ -6,6 +6,9 @@ import { parseNewYearReturn } from "@/lib/newYear/returnParams";
 import { trackEvent } from "@/lib/analytics/track";
 import { NEW_YEAR_REPORT_NAME } from "@/lib/payment/config";
 import { NewYearReportText } from "./NewYearReportText";
+import { ConsultAfterNewYear } from "@/components/consult/ConsultAfterNewYear";
+import { resultToInput } from "@/lib/saju/types";
+import type { SajuInput } from "@/lib/saju/types";
 import type { NewYearMonthCard } from "@/lib/newYear/preview";
 import { clipForLog, detectInAppBrowser, friendlyPaymentError, inAppHint } from "@/lib/payment/checkoutEnv";
 import { clearNewYearPending, loadNewYearPending } from "@/lib/newYear/pending";
@@ -24,6 +27,7 @@ type State =
  */
 export function NewYearReturn() {
   const [state, setState] = useState<State>({ step: "checking" });
+  const [buyer, setBuyer] = useState<{ input: SajuInput; name: string } | null>(null);
   const started = useRef(false);
 
   async function load(paymentId: string) {
@@ -84,6 +88,9 @@ export function NewYearReturn() {
         if (!res.ok) throw new Error(data.error ?? "결제 확인에 실패했어요.");
         if (data.status !== "PAID") throw new Error("결제가 완료되지 않았어요.");
         trackEvent("payment_success", { productType: "new_year_report" });
+        // 상담 이어 팔기에 생일을 넘기려고 지우기 전에 꺼내 둔다.
+        const pending = loadNewYearPending();
+        if (pending) setBuyer({ input: resultToInput(pending.result), name: pending.name });
         clearNewYearPending();
         await load(paymentId);
       } catch (e) {
@@ -116,9 +123,12 @@ export function NewYearReturn() {
       )}
 
       {state.step === "done" && (
-        <div className="rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4">
-          <NewYearReportText text={state.text} cards={state.cards} />
-        </div>
+        <>
+          <div className="rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4">
+            <NewYearReportText text={state.text} cards={state.cards} />
+          </div>
+          <ConsultAfterNewYear input={buyer?.input ?? null} name={buyer?.name ?? ""} place="return" />
+        </>
       )}
 
       {state.step === "retry" && (

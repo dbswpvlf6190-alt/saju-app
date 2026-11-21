@@ -37,10 +37,13 @@ export function BirthInfoForm({
   onSubmit,
   submitting,
   errorMessage,
+  initialYear,
 }: {
   onSubmit: (values: BirthInfoFormValues) => void;
   submitting: boolean;
   errorMessage: string | null;
+  /** /2027/1975 같은 출생연도 페이지에서 온 손님: 그 페이지를 직접 고른 사람이라 연도만 미리 채운다(월·일·성별은 비워 둠). */
+  initialYear?: number;
 }) {
   const [name, setName] = useState("");
   const [calendarType, setCalendarType] = useState<CalendarType>("solar");
@@ -48,7 +51,7 @@ export function BirthInfoForm({
   // 생년월일시는 일부러 기본값을 두지 않는다 — 기본값이 있으면 아무것도 안 고르고 바로
   // 제출해도 그 기본값(예: 2000년 1월 1일)으로 계산이 되어버려서, 정작 본인의 생년월일시를
   // 입력하지 않고도 "결과"가 나오는 것처럼 보이는 문제가 있었다.
-  const [year, setYear] = useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(initialYear ?? null);
   const [month, setMonth] = useState<number | null>(null);
   const [day, setDay] = useState<number | null>(null);
   const [timeUnknown, setTimeUnknown] = useState(false);

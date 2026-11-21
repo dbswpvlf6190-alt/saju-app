@@ -1,6 +1,13 @@
 // 검색용 공개 페이지(/2027 등)에 손님이 어디서 왔는지 큰 분류로 나눈다(2026-11-13).
 // 네이버 블로그 글이 실제로 손님을 데려오는지 숫자로 보려고 만들었다. 주소 전체는 남기지 않고 분류 이름만 남긴다.
 
+/** 블로그 글이름표(?post=)는 영문 소문자·숫자·하이픈 24자까지만 받는다(그 밖의 값은 버림 — 주소에 개인정보가 섞여도 남지 않게). */
+export function blogPostTag(raw: string | null): string | undefined {
+  if (!raw) return undefined;
+  const v = raw.trim().toLowerCase();
+  return /^[a-z0-9-]{1,24}$/.test(v) ? v : undefined;
+}
+
 export type PageFrom = "blog" | "naver_search" | "google" | "daum" | "internal" | "direct" | "other";
 
 const PARAM_VALUES = new Set<PageFrom>(["blog", "naver_search", "google", "daum"]);

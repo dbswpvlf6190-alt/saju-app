@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { trackEvent } from "@/lib/analytics/track";
 import { rememberSource } from "@/lib/analytics/source";
-import { classifyPageFrom } from "@/lib/analytics/pageFrom";
+import { blogPostTag, classifyPageFrom } from "@/lib/analytics/pageFrom";
 
 /**
  * /2027 띠·나이 페이지 방문을 기록한다(정적 페이지라 서버 기록이 없었다). page = 띠 slug·출생연도·index.
@@ -11,13 +11,12 @@ import { classifyPageFrom } from "@/lib/analytics/pageFrom";
  */
 export function Y2027View({ page }: { page: string }) {
   useEffect(() => {
-    const from = classifyPageFrom(
-      document.referrer,
-      new URLSearchParams(window.location.search).get("from"),
-      window.location.hostname,
-    );
-    if (from === "blog") rememberSource(`blog_${page}`);
-    trackEvent("y2027_view", { page, from });
+    const params = new URLSearchParams(window.location.search);
+    const from = classifyPageFrom(document.referrer, params.get("from"), window.location.hostname);
+    // 2026-11-21 C4: 블로그 링크의 ?post=<글이름표>(예: 1123-sonnal)로 어느 글이 손님·결제를 데려오는지 본다.
+    const post = blogPostTag(params.get("post"));
+    if (from === "blog") rememberSource(post ? `blog_${page}~${post}` : `blog_${page}`);
+    trackEvent("y2027_view", { page, from, ...(post && { post }) });
   }, [page]);
   return null;
 }

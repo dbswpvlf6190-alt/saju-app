@@ -19,3 +19,5 @@
 - [파일 넘기기·블로그 글 스타일](feedback_blog_and_handoff_style.md) — 경로 먼저+탐색기 열기, 칸마다 값 하나씩, 블로그는 AI 말투 금지·짧은 줄
 - [썸네일은 궁금증으로](feedback_thumbnail_curiosity.md) — 정보·답 주지 말고 어그로로 클릭하게 (11/16, 09 C 유지 결정)
 - [숫자는 비유로](feedback_numbers_as_metaphor.md) — 숫자는 카드에만, 목소리는 비유, 돈은 만 원 기준 (11/18)
+- [폴더는 항상 바로 열기](feedback_auto_reveal_folders.md) — 파일·폴더 알려줄 땐 묻지 말고 reveal_path로 탐색기 열기
+- [네이버 블로그는 브라우저 도구로 못 연다](project_naver_blog_blocked.md) — 블로그 확인은 사장님 캡처로, RSS는 12편만

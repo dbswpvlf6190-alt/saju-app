@@ -40,12 +40,44 @@ export function inAppHint(app: InAppBrowser): string | null {
 }
 
 /**
- * 카카오페이 버튼을 보여줘도 되는가. PC 결제창에서 카카오페이를 고르면 이니시스가
- * "[V104] [NO MPI SET] 미사용 설정 지불수단"으로 거절한다(11/13 사장님 PC 시험, 계약에 PC 카카오페이가 꺼져 있음).
- * 휴대폰 결제창에서는 열린다(11/12 손님이 카카오페이 창까지 감). 이니시스에서 PC를 켜 주면 이 함수를 true로 바꾼다.
+ * 결제 수단 선택지(2026-11-22). KG이니시스 간편결제 추가 신청(11/13)이 승인돼 가맹점관리자 '간편결제서비스'에서
+ * 네이버페이·토스페이·카카오페이가 '사용함'이 됐다(PAYCO·삼성페이도 사용함이지만 버튼은 넣지 않음).
+ * 11/13엔 PC 카카오페이가 "[V104] [NO MPI SET]"으로 거절됐는데, 이번 승인으로 PC도 열렸는지는 실결제로만 확인할 수 있다.
+ * PC에서 다시 V104가 나면 EASY_PAY_ON_PC를 false로 바꾸면 PC는 카드만 보인다.
  */
+export const EASY_PAY_ON_PC = true;
+
+export type PayChoice = "CARD" | "NAVERPAY" | "KAKAOPAY" | "TOSSPAY";
+
+const PAY_LABELS: Record<PayChoice, string> = {
+  CARD: "카드",
+  NAVERPAY: "네이버페이",
+  KAKAOPAY: "카카오페이",
+  TOSSPAY: "토스페이",
+};
+
+/** 이 기기에서 보여줄 결제 수단 버튼(순서대로). 카드는 항상 첫 번째. */
+export function payChoices(ua: string): { value: PayChoice; label: string }[] {
+  const easy = EASY_PAY_ON_PC || !needsFullContact(ua);
+  const keys: PayChoice[] = easy ? ["CARD", "NAVERPAY", "KAKAOPAY", "TOSSPAY"] : ["CARD"];
+  return keys.map((value) => ({ value, label: PAY_LABELS[value] }));
+}
+
+/** 고른 수단이 이 기기에서 안 보이는 수단이면(예: 예전 저장값) 카드로 돌린다. 예전 저장값 "EASY_PAY"는 카카오페이였다. */
+export function resolvePayChoice(choice: string | null | undefined, ua: string): PayChoice {
+  const c = choice === "EASY_PAY" ? "KAKAOPAY" : choice;
+  return payChoices(ua).some((o) => o.value === c) ? (c as PayChoice) : "CARD";
+}
+
+/** PortOne requestPayment에 넘길 결제 수단 부분. */
+export function portOnePayMethod(choice: PayChoice): { payMethod: "CARD" } | { payMethod: "EASY_PAY"; easyPay: { easyPayProvider: "NAVERPAY" | "KAKAOPAY" | "TOSSPAY" } } {
+  if (choice === "CARD") return { payMethod: "CARD" };
+  return { payMethod: "EASY_PAY", easyPay: { easyPayProvider: choice } };
+}
+
+/** @deprecated payChoices를 쓴다. 예전 호출 호환용(카카오페이 버튼 표시 여부). */
 export function kakaoPayAvailable(ua: string): boolean {
-  return !needsFullContact(ua);
+  return payChoices(ua).some((o) => o.value === "KAKAOPAY");
 }
 
 /**
@@ -77,8 +109,8 @@ export function isValidEmail(raw: string): boolean {
 export function friendlyPaymentError(message: string | null | undefined): string {
   const m = message ?? "";
   if (/취소|cancel/i.test(m)) return "결제를 취소하셨어요. 아래 버튼으로 언제든 다시 결제할 수 있어요.";
-  if (/한도|잔액|limit|balance/i.test(m)) return "카드 한도나 잔액 문제로 결제가 안 됐어요. 다른 카드나 카카오페이로 다시 시도해 주세요.";
-  return "결제가 완료되지 않았어요. 다른 카드나 카카오페이로 다시 시도해 주세요.";
+  if (/한도|잔액|limit|balance/i.test(m)) return "카드 한도나 잔액 문제로 결제가 안 됐어요. 다른 카드나 네이버페이·카카오페이로 다시 시도해 주세요.";
+  return "결제가 완료되지 않았어요. 다른 카드나 네이버페이·카카오페이로 다시 시도해 주세요.";
 }
 
 /** 기록용으로 결제창 메시지를 짧게 자른다(개인정보가 들어오지 않는 PG 메시지지만 길이는 제한). */

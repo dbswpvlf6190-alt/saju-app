@@ -5,6 +5,10 @@ import {
   inAppHint,
   inAppPrepayHint,
   kakaoPayAvailable,
+  payChoices,
+  portOnePayMethod,
+  resolvePayChoice,
+  EASY_PAY_ON_PC,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -97,10 +101,24 @@ describe("모바일 결제창 복귀 주소 해석", () => {
   });
 });
 
-describe("카카오페이 버튼", () => {
-  it("PC에서는 숨기고(이니시스 V104) 휴대폰에서는 보여준다", () => {
-    expect(kakaoPayAvailable(IPHONE_SAFARI)).toBe(true);
+describe("결제 수단 버튼", () => {
+  const PC = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36";
+  it("휴대폰에서는 카드·네이버페이·카카오페이·토스페이 순서", () => {
+    expect(payChoices(IPHONE_SAFARI).map((c) => c.value)).toEqual(["CARD", "NAVERPAY", "KAKAOPAY", "TOSSPAY"]);
     expect(kakaoPayAvailable(NAVER_ANDROID)).toBe(true);
-    expect(kakaoPayAvailable("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36")).toBe(false);
+  });
+  it("PC는 EASY_PAY_ON_PC 스위치를 따른다", () => {
+    expect(payChoices(PC).length).toBe(EASY_PAY_ON_PC ? 4 : 1);
+    expect(kakaoPayAvailable(PC)).toBe(EASY_PAY_ON_PC);
+  });
+  it("예전 저장값 EASY_PAY는 카카오페이, 모르는 값은 카드", () => {
+    expect(resolvePayChoice("EASY_PAY", IPHONE_SAFARI)).toBe("KAKAOPAY");
+    expect(resolvePayChoice("BITCOIN", IPHONE_SAFARI)).toBe("CARD");
+    expect(resolvePayChoice(null, IPHONE_SAFARI)).toBe("CARD");
+  });
+  it("PortOne에는 간편결제 제공자를 그대로 넘긴다", () => {
+    expect(portOnePayMethod("CARD")).toEqual({ payMethod: "CARD" });
+    expect(portOnePayMethod("NAVERPAY")).toEqual({ payMethod: "EASY_PAY", easyPay: { easyPayProvider: "NAVERPAY" } });
+    expect(portOnePayMethod("TOSSPAY")).toEqual({ payMethod: "EASY_PAY", easyPay: { easyPayProvider: "TOSSPAY" } });
   });
 });

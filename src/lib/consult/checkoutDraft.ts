@@ -13,7 +13,8 @@ export interface ConsultCheckoutDraft {
   person: PersonFormValues;
   giftFrom: string;
   fullName: string;
-  payMethod: "CARD" | "EASY_PAY";
+  /** 예전 저장값 "EASY_PAY"(카카오페이)가 남아 있을 수 있어 resolvePayChoice로 읽는다. */
+  payMethod: string;
   savedAt: number;
 }
 

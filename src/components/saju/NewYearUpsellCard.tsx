@@ -17,7 +17,10 @@ import {
   friendlyPaymentError,
   inAppHint,
   inAppPrepayHint,
-  kakaoPayAvailable,
+  payChoices,
+  portOnePayMethod,
+  resolvePayChoice,
+  type PayChoice,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -59,7 +62,7 @@ export function NewYearUpsellCard({
   const [needConsent, setNeedConsent] = useState(false);
   const [text, setText] = useState<string | null>(null);
   const [cards, setCards] = useState<NewYearMonthCard[] | undefined>(undefined);
-  const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  const [payMethod, setPayMethod] = useState<PayChoice>("CARD");
   // 기본 리포트를 결제로 산 사람은 이 값들이 이미 채워져 있어 바로 결제창으로 간다. 쿠폰으로
   // 무료 리포트를 받은 사람(email/phone을 물어본 적이 없음)은 이 카드에서 처음으로 결제
   // 정보를 받아야 해서, 비어있을 때만 입력란을 보여준다.
@@ -69,9 +72,9 @@ export function NewYearUpsellCard({
   const userAgent = useUserAgent();
   // 이니시스 모바일 결제창은 이름만 필수다(checkoutEnv.ts). 휴대폰에서는 휴대폰·이메일 칸을 아예 보여주지 않는다(11/12 첫 손님이 여기서 막힘).
   const fullContact = needsFullContact(userAgent);
-  // PC 결제창은 카카오페이가 꺼져 있어(kakaoPayAvailable) 카드로만 받는다.
-  const kakaoOk = kakaoPayAvailable(userAgent);
-  const method = kakaoOk ? payMethod : "CARD";
+  // 결제 수단 버튼은 기기별로 payChoices가 정한다(11/22 이니시스 간편결제 승인: 네이버페이·토스페이 추가).
+  const choices = payChoices(userAgent);
+  const method = resolvePayChoice(payMethod, userAgent);
   const inApp = detectInAppBrowser(userAgent);
   const askName = !initialFullName.trim();
   const askContact = fullContact && (!initialEmail || !initialPhoneNumber);
@@ -153,8 +156,7 @@ export function NewYearUpsellCard({
         orderName: order.orderName,
         totalAmount: order.amount,
         currency: "KRW",
-        payMethod: method,
-        ...(method === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
+        ...portOnePayMethod(method),
         // 휴대폰·이메일은 PC에서만 필수다. 모바일에서 비어 있으면 아예 보내지 않는다(빈 값은 형식 오류가 날 수 있다).
         customer: {
           fullName: name,
@@ -262,11 +264,8 @@ export function NewYearUpsellCard({
         </div>
       )}
 
-      <div className="flex justify-center gap-2">
-        {([
-          ["CARD", "카드"],
-          ["EASY_PAY", "카카오페이"],
-        ] as const).filter(([value]) => kakaoOk || value !== "EASY_PAY").map(([value, label]) => (
+      <div className="grid grid-cols-2 gap-2">
+        {choices.map(({ value, label }) => (
           <button
             key={value}
             type="button"

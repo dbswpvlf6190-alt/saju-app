@@ -22,7 +22,10 @@ import {
   friendlyPaymentError,
   inAppHint,
   inAppPrepayHint,
-  kakaoPayAvailable,
+  payChoices,
+  portOnePayMethod,
+  resolvePayChoice,
+  type PayChoice,
   isValidEmail,
   isValidPhone,
   needsFullContact,
@@ -58,7 +61,7 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  const [payMethod, setPayMethod] = useState<PayChoice>("CARD");
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -66,9 +69,9 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
   const userAgent = useUserAgent();
   // 이니시스 모바일 결제창은 이름만 필수다(checkoutEnv.ts). 휴대폰에서는 휴대폰·이메일 칸을 보여주지 않는다.
   const fullContact = needsFullContact(userAgent);
-  // PC 결제창은 카카오페이가 꺼져 있어(kakaoPayAvailable) 카드로만 받는다.
-  const kakaoOk = kakaoPayAvailable(userAgent);
-  const method = kakaoOk ? payMethod : "CARD";
+  // 결제 수단 버튼은 기기별로 payChoices가 정한다(11/22 이니시스 간편결제 승인: 네이버페이·토스페이 추가).
+  const choices = payChoices(userAgent);
+  const method = resolvePayChoice(payMethod, userAgent);
   const inApp = detectInAppBrowser(userAgent);
   const hint = inAppHint(inApp);
 
@@ -130,7 +133,7 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
         setPerson(draft.person);
         setGiftFrom(draft.giftFrom);
         setFullName(draft.fullName);
-        setPayMethod(draft.payMethod);
+        setPayMethod(resolvePayChoice(draft.payMethod, navigator.userAgent));
       }
       setStatus("error");
       setErrorMessage(
@@ -197,8 +200,7 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
         orderName: order.orderName,
         totalAmount: order.amount,
         currency: "KRW",
-        payMethod: method,
-        ...(method === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
+        ...portOnePayMethod(method),
         // 휴대폰·이메일은 PC에서만 필수다. 모바일에서 비어 있으면 보내지 않는다.
         customer: {
           fullName: name,
@@ -326,11 +328,8 @@ export function ConsultCheckout({ initialProduct }: { initialProduct?: ConsultPr
             </label>
           </>
         )}
-        <div className="flex gap-2">
-          {([
-            ["CARD", "카드"],
-            ["EASY_PAY", "카카오페이"],
-          ] as const).filter(([value]) => kakaoOk || value !== "EASY_PAY").map(([value, label]) => (
+        <div className="grid grid-cols-2 gap-2">
+          {choices.map(({ value, label }) => (
             <button
               key={value}
               type="button"

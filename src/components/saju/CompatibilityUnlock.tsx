@@ -7,7 +7,7 @@ import { COMPATIBILITY_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/c
 import { PaymentWaitlist } from "./PaymentWaitlist";
 import { trackEvent } from "@/lib/analytics/track";
 import { useUserAgent } from "@/lib/hooks/useUserAgent";
-import { kakaoPayAvailable } from "@/lib/payment/checkoutEnv";
+import { payChoices, portOnePayMethod, resolvePayChoice, type PayChoice } from "@/lib/payment/checkoutEnv";
 import { ReviewForm } from "./ReviewForm";
 import { PurchaseConsent } from "./PurchaseConsent";
 import { Icon } from "@/components/ui/Icon";
@@ -44,11 +44,11 @@ export function CompatibilityUnlock({
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [fullName, setFullName] = useState(selfName);
-  const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  const [payMethod, setPayMethod] = useState<PayChoice>("CARD");
   const userAgent = useUserAgent();
-  // PC 결제창은 카카오페이가 꺼져 있어(kakaoPayAvailable) 카드로만 받는다.
-  const kakaoOk = kakaoPayAvailable(userAgent);
-  const method = kakaoOk ? payMethod : "CARD";
+  // 결제 수단 버튼은 기기별로 payChoices가 정한다(11/22 이니시스 간편결제 승인: 네이버페이·토스페이 추가).
+  const choices = payChoices(userAgent);
+  const method = resolvePayChoice(payMethod, userAgent);
 
   const fetchReport = useCallback(async (paymentId: string) => {
     const reportRes = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
@@ -170,8 +170,7 @@ export function CompatibilityUnlock({
         orderName: order.orderName,
         totalAmount: order.amount,
         currency: "KRW",
-        payMethod: method,
-        ...(method === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
+        ...portOnePayMethod(method),
         customer: { email, phoneNumber: phoneNumber.replace(/-/g, ""), fullName: fullName.trim() },
         redirectUrl: window.location.href.split("?")[0],
       });
@@ -257,10 +256,7 @@ export function CompatibilityUnlock({
       <div className="flex flex-col gap-2">
         <span className="px-1 text-sm text-foreground-muted">결제 수단</span>
         <div className="grid grid-cols-2 gap-2">
-          {([
-            ["CARD", "카드"],
-            ["EASY_PAY", "카카오페이"],
-          ] as const).filter(([value]) => kakaoOk || value !== "EASY_PAY").map(([value, label]) => (
+          {choices.map(({ value, label }) => (
             <button
               key={value}
               type="button"

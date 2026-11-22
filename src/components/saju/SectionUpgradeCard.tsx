@@ -6,6 +6,8 @@ import { SECTION_UPGRADE_PRICE_KRW } from "@/lib/payment/config";
 import { trackEvent } from "@/lib/analytics/track";
 import { PurchaseConsent } from "./PurchaseConsent";
 import { Icon } from "@/components/ui/Icon";
+import { useUserAgent } from "@/lib/hooks/useUserAgent";
+import { payChoices, portOnePayMethod, resolvePayChoice, type PayChoice } from "@/lib/payment/checkoutEnv";
 
 type Status = "idle" | "processing" | "error";
 
@@ -34,7 +36,10 @@ export function SectionUpgradeCard({
 }) {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [payMethod, setPayMethod] = useState<"CARD" | "EASY_PAY">("CARD");
+  const [payMethod, setPayMethod] = useState<PayChoice>("CARD");
+  const userAgent = useUserAgent();
+  const choices = payChoices(userAgent);
+  const method = resolvePayChoice(payMethod, userAgent);
   const [fullName, setFullName] = useState(initialFullName);
   const [email, setEmail] = useState(initialEmail);
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber);
@@ -88,8 +93,7 @@ export function SectionUpgradeCard({
         orderName: order.orderName,
         totalAmount: order.amount,
         currency: "KRW",
-        payMethod,
-        ...(payMethod === "EASY_PAY" ? { easyPay: { easyPayProvider: "KAKAOPAY" } } : {}),
+        ...portOnePayMethod(method),
         customer: { email, phoneNumber: phoneNumber.replace(/-/g, ""), fullName: fullName.trim() },
         redirectUrl: window.location.href.split("?")[0],
       });
@@ -133,17 +137,14 @@ export function SectionUpgradeCard({
         </div>
       )}
 
-      <div className="flex justify-center gap-2">
-        {([
-          ["CARD", "카드"],
-          ["EASY_PAY", "카카오페이"],
-        ] as const).map(([value, label]) => (
+      <div className="grid grid-cols-2 gap-2">
+        {choices.map(({ value, label }) => (
           <button
             key={value}
             type="button"
             onClick={() => setPayMethod(value)}
             className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-              payMethod === value ? "border-accent-gold bg-accent-gold/15 text-accent-gold-soft" : "border-border-subtle text-foreground-muted"
+              method === value ? "border-accent-gold bg-accent-gold/15 text-accent-gold-soft" : "border-border-subtle text-foreground-muted"
             }`}
           >
             {label}

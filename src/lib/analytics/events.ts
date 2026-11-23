@@ -49,6 +49,10 @@ export const ANALYTICS_EVENT_NAMES = [
   "y2027_view",
   // 웹 /new-year 결제 전 미리보기 카드가 보인 횟수(2026-11-17) — new_year_result_view → ny_teaser_view → checkout_start
   "ny_teaser_view",
+  // 2026-11-23: 미리보기 배포(11/17) 뒤 결제 시도가 14번 → 1번으로 줄었는데, 확인란을 안 짚고 누른 버튼은 기록이 없었다.
+  // 결제 카드가 화면에 보였는지, 결제 버튼을 눌렀는지(확인란 체크 여부 포함)를 따로 남긴다.
+  "ny_paycard_seen",
+  "ny_pay_click",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SajuResult } from "@/lib/saju";
 import { resultToInput } from "@/lib/saju/types";
 import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW, PAYMENTS_PAUSED } from "@/lib/payment/config";
@@ -78,6 +78,26 @@ export function NewYearUpsellCard({
   const inApp = detectInAppBrowser(userAgent);
   const askName = !initialFullName.trim();
   const askContact = fullContact && (!initialEmail || !initialPhoneNumber);
+  // 결제 카드가 화면에 들어왔는지 한 번만 기록한다(2026-11-23, 미리보기 뒤 결제 시도 급감 원인 찾기).
+  const cardRef = useRef<HTMLDivElement>(null);
+  const seenSent = useRef(false);
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || seenSent.current || variant !== "standalone" || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          seenSent.current = true;
+          trackEvent("ny_paycard_seen", { productType: "new_year_report" });
+          io.disconnect();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   async function fetchReport(paymentId: string) {
     const res = await fetch(`/api/orders/${encodeURIComponent(paymentId)}`);
@@ -206,7 +226,7 @@ export function NewYearUpsellCard({
   const priceLabel = `${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원`;
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4 text-center">
+    <div ref={cardRef} className="flex flex-col gap-3 rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4 text-center">
       {standalone ? (
         <div className="flex flex-col gap-1">
           <strong className="font-serif text-xl text-foreground">열두 달 풀이 열기</strong>
@@ -309,6 +329,7 @@ export function NewYearUpsellCard({
       <button
         type="button"
         onClick={() => {
+          trackEvent("ny_pay_click", { productType: "new_year_report", agreed: agreed ? "y" : "n", method });
           if (!agreed) {
             setNeedConsent(true);
             return;

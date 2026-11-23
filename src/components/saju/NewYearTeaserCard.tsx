@@ -103,8 +103,9 @@ export function NewYearTeaserCard({ teaser, name }: { teaser: NewYearTeaser; nam
         {t.moneyMonths.length > 0 && (
           <p className="flex gap-1.5 text-sm text-foreground">
             <Icon name="coin" className="mt-0.5 shrink-0" />
+            {/* 2026-11-23: 재물 달까지 다 알려 주면 궁금한 게 남지 않는다(미리보기 뒤 결제 시도 14 → 1). 몇 번인지만 알리고 잠근다. */}
             <span>
-              재물이 들어오는 달은 <b className="text-accent-gold-soft">{monthList(t.moneyMonths)}</b>이에요
+              재물이 들어오는 달 <b className="text-accent-gold-soft">{t.moneyMonths.length}번</b>은 열두 달 풀이에서 알려드려요
             </span>
           </p>
         )}

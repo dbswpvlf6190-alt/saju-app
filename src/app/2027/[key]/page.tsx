@@ -19,7 +19,6 @@ import {
   ttiFromKey,
   yearRelationLabel,
   yearTheme,
-  type MonthTone,
 } from "@/lib/saju/year2027";
 import type { Tti } from "@/lib/saju/ttiCompat";
 
@@ -63,16 +62,14 @@ export async function generateMetadata({ params }: { params: Promise<{ key: stri
   const r = resolve(key);
   if (!r) return {};
   const theme = yearTheme(r.tti);
-  const months = monthFlows(r.tti.branch);
-  const good = months.filter((m) => m.tone === "good").map((m) => `${m.month}월`).join("·");
   const title =
     r.kind === "tti"
       ? `${r.tti.animal}띠 2027년 운세 | 정미년 ${theme.headline} - 사주랩`
       : `${r.info.year}년생 ${shortYear(r.info.year)}년생 ${r.tti.animal}띠 2027년 운세 | 좋은 달·조심할 달 - 사주랩`;
   const description =
     r.kind === "tti"
-      ? `2027년 정미년(양띠 해) ${r.tti.animal}띠 운세. ${theme.summary.slice(0, 70)}… 좋은 달${good ? `(${good})` : ""}과 조심할 달, 일·돈·사람 조언까지 정리했어요.`
-      : `${r.info.year}년생(${r.info.ganzhiKor}생, 2027년 만 ${r.info.age2027}세) ${r.tti.animal}띠의 2027년 정미년 운세. 띠 관계, 태어난 해 천간으로 본 흐름, 월별 좋은 달·조심할 달, ${ageTips(r.info.age2027).stage} 생활 조언을 쉽게 정리했어요.`;
+      ? `2027년 정미년(양띠 해) ${r.tti.animal}띠 운세. ${theme.summary.slice(0, 70)}… 띠 관계와 삼재, 좋은 달이 몇 번인지 정리했어요. 내 좋은 달은 생일로 확인해요.`
+      : `${r.info.year}년생(${r.info.ganzhiKor}생, 2027년 만 ${r.info.age2027}세) ${r.tti.animal}띠의 2027년 정미년 운세. 띠 관계, 태어난 해 천간으로 본 흐름, 삼재, ${ageTips(r.info.age2027).stage} 생활 조언을 쉽게 정리했어요. 내 좋은 달은 생일로 확인해요.`;
   const url = `/2027/${key}`;
   return {
     title,
@@ -82,14 +79,6 @@ export async function generateMetadata({ params }: { params: Promise<{ key: stri
     twitter: { card: "summary_large_image", title, description, images: [DEFAULT_OG_IMAGE] },
   };
 }
-
-const TONE_CLASS: Record<MonthTone, string> = {
-  good: "border-accent-gold bg-accent-gold/10 text-accent-gold-soft",
-  care: "border-red-300 bg-red-50 text-red-700",
-  light: "border-border-subtle bg-background-card text-foreground-muted",
-  mine: "border-accent-gold/50 bg-background-card text-accent-gold-soft",
-  plain: "border-border-subtle bg-background-card text-foreground-muted",
-};
 
 export default async function Year2027Page({ params }: { params: Promise<{ key: string }> }) {
   const { key } = await params;
@@ -121,7 +110,7 @@ export default async function Year2027Page({ params }: { params: Promise<{ key: 
     },
     {
       question: `2027년에 ${t.animal}띠가 좋은 달과 조심할 달은 언제인가요?`,
-      answer: `띠로 보면 좋은 달은 ${good.length ? good.map((m) => `${m.month}월`).join(", ") : "뚜렷하게 정해진 달 없이 고른 편"}이고, 조심할 달은 ${care.length ? care.map((m) => `${m.month}월`).join(", ") : "뚜렷하게 정해진 달 없이 고른 편"}이에요. 띠는 사주 여덟 글자 중 한 글자라, 생일을 넣어 사주 전체로 보면 달마다 더 정확하게 알 수 있어요.`,
+      answer: `띠로 보면 좋은 달은 ${good.length}번, 조심할 달은 ${care.length}번 있어요. 다만 띠는 사주 여덟 글자 중 한 글자라, 같은 ${t.animal}띠라도 태어난 달·날·시간에 따라 좋은 달이 달라져요. 생일을 넣으면 내 사주로 어느 달인지 알려 드려요.`,
     },
     {
       question: `${t.animal}띠는 2027년에 삼재인가요?`,
@@ -216,9 +205,9 @@ export default async function Year2027Page({ params }: { params: Promise<{ key: 
             <dt className="text-foreground-muted">삼재</dt>
             <dd className="text-foreground">{samjae ? "날삼재(삼재가 끝나는 해)" : "해당 없음"}</dd>
             <dt className="text-foreground-muted">좋은 달</dt>
-            <dd className="text-foreground">{good.length ? good.map((m) => `${m.month}월`).join(", ") : "고른 편"}</dd>
+            <dd className="text-foreground">{good.length ? `${good.length}번 · 생일로 보면 내 달이 나와요` : "고른 편"}</dd>
             <dt className="text-foreground-muted">조심할 달</dt>
-            <dd className="text-foreground">{care.length ? care.map((m) => `${m.month}월`).join(", ") : "고른 편"}</dd>
+            <dd className="text-foreground">{care.length ? `${care.length}번 · 생일로 보면 내 달이 나와요` : "고른 편"}</dd>
           </dl>
         </section>
 
@@ -248,31 +237,23 @@ export default async function Year2027Page({ params }: { params: Promise<{ key: 
         )}
 
         <section className={section}>
-          <h2 className={h2}>2027년 달별 흐름</h2>
-          <p className="text-sm text-foreground-muted">달의 기운(절기 기준)과 {t.animal}띠의 관계로 본 흐름이에요.</p>
-          <ul className="flex flex-col gap-2">
+          <h2 className={h2}>2027년 열두 달</h2>
+          {/* 2026-11-23: 띠 달별 풀이를 다 보여 주면 "음, 알겠다" 하고 끝난다 — 몇 번인지만 알리고 어느 달인지는 생일로 연다. */}
+          <div className="grid grid-cols-4 gap-1.5" role="img" aria-label="열두 달이 모두 잠겨 있어요">
             {months.map((m) => (
-              <li key={m.month} className={`flex flex-col gap-0.5 rounded-xl border px-3.5 py-2.5 ${TONE_CLASS[m.tone]}`}>
-                <span className="flex items-baseline justify-between gap-2">
-                  <strong className="text-base">{m.month}월 · {m.animal}의 달</strong>
-                  <span className="text-sm font-semibold">{m.label}</span>
-                </span>
-                <span className="text-sm leading-relaxed text-foreground">{m.line}</span>
-                {m.note && <span className="text-xs text-foreground-muted">{m.note}</span>}
-              </li>
+              <span key={m.month} className="flex flex-col items-center rounded-lg border border-dashed border-border-subtle bg-background-card py-2 text-foreground-muted">
+                <small className="text-[11px]">{m.animal}의 달</small>
+                <b className="text-base font-normal">{m.month}월 🔒</b>
+              </span>
             ))}
-          </ul>
+          </div>
+          <p className={body}>
+            {t.animal}띠로 보면 2027년에 좋은 달이 {good.length}번, 조심할 달이 {care.length}번 있어요. 같은 {t.animal}띠라도 태어난 달·날·시간에 따라 어느 달이 좋은지는 달라져요.
+          </p>
           {/* 달별 흐름을 다 읽은 순간이 '내 날짜'가 가장 궁금한 때 — 여기서 바로 넘어가게 버튼을 하나 더 둔다(C2). */}
           <Link href={cta} className="mt-1 rounded-xl border border-accent-gold/60 bg-accent-gold/10 px-4 py-3 text-center text-base font-semibold text-foreground">
-            띠로는 여기까지 — 내 생일로 보면 달마다 좋은 날짜가 나와요 →
+            {who}, 내 생일로 좋은 달 열어 보기 →
           </Link>
-        </section>
-
-        <section className={section}>
-          <h2 className={h2}>일 · 돈 · 사람</h2>
-          <p className={body}><strong>일</strong> — {theme.work}</p>
-          <p className={body}><strong>돈</strong> — {theme.money}</p>
-          <p className={body}><strong>사람</strong> — {theme.people}</p>
         </section>
 
         {age && (

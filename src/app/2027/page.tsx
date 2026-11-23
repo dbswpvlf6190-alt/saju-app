@@ -7,7 +7,7 @@ import { TTI, Y2027, birthYearsOf, isSamjae2027, yearRelationLabel, yearTheme } 
 
 const TITLE = "2027년 띠별 운세 · 나이별 운세 | 정미년 신년운세 - 사주랩";
 const DESCRIPTION =
-  "2027년 정미년(붉은 양의 해) 열두 띠 운세와 1940~2009년생 나이별 운세를 한곳에. 띠별 좋은 달과 조심할 달, 2027 삼재띠(돼지·토끼·양 날삼재)까지 쉽게 정리했어요.";
+  "2027년 정미년(붉은 양의 해) 열두 띠 운세와 1940~2009년생 나이별 운세를 한곳에. 띠 관계와 2027 삼재띠(돼지·토끼·양 날삼재)까지 쉽게 정리했어요.";
 
 export const metadata: Metadata = {
   title: TITLE,

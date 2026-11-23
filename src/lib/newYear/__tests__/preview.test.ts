@@ -19,9 +19,8 @@ describe("buildNewYearTeaser", () => {
       expect(teaser.label).toBe(hook.label);
       expect(teaser.top.month).toBe(hook.top.month);
       expect(teaser.freeDay).toEqual(hook.freeDay);
-      expect(teaser.best).toEqual(hook.best.map((m) => m.month));
-      expect(teaser.bars).toHaveLength(12);
-      for (const b of teaser.bars) expect(b.h).toBeGreaterThanOrEqual(25);
+      expect(teaser.bestCount).toBe(hook.best.length);
+      expect(teaser.moneyCount).toBe(hook.moneyMonths.length);
     });
 
     it(`${p.year}년생: 다른 달의 유료 내용(재물·가족·좋은 날짜)은 응답에 없다`, () => {
@@ -32,6 +31,9 @@ describe("buildNewYearTeaser", () => {
         expect(json).not.toContain(f.people);
       }
       expect(json).not.toContain("goodDays");
+      // 결제 전에는 그 달 이름·조언도, 다른 좋은 달·재물 달 목록도 보내지 않는다(개수만).
+      expect(json).not.toContain(hook.top.tip);
+      expect(json).not.toMatch(/"best"|"moneyMonths"|"bars"/);
     });
 
     it(`${p.year}년생: 결제 후 달 카드는 미리보기가 약속한 좋은 날 수와 같다`, () => {
@@ -40,7 +42,8 @@ describe("buildNewYearTeaser", () => {
       expect(cards.reduce((n, c) => n + c.goodDays.length, 0)).toBe(teaser.totalGoodDays);
       const top = cards.find((c) => c.month === teaser.top.month)!;
       if (teaser.freeDay) expect(top.goodDays.map((d) => d.day)).toContain(teaser.freeDay.day);
-      expect(cards.filter((c) => c.best).map((c) => c.month)).toEqual(teaser.best);
+      expect(cards.filter((c) => c.best)).toHaveLength(teaser.bestCount);
+      expect(cards.find((c) => c.month === teaser.top.month)?.best).toBe(true);
     });
   }
 });

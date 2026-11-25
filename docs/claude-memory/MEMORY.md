@@ -22,3 +22,5 @@
 - [폴더는 항상 바로 열기](feedback_auto_reveal_folders.md) — 파일·폴더 알려줄 땐 묻지 말고 reveal_path로 탐색기 열기
 - [네이버 블로그는 브라우저 도구로 못 연다](project_naver_blog_blocked.md) — 블로그 확인은 사장님 캡처로, RSS는 12편만
 - [블로그 첫머리 규칙](feedback_blog_intro_6w.md) — 한눈에 답→감성 4줄→육하원칙 도입(사실만)→날짜, 지어낸 사례 금지
+- [틱톡 임시 저장함 자동 전송](project_tiktok_inbox.md) — 11/24 연결, Sandbox는 비공개만 도착, 주말 데스크톱에서 정식 심사
+- [무료엔 풀이 금지](feedback_free_content_no_reading.md) — 블로그·무료 화면은 넓은 궁금증+사실만, 좋은 달·조언은 결제 뒤 (11/23)

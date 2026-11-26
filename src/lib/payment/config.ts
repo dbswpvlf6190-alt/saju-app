@@ -6,7 +6,8 @@ import { CONSULT_PLANS, type ConsultProductType } from "@/lib/consult/plans";
 // 다시 실패가 나면 true로 되돌려 배포하면 즉시 대기자 수집 화면으로 돌아간다.
 export const PAYMENTS_PAUSED = false;
 
-export const PREMIUM_REPORT_PRICE_KRW = 4900;
+// 2026-11-26 품질경영(사장님 결정): 나 사용설명서 4,900원 → 15,900원, 신년운세 3,900원 → 29,000원.
+export const PREMIUM_REPORT_PRICE_KRW = 15900;
 export const PREMIUM_REPORT_NAME = "사주 상세 분석 리포트";
 
 export const COMPATIBILITY_REPORT_PRICE_KRW = 4900;
@@ -22,7 +23,7 @@ export const COMPATIBILITY_REPORT_NAME = "궁합 상세 분석 리포트";
 // 이번 시즌(2026년 11월~2027년 2월) 한정 업셀 상품의 대상 연도. 다음 신년운세 시즌에는
 // 이 값과 NEW_YEAR_REPORT_NAME을 함께 다음 해로 갱신해야 한다.
 export const NEW_YEAR_REPORT_TARGET_YEAR = 2027;
-export const NEW_YEAR_REPORT_PRICE_KRW = 3900;
+export const NEW_YEAR_REPORT_PRICE_KRW = 29000;
 export const NEW_YEAR_REPORT_NAME = `${NEW_YEAR_REPORT_TARGET_YEAR} 신년운세`;
 
 export type ProductType =

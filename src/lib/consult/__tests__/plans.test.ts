@@ -20,9 +20,9 @@ describe("refundableKrw", () => {
   it("신년운세+15회: 리포트를 열면 리포트 몫이 빠진다", () => {
     const plan = CONSULT_PLANS.newyear_plus;
     const opened = refundableKrw(plan, { paidAt, creditsLeft: 15, reportsOpened: 1, opened: true }, after(1));
-    expect(opened).toBe(14990 - 4990);
+    expect(opened).toBe(34900 - 29000);
     const unopened = refundableKrw(plan, { paidAt, creditsLeft: 15, reportsOpened: 0, opened: true }, after(1));
-    expect(unopened).toBe(14990);
+    expect(unopened).toBe(34900);
   });
 
   it("30일권: 이용일수만큼 빼고, 7일 지나면 남은 금액의 10%도 뺀다", () => {

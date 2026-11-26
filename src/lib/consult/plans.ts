@@ -35,7 +35,7 @@ export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
     reportValueKrw: 0,
   },
   newyear_plus: {
-    amount: 14990,
+    amount: 34900,
     name: "2027 신년운세 + AI 상담 15회",
     credits: 15,
     unlimitedDays: null,
@@ -43,10 +43,11 @@ export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
     familyMax: 0,
     costCapKrw: 1000,
     includes: ["new_year_report"],
-    reportValueKrw: 4990,
+    // 2026-11-26 가격 인상: 신년운세 단품 29,000원 = 리포트 몫
+    reportValueKrw: 29000,
   },
   premium_bundle: {
-    amount: 29990,
+    amount: 49900,
     name: "평생·신년운세 + 가족 2명 + 30일 상담",
     credits: null,
     unlimitedDays: 30,
@@ -54,7 +55,8 @@ export const CONSULT_PLANS: Record<ConsultProductType, ConsultPlan> = {
     familyMax: 2,
     costCapKrw: 3000,
     includes: ["premium_report", "new_year_report"],
-    reportValueKrw: 4990,
+    // 2026-11-26 가격 인상: 두 리포트 단품 합(15,900 + 29,000)을 반씩 나눈 값
+    reportValueKrw: 22450,
   },
 };
 

@@ -122,9 +122,10 @@ export function NewYearTeaserCard({ teaser, name }: { teaser: NewYearTeaser; nam
 
       <ul className="flex flex-col gap-2.5 border-t border-[#e8dfcc] pt-4">
         {[
-          [`내게 좋은 날 ${t.totalGoodDays}일`, "달마다 날짜와 요일까지 알려드려요"],
-          ["달마다 재물 · 가족 · 할 일", "열두 달 모두, 그 달 이름과 함께"],
-          ["내 사주로 쓴 총평", "분기별 키워드와 실천 조언까지"],
+          [`내게 좋은 날 ${t.totalGoodDays}일`, "달마다 날짜와 요일, 그날 해 보면 좋은 일까지"],
+          ["열두 달 풀이", "달마다 흐름과 재물 · 가족 · 할 일을 한 문단씩"],
+          ["다섯 가지 영역 풀이", "일 · 돈 · 가족 · 인연 · 이사와 계약"],
+          ["총평과 분기별 실천 계획", "내 사주가 2027년을 받는 방식부터, 약 7,000자"],
         ].map(([title, sub]) => (
           <li key={title} className="flex gap-2.5">
             <Icon name="check" className="mt-1 shrink-0 text-accent-gold-soft" />

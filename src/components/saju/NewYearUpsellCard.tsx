@@ -231,8 +231,7 @@ export function NewYearUpsellCard({
         <div className="flex flex-col gap-1">
           <strong className="font-serif text-xl text-foreground">열두 달 풀이 열기</strong>
           <span className="text-sm text-foreground-muted">
-            <b className="text-base text-accent-gold-soft">{priceLabel}</b> · 한 번만 결제 · 하루 약{" "}
-            {Math.max(1, Math.round(NEW_YEAR_REPORT_PRICE_KRW / 365))}원꼴
+            <b className="text-base text-accent-gold-soft">{priceLabel}</b> · 한 번만 결제 · 내 사주로 새로 쓰는 풀이
           </span>
         </div>
       ) : (

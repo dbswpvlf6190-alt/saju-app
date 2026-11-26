@@ -1,9 +1,10 @@
 import { reportV2Enabled } from "@/lib/reports/manualChapters";
+import { PREMIUM_REPORT_PRICE_KRW } from "@/lib/payment/config";
 
 // 전환 관련 카피를 한곳에 모아둔다. 나중에 실제 데이터로 문구 A/B 테스트를 하고 싶어지면
 // 이 값들만 바꾸면 되고(예: PREMIUM_CTA_LABEL을 "내 상세 사주 확인하기"로), 지금 당장
 // 무작위 테스트 로직을 넣지는 않는다 — 구조만 미리 준비해둔다.
-export const PREMIUM_CTA_LABEL = "4,900원으로 전체 분석 보기";
+export const PREMIUM_CTA_LABEL = `${PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원으로 전체 분석 보기`;
 export const PREMIUM_VALUE_HEADLINE = "🔮 나의 사주 기반 심층 분석";
 export const PREMIUM_VALUE_SUBHEAD = "오늘 하루가 아니라, 사주 전체를 근거로 한 깊이 있는 분석";
 // 아래 결제 폼(카드/카카오페이 선택 + 이름·이메일·휴대폰) 진입 전에 보여주는 안내 —
@@ -12,7 +13,7 @@ export const PREMIUM_DETAILS_STEP_INTRO = "결제 정보를 입력하고 바로 
 
 // 6장 "나 사용설명서"(NEXT_PUBLIC_REPORT_V2, 기본 켬)에서는 소개·가격 화면과 같은 이름으로 부른다(옛 5개 주제 문구는 롤백용).
 export function premiumCtaLabel(): string {
-  return reportV2Enabled() ? "4,900원 결제하고 나 사용설명서 열기" : PREMIUM_CTA_LABEL;
+  return reportV2Enabled() ? `${PREMIUM_REPORT_PRICE_KRW.toLocaleString()}원 결제하고 나 사용설명서 열기` : PREMIUM_CTA_LABEL;
 }
 export function premiumDetailsStepIntro(): string {
   return reportV2Enabled() ? "결제 정보를 입력하면 나 사용설명서 6장이 바로 열려요." : PREMIUM_DETAILS_STEP_INTRO;

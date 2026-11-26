@@ -50,7 +50,7 @@ export default function RefundPage() {
         </p>
         <ul>
           <li>상담방과 리포트를 <strong>한 번도 열지 않은 경우</strong>(선물을 받는 분이 아직 열지 않은 경우 포함), 결제 후 7일 이내 전액 환불합니다.</li>
-          <li><strong>열어 본 리포트</strong>는 환불되지 않습니다. 묶음 상품의 리포트 몫은 리포트 1개당 {CONSULT_PLANS.newyear_plus.reportValueKrw.toLocaleString()}원으로 계산합니다.</li>
+          <li><strong>열어 본 리포트</strong>는 환불되지 않습니다. 묶음 상품의 리포트 몫은 리포트 1개당 {CONSULT_PLANS.newyear_plus.name} {CONSULT_PLANS.newyear_plus.reportValueKrw.toLocaleString()}원, {CONSULT_PLANS.premium_bundle.name} {CONSULT_PLANS.premium_bundle.reportValueKrw.toLocaleString()}원으로 계산합니다.</li>
           <li>
             <strong>질문권</strong>: 사용한 질문은 환불되지 않습니다. 결제 후 7일 이내에는 사용하지 않은 질문을
             (결제금액 − 리포트 몫) ÷ 총 질문 수로 계산해 환불합니다.

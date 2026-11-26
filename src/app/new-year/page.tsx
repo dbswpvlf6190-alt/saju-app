@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/saju/SiteFooter";
 import { NEW_YEAR_REPORT_NAME, NEW_YEAR_REPORT_PRICE_KRW, NEW_YEAR_REPORT_TARGET_YEAR } from "@/lib/payment/config";
 
 const TITLE = `${NEW_YEAR_REPORT_NAME} | 사주랩`;
-const DESCRIPTION = `내 사주로 보는 ${NEW_YEAR_REPORT_TARGET_YEAR}년 정미년 흐름. 분기별 키워드와 월별 12개월 흐름, 조심할 달과 기회의 달까지 ${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원으로 확인하세요.`;
+const DESCRIPTION = `내 사주로 보는 ${NEW_YEAR_REPORT_TARGET_YEAR}년 정미년 흐름. 열두 달 풀이와 좋은 날, 일·돈·가족·인연·이사 다섯 가지 영역, 분기별 실천 계획까지 ${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원으로 확인하세요.`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -15,12 +15,12 @@ export const metadata: Metadata = {
 };
 
 const CONTENTS = [
-  ["총평", "올해의 기운이 내 사주와 만나는 방식"],
-  ["분기별 키워드", "1~3월, 4~6월, 7~9월, 10~12월 한 줄 키워드"],
-  ["열두 달 풀이 + 좋은 날", "달마다 좋은 날짜·요일, 재물·가족·할 일"],
-  ["조심할 달 · 기회의 달", "내 사주에서 부딪히거나 맺어지는 달"],
-  ["일 · 돈 · 사람", "세 가지 영역 한 줄 정리"],
-  ["실천 조언 3가지", "오늘부터 시작할 수 있는 행동"],
+  ["총평", "올해 기운이 내 사주와 만나는 방식, 상반기와 하반기의 흐름"],
+  ["내 사주가 2027년을 받는 방식", "많은 기운·적은 기운이 정미년과 어떻게 만나는지"],
+  ["열두 달 풀이 + 좋은 날", "달마다 한 문단씩, 좋은 날짜·요일과 그날 해 보면 좋은 일"],
+  ["다섯 가지 영역", "일 · 돈 · 가족 · 인연 · 이사와 계약"],
+  ["차분히 챙길 달 · 기회로 삼을 달", "내 사주에서 부딪히거나 맺어지는 달"],
+  ["분기별 실천 계획", "1~3월부터 10~12월까지 할 일, 모두 약 7,000자"],
 ] as const;
 
 export default function NewYearPage() {

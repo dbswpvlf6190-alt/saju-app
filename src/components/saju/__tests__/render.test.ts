@@ -23,10 +23,10 @@ describe("결제 전 소개(PremiumOffer)", () => {
       expect(html).toContain(c.promise);
     }
     expect(html).toContain("나 사용설명서 전체 6장");
-    expect(html).toContain("4,900원");
+    expect(html).toContain("15,900원");
     expect(html).toContain("궁금한 1가지만 먼저");
     expect(html).toContain("1,900원");
-    expect(html).toContain("4,900원으로 나 사용설명서 열기");
+    expect(html).toContain("15,900원으로 나 사용설명서 열기");
     expect(html).not.toContain("전체 5가지 한 번에");
   });
 
@@ -34,7 +34,7 @@ describe("결제 전 소개(PremiumOffer)", () => {
     vi.stubEnv("NEXT_PUBLIC_REPORT_V2", "0");
     const html = offer();
     expect(html).toContain("전체 5가지 한 번에");
-    expect(html).toContain("4,900원으로 5가지 전체 보기");
+    expect(html).toContain("15,900원으로 5가지 전체 보기");
     expect(html).not.toContain("나 사용설명서 전체 6장");
   });
 
@@ -129,7 +129,7 @@ describe("결제 폼 문구", () => {
     expect(copy.premiumCtaLabel()).toContain("나 사용설명서");
     expect(copy.premiumDetailsStepIntro()).toContain("6장");
     vi.stubEnv("NEXT_PUBLIC_REPORT_V2", "0");
-    expect(copy.premiumCtaLabel()).toBe("4,900원으로 전체 분석 보기");
+    expect(copy.premiumCtaLabel()).toBe("15,900원으로 전체 분석 보기");
     expect(copy.premiumDetailsStepIntro()).toContain("전체 분석");
   });
 });

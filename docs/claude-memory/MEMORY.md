@@ -24,3 +24,4 @@
 - [블로그 첫머리 규칙](feedback_blog_intro_6w.md) — 한눈에 답→감성 4줄→육하원칙 도입(사실만)→날짜, 지어낸 사례 금지
 - [틱톡 임시 저장함 자동 전송](project_tiktok_inbox.md) — 11/24 연결, Sandbox는 비공개만 도착, 주말 데스크톱에서 정식 심사
 - [무료엔 풀이 금지](feedback_free_content_no_reading.md) — 블로그·무료 화면은 넓은 궁금증+사실만, 좋은 달·조언은 결제 뒤 (11/23)
+- [품질경영 가격 결정](project_quality_pricing.md) — 11/27 배포, 신년운세 29,000·나 사용설명서 15,900, 옛 가격 문구 같이 고치기

@@ -53,6 +53,8 @@ export const ANALYTICS_EVENT_NAMES = [
   // 결제 카드가 화면에 보였는지, 결제 버튼을 눌렀는지(확인란 체크 여부 포함)를 따로 남긴다.
   "ny_paycard_seen",
   "ny_pay_click",
+  // 2026-11-27 결제 카드 '버튼 먼저': 1단계 큰 버튼(결제 수단·확인란 화면 열기). ny_pay_click은 2단계 결제 버튼.
+  "ny_pay_open",
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

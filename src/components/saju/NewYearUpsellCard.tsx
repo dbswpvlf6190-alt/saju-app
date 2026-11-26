@@ -63,6 +63,9 @@ export function NewYearUpsellCard({
   const [text, setText] = useState<string | null>(null);
   const [cards, setCards] = useState<NewYearMonthCard[] | undefined>(undefined);
   const [payMethod, setPayMethod] = useState<PayChoice>("CARD");
+  // 2026-11-27 '버튼 먼저'(사장님 결정): 단독 구매 카드는 1단계에 큰 버튼 하나만 보여 주고, 결제 수단·확인란은 누른 뒤(2단계)에 보여 준다.
+  // 11/23~26 카드를 본 22명 중 결제 버튼을 누른 사람이 0명 — 결제 수단 4칸과 긴 동의 글이 먼저 보여 '결제 서류'처럼 읽혔다고 봤다.
+  const [step, setStep] = useState<1 | 2>(variant === "standalone" ? 1 : 2);
   // 기본 리포트를 결제로 산 사람은 이 값들이 이미 채워져 있어 바로 결제창으로 간다. 쿠폰으로
   // 무료 리포트를 받은 사람(email/phone을 물어본 적이 없음)은 이 카드에서 처음으로 결제
   // 정보를 받아야 해서, 비어있을 때만 입력란을 보여준다.
@@ -225,20 +228,61 @@ export function NewYearUpsellCard({
   const standalone = variant === "standalone";
   const priceLabel = `${NEW_YEAR_REPORT_PRICE_KRW.toLocaleString()}원`;
 
+  const checks = [
+    "결제하면 이 화면에서 바로 열려요",
+    "자동 결제 없이 한 번만 결제해요",
+    "열어 보기 전엔 7일 안에 환불돼요",
+    "명리학으로 계산하고 AI가 쉬운 말로 정리한 참고용 풀이예요",
+  ];
+
+  // 1단계(단독 구매만): 큰 버튼 하나와 안심 문구만. 누르면 같은 카드 안에서 2단계가 열린다.
+  if (standalone && step === 1) {
+    return (
+      <div ref={cardRef} className="flex flex-col gap-3 rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4 text-center">
+        <div className="flex flex-col gap-1">
+          <strong className="font-serif text-xl text-foreground">열두 달 풀이 열기</strong>
+          <span className="text-sm text-foreground-muted">내 사주로 새로 쓰는 약 7,000자 풀이</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            trackEvent("ny_pay_open", { productType: "new_year_report" });
+            setStep(2);
+          }}
+          className="rounded-xl bg-cta px-4 py-4 text-center text-base font-semibold text-cta-ink transition-opacity hover:opacity-90"
+        >
+          {goodDays ? `내게 좋은 날 ${goodDays}일 모두 보기` : "열두 달 풀이 열기"}
+          <span className="mt-0.5 block text-sm font-medium opacity-90">{priceLabel} · 한 번만 결제</span>
+        </button>
+        <ul className="flex flex-col gap-1 text-left text-sm leading-relaxed text-foreground-muted">
+          {checks.map((c) => (
+            <li key={c} className="flex gap-1.5">
+              <Icon name="check" className="mt-1 shrink-0 text-accent-gold-soft" />
+              <span>{c}</span>
+            </li>
+          ))}
+        </ul>
+        {inAppPrepayHint(inApp) && (
+          <p className="text-left text-xs leading-relaxed text-foreground-muted">{inAppPrepayHint(inApp)}</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div ref={cardRef} className="flex flex-col gap-3 rounded-2xl border border-[#dccba6] bg-[#fbf7ef] p-4 text-center">
       {standalone ? (
         <div className="flex flex-col gap-1">
-          <strong className="font-serif text-xl text-foreground">열두 달 풀이 열기</strong>
+          <strong className="font-serif text-xl text-foreground">어떻게 결제할까요?</strong>
           <span className="text-sm text-foreground-muted">
-            <b className="text-base text-accent-gold-soft">{priceLabel}</b> · 한 번만 결제 · 내 사주로 새로 쓰는 풀이
+            {NEW_YEAR_REPORT_NAME} · <b className="text-base text-accent-gold-soft">{priceLabel}</b> · 한 번만 결제
           </span>
         </div>
       ) : (
         <>
           <strong className="text-sm text-accent-gold-soft">{`${NEW_YEAR_REPORT_NAME}도 궁금하다면`}</strong>
           <span className="text-xs text-foreground-muted">
-            지금 리포트에 이어서, 새해 흐름만 따로 더 자세히 — 월별 흐름과 조심할 달·기회의 달까지
+            지금 리포트에 이어서, 새해 흐름만 따로 더 자세히 — 열두 달 흐름과 차분히 챙길 달·기회의 달까지
           </span>
         </>
       )}
@@ -283,18 +327,21 @@ export function NewYearUpsellCard({
         </div>
       )}
 
+      {standalone && <span className="text-left text-sm text-foreground-muted">결제 수단</span>}
       <div className="grid grid-cols-2 gap-2">
         {choices.map(({ value, label }) => (
           <button
             key={value}
             type="button"
             onClick={() => setPayMethod(value)}
+            aria-pressed={method === value}
             className={`min-w-24 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
               method === value
                 ? "border-[#b8955a] bg-[#f3eee4] text-accent-gold-soft"
                 : "border-[#dccba6] text-foreground-muted"
             }`}
           >
+            {method === value && <Icon name="check" className="mr-1" />}
             {label}
           </button>
         ))}
@@ -343,31 +390,18 @@ export function NewYearUpsellCard({
         {status === "processing"
           ? "결제창을 여는 중이에요…"
           : standalone
-            ? goodDays
-              ? `내게 좋은 날 ${goodDays}일 모두 보기 · ${priceLabel}`
-              : `열두 달 풀이 열기 · ${priceLabel}`
+            ? `${priceLabel} 결제하기`
             : `+${priceLabel}으로 신년운세 추가`}
       </button>
 
-      {standalone && (
-        <ul className="flex flex-col gap-1 text-left text-sm leading-relaxed text-foreground-muted">
-          <li className="flex gap-1.5">
-            <Icon name="check" className="mt-1 shrink-0 text-accent-gold-soft" />
-            <span>자동 결제 없이 한 번만 결제해요</span>
-          </li>
-          <li className="flex gap-1.5">
-            <Icon name="check" className="mt-1 shrink-0 text-accent-gold-soft" />
-            <span>결제하면 바로 이어서 열려요</span>
-          </li>
-          <li className="flex gap-1.5">
-            <Icon name="check" className="mt-1 shrink-0 text-accent-gold-soft" />
-            <span>명리학으로 계산하고 AI가 쉬운 말로 정리한 참고용 풀이예요</span>
-          </li>
-        </ul>
-      )}
-
-      {standalone && !errorMessage && inAppPrepayHint(inApp) && (
-        <p className="text-left text-xs leading-relaxed text-foreground-muted">{inAppPrepayHint(inApp)}</p>
+      {standalone && status !== "processing" && (
+        <button
+          type="button"
+          onClick={() => setStep(1)}
+          className="text-xs text-foreground-muted underline underline-offset-4 hover:text-accent-gold-soft"
+        >
+          이전으로
+        </button>
       )}
     </div>
   );

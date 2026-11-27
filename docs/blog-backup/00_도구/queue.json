@@ -3,19 +3,23 @@
   "items": [
     {
       "key": "hub_holiday_2027",
-      "done": "2026-11-28"
+      "done": "2026-11-28",
+      "reserved": "2026-11-27"
     },
     {
       "key": "hub_1970s",
-      "done": "2026-11-28"
+      "done": "2026-11-28",
+      "reserved": "2026-11-27"
     },
     {
       "key": "hub_ahopsu",
-      "done": "2026-11-29"
+      "done": "2026-11-29",
+      "reserved": "2026-11-27"
     },
     {
       "key": "hub_1950s",
-      "done": "2026-11-29"
+      "done": "2026-11-29",
+      "reserved": "2026-11-27"
     },
     {
       "key": "hub_luck_tti",

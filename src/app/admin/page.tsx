@@ -7,18 +7,15 @@ import { AdminPreviewTool } from "@/components/admin/AdminPreviewTool";
 import { reconcileStalePendingOrders } from "@/lib/payment/reconcile";
 import { getFunnelSummary } from "@/lib/analytics/funnelSummary";
 import type { AnalyticsEventName } from "@/lib/analytics/events";
+import { getDashboard, parseRange, formatKst, RANGE_LABEL, PRODUCT_LABEL, type RangeKey } from "@/lib/admin/dashboard";
 
 // 매출/주문 데이터는 요청마다 최신 상태여야 하므로 빌드 시점 정적 캐싱을 막는다.
 export const dynamic = "force-dynamic";
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: "결제대기",
-  PAID: "결제완료",
-  FAILED: "실패",
-  CANCELED: "취소",
-};
+// 2026-11-28 개편: 큰 사이트 관리자 화면(Shopify 홈·Stripe 홈·스마트스토어 판매자센터)처럼
+// ① 큰 숫자 4개 + 이전 기간 비교 → ② 확인할 일 → ③ 추이 → ④ 결제 흐름 → ⑤ 유입·글·상품 → ⑥ 최근 결제·실패 → 도구는 접어 둠.
 
-// 30DAY_FINAL_PLAN.md의 퍼널 순서(랜딩→시작→완료→CTA→결제)를 그대로 따른 표시 순서·라벨.
+// 전체 이벤트 숫자(접어 두는 칸)에 쓰는 이름표.
 const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   landing_view: "랜딩 조회",
   saju_start: "무료 사주 시작",
@@ -68,176 +65,207 @@ const EVENT_LABEL: Record<AnalyticsEventName, string> = {
   ny_pay_click: "신년운세 결제 버튼 누름",
 };
 
-function pct(numerator: number, denominator: number): string {
-  if (denominator === 0) return "—";
-  return `${((numerator / denominator) * 100).toFixed(1)}%`;
-}
+const RANGES: RangeKey[] = ["today", "7d", "30d"];
 
-export default async function AdminPage() {
-  // Vercel Cron(vercel.json)이 하루 1회 재검증한다(Hobby 플랜은 cron이 하루 1회 이상이면
-  // 배포 자체가 거부된다 — 2026-09-04에 실제로 이 스케줄이 시간당으로 되어 있어서 배포가
-  // 통째로 실패했던 적이 있다). 그 안전망과 별개로, 관리자가 대시보드를 열 때마다도 정체된
-  // PENDING 주문을 즉시 재검증해서 화면에 최신 상태가 보이게 한다.
+type SearchParams = Promise<{ range?: string }>;
+
+export default async function AdminPage({ searchParams }: { searchParams: SearchParams }) {
+  // 관리자가 열 때마다 정체된 PENDING 주문을 재검증한다(하루 1회 크론과 별개의 안전망).
   await reconcileStalePendingOrders();
 
-  const [orders, paidAgg, statusCounts, reviews, funnel, coupons, waitlistCount] = await Promise.all([
-    prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
-    prisma.order.aggregate({ where: { status: "PAID" }, _sum: { amount: true }, _count: true }),
-    prisma.order.groupBy({ by: ["status"], _count: true }),
+  const range = parseRange((await searchParams).range);
+  const [d, funnel, reviews, coupons, waitlistCount] = await Promise.all([
+    getDashboard(range),
+    getFunnelSummary(range === "30d" ? 30 : range === "today" ? 1 : 7),
     prisma.review.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
-    getFunnelSummary(7),
     prisma.coupon.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
     prisma.waitlistSignup.count(),
   ]);
-
-  const totalRevenue = paidAgg._sum.amount ?? 0;
-  const paidCount = paidAgg._count;
+  const k = d.kpi;
+  const prevLabel = range === "today" ? "어제 같은 시각까지" : "그 전 같은 기간";
 
   return (
-    <div className="flex flex-1 flex-col gap-8 bg-background px-6 py-10 text-foreground">
-      <h1 className="font-serif text-2xl text-accent-gold-soft">관리자 대시보드</h1>
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 bg-background px-4 py-8 text-foreground sm:px-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl text-accent-gold-soft">사주랩 관리자</h1>
+          <p className="mt-1 text-xs text-foreground-muted">
+            {formatKst(d.generatedAt)} 기준 · 한국 시간 · 사장님 시험 결제와 0원 주문은 매출에서 뺌
+          </p>
+        </div>
+        <nav className="flex rounded-full border border-border-subtle p-1 text-sm" aria-label="기간">
+          {RANGES.map((r) => (
+            <a
+              key={r}
+              href={`/admin?range=${r}`}
+              aria-current={r === range ? "page" : undefined}
+              className={`rounded-full px-4 py-1.5 ${r === range ? "bg-accent-gold font-semibold text-background" : "text-foreground-muted hover:text-foreground"}`}
+            >
+              {RANGE_LABEL[r]}
+            </a>
+          ))}
+        </nav>
+      </header>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="총 매출" value={`${totalRevenue.toLocaleString()}원`} />
-        <StatCard label="결제완료 건수" value={`${paidCount}건`} />
-        {statusCounts.map((s) => (
-          <StatCard key={s.status} label={STATUS_LABEL[s.status] ?? s.status} value={`${s._count}건`} />
-        ))}
-      </div>
+      {/* ① 큰 숫자 4개 */}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <KpiCard label="손님 매출" value={`${k.revenue.toLocaleString()}원`} cur={k.revenue} prev={k.revenuePrev} prevLabel={prevLabel} />
+        <KpiCard label="손님 결제" value={`${k.paid}건`} cur={k.paid} prev={k.paidPrev} prevLabel={prevLabel} />
+        <KpiCard label="사이트 방문" value={`${k.visits.toLocaleString()}번`} cur={k.visits} prev={k.visitsPrev} prevLabel={prevLabel} />
+        <KpiCard label="결제창 열림" value={`${k.checkouts}번`} cur={k.checkouts} prev={k.checkoutsPrev} prevLabel={prevLabel} />
+      </section>
 
-      <WaitlistPanel count={waitlistCount} />
-
-      <div className="overflow-x-auto rounded-2xl border border-border-subtle">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="bg-background-elevated text-foreground-muted">
-            <tr>
-              <th className="px-4 py-3">결제 ID</th>
-              <th className="px-4 py-3">상태</th>
-              <th className="px-4 py-3">금액</th>
-              <th className="px-4 py-3">생성 시각</th>
-              <th className="px-4 py-3">결제 완료 시각</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id} className="border-t border-border-subtle">
-                <td className="px-4 py-3 font-mono text-xs">{order.paymentId}</td>
-                <td className="px-4 py-3">{STATUS_LABEL[order.status] ?? order.status}</td>
-                <td className="px-4 py-3">{order.amount.toLocaleString()}원</td>
-                <td className="px-4 py-3 text-foreground-muted">
-                  {order.createdAt.toLocaleString("ko-KR")}
-                </td>
-                <td className="px-4 py-3 text-foreground-muted">
-                  {order.paidAt ? order.paidAt.toLocaleString("ko-KR") : "-"}
-                </td>
-              </tr>
+      {/* ② 확인할 일 */}
+      <section className="rounded-2xl border border-border-subtle bg-background-card/70 px-5 py-4">
+        <h2 className="text-sm font-semibold text-foreground">확인할 일</h2>
+        {d.attention.length === 0 ? (
+          <p className="mt-2 text-sm text-foreground-muted">✓ 지금 확인할 일은 없어요.</p>
+        ) : (
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {d.attention.map((a) => (
+              <li
+                key={a.label}
+                className={`rounded-full border px-3 py-1 text-sm ${a.tone === "warn" ? "border-[#c0573e]/60 text-[#e0876f]" : "border-border-subtle text-foreground-muted"}`}
+              >
+                {a.tone === "warn" ? "⚠ " : "• "}
+                {a.label} {a.value}
+              </li>
             ))}
-            {orders.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-foreground-muted">
-                  아직 주문이 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </ul>
+        )}
+      </section>
 
-      <h2 className="font-serif text-xl text-accent-gold-soft">퍼널 요약 (최근 {funnel.windowDays}일)</h2>
-      <p className="-mt-4 text-xs text-foreground-muted">
-        MARKETING_KPI.md의 ④~⑩번 지표. ①~③(조회수·도달·프로필방문)은 Instagram Insights에서 직접 확인해야 해요.
-      </p>
+      {/* ③ 30일 추이 */}
+      <Panel title="최근 30일 방문과 결제" note="회색 막대 = 하루 방문 · 막대 위 금색 숫자 = 그날 손님 결제 건수 · 막대에 마우스를 올리면 자세히">
+        <TrendChart rows={d.trend} />
+      </Panel>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <StatCard label="CTA 클릭율 (⑦÷⑥)" value={pct(funnel.counts.premium_cta_click, funnel.counts.saju_complete)} />
-        <StatCard label="결제 시작율 (⑧÷⑦)" value={pct(funnel.counts.checkout_start, funnel.counts.premium_cta_click)} />
-        <StatCard label="결제 성공율 (⑨÷⑧)" value={pct(funnel.counts.payment_success, funnel.counts.checkout_start)} />
-      </div>
+      {/* ④ 결제 흐름 */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <Panel title={`신년운세 결제 흐름 · ${RANGE_LABEL[range]}`} note="오른쪽 %는 바로 앞 단계에서 넘어온 비율">
+          <FunnelBars steps={d.newYearFunnel} />
+        </Panel>
+        <Panel title={`나 사용설명서 결제 흐름 · ${RANGE_LABEL[range]}`} note="무료 결과를 본 사람 기준">
+          <FunnelBars steps={d.manualFunnel} />
+        </Panel>
+      </section>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {(Object.keys(EVENT_LABEL) as AnalyticsEventName[]).map((name) => (
-          <StatCard key={name} label={EVENT_LABEL[name]} value={`${funnel.counts[name]}건`} />
-        ))}
-      </div>
+      {/* ⑤ 유입·블로그·상품 */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        <Panel title="어디서 들어왔나">
+          <SimpleTable head={["경로", "방문"]} rows={d.channels.slice(0, 8).map((c) => [c.key, `${c.count}`])} empty="방문 기록 없음" />
+        </Panel>
+        <Panel title="블로그 글별 성과" note="글 이름표(post) 기준 · 11/21 이후 글부터">
+          <SimpleTable
+            head={["글", "조회", "결제창", "결제"]}
+            rows={d.blogPosts.map((p) => [p.post, `${p.views}`, `${p.checkouts}`, `${p.paid}`])}
+            empty="블로그 조회 없음"
+          />
+        </Panel>
+        <Panel title="상품별 손님 매출">
+          <SimpleTable
+            head={["상품", "웹", "토스", "매출"]}
+            rows={d.products.map((p) => [p.label, `${p.web}`, `${p.toss}`, `${p.revenue.toLocaleString()}원`])}
+            empty="이 기간 손님 결제 없음"
+          />
+          <p className="mt-3 text-xs text-foreground-muted">토스 첫 질문 무료(0원) {d.freeQuestions}건은 매출에서 뺌</p>
+        </Panel>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <BreakdownTable title="랜딩 유입 경로 (ref)" rows={funnel.landingRefBreakdown} />
-        <BreakdownTable title="공유 버튼 위치 (source)" rows={funnel.shareSourceBreakdown} />
-        <BreakdownTable title="결제 완료 첫 유입 경로 (src)" rows={funnel.paymentSourceBreakdown} />
-      </div>
+      {/* ⑥ 최근 결제 · 실패 */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <Panel title="최근 손님 결제" note="최근 30일 · 시험·0원 제외">
+          <SimpleTable
+            head={["시각", "상품", "금액", "어디서"]}
+            rows={d.recentPaid.map((o) => [formatKst(o.when), o.product, `${o.amount.toLocaleString()}원`, o.where])}
+            empty="최근 30일 손님 결제 없음"
+          />
+        </Panel>
+        <Panel title={`결제 실패 · ${RANGE_LABEL[range]}`} note="사유는 결제사가 알려 준 문장">
+          <SimpleTable
+            head={["시각", "상품", "금액", "사유"]}
+            rows={d.failures.map((f) => [formatKst(f.when), f.product, `${f.amount.toLocaleString()}원`, f.reason])}
+            empty="실패 없음"
+          />
+        </Panel>
+      </section>
 
-      <h2 className="font-serif text-xl text-accent-gold-soft">후기 관리</h2>
-      <div className="overflow-x-auto rounded-2xl border border-border-subtle">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="bg-background-elevated text-foreground-muted">
-            <tr>
-              <th className="px-4 py-3">별점</th>
-              <th className="px-4 py-3">내용</th>
-              <th className="px-4 py-3">상품</th>
-              <th className="px-4 py-3">상태</th>
-              <th className="px-4 py-3">작성일</th>
-              <th className="px-4 py-3">관리</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reviews.map((review) => (
-              <tr key={review.id} className="border-t border-border-subtle">
-                <td className="px-4 py-3">{"★".repeat(review.rating)}</td>
-                <td className="max-w-xs truncate px-4 py-3">{review.content}</td>
-                <td className="px-4 py-3 text-foreground-muted">{review.productType}</td>
-                <td className="px-4 py-3 text-foreground-muted">{review.visible ? "노출" : "숨김"}</td>
-                <td className="px-4 py-3 text-foreground-muted">{review.createdAt.toLocaleString("ko-KR")}</td>
-                <td className="px-4 py-3">
-                  <AdminReviewToggle id={review.id} visible={review.visible} />
-                </td>
-              </tr>
+      {/* 접어 두는 도구 */}
+      <section className="flex flex-col gap-3">
+        <Fold title={`후기 관리 (${reviews.length}개)`}>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="text-xs text-foreground-muted">
+                <tr>
+                  <th className="px-3 py-2 font-normal">별점</th>
+                  <th className="px-3 py-2 font-normal">내용</th>
+                  <th className="px-3 py-2 font-normal">상품</th>
+                  <th className="px-3 py-2 font-normal">상태</th>
+                  <th className="px-3 py-2 font-normal">작성</th>
+                  <th className="px-3 py-2 font-normal">관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviews.map((review) => (
+                  <tr key={review.id} className="border-t border-border-subtle">
+                    <td className="px-3 py-2">{"★".repeat(review.rating)}</td>
+                    <td className="max-w-xs truncate px-3 py-2">{review.content}</td>
+                    <td className="px-3 py-2 text-foreground-muted">{PRODUCT_LABEL[review.productType] ?? review.productType}</td>
+                    <td className="px-3 py-2 text-foreground-muted">{review.visible ? "노출" : "숨김"}</td>
+                    <td className="px-3 py-2 text-foreground-muted">{formatKst(review.createdAt)}</td>
+                    <td className="px-3 py-2">
+                      <AdminReviewToggle id={review.id} visible={review.visible} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Fold>
+        <Fold title="AI 콘텐츠 미리보기 (결제 없음)">
+          <AdminPreviewTool />
+        </Fold>
+        <Fold title={`쿠폰 발급 (${coupons.length}개)`}>
+          <CouponIssuer />
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[480px] text-left text-sm">
+              <thead className="text-xs text-foreground-muted">
+                <tr>
+                  <th className="px-3 py-2 font-normal">코드</th>
+                  <th className="px-3 py-2 font-normal">상태</th>
+                  <th className="px-3 py-2 font-normal">발급</th>
+                  <th className="px-3 py-2 font-normal">만료</th>
+                </tr>
+              </thead>
+              <tbody>
+                {coupons.map((coupon) => (
+                  <tr key={coupon.id} className="border-t border-border-subtle">
+                    <td className="px-3 py-2">
+                      <CopyableCode code={coupon.code} />
+                    </td>
+                    <td className="px-3 py-2">{couponStatusLabel(coupon)}</td>
+                    <td className="px-3 py-2 text-foreground-muted">{formatKst(coupon.createdAt)}</td>
+                    <td className="px-3 py-2 text-foreground-muted">{formatKst(coupon.expiresAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Fold>
+        <Fold title={`결제 오픈 알림 대기자 (${waitlistCount}명)`}>
+          <WaitlistPanel count={waitlistCount} />
+        </Fold>
+        <Fold title={`전체 이벤트 숫자 · ${RANGE_LABEL[range]}`}>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {(Object.keys(EVENT_LABEL) as AnalyticsEventName[]).map((name) => (
+              <div key={name} className="rounded-xl border border-border-subtle px-3 py-2">
+                <p className="text-xs text-foreground-muted">{EVENT_LABEL[name]}</p>
+                <p className="text-sm font-semibold tabular-nums">{funnel.counts[name]}</p>
+              </div>
             ))}
-            {reviews.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-foreground-muted">
-                  아직 후기가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <h2 className="font-serif text-xl text-accent-gold-soft">AI 콘텐츠 미리보기 (결제 없음)</h2>
-      <AdminPreviewTool />
-
-      <h2 className="font-serif text-xl text-accent-gold-soft">인스타 추첨 쿠폰</h2>
-      <CouponIssuer />
-      <div className="overflow-x-auto rounded-2xl border border-border-subtle">
-        <table className="w-full min-w-[480px] text-left text-sm">
-          <thead className="bg-background-elevated text-foreground-muted">
-            <tr>
-              <th className="px-4 py-3">코드</th>
-              <th className="px-4 py-3">상태</th>
-              <th className="px-4 py-3">발급일</th>
-              <th className="px-4 py-3">만료일</th>
-            </tr>
-          </thead>
-          <tbody>
-            {coupons.map((coupon) => (
-              <tr key={coupon.id} className="border-t border-border-subtle">
-                <td className="px-4 py-3">
-                  <CopyableCode code={coupon.code} />
-                </td>
-                <td className="px-4 py-3">{couponStatusLabel(coupon)}</td>
-                <td className="px-4 py-3 text-foreground-muted">{coupon.createdAt.toLocaleString("ko-KR")}</td>
-                <td className="px-4 py-3 text-foreground-muted">{coupon.expiresAt.toLocaleString("ko-KR")}</td>
-              </tr>
-            ))}
-            {coupons.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-foreground-muted">
-                  아직 발급한 쿠폰이 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </Fold>
+      </section>
     </div>
   );
 }
@@ -248,34 +276,136 @@ function couponStatusLabel(coupon: { usedAt: Date | null; expiresAt: Date }): st
   return "사용 가능";
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function KpiCard({ label, value, cur, prev, prevLabel }: { label: string; value: string; cur: number; prev: number; prevLabel: string }) {
+  let delta = "비교할 값 없음";
+  let tone = "text-foreground-muted";
+  if (prev > 0) {
+    const p = Math.round(((cur - prev) / prev) * 100);
+    delta = `${p > 0 ? "▲" : p < 0 ? "▼" : "–"} ${Math.abs(p)}%`;
+    tone = p > 0 ? "text-[#7fbf8f]" : p < 0 ? "text-[#e0876f]" : "text-foreground-muted";
+  } else if (cur > 0) {
+    delta = "▲ 새로 생김";
+    tone = "text-[#7fbf8f]";
+  }
   return (
     <div className="rounded-2xl border border-border-subtle bg-background-card/70 p-4">
       <p className="text-xs text-foreground-muted">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-foreground">{value}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">{value}</p>
+      <p className={`mt-1 text-xs ${tone}`}>
+        {delta} <span className="text-foreground-muted">· {prevLabel} 대비</span>
+      </p>
     </div>
   );
 }
 
-function BreakdownTable({ title, rows }: { title: string; rows: { key: string; count: number }[] }) {
+function Panel({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border-subtle">
-      <div className="bg-background-elevated px-4 py-2 text-sm font-medium text-foreground-muted">{title}</div>
+    <div className="rounded-2xl border border-border-subtle bg-background-card/70 p-5">
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      {note && <p className="mt-0.5 text-xs text-foreground-muted">{note}</p>}
+      <div className="mt-4">{children}</div>
+    </div>
+  );
+}
+
+function Fold({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <details className="rounded-2xl border border-border-subtle bg-background-card/40 px-5 py-3">
+      <summary className="cursor-pointer text-sm text-foreground-muted hover:text-foreground">{title}</summary>
+      <div className="mt-4">{children}</div>
+    </details>
+  );
+}
+
+function SimpleTable({ head, rows, empty }: { head: string[]; rows: string[][]; empty: string }) {
+  if (rows.length === 0) return <p className="text-sm text-foreground-muted">{empty}</p>;
+  return (
+    <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
+        <thead className="text-xs text-foreground-muted">
+          <tr>
+            {head.map((h, i) => (
+              <th key={h} className={`pb-2 font-normal ${i > 0 ? "text-right" : ""}`}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.key} className="border-t border-border-subtle">
-              <td className="px-4 py-2 font-mono text-xs">{row.key}</td>
-              <td className="px-4 py-2 text-right">{row.count}건</td>
+          {rows.map((r, ri) => (
+            <tr key={ri} className="border-t border-border-subtle">
+              {r.map((cell, i) => (
+                <td key={i} className={`py-2 ${i > 0 ? "pl-3 text-right tabular-nums" : "max-w-[14rem] truncate"}`} title={cell}>
+                  {cell}
+                </td>
+              ))}
             </tr>
           ))}
-          {rows.length === 0 && (
-            <tr>
-              <td className="px-4 py-3 text-center text-foreground-muted">데이터 없음</td>
-            </tr>
-          )}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function FunnelBars({ steps }: { steps: { label: string; count: number }[] }) {
+  const max = Math.max(1, ...steps.map((s) => s.count));
+  return (
+    <ol className="flex flex-col gap-2.5">
+      {steps.map((s, i) => {
+        const prev = i > 0 ? steps[i - 1].count : 0;
+        const rate = i === 0 ? "" : prev > 0 ? `${Math.round((s.count / prev) * 100)}%` : "—";
+        const width = s.count === 0 ? 0 : Math.max(2, (s.count / max) * 100);
+        return (
+          <li key={s.label} className="grid grid-cols-[9.5rem_1fr_3.5rem_3rem] items-center gap-2 text-sm" title={`${s.label}: ${s.count}`}>
+            <span className="truncate text-foreground-muted">{s.label}</span>
+            <span className="h-3 rounded-r bg-background-elevated">
+              <span className="block h-3 rounded-r bg-accent-gold" style={{ width: `${width}%` }} />
+            </span>
+            <span className="text-right font-semibold tabular-nums">{s.count.toLocaleString()}</span>
+            <span className="text-right text-xs tabular-nums text-foreground-muted">{rate}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function TrendChart({ rows }: { rows: { day: string; visits: number; paid: number; revenue: number }[] }) {
+  const W = 900;
+  const H = 180;
+  const padB = 22;
+  const padT = 18;
+  const max = Math.max(1, ...rows.map((r) => r.visits));
+  const slot = W / rows.length;
+  const bw = Math.max(4, slot - 6);
+  return (
+    <div className="overflow-x-auto">
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-48 w-full min-w-[600px]" role="img" aria-label="최근 30일 하루 방문 막대 그래프">
+        <line x1="0" x2={W} y1={H - padB} y2={H - padB} stroke="currentColor" className="text-border-subtle" strokeWidth="1" />
+        {rows.map((r, i) => {
+          const h = ((H - padB - padT) * r.visits) / max;
+          const x = i * slot + (slot - bw) / 2;
+          const y = H - padB - h;
+          const label = r.day.slice(5).replace("-", "/");
+          return (
+            <g key={r.day}>
+              <title>{`${label} · 방문 ${r.visits}번 · 결제 ${r.paid}건${r.revenue ? ` (${r.revenue.toLocaleString()}원)` : ""}`}</title>
+              <rect x={i * slot} y={0} width={slot} height={H} fill="transparent" />
+              <rect x={x} y={y} width={bw} height={Math.max(h, r.visits ? 2 : 0)} rx="3" className="fill-foreground-muted/50" />
+              {r.paid > 0 && (
+                <text x={x + bw / 2} y={y - 4} textAnchor="middle" fontSize="11" className="fill-accent-gold font-semibold">
+                  {r.paid}
+                </text>
+              )}
+              {(i % 5 === 0 || i === rows.length - 1) && (
+                <text x={x + bw / 2} y={H - 6} textAnchor="middle" fontSize="10" className="fill-foreground-muted">
+                  {label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
